@@ -1,0 +1,7 @@
+{
+  "name": "GoVets",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react-vite"
+}
