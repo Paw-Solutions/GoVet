@@ -43,22 +43,18 @@ const RegistroPacienteTutor: React.FC = () => (
                 <IonLabel position="stacked" className="input-custom-font">
                   Nombre
                 </IonLabel>
-                <IonInput type="text" placeholder="Ej: Copito, Luna, etc." />
+                <IonInput
+                  type="text"
+                  placeholder="Ej: Copito, Luna, etc."
+                  className="input-box"
+                />
               </IonItem>
             </IonCol>
           </IonRow>
         </IonGrid>
-        {/* Input Edad y Especie*/}
+        {/* Especie*/}
         <IonGrid>
           <IonRow>
-            <IonCol>
-              <IonItem lines="none">
-                <IonLabel position="stacked" className="input-custom-font">
-                  Edad
-                </IonLabel>
-                <IonInput type="number" placeholder="X" />
-              </IonItem>
-            </IonCol>
             <IonCol>
               <IonItem lines="none">
                 <IonLabel position="stacked" className="input-custom-font">
@@ -67,23 +63,11 @@ const RegistroPacienteTutor: React.FC = () => (
                 <IonSelect
                   interface="popover"
                   placeholder="Seleccione la especie"
+                  className="input-box"
                 >
                   <IonSelectOption value="perro">Perro</IonSelectOption>
                   <IonSelectOption value="gato">Gato</IonSelectOption>
                 </IonSelect>
-              </IonItem>
-            </IonCol>
-          </IonRow>
-        </IonGrid>
-        {/* Input Fecha de nacimiento y sexo */}
-        <IonGrid>
-          <IonRow>
-            <IonCol>
-              <IonItem lines="none">
-                <IonLabel position="stacked" className="input-custom-font">
-                  Fecha de nacimiento
-                </IonLabel>
-                <IonInput type="date" />
               </IonItem>
             </IonCol>
             <IonCol>
@@ -105,6 +89,19 @@ const RegistroPacienteTutor: React.FC = () => (
                     </IonCol>
                   </IonRow>
                 </IonRadioGroup>
+              </IonItem>
+            </IonCol>
+          </IonRow>
+        </IonGrid>
+        {/* Input Fecha de nacimiento y sexo */}
+        <IonGrid>
+          <IonRow>
+            <IonCol>
+              <IonItem lines="none" className="fecha-nacimiento-inline">
+                <IonLabel position="stacked" className="input-custom-font">
+                  Fecha de nacimiento
+                </IonLabel>
+                <IonInput type="date" className="input-box" />
               </IonItem>
             </IonCol>
           </IonRow>
