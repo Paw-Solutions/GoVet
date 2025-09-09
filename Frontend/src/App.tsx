@@ -3,7 +3,7 @@ import { IonApp, IonRouterOutlet, setupIonicReact } from "@ionic/react";
 import { IonReactRouter } from "@ionic/react-router";
 import BarraLateral from "./components/BarraLateral";
 import RegistroPacienteTutor from "./pages/RegistroPacienteTutor";
-
+import RegistroTutor from "./pages/registroTutor";
 /* Core CSS required for Ionic components to work properly */
 import "@ionic/react/css/core.css";
 
@@ -42,7 +42,7 @@ const App: React.FC = () => (
       <BarraLateral />
       <IonRouterOutlet id="main-content">
         <Route exact path="/">
-          <RegistroPacienteTutor />
+          <RegistroTutor />
         </Route>
         {/*agregar mas paginas aca*/}
       </IonRouterOutlet>
