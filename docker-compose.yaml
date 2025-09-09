@@ -1,0 +1,51 @@
+version: "3.8"
+services:
+  postgres:
+    image: bitnami/postgresql:latest
+    ports:
+      - "5444:5432"
+    volumes:
+      - ./Dbase/data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_DB=${POSTGRES_DB}
+    networks:
+      - govet
+      - app-tier
+
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: dockerfile
+    ports:
+      - "8080:80"
+    volumes:
+      - ./Backend/back:/code
+    depends_on:
+      - postgres
+    networks:
+      - govet
+      - app-tier
+
+  frontend:
+    build:
+      context: ./Front
+      dockerfile: dockerfile
+    ports:
+      - "3009:3000"
+    environment:
+      - PORT=3000
+    volumes:
+      - ./Front/app:/app
+    depends_on:
+      - backend
+    networks:
+      - govet
+      - app-tier
+
+networks:
+  Practica_net:
+    driver: bridge
+  app-tier:
+    driver: bridge
