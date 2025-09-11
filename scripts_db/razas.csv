@@ -1,0 +1,66 @@
+﻿especie-raza;nombre;id_raza;id_especie
+1-Mestizo;Mestizo;1;1
+1-Fox Terrier Pelo Corto;Fox Terrier Pelo Corto;2;1
+1-Shar-Pei;Shar-Pei;3;1
+1-Caniche;Caniche;4;1
+1-Yorkshire Terrier;Yorkshire Terrier;5;1
+1-Poodle;Poodle;6;1
+1-Shih Tzu;Shih Tzu;7;1
+1-Teckel;Teckel;8;1
+1-Chow-Chow;Chow-Chow;9;1
+1-Terrier Chileno;Terrier Chileno;10;1
+1-Pug;Pug;11;1
+1-Ovejero Alemán;Ovejero Alemán;12;1
+1-Beagle;Beagle;13;1
+1-Boxer;Boxer;14;1
+1-Akita Americano;Akita Americano;15;1
+1-Golden Retriever;Golden Retriever;16;1
+1-Malamute de Alaska;Malamute de Alaska;17;1
+1-Fox Terrier de Pelo Duro;Fox Terrier de Pelo Duro;18;1
+1-Dogo Argentino;Dogo Argentino;19;1
+1-Rottweiler;Rottweiler;20;1
+1-Terrier Australiano;Terrier Australiano;21;1
+1-Mudi;Mudi;22;1
+1-Collie de Pelo Largo;Collie de Pelo Largo;23;1
+1-Siberian Husky;Siberian Husky;24;1
+1-American Pit Bull Terrier;American Pit Bull Terrier;25;1
+1-Bulldog Francés;Bulldog Francés;26;1
+1-Chihuahua;Chihuahua;27;1
+1-Labrador Retriever;Labrador Retriever;28;1
+1-Braco de Weimar;Braco de Weimar;29;1
+1-San Bernardo;San Bernardo;30;1
+1-Pastor Australiano;Pastor Australiano;31;1
+1-Perro de la Montaña de los pirineos;Perro de la Montaña de los pirineos;32;1
+1-Basset Hound;Basset Hound;33;1
+1-Pastor de los Pirineos de pelo largo;Pastor de los Pirineos de pelo largo;34;1
+1-Fila Brasilero;Fila Brasilero;35;1
+1-Samoyedo;Samoyedo;36;1
+1-Bichón Maltes;Bichón Maltes;37;1
+1-Cocker Spaniel Americano;Cocker Spaniel Americano;38;1
+1-Border Collie;Border Collie;39;1
+1-Schnauzer Mediano;Schnauzer Mediano;40;1
+1-Dálmata;Dálmata;41;1
+1-Terranova;Terranova;42;1
+1-Staffordshire Terrier Americano;Staffordshire Terrier Americano;43;1
+1-Bulldog;Bulldog;44;1
+1-Schnauzer Miniatura;Schnauzer Miniatura;45;1
+1-Jack Russell terrier;Jack Russell terrier;46;1
+1-Braco de Ariege;Braco de Ariege;47;1
+1-Pequinés;Pequinés;48;1
+1-Antiguo Pastor Inglés;Antiguo Pastor Inglés;49;1
+1-Dobermann;Dobermann;50;1
+2-DPC (Doméstico de pelo corto o DSH);DPC (Doméstico de pelo corto o DSH);51;2
+2-DPL (Doméstico de pelo Largo o DLH);DPL (Doméstico de pelo Largo o DLH);52;2
+2-Británico de Pelo Corto;Británico de Pelo Corto;53;2
+2-Persa;Persa;54;2
+3-Otra;Otra;55;3
+4-Erizo de Tierra;Erizo de Tierra;56;4
+5-Hamster Dorado;Hamster Dorado;57;5
+5-Hamster Chino;Hamster Chino;58;5
+6-Enana;Enana;59;6
+6-Cabeza de León;Cabeza de León;60;6
+6-Conejo Doméstico;Conejo Doméstico;61;6
+6-Conejo Angora;Conejo Angora;62;6
+6-Orejas Caidas;Orejas Caidas;63;6
+7-Tortuga de oreja roja;Tortuga de oreja roja;64;7
+8-Americana;Americana;65;8
