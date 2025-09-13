@@ -45,11 +45,9 @@ const App: React.FC = () => (
         <Route exact path="/">
           <Home />
         </Route>
-        <Route exact path="/registro-tutor">
-          <RegistroTutor />
+        <Route exact path="/registro-tutor" component={RegistroTutor}>
         </Route>
-        <Route exact path="/registro-paciente">
-          <RegistroPaciente />
+        <Route exact path="/registro-paciente" component={RegistroPaciente}>
         </Route>
       </IonRouterOutlet>
     </IonReactRouter>

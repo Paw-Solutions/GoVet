@@ -5,13 +5,14 @@ import {
   IonItem,
   IonIcon,
   IonLabel,
+  IonMenuToggle,
 } from "@ionic/react";
 import { home, eye, add, calendar, menu } from "ionicons/icons";
 import { useHistory } from "react-router-dom";
 import "./BarraLateral.css";
 
 const BarraLateral: React.FC = () => {
-  const history = useHistory();
+  const history = useHistory(); /* Hook para navegación programática */
 
   const navegarARegistroTutor = () => {
     history.push("/registro-tutor");
@@ -25,12 +26,19 @@ const BarraLateral: React.FC = () => {
     history.push("/");
   };
 
+  const cerrarMenu = () => {
+    const menu = document.querySelector("ion-menu");
+    if (menu) {
+      menu.close();
+    }
+  };
+
   return (
-    <IonMenu contentId="main-content" side="start" menuId="main-menu">
+    <IonMenu contentId="main-content" side="start" menuId="main-menu" type="overlay">
       <IonContent>
         <IonList>
           {/* Íconos de navegación centrados */}
-          <IonItem button lines="none">
+          <IonItem button lines="none" onClick={cerrarMenu}>
             <IonIcon icon={menu} />
           </IonItem>
           <IonItem button lines="none" onClick={navegarAHome}>
