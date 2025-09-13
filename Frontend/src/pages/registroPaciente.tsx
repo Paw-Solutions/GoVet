@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   IonPage,
   IonHeader,
@@ -9,6 +9,8 @@ import {
   IonItem,
   IonLabel,
   IonInput,
+  IonSelect,
+  IonSelectOption,
   IonRadioGroup,
   IonRadio,
   IonButton,
@@ -20,6 +22,7 @@ import {
   IonToast,
 } from "@ionic/react";
 import "./registroPaciente.css";
+import "./main.css";
 
 const RegistroPaciente: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -34,27 +37,43 @@ const RegistroPaciente: React.FC = () => {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
 
+  // Manejador de cambios en los inputs
   const handleInputChange = (e: any) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
+    setFormData((prevState) => ({
+      ...prevState,
       [name]: value,
     }));
   };
 
-  const handleRadioChange = (value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      sexo: value,
-    }));
-  };
+  const registraPaciente = async () => {
+    try {
+      const response = await fetch("DaniAPI/tutores", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
 
-  const registrarPaciente = async () => {
-    // Aquí podrías enviar los datos a tu API
-    setToastMessage("Paciente registrado (simulado)");
+      if (response.ok) {
+        setToastMessage("Paciente registrado exitosamente");
+        // Limpiar formulario
+        setFormData({
+          nombre: "",
+          especie: "",
+          raza: "",
+          sexo: "",
+          color: "",
+          fechaNacimiento: "",
+        });
+      } else {
+        setToastMessage("Error al registrar paciente");
+      }
+    } catch (error) {
+      setToastMessage("Error de conexión");
+    }
     setShowToast(true);
-    // Limpiar formulario si lo deseas
-    // setFormData({ nombre: "", especie: "", raza: "", sexo: "", color: "", fechaNacimiento: "" });
   };
 
   return (
@@ -84,10 +103,7 @@ const RegistroPaciente: React.FC = () => {
                     type="text"
                     labelPlacement="floating"
                     fill="outline"
-                    placeholder="Ej: Dani Huenuman"
-                    name="nombre"
-                    value={formData.nombre}
-                    onIonChange={handleInputChange}
+                    placeholder="Ej: copito"
                   ></IonInput>
                 </IonItem>
               </IonCol>
@@ -104,9 +120,6 @@ const RegistroPaciente: React.FC = () => {
                     labelPlacement="floating"
                     fill="outline"
                     placeholder="Ej: Perro"
-                    name="especie"
-                    value={formData.especie}
-                    onIonChange={handleInputChange}
                   ></IonInput>
                 </IonItem>
               </IonCol>
@@ -123,20 +136,19 @@ const RegistroPaciente: React.FC = () => {
                     labelPlacement="floating"
                     fill="outline"
                     placeholder="Ej: Golden Retriever"
-                    name="raza"
-                    value={formData.raza}
-                    onIonChange={handleInputChange}
                   ></IonInput>
                 </IonItem>
               </IonCol>
               <IonCol>
                 <IonItem lines="none">
-                  <IonRadioGroup
-                    value={formData.sexo}
-                    onIonChange={(e) => handleRadioChange(e.detail.value)}
-                  >
-                    <IonRadio slot="start" value="macho" />
-                    <IonRadio slot="start" value="hembra" />
+                  <IonRadioGroup className="radio-group-spaced">
+                    <IonRadio slot="start" value="macho">
+                      M
+                    </IonRadio>
+
+                    <IonRadio slot="start" value="hembra">
+                      H
+                    </IonRadio>
                   </IonRadioGroup>
                 </IonItem>
               </IonCol>
@@ -149,13 +161,10 @@ const RegistroPaciente: React.FC = () => {
                 <IonItem lines="none">
                   <IonInput
                     label="Color"
-                    type="text"
+                    type="tel"
                     labelPlacement="floating"
                     fill="outline"
                     placeholder="Ej: Naranja demoniaco"
-                    name="color"
-                    value={formData.color}
-                    onIonChange={handleInputChange}
                   ></IonInput>
                 </IonItem>
               </IonCol>
@@ -172,9 +181,6 @@ const RegistroPaciente: React.FC = () => {
                     labelPlacement="floating"
                     fill="outline"
                     placeholder="Ej: dd-mm-aaaa"
-                    name="fechaNacimiento"
-                    value={formData.fechaNacimiento}
-                    onIonChange={handleInputChange}
                   ></IonInput>
                 </IonItem>
               </IonCol>
@@ -185,7 +191,11 @@ const RegistroPaciente: React.FC = () => {
           <IonGrid>
             <IonRow>
               <IonCol className="ion-text-center">
-                <IonButton className="custom-button" expand="block" onClick={registrarPaciente}>
+                <IonButton
+                  className="custom-button"
+                  expand="block"
+                  onClick={registraPaciente}
+                >
                   Registrar paciente
                 </IonButton>
               </IonCol>
@@ -198,6 +208,7 @@ const RegistroPaciente: React.FC = () => {
           message={toastMessage}
           duration={3000}
           position="bottom"
+          className="custom-toast"
         />
       </IonContent>
     </IonPage>

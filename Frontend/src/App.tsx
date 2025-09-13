@@ -4,7 +4,7 @@ import { IonReactRouter } from "@ionic/react-router";
 import BarraLateral from "./components/BarraLateral";
 import Home from "./pages/home";
 import RegistroTutor from "./pages/registroTutor";
-import RegistroPaciente from "./pages/registoPaciente";
+import RegistroPaciente from "./pages/registroPaciente";
 /* Core CSS required for Ionic components to work properly */
 import "@ionic/react/css/core.css";
 
@@ -45,10 +45,12 @@ const App: React.FC = () => (
         <Route exact path="/">
           <Home />
         </Route>
-        <Route exact path="/registro-tutor" component={RegistroTutor}>
-        </Route>
-        <Route exact path="/registro-paciente" component={RegistroPaciente}>
-        </Route>
+        <Route exact path="/registro-tutor" component={RegistroTutor}></Route>
+        <Route
+          exact
+          path="/registro-paciente"
+          component={RegistroPaciente}
+        ></Route>
       </IonRouterOutlet>
     </IonReactRouter>
   </IonApp>
