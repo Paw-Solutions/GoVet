@@ -21,20 +21,20 @@ import {
 } from "@ionic/react";
 import "./registroTutor.css";
 
-const RegistroTutor: React.FC = () => (
+const RegistroPaciente: React.FC = () => (
   <IonPage>
     <IonHeader translucent={true}>
       <IonToolbar>
         <IonButtons slot="start">
           <IonMenuButton />
         </IonButtons>
-        <IonTitle>Registrar Tutor</IonTitle>
+        <IonTitle>Registrar Paciente</IonTitle>
       </IonToolbar>
     </IonHeader>
     <IonContent fullscreen={true}>
       <IonHeader collapse="condense">
         <IonToolbar>
-          <IonTitle size="large">Registrar Tutor</IonTitle>
+          <IonTitle size="large">Registrar Paciente</IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonList>
@@ -60,11 +60,11 @@ const RegistroTutor: React.FC = () => (
             <IonCol>
               <IonItem lines="none">
                 <IonInput
-                  label="RUT"
-                  type="text"
+                  label="Fecha de nacimiento"
+                  type="date"
                   labelPlacement="floating"
                   fill="outline"
-                  placeholder="Ej: 99999999-9"
+                  placeholder="Ej: dd-mm-aaaa"
                 ></IonInput>
               </IonItem>
             </IonCol>
@@ -123,7 +123,7 @@ const RegistroTutor: React.FC = () => (
           <IonRow>
             <IonCol className="ion-text-center">
               <IonButton className="custom-button" expand="block">
-                Registrar tutor
+                Registrar paciente
               </IonButton>
             </IonCol>
           </IonRow>
@@ -132,4 +132,4 @@ const RegistroTutor: React.FC = () => (
     </IonContent>
   </IonPage>
 );
-export default RegistroTutor;
+export default RegistroPaciente;

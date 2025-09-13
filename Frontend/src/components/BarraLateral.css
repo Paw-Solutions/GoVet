@@ -1,30 +1,109 @@
+/* Estilo para el menú lateral */
 ion-menu {
-  --width: 80px;
-  --max-width: 80px;
-  --background: #f8f8f8;
+  --width: 4rem; /* Ancho reducido de la barra lateral (60px / 16 = 3.75rem) */
 }
 
+/* Contenedor del contenido del menú */
 ion-menu ion-content {
-  --background: #f8f8f8;
+  --background: #ddcfe4; /* Color de fondo opcional */
+  --padding-top: 0;
+  --padding-bottom: 0;
+  --padding-start: 0;
+  --padding-end: 0;
 }
 
+/* Lista de elementos del menú */
 ion-menu ion-list {
   padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin: 0 !important; /* Eliminar márgenes */
+  background: #ddcfe4 !important; /* Mismo color de fondo */
 }
 
+/* Elementos individuales del menú */
 ion-menu ion-item {
-  --background: transparent;
+  --background: #ddcfe4; /* Mismo color de fondo que la barra */
   --padding-start: 0;
+  --padding-end: 0;
+  --inner-padding-start: 0;
   --inner-padding-end: 0;
-  margin-bottom: 20px;
-  text-align: center;
+  --border-style: none;
+  height: 3.75rem; /* Altura fija para cada elemento (60px / 16 = 3.75rem) */
+  margin: 0; /* Eliminar todos los márgenes */
+  width: 100%;
+  text-align: center !important;
+  border: none; /* Eliminar bordes */
 }
 
+/* Iconos centrados */
 ion-menu ion-icon {
-  font-size: 24px;
-  color: #666;
+  font-size: 1.5rem !important;
+  margin: 0 auto !important;
+  color: #333 !important;
+  display: block !important;
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+  transition: color 0.3s ease, transform 0.2s ease !important; /* Transición suave para color y transformación */
 }
 
-ion-menu ion-label {
-  display: none; /* Ocultar texto, solo mostrar iconos */
+/* Centrado simple y efectivo */
+ion-menu ion-item {
+  text-align: center !important;
+}
+
+/* Hover effect opcional */
+ion-menu ion-item:hover {
+  --background: #c8b8d6; /* Color ligeramente más oscuro para hover */
+}
+
+/* Efecto hover en iconos */
+ion-menu ion-item:hover ion-icon {
+  color: #6a4c93 !important; /* Color púrpura más oscuro en hover */
+}
+
+/* Efecto focus en elementos */
+ion-menu ion-item:focus {
+  --background: #b8a4c8 !important;
+  outline: none;
+}
+
+/* Efecto focus en iconos */
+ion-menu ion-item:focus ion-icon {
+  color: #5a3d7a !important; /* Color púrpura más intenso en focus */
+}
+
+/* Efecto active/pressed */
+ion-menu ion-item:active {
+  --background: #a895bb !important;
+}
+
+/* Efecto active en iconos */
+ion-menu ion-item:active ion-icon {
+  color: #4a2d6a !important; /* Color púrpura muy oscuro cuando está presionado */
+  transform: scale(0.95); /* Pequeña reducción de tamaño para feedback visual */
+}
+
+/* Focus visible para accesibilidad */
+ion-menu ion-item:focus-visible {
+  --background: #b8a4c8 !important;
+  outline: 2px solid #6a4c93;
+  outline-offset: 2px;
+}
+
+/* Eliminar espacios entre items */
+ion-menu ion-item + ion-item {
+  margin-top: 0 !important;
+  border-top: none !important;
+}
+
+/* Asegurar que no hay espacios adicionales */
+ion-menu ion-item:first-child {
+  margin-top: 0 !important;
+}
+
+ion-menu ion-item:last-child {
+  margin-bottom: 0 !important;
 }
