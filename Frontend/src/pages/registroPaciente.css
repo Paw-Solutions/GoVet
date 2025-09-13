@@ -1,0 +1,58 @@
+/* Forzar que los labels se muestren completos */
+ion-input .label-text-wrapper,
+ion-input .native-wrapper {
+  overflow: visible !important;
+}
+
+/* Solución específica para evitar el recorte de labels flotantes */
+ion-input {
+  --padding-top: 1.2rem;
+  /*Personalizacion de colores de los inputs*/
+  --highlight-color-focused: #87216c !important;
+  --placeholder-color: #c8a9da !important;
+}
+
+ion-item {
+  --min-height: 3.5rem;
+  overflow: visible !important;
+}
+
+/* Hacer que el botón tenga el mismo ancho que los inputs y centrarlo */
+.custom-button {
+  width: 19rem;
+  margin: 0 auto;
+  display: block;
+
+  --background: #c757c0 !important;
+}
+
+/* Personalización del header */
+ion-header ion-toolbar {
+  --background: #ddcfe4; /* Mismo color que la barra lateral */
+  --color: #333; /* Color del texto */
+}
+
+/* Título del header */
+ion-header ion-title {
+  --color: #333;
+  font-weight: 600;
+}
+
+/* Botón del menú en el header */
+ion-header ion-menu-button {
+  --color: #333;
+}
+
+/* Estilos para radio buttons con mayor distancia */
+.radio-group-spaced {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 0.01rem !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  padding: 0.125rem 0 !important;
+}
+
+.radio-group-spaced ion-radio {
+  margin-right: 0.5rem !important;
+}

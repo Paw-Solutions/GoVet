@@ -48,7 +48,7 @@ const RegistroPaciente: React.FC = () => (
                   type="text"
                   labelPlacement="floating"
                   fill="outline"
-                  placeholder="Ej: Dani Huenuman"
+                  placeholder="Ej: copito"
                 ></IonInput>
               </IonItem>
             </IonCol>
@@ -86,9 +86,14 @@ const RegistroPaciente: React.FC = () => (
             </IonCol>
             <IonCol>
               <IonItem lines="none">
-                <IonRadioGroup>
-                  <IonRadio slot="start" value="macho"></IonRadio>
-                  <IonRadio slot="start" value="hembra"></IonRadio>
+                <IonRadioGroup className="radio-group-spaced">
+                  <IonRadio slot="start" value="macho">
+                    M
+                  </IonRadio>
+
+                  <IonRadio slot="start" value="hembra">
+                    H
+                  </IonRadio>
                 </IonRadioGroup>
               </IonItem>
             </IonCol>

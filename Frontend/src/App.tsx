@@ -4,7 +4,7 @@ import { IonReactRouter } from "@ionic/react-router";
 import BarraLateral from "./components/BarraLateral";
 import Home from "./pages/home";
 import RegistroTutor from "./pages/registroTutor";
-import RegistroPaciente from "./pages/registrarPaciente";
+import RegistroPaciente from "./pages/registoPaciente";
 /* Core CSS required for Ionic components to work properly */
 import "@ionic/react/css/core.css";
 
