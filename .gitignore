@@ -11,6 +11,10 @@
 # production
 /dist
 
+# Entornos virtuales
+venv/
+.env/
+
 # misc
 .DS_Store
 .env.local

@@ -207,7 +207,7 @@ CREATE TABLE govet.paciente (
 	nombre varchar NULL, -- nombre de la mascota
 	color varchar NULL, -- color del pelaje del animal
 	sexo bpchar(1) NOT NULL, -- M: Macho¶H: Hembra
-	esterelizado bool DEFAULT false NULL, -- V: si la mascota se encuentra esterelizada¶F: si no
+	esterilizado bool DEFAULT false NULL, -- V: si la mascota se encuentra esterelizada¶F: si no
 	fecha_nacimiento date NOT NULL, -- Fecha de nacimiento de la mascota
 	id_raza int8 NOT NULL,
 	codigo_chip varchar NULL, -- Codigo del chip de la mascota, en caso de poseerlo
@@ -223,7 +223,7 @@ COMMENT ON COLUMN govet.paciente.nombre IS 'nombre de la mascota';
 COMMENT ON COLUMN govet.paciente.color IS 'color del pelaje del animal';
 COMMENT ON COLUMN govet.paciente.sexo IS 'M: Macho
 H: Hembra';
-COMMENT ON COLUMN govet.paciente.esterelizado IS 'V: si la mascota se encuentra esterelizada
+COMMENT ON COLUMN govet.paciente.esterilizado IS 'V: si la mascota se encuentra esterelizada
 F: si no';
 COMMENT ON COLUMN govet.paciente.fecha_nacimiento IS 'Fecha de nacimiento de la mascota';
 COMMENT ON COLUMN govet.paciente.codigo_chip IS 'Codigo del chip de la mascota, en caso de poseerlo';

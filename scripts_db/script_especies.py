@@ -7,7 +7,7 @@ df = pd.read_csv('especies.csv', sep=';')
 # Conectar PostgreSQL
 conn = psycopg2.connect(
     host="localhost",
-    dbname="govet_db",
+    dbname="govet",
     user="postgres",
     password=""
 )
