@@ -40,6 +40,7 @@ app.add_middleware(
     allow_headers=["*"],  # Allows all headers
 )
 
+# HU 4: Como Veterinaria, quiero poder almacenar al tutor con su RUT y nombre, para poder tener su información para consultas futuras
 """ RUTAS PARA DUEÑOS """
 # Ruta POST para añadir un dueño
 @app.post("/tutores/", response_model=TutorResponse)
@@ -57,6 +58,14 @@ def obtener_tutor(rut: str, db: Session = Depends(get_db)):
     if db_tutor is None:
         raise HTTPException(status_code=404, detail="Tutor no encontrado")
     return db_tutor
+
+# Ruta GET para obtener todos los dueños
+@app.get("/tutores/", response_model=List[TutorResponse])
+def obtener_todos_los_tutores(db: Session = Depends(get_db)):
+    db_tutores = db.query(models.Tutor).all()
+    if not db_tutores:
+        raise HTTPException(status_code=404, detail="No se encontraron tutores")
+    return db_tutores
 
 
 # HU 3: Como Veterinaria, quiero poder almacenar el paciente por su nombre y raza para indentificarlos y buscarlos facilmente
@@ -81,9 +90,25 @@ def obtener_paciente(id_paciente: int, db: Session = Depends(get_db)):
 # Ruta GET para obtener pacientes por su nombre
 @app.get("/pacientes/nombre/{nombre}", response_model=List[PacienteResponse])
 def obtener_pacientes_por_nombre(nombre: str, db: Session = Depends(get_db)):
-    db_pacientes = db.query(models.Paciente).filter(models.Paciente.nombre.ilike(f"%{nombre}%")).all()
+    db_pacientes = db.query(models.Paciente).filter(models.Paciente.nombre.ilike(f"%{nombre}%")).all() # el ilike no diferencia mayusculas o minusculas asi facilitamos la busqueda al no ser tan estricta
     if not db_pacientes:
         raise HTTPException(status_code=404, detail="No se encontraron pacientes con ese nombre")
+    return db_pacientes
+
+# Ruta GET para obtener pacientes por su raza (nombre de la raza)
+@app.get("/pacientes/raza/{nombre_raza}", response_model=List[PacienteResponse])
+def obtener_pacientes_por_raza(nombre_raza: str, db: Session = Depends(get_db)):
+    db_pacientes = db.query(models.Paciente).join(models.Raza).filter(models.Raza.nombre.ilike(f"%{nombre_raza}%")).all()
+    if not db_pacientes:
+        raise HTTPException(status_code=404, detail="No se encontraron pacientes con esa raza")
+    return db_pacientes
+
+# Ruta GET para obtener todos los pacientes
+@app.get("/pacientes/", response_model=List[PacienteResponse])
+def obtener_todos_los_pacientes(db: Session = Depends(get_db)):
+    db_pacientes = db.query(models.Paciente).all()
+    if not db_pacientes:
+        raise HTTPException(status_code=404, detail="No se encontraron pacientes")
     return db_pacientes
 
 """ Rutas para razas """
@@ -96,6 +121,29 @@ def crear_raza(raza: RazaCreate, db: Session = Depends(get_db)):
     db.refresh(db_raza)
     return db_raza
 
+# Ruta GET para obtener una raza por su nombre
+@app.get("/razas/nombre/{nombre}", response_model=List[RazaResponse])
+def obtener_razas_por_nombre(nombre: str, db: Session = Depends(get_db)):
+    db_razas = db.query(models.Raza).filter(models.Raza.nombre.ilike(f"%{nombre}%")).all()
+    if not db_razas:
+        raise HTTPException(status_code=404, detail="No se encontraron razas con ese nombre")
+    return db_razas
+
+# Ruta GET para obtener todas las razas
+@app.get("/razas/", response_model=List[RazaResponse])  
+def obtener_todas_las_razas(db: Session = Depends(get_db)):
+    db_razas = db.query(models.Raza).all()
+    if not db_razas:
+        raise HTTPException(status_code=404, detail="No se encontraron razas")
+    return db_razas
+
+# Ruta GET para obtener todas las razas mediante el nombre común de la especie
+@app.get("/razas/especie/{nombre_especie}", response_model=List[RazaResponse])
+def obtener_razas_por_especie(nombre_especie: str, db: Session = Depends(get_db)):
+    db_razas = db.query(models.Raza).join(models.Especie).filter(models.Especie.nombre_comun.ilike(f"%{nombre_especie}%")).all()
+    if not db_razas:
+        raise HTTPException(status_code=404, detail="No se encontraron razas para esa especie")
+    return db_razas
 
 """ Rutas para especies """
 # Ruta POST para añadir una especie
@@ -106,3 +154,24 @@ def crear_especie(especie: EspecieCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(db_especie)
     return db_especie
+
+# Ruta GET para obtener una especie por su nombre común o científico
+@app.get("/especies/nombre/{nombre}", response_model=List[EspecieResponse])
+def obtener_especies_por_nombre(nombre: str, db: Session = Depends(get_db)):
+    db_especies = db.query(models.Especie).filter(
+        or_(
+            models.Especie.nombre_cientifico.ilike(f"%{nombre}%"),
+            models.Especie.nombre_comun.ilike(f"%{nombre}%")
+        )
+    ).all()
+    if not db_especies:
+        raise HTTPException(status_code=404, detail="No se encontraron especies con ese nombre")
+    return db_especies
+
+# Ruta GET para obtener todas las especies
+@app.get("/especies/", response_model=List[EspecieResponse])
+def obtener_todas_las_especies(db: Session = Depends(get_db)):
+    db_especies = db.query(models.Especie).all()
+    if not db_especies:
+        raise HTTPException(status_code=404, detail="No se encontraron especies")
+    return db_especies
