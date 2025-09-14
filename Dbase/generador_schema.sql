@@ -16,8 +16,8 @@ CREATE SEQUENCE govet.consulta_id_consulta_seq
 
 -- Permissions
 
-ALTER SEQUENCE govet.consulta_id_consulta_seq OWNER TO postgres;
-GRANT ALL ON SEQUENCE govet.consulta_id_consulta_seq TO postgres;
+ALTER SEQUENCE govet.consulta_id_consulta_seq OWNER TO pawsolutions;
+GRANT ALL ON SEQUENCE govet.consulta_id_consulta_seq TO pawsolutions;
 
 -- DROP SEQUENCE govet.consulta_tratamiento_id_aplicacion_seq;
 
@@ -31,8 +31,8 @@ CREATE SEQUENCE govet.consulta_tratamiento_id_aplicacion_seq
 
 -- Permissions
 
-ALTER SEQUENCE govet.consulta_tratamiento_id_aplicacion_seq OWNER TO postgres;
-GRANT ALL ON SEQUENCE govet.consulta_tratamiento_id_aplicacion_seq TO postgres;
+ALTER SEQUENCE govet.consulta_tratamiento_id_aplicacion_seq OWNER TO pawsolutions;
+GRANT ALL ON SEQUENCE govet.consulta_tratamiento_id_aplicacion_seq TO pawsolutions;
 
 -- DROP SEQUENCE govet.especie_id_especie_seq;
 
@@ -46,8 +46,8 @@ CREATE SEQUENCE govet.especie_id_especie_seq
 
 -- Permissions
 
-ALTER SEQUENCE govet.especie_id_especie_seq OWNER TO postgres;
-GRANT ALL ON SEQUENCE govet.especie_id_especie_seq TO postgres;
+ALTER SEQUENCE govet.especie_id_especie_seq OWNER TO pawsolutions;
+GRANT ALL ON SEQUENCE govet.especie_id_especie_seq TO pawsolutions;
 
 -- DROP SEQUENCE govet.mascota_id_mascota_seq;
 
@@ -61,8 +61,8 @@ CREATE SEQUENCE govet.mascota_id_mascota_seq
 
 -- Permissions
 
-ALTER SEQUENCE govet.mascota_id_mascota_seq OWNER TO postgres;
-GRANT ALL ON SEQUENCE govet.mascota_id_mascota_seq TO postgres;
+ALTER SEQUENCE govet.mascota_id_mascota_seq OWNER TO pawsolutions;
+GRANT ALL ON SEQUENCE govet.mascota_id_mascota_seq TO pawsolutions;
 
 -- DROP SEQUENCE govet.raza_id_raza_seq;
 
@@ -76,8 +76,8 @@ CREATE SEQUENCE govet.raza_id_raza_seq
 
 -- Permissions
 
-ALTER SEQUENCE govet.raza_id_raza_seq OWNER TO postgres;
-GRANT ALL ON SEQUENCE govet.raza_id_raza_seq TO postgres;
+ALTER SEQUENCE govet.raza_id_raza_seq OWNER TO pawsolutions;
+GRANT ALL ON SEQUENCE govet.raza_id_raza_seq TO pawsolutions;
 
 -- DROP SEQUENCE govet.tratamiento_id_tratamiento_seq;
 
@@ -91,8 +91,8 @@ CREATE SEQUENCE govet.tratamiento_id_tratamiento_seq
 
 -- Permissions
 
-ALTER SEQUENCE govet.tratamiento_id_tratamiento_seq OWNER TO postgres;
-GRANT ALL ON SEQUENCE govet.tratamiento_id_tratamiento_seq TO postgres;
+ALTER SEQUENCE govet.tratamiento_id_tratamiento_seq OWNER TO pawsolutions;
+GRANT ALL ON SEQUENCE govet.tratamiento_id_tratamiento_seq TO pawsolutions;
 -- govet.especie definition
 
 -- Drop table
@@ -115,8 +115,8 @@ COMMENT ON COLUMN govet.especie.nombre_comun IS 'Nombre comun que se utiliza par
 
 -- Permissions
 
-ALTER TABLE govet.especie OWNER TO postgres;
-GRANT ALL ON TABLE govet.especie TO postgres;
+ALTER TABLE govet.especie OWNER TO pawsolutions;
+GRANT ALL ON TABLE govet.especie TO pawsolutions;
 
 
 -- govet.tratamiento definition
@@ -135,8 +135,8 @@ COMMENT ON TABLE govet.tratamiento IS 'Tratamientos disponibles y/o existentes';
 
 -- Permissions
 
-ALTER TABLE govet.tratamiento OWNER TO postgres;
-GRANT ALL ON TABLE govet.tratamiento TO postgres;
+ALTER TABLE govet.tratamiento OWNER TO pawsolutions;
+GRANT ALL ON TABLE govet.tratamiento TO pawsolutions;
 
 
 -- govet.tutor definition
@@ -165,8 +165,8 @@ COMMENT ON COLUMN govet.tutor.rut IS 'Rut del dueño';
 
 -- Permissions
 
-ALTER TABLE govet.tutor OWNER TO postgres;
-GRANT ALL ON TABLE govet.tutor TO postgres;
+ALTER TABLE govet.tutor OWNER TO pawsolutions;
+GRANT ALL ON TABLE govet.tutor TO pawsolutions;
 
 
 -- govet.raza definition
@@ -192,8 +192,8 @@ COMMENT ON COLUMN govet.raza.id_especie IS 'identificador de la especie asociada
 
 -- Permissions
 
-ALTER TABLE govet.raza OWNER TO postgres;
-GRANT ALL ON TABLE govet.raza TO postgres;
+ALTER TABLE govet.raza OWNER TO pawsolutions;
+GRANT ALL ON TABLE govet.raza TO pawsolutions;
 
 
 -- govet.paciente definition
@@ -230,8 +230,8 @@ COMMENT ON COLUMN govet.paciente.codigo_chip IS 'Codigo del chip de la mascota, 
 
 -- Permissions
 
-ALTER TABLE govet.paciente OWNER TO postgres;
-GRANT ALL ON TABLE govet.paciente TO postgres;
+ALTER TABLE govet.paciente OWNER TO pawsolutions;
+GRANT ALL ON TABLE govet.paciente TO pawsolutions;
 
 
 -- govet.tutor_paciente definition
@@ -256,8 +256,8 @@ COMMENT ON COLUMN govet.tutor_paciente.rut IS 'rut del dueño de la mascota';
 
 -- Permissions
 
-ALTER TABLE govet.tutor_paciente OWNER TO postgres;
-GRANT ALL ON TABLE govet.tutor_paciente TO postgres;
+ALTER TABLE govet.tutor_paciente OWNER TO pawsolutions;
+GRANT ALL ON TABLE govet.tutor_paciente TO pawsolutions;
 
 
 -- govet.consulta definition
@@ -289,8 +289,8 @@ COMMENT ON TABLE govet.consulta IS 'Consulta en la cual la mascota actualmente s
 
 -- Permissions
 
-ALTER TABLE govet.consulta OWNER TO postgres;
-GRANT ALL ON TABLE govet.consulta TO postgres;
+ALTER TABLE govet.consulta OWNER TO pawsolutions;
+GRANT ALL ON TABLE govet.consulta TO pawsolutions;
 
 
 -- govet.consulta_tratamiento definition
@@ -314,8 +314,8 @@ CREATE TABLE govet.consulta_tratamiento (
 
 -- Permissions
 
-ALTER TABLE govet.consulta_tratamiento OWNER TO postgres;
-GRANT ALL ON TABLE govet.consulta_tratamiento TO postgres;
+ALTER TABLE govet.consulta_tratamiento OWNER TO pawsolutions;
+GRANT ALL ON TABLE govet.consulta_tratamiento TO pawsolutions;
 
 
 

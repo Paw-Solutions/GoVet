@@ -2,7 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-URL_DATABASE = 'postgresql://pawsolutions:garrita@localhost:5432/govet'
+URL_DATABASE = 'postgresql://pawsolutions:garrita@db:5432/govet'
 
 # Crear el motor de la base de datos
 engine = create_engine(URL_DATABASE)
