@@ -26,11 +26,15 @@ services:
   frontend:
     build:
       context: ./Frontend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     ports:
       - "8100:8100"
+    volumes:
+      - ./Frontend:/app
+      - /app/node_modules
     depends_on:
       - backend
+      
 
 volumes:
   db_data:

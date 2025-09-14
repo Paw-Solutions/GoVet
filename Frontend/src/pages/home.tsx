@@ -61,7 +61,7 @@ const Home: React.FC = () => {
                 onClick={navegarARegistroPaciente}
                 style={{ margin: "10px 0" }}
               >
-                Registro Paciente
+                Registro Paciente KJSLKDJads
               </IonButton>
             </IonCol>
           </IonRow>
