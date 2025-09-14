@@ -7,7 +7,7 @@ services:
       POSTGRES_USER: pawsolutions
       POSTGRES_PASSWORD: garrita
     ports:
-      - "5433:5432"
+      - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
       - ./Dbase/generador_schema.sql:/docker-entrypoint-initdb.d/generador_schema.sql
