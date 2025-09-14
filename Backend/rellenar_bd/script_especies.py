@@ -1,15 +1,16 @@
 import pandas as pd
 import psycopg2
+import os
 
 # Leer CSV
-df = pd.read_csv('especies.csv', sep=';')
+df = pd.read_csv('/app/rellenar_bd/especies.csv', sep=';')
 
 # Conectar PostgreSQL
 conn = psycopg2.connect(
-    host="localhost",
-    dbname="govet",
-    user="postgres",
-    password=""
+    host=os.getenv("DB_HOST", "localhost"),         # valor por defecto localhost
+    dbname=os.getenv("DB_NAME", "govet"),
+    user=os.getenv("POSTGRES_USER", "postgres"),
+    password=os.getenv("POSTGRES_PASSWORD", "")
 )
 cur = conn.cursor()
 
