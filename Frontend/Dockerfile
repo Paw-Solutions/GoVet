@@ -1,7 +1,9 @@
 FROM node:24
 WORKDIR /app
-COPY . .
+COPY package*.json ./
+RUN npm i -D -E vite
+RUN npm install -g @ionic/cli
 RUN npm install
-RUN npm install -g ionic
-EXPOSE 3000
-CMD ["ionic", "s"]
+COPY . .
+EXPOSE 8100
+CMD ["ionic", "serve", "--host", "0.0.0.0"]
