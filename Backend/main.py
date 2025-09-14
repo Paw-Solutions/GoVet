@@ -73,7 +73,7 @@ def crear_paciente(paciente: PacienteCreate, db: Session = Depends(get_db)):
 # Ruta GET para obtener un paciente por su ID
 @app.get("/pacientes/{id_paciente}", response_model=PacienteResponse)
 def obtener_paciente(id_paciente: int, db: Session = Depends(get_db)):
-    db_paciente = db.query(models.Paciente).filter(models.Paciente.id_Paciente == id_paciente).first()
+    db_paciente = db.query(models.Paciente).filter(models.Paciente.id_paciente == id_paciente).first()
     if db_paciente is None:
         raise HTTPException(status_code=404, detail="Paciente no encontrado")
     return db_paciente
