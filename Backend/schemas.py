@@ -68,7 +68,15 @@ class EspecieResponse(EspecieBase):
 class TutorBase(BaseModel):
     rut: str
     nombre: str
+    apellido_paterno: Optional[str] = None
+    apellido_materno: Optional[str] = None
+    celular: Optional[int] = None
+    celular2: Optional[int] = None
+    comuna: str
+    region: str
+    observacion: Optional[str] = None
     telefono: int
+    telefono2: Optional[int] = None
     direccion: str
     email: str
 

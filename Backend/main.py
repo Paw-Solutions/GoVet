@@ -19,6 +19,16 @@ from typing import List, Annotated
 from database import engine, SessionLocal
 
 app = FastAPI()
+
+# CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:8100", "http://172.19.0.4:8100/"],
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all HTTP methods
+    allow_headers=["*"],  # Allows all headers
+)
+
 models.Base.metadata.create_all(bind=engine) # Crear tablas en la base de datos
 
 # Crear una sesión para cada solicitud
@@ -31,14 +41,7 @@ def get_db():
 
 db_dependency = Annotated[Session, Depends(get_db)]
 
-# CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Orígenes permitidos
-    allow_credentials=True,
-    allow_methods=["*"],  # Allows all HTTP methods
-    allow_headers=["*"],  # Allows all headers
-)
+
 
 # HU 4: Como Veterinaria, quiero poder almacenar al tutor con su RUT y nombre, para poder tener su información para consultas futuras
 """ RUTAS PARA DUEÑOS """
