@@ -19,6 +19,21 @@ CREATE SEQUENCE govet.consulta_id_consulta_seq
 ALTER SEQUENCE govet.consulta_id_consulta_seq OWNER TO pawsolutions;
 GRANT ALL ON SEQUENCE govet.consulta_id_consulta_seq TO pawsolutions;
 
+-- DROP SEQUENCE govet.consulta_id_consulta_seq1;
+
+CREATE SEQUENCE govet.consulta_id_consulta_seq1
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 9223372036854775807
+	START 1
+	CACHE 1
+	NO CYCLE;
+
+-- Permissions
+
+ALTER SEQUENCE govet.consulta_id_consulta_seq1 OWNER TO pawsolutions;
+GRANT ALL ON SEQUENCE govet.consulta_id_consulta_seq1 TO pawsolutions;
+
 -- DROP SEQUENCE govet.consulta_tratamiento_id_aplicacion_seq;
 
 CREATE SEQUENCE govet.consulta_tratamiento_id_aplicacion_seq
@@ -34,6 +49,21 @@ CREATE SEQUENCE govet.consulta_tratamiento_id_aplicacion_seq
 ALTER SEQUENCE govet.consulta_tratamiento_id_aplicacion_seq OWNER TO pawsolutions;
 GRANT ALL ON SEQUENCE govet.consulta_tratamiento_id_aplicacion_seq TO pawsolutions;
 
+-- DROP SEQUENCE govet.consulta_tratamiento_id_aplicacion_seq1;
+
+CREATE SEQUENCE govet.consulta_tratamiento_id_aplicacion_seq1
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 9223372036854775807
+	START 1
+	CACHE 1
+	NO CYCLE;
+
+-- Permissions
+
+ALTER SEQUENCE govet.consulta_tratamiento_id_aplicacion_seq1 OWNER TO pawsolutions;
+GRANT ALL ON SEQUENCE govet.consulta_tratamiento_id_aplicacion_seq1 TO pawsolutions;
+
 -- DROP SEQUENCE govet.especie_id_especie_seq;
 
 CREATE SEQUENCE govet.especie_id_especie_seq
@@ -48,6 +78,21 @@ CREATE SEQUENCE govet.especie_id_especie_seq
 
 ALTER SEQUENCE govet.especie_id_especie_seq OWNER TO pawsolutions;
 GRANT ALL ON SEQUENCE govet.especie_id_especie_seq TO pawsolutions;
+
+-- DROP SEQUENCE govet.especie_id_especie_seq1;
+
+CREATE SEQUENCE govet.especie_id_especie_seq1
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 9223372036854775807
+	START 1
+	CACHE 1
+	NO CYCLE;
+
+-- Permissions
+
+ALTER SEQUENCE govet.especie_id_especie_seq1 OWNER TO pawsolutions;
+GRANT ALL ON SEQUENCE govet.especie_id_especie_seq1 TO pawsolutions;
 
 -- DROP SEQUENCE govet.mascota_id_mascota_seq;
 
@@ -79,6 +124,21 @@ CREATE SEQUENCE govet.raza_id_raza_seq
 ALTER SEQUENCE govet.raza_id_raza_seq OWNER TO pawsolutions;
 GRANT ALL ON SEQUENCE govet.raza_id_raza_seq TO pawsolutions;
 
+-- DROP SEQUENCE govet.raza_id_raza_seq1;
+
+CREATE SEQUENCE govet.raza_id_raza_seq1
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 9223372036854775807
+	START 1
+	CACHE 1
+	NO CYCLE;
+
+-- Permissions
+
+ALTER SEQUENCE govet.raza_id_raza_seq1 OWNER TO pawsolutions;
+GRANT ALL ON SEQUENCE govet.raza_id_raza_seq1 TO pawsolutions;
+
 -- DROP SEQUENCE govet.tratamiento_id_tratamiento_seq;
 
 CREATE SEQUENCE govet.tratamiento_id_tratamiento_seq
@@ -93,6 +153,21 @@ CREATE SEQUENCE govet.tratamiento_id_tratamiento_seq
 
 ALTER SEQUENCE govet.tratamiento_id_tratamiento_seq OWNER TO pawsolutions;
 GRANT ALL ON SEQUENCE govet.tratamiento_id_tratamiento_seq TO pawsolutions;
+
+-- DROP SEQUENCE govet.tratamiento_id_tratamiento_seq1;
+
+CREATE SEQUENCE govet.tratamiento_id_tratamiento_seq1
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 2147483647
+	START 1
+	CACHE 1
+	NO CYCLE;
+
+-- Permissions
+
+ALTER SEQUENCE govet.tratamiento_id_tratamiento_seq1 OWNER TO pawsolutions;
+GRANT ALL ON SEQUENCE govet.tratamiento_id_tratamiento_seq1 TO pawsolutions;
 -- govet.especie definition
 
 -- Drop table
@@ -146,22 +221,38 @@ GRANT ALL ON TABLE govet.tratamiento TO pawsolutions;
 -- DROP TABLE govet.tutor;
 
 CREATE TABLE govet.tutor (
-	nombre varchar NULL, -- Nombre del dueño
-	telefono int8 NULL, -- Numero telefonico del dueño
-	email varchar NULL, -- Correo electronico del dueño
-	direccion varchar NULL, -- Direccion del dueño
-	rut varchar NOT NULL, -- Rut del dueño
+	nombre varchar NULL, -- Nombre del tutor
+	telefono int8 NULL, -- Numero telefonico del tutor
+	email varchar NULL, -- Correo electronico del tutor
+	direccion varchar NULL, -- Direccion del tutor
+	rut varchar NOT NULL, -- Rut del tutor
+	celular int4 NULL, -- Numero Celular del tutor
+	celular2 int4 NULL, -- Numero Celular 2 del tutor
+	apellido_paterno varchar NULL, -- Apellido paterno del Tutor
+	apellido_mateno varchar NULL, -- Apellido materno del tutor
+	comuna varchar NULL, -- Comuna del tutor
+	region varchar NULL, -- Region del tutor
+	observacion varchar NULL, -- Observacion/notas que considerar sobre un tutor
+	telefono2 int4 NULL, -- Numero telefonico 2 del tutor
 	CONSTRAINT dueno_pk PRIMARY KEY (rut)
 );
-COMMENT ON TABLE govet.tutor IS 'Dueño de la mascota o persona encargada de la mascota';
+COMMENT ON TABLE govet.tutor IS 'Tutor de la mascota o persona encargada de la mascota';
 
 -- Column comments
 
-COMMENT ON COLUMN govet.tutor.nombre IS 'Nombre del dueño';
-COMMENT ON COLUMN govet.tutor.telefono IS 'Numero telefonico del dueño';
-COMMENT ON COLUMN govet.tutor.email IS 'Correo electronico del dueño';
-COMMENT ON COLUMN govet.tutor.direccion IS 'Direccion del dueño';
-COMMENT ON COLUMN govet.tutor.rut IS 'Rut del dueño';
+COMMENT ON COLUMN govet.tutor.nombre IS 'Nombre del tutor';
+COMMENT ON COLUMN govet.tutor.telefono IS 'Numero telefonico del tutor';
+COMMENT ON COLUMN govet.tutor.email IS 'Correo electronico del tutor';
+COMMENT ON COLUMN govet.tutor.direccion IS 'Direccion del tutor';
+COMMENT ON COLUMN govet.tutor.rut IS 'Rut del tutor';
+COMMENT ON COLUMN govet.tutor.celular IS 'Numero Celular del tutor';
+COMMENT ON COLUMN govet.tutor.celular2 IS 'Numero Celular 2 del tutor';
+COMMENT ON COLUMN govet.tutor.apellido_paterno IS 'Apellido paterno del Tutor';
+COMMENT ON COLUMN govet.tutor.apellido_mateno IS 'Apellido materno del tutor';
+COMMENT ON COLUMN govet.tutor.comuna IS 'Comuna del tutor';
+COMMENT ON COLUMN govet.tutor.region IS 'Region del tutor';
+COMMENT ON COLUMN govet.tutor.observacion IS 'Observacion/notas que considerar sobre un tutor';
+COMMENT ON COLUMN govet.tutor.telefono2 IS 'Numero telefonico 2 del tutor';
 
 -- Permissions
 
