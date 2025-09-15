@@ -226,14 +226,14 @@ CREATE TABLE govet.tutor (
 	email varchar NULL, -- Correo electronico del tutor
 	direccion varchar NULL, -- Direccion del tutor
 	rut varchar NOT NULL, -- Rut del tutor
-	celular int4 NULL, -- Numero Celular del tutor
-	celular2 int4 NULL, -- Numero Celular 2 del tutor
+	celular int8 NULL, -- Numero Celular del tutor
+	celular2 int8 NULL, -- Numero Celular 2 del tutor
 	apellido_paterno varchar NULL, -- Apellido paterno del Tutor
-	apellido_mateno varchar NULL, -- Apellido materno del tutor
+	apellido_materno varchar NULL, -- Apellido materno del tutor
 	comuna varchar NULL, -- Comuna del tutor
 	region varchar NULL, -- Region del tutor
 	observacion varchar NULL, -- Observacion/notas que considerar sobre un tutor
-	telefono2 int4 NULL, -- Numero telefonico 2 del tutor
+	telefono2 int8 NULL, -- Numero telefonico 2 del tutor
 	CONSTRAINT dueno_pk PRIMARY KEY (rut)
 );
 COMMENT ON TABLE govet.tutor IS 'Tutor de la mascota o persona encargada de la mascota';
@@ -248,7 +248,7 @@ COMMENT ON COLUMN govet.tutor.rut IS 'Rut del tutor';
 COMMENT ON COLUMN govet.tutor.celular IS 'Numero Celular del tutor';
 COMMENT ON COLUMN govet.tutor.celular2 IS 'Numero Celular 2 del tutor';
 COMMENT ON COLUMN govet.tutor.apellido_paterno IS 'Apellido paterno del Tutor';
-COMMENT ON COLUMN govet.tutor.apellido_mateno IS 'Apellido materno del tutor';
+COMMENT ON COLUMN govet.tutor.apellido_materno IS 'Apellido materno del tutor';
 COMMENT ON COLUMN govet.tutor.comuna IS 'Comuna del tutor';
 COMMENT ON COLUMN govet.tutor.region IS 'Region del tutor';
 COMMENT ON COLUMN govet.tutor.observacion IS 'Observacion/notas que considerar sobre un tutor';
