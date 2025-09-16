@@ -42,3 +42,16 @@ ion-header ion-title {
 ion-header ion-menu-button {
   --color: #333;
 }
+
+ion-row.ion-row-apellidos {
+ --ion-grid-column-padd: 50%;
+}
+
+ion-item.apellido-paterno {
+  --inner-padding-end: 0px;
+  --padding-end: 0px;
+}
+
+ion-item.apellido-materno {
+  --padding-start: 0px;
+}

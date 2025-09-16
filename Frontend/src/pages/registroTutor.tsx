@@ -20,6 +20,7 @@ import {
   IonRow,
   IonCol,
   IonToast,
+  IonText,
 } from "@ionic/react";
 import "./registroTutor.css";
 
@@ -27,9 +28,16 @@ const RegistroTutor: React.FC = () => {
   // Estado para los campos del formulario
   const [formData, setFormData] = useState({
     nombre: '',
+    apellido_paterno: '',
+    apellido_materno: '',
     rut: '',
     direccion: '',
-    telefono: '',
+    celular: 0,
+    celular2: 0,
+    telefono: 0,
+    telefono2: 0,
+    comuna: '',
+    region: '',
     email: ''
   });
   
@@ -62,9 +70,16 @@ const RegistroTutor: React.FC = () => {
         // Limpiar formulario
         setFormData({
           nombre: '',
+          apellido_materno: '',
+          apellido_paterno: '',
           rut: '',
           direccion: '',
-          telefono: '',
+          telefono: 0,
+          telefono2: 0,
+          comuna: '',
+          region: '',
+          celular: 0,
+          celular2: 0,
           email: ''
         });
       } else {
@@ -98,11 +113,50 @@ const RegistroTutor: React.FC = () => {
               <IonCol>
                 <IonItem lines="none">
                   <IonInput
-                    label="Nombre"
                     type="text"
-                    labelPlacement="floating"
+                    labelPlacement="stacked"
                     fill="outline"
-                    placeholder="Ej: Dani Huenuman"
+                    placeholder="Daniela"
+                    name="nombre"
+                    value={formData.nombre}
+                    onIonChange={handleInputChange}
+                  >
+                    <div slot="label">
+                      Nombre <IonText color="danger">(*)</IonText>
+                    </div>
+                  </IonInput>
+                  
+                </IonItem>
+              </IonCol>
+            </IonRow>
+            <IonRow className="apellidos">
+              <IonCol>
+                <IonItem lines="none" className="apellido-paterno">
+                  <IonInput
+                    required
+                    type="text"
+                    labelPlacement="stacked"
+                    fill="outline"
+                    placeholder="Huenuman"
+                    name="nombre"
+                    value={formData.nombre}
+                    onIonChange={handleInputChange}
+                  >
+                    <div slot="label">
+                      Apellido Paterno <IonText color="danger">(*)</IonText>
+                    </div>
+                  </IonInput>
+                </IonItem>
+              </IonCol>
+              <IonCol>
+                <IonItem lines="none" className="apellido-materno">
+                  <IonInput
+                    className="apellido-materno"
+                    label="Apellido Materno"
+                    type="text"
+                    labelPlacement="stacked"
+                    fill="outline"
+                    placeholder="Oliva"
                     name="nombre"
                     value={formData.nombre}
                     onIonChange={handleInputChange}
@@ -110,97 +164,76 @@ const RegistroTutor: React.FC = () => {
                 </IonItem>
               </IonCol>
             </IonRow>
-          </IonGrid>
-          
-          <IonGrid>
-            <IonRow>
-              <IonCol>
-                <IonItem lines="none">
-                  <IonInput
-                    label="RUT"
-                    type="text"
-                    labelPlacement="floating"
-                    fill="outline"
-                    placeholder="Ej: 99999999-9"
-                    name="rut"
-                    value={formData.rut}
-                    onIonChange={handleInputChange}
-                  ></IonInput>
-                </IonItem>
-              </IonCol>
-            </IonRow>
-          </IonGrid>
-
-          <IonGrid>
-            <IonRow>
-              <IonCol>
-                <IonItem lines="none">
-                  <IonInput
-                    label="Dirección"
-                    type="text"
-                    labelPlacement="floating"
-                    fill="outline"
-                    placeholder="Ej: Calle Falsa 123"
-                    name="direccion"
-                    value={formData.direccion}
-                    onIonChange={handleInputChange}
-                  ></IonInput>
-                </IonItem>
-              </IonCol>
-            </IonRow>
-          </IonGrid>
-
-          <IonGrid>
-            <IonRow>
-              <IonCol>
-                <IonItem lines="none">
-                  <IonInput
-                    label="Teléfono"
-                    type="tel"
-                    labelPlacement="floating"
-                    fill="outline"
-                    placeholder="Ej: 9XXXXXXXX"
-                    name="telefono"
-                    value={formData.telefono}
-                    onIonChange={handleInputChange}
-                  ></IonInput>
-                </IonItem>
-              </IonCol>
-            </IonRow>
-          </IonGrid>
-
-          <IonGrid>
-            <IonRow>
-              <IonCol>
-                <IonItem lines="none">
-                  <IonInput
-                    label="Email"
-                    type="email"
-                    labelPlacement="floating"
-                    fill="outline"
-                    placeholder="Ej: govet@paw-solutions.com"
-                    name="email"
-                    value={formData.email}
-                    onIonChange={handleInputChange}
-                  ></IonInput>
-                </IonItem>
-              </IonCol>
-            </IonRow>
-          </IonGrid>
-
-          <IonGrid>
-            <IonRow>
-              <IonCol className="ion-text-center">
-                <IonButton 
-                  className="custom-button" 
-                  expand="block"
-                  onClick={registra_tutor}
+          <IonRow>
+            <IonCol>
+              <IonItem lines="none">
+                <IonInput
+                  type="text"
+                  labelPlacement="stacked"
+                  fill="outline"
+                  placeholder="Ej: Calle Falsa 123"
+                  name="direccion"
+                  value={formData.direccion}
+                  onIonChange={handleInputChange}
                 >
-                  Registrar tutor
-                </IonButton>
-              </IonCol>
-            </IonRow>
-          </IonGrid>
+                  <div slot="label">
+                    Dirección <IonText color="danger">(*)</IonText>
+                  </div>
+                </IonInput>
+              </IonItem>
+            </IonCol>
+          </IonRow>
+          <IonRow>
+            <IonCol>
+              <IonItem lines="none">
+                <IonInput
+                  type="tel"
+                  labelPlacement="stacked"
+                  fill="outline"
+                  placeholder="Ej: 9XXXXXXXX"
+                  name="telefono"
+                  value={formData.telefono}
+                  onIonChange={handleInputChange}
+                >
+                  <div slot="label">
+                    Teléfono
+                  </div>
+                </IonInput>
+              </IonItem>
+            </IonCol>
+          </IonRow>
+          <IonRow>
+            <IonCol>
+              <IonItem lines="none">
+                <IonInput
+                  required
+                  type="email"
+                  labelPlacement="stacked"
+                  fill="outline"
+                  placeholder="Ej: govet@paw-solutions.com"
+                  name="email"
+                  value={formData.email}
+                  onIonChange={handleInputChange}
+                >
+                  <div slot="label">
+                    Email <IonText color="danger">(*)</IonText>
+                  </div>
+                </IonInput>
+              </IonItem>
+            </IonCol>
+          </IonRow>
+        </IonGrid>
+          <IonRow>
+            <IonCol className="ion-text-center">
+              <IonButton 
+                className="custom-button" 
+                expand="block"
+                onClick={registra_tutor}
+              >
+                Registrar tutor
+              </IonButton>
+            </IonCol>
+          </IonRow>
         </IonList>
         <IonToast
           isOpen={showToast}
