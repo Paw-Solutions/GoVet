@@ -143,7 +143,7 @@ class consultaTratamientoResponse(consultaTratamientoBase):
 class ConsultaBase(BaseModel):
     id_paciente: int
     rut: str
-    fecha: date
+    fecha_consulta: date
     motivo: str 
     diagnostico: str
     observaciones: str

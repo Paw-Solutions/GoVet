@@ -114,6 +114,14 @@ def obtener_todos_los_pacientes(db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="No se encontraron pacientes")
     return db_pacientes
 
+# Rut GET para obtener todos los pacientes por rut de su tutor
+@app.get("/pacientes/tutor/{rut}", response_model=List[PacienteResponse])
+def obtener_pacientes_por_rut_tutor(rut: str, db: Session = Depends(get_db)):
+    db_pacientes = db.query(models.Paciente).join(models.TutorPaciente).filter(models.TutorPaciente.rut == rut).all()
+    if not db_pacientes:
+        raise HTTPException(status_code=404, detail="No se encontraron pacientes para ese tutor")
+    return db_pacientes
+
 """ Rutas para razas """
 # Ruta POST para añadir una raza
 @app.post("/razas/", response_model=RazaResponse)
@@ -178,3 +186,40 @@ def obtener_todas_las_especies(db: Session = Depends(get_db)):
     if not db_especies:
         raise HTTPException(status_code=404, detail="No se encontraron especies")
     return db_especies
+
+# HU 7: Como veterinaria quiero buscar pacientes, tutores y fichas con su información 
+# clave para recuperar información importante de forma flexible y rápida
+""" Rutas para fichas de pacientes (consultas) """
+# Ruta POST para añadir una consulta
+@app.post("/consultas/", response_model=ConsultaResponse)
+def crear_consulta(consulta: ConsultaCreate, db: Session = Depends(get_db)):
+    db_consulta = models.Consulta(**consulta.dict())
+    db.add(db_consulta)
+    db.commit()
+    db.refresh(db_consulta)
+    return db_consulta
+
+# Ruta GET para obtener una consulta por su ID
+@app.get("/consultas/{id_consulta}", response_model=ConsultaResponse)
+def obtener_consulta_por_id(id_consulta: int, db: Session = Depends(get_db)):
+    db_consulta = db.query(models.Consulta).filter(models.Consulta.id_consulta == id_consulta).first()
+    if not db_consulta:
+        raise HTTPException(status_code=404, detail="Consulta no encontrada")
+    return db_consulta
+
+# Ruta GET para obtener todas las consultas
+@app.get("/consultas/", response_model=List[ConsultaResponse])
+def obtener_todas_las_consultas(db: Session = Depends(get_db)):
+    db_consultas = db.query(models.Consulta).all()
+    if not db_consultas:
+        raise HTTPException(status_code=404, detail="No se encontraron consultas")
+    return db_consultas
+
+# Ruta GET para obtener consultas por nombre de paciente
+@app.get("/consultas/paciente/{nombre_paciente}", response_model=List[ConsultaResponse])
+def obtener_consultas_por_nombre_paciente(nombre_paciente: str, db: Session = Depends(get_db)):
+    db_consultas = db.query(models.Consulta).join(models.Paciente).filter(models.Paciente.nombre.ilike(f"%{nombre_paciente}%")).all()
+    if not db_consultas:
+        raise HTTPException(status_code=404, detail="No se encontraron consultas para ese paciente")
+    return db_consultas
+
