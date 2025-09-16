@@ -363,7 +363,7 @@ CREATE TABLE govet.consulta (
 	diagnostico varchar NULL,
 	id_consulta bigserial NOT NULL,
 	estado_pelaje varchar NULL,
-	peso int4 NULL,
+	peso float8 NULL,
 	condicion_corporal varchar NULL,
 	mucosas varchar NULL,
 	dht varchar NULL,
