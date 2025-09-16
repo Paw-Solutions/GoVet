@@ -11,7 +11,15 @@ class Tutor(Base):
     email = Column(String)
     direccion = Column(String)
     rut = Column(String, primary_key=True)
-    
+    apellido_paterno = Column(String)
+    apellido_materno = Column(String)
+    celular = Column(BigInteger)
+    celular2 = Column(BigInteger)
+    comuna = Column(String)
+    region = Column(String)
+    observacion = Column(String)
+    telefono2 = Column(BigInteger)
+
     # Relaciones
     consultas = relationship("Consulta", back_populates="tutor")
     pacientes = relationship("TutorPaciente", back_populates="tutor")
