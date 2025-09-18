@@ -91,7 +91,7 @@ class Consulta(Base):
     mucosas = Column(String)
     dht = Column(String)
     nodulos_linfaticos = Column(String)
-    auscultacion_cardiaca_toraxica = Column(String)
+    auscultacion_cardiaca_toraxica = Column("auscultacion_cardiaca-toraxica", String) # DEBERIAMOS CAMBIARLO EN LA DB
     observaciones = Column(String)
     fecha_consulta = Column(Date)
     motivo = Column(String)

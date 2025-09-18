@@ -101,6 +101,17 @@ class TutorPacienteBase(BaseModel):
     class Config:
         from_attributes = True
 
+class TutorPacienteCreate(TutorPacienteBase):
+    pass
+
+class TutorPacienteResponse(TutorPacienteBase):
+    rut: str
+    id_paciente: int
+    fecha: date
+
+    class Config:
+        from_attributes = True
+
 """ Esquema de datos para la entidad tratamiento """
 
 class TratamientoBase(BaseModel):
@@ -150,7 +161,7 @@ class ConsultaBase(BaseModel):
     dht: str
     nodulos_linfaticos: str
     mucosas: str
-    peso: int
+    peso: float
     auscultacion_cardiaca_toraxica: str
     estado_pelaje: str
     condicion_corporal: str

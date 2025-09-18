@@ -1,8 +1,13 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from dotenv import load_dotenv
+import os
 
-URL_DATABASE = 'postgresql://pawsolutions:garrita@db:5432/govet'
+# Cargar variables de entorno desde el archivo .env
+load_dotenv()
+
+URL_DATABASE = os.getenv('DATABASE_URL')
 
 # Crear el motor de la base de datos
 engine = create_engine(URL_DATABASE)

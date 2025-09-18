@@ -1,10 +1,11 @@
+from datetime import date
 from sqlalchemy import create_engine, between, or_, func
 from sqlalchemy.orm import Session, sessionmaker
 from schemas import (
     PacienteBase, PacienteCreate, PacienteResponse,
     RazaBase, RazaCreate, RazaResponse,
     EspecieBase, EspecieCreate, EspecieResponse,
-    TutorBase, TutorCreate, TutorResponse,
+    TutorBase, TutorCreate, TutorPacienteResponse, TutorResponse,
     TutorPacienteBase,
     TratamientoBase, TratamientoCreate, TratamientoResponse,
     consultaTratamientoBase, consultaTratamientoCreate, consultaTratamientoResponse,
@@ -17,13 +18,19 @@ import models # Donde están las tablas de la base de datos
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Annotated
 from database import engine, SessionLocal
+from dotenv import load_dotenv
+import os
+
+# Cargar variables de entorno desde el archivo .env
+load_dotenv()
 
 app = FastAPI()
 
 # CORS
+allowed_origins = os.getenv("ALLOWED_ORIGINS", "").split(",")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:8100", "http://172.19.0.4:8100/"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],  # Allows all HTTP methods
     allow_headers=["*"],  # Allows all headers
@@ -44,7 +51,7 @@ db_dependency = Annotated[Session, Depends(get_db)]
 
 
 # HU 4: Como Veterinaria, quiero poder almacenar al tutor con su RUT y nombre, para poder tener su información para consultas futuras
-""" RUTAS PARA DUEÑOS """
+""" RUTAS PARA TUTORES (dueños de mascotas) """
 # Ruta POST para añadir un dueño
 @app.post("/tutores/", response_model=TutorResponse)
 def crear_tutor(tutor: TutorCreate, db: Session = Depends(get_db)):
@@ -72,7 +79,7 @@ def obtener_todos_los_tutores(db: Session = Depends(get_db)):
 
 
 # HU 3: Como Veterinaria, quiero poder almacenar el paciente por su nombre y raza para indentificarlos y buscarlos facilmente
-""" Rutas para pacientes """
+""" RUTAS PARA PACIENTES (mascotas) """
 # Ruta POST para añadir un paciente
 @app.post("/pacientes/", response_model=PacienteResponse)
 def crear_paciente(paciente: PacienteCreate, db: Session = Depends(get_db)):
@@ -122,7 +129,35 @@ def obtener_pacientes_por_rut_tutor(rut: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="No se encontraron pacientes para ese tutor")
     return db_pacientes
 
-""" Rutas para razas """
+""" RUTAS PARA ASOCIAR TUTORES Y PACIENTES """
+# Ruta POST para asociar un tutor a un paciente (tutor_paciente)
+@app.post("/tutores/{rut_tutor}/pacientes/{id_paciente}", response_model=TutorPacienteResponse)
+def asociar_tutor_a_paciente(rut_tutor: str, id_paciente: int, fecha: date, db: Session = Depends(get_db)):
+    db_tutor = db.query(models.Tutor).filter(models.Tutor.rut == rut_tutor).first()
+    db_paciente = db.query(models.Paciente).filter(models.Paciente.id_paciente == id_paciente).first()
+    if not db_tutor:
+        raise HTTPException(status_code=404, detail="Tutor no encontrado")
+    if not db_paciente:
+        raise HTTPException(status_code=404, detail="Paciente no encontrado")
+    db_tutor_paciente = models.TutorPaciente(rut=rut_tutor, id_paciente=id_paciente, fecha=fecha)
+    db.add(db_tutor_paciente)
+    db.commit()
+    db.refresh(db_tutor_paciente)
+    return db_tutor_paciente
+
+# Ruta para ver mascotas asociadas a un tutor
+@app.get("/tutores/{rut}/pacientes/", response_model=List[PacienteResponse])
+def obtener_mascotas_por_tutor(rut: str, db: Session = Depends(get_db)):
+    db_tutor = db.query(models.Tutor).filter(models.Tutor.rut == rut).first()
+    if not db_tutor:
+        raise HTTPException(status_code=404, detail="Tutor no encontrado")
+    db_mascotas = db.query(models.Paciente).join(models.TutorPaciente).filter(models.TutorPaciente.rut == rut).all()
+    if not db_mascotas:
+        raise HTTPException(status_code=404, detail="No se encontraron mascotas para ese tutor")
+    return db_mascotas
+
+
+""" RUTAS PARA RAZAS """
 # Ruta POST para añadir una raza
 @app.post("/razas/", response_model=RazaResponse)
 def crear_raza(raza: RazaCreate, db: Session = Depends(get_db)):
@@ -156,7 +191,7 @@ def obtener_razas_por_especie(nombre_especie: str, db: Session = Depends(get_db)
         raise HTTPException(status_code=404, detail="No se encontraron razas para esa especie")
     return db_razas
 
-""" Rutas para especies """
+""" RUTAS PARA ESPECIE """
 # Ruta POST para añadir una especie
 @app.post("/especies/", response_model=EspecieResponse)
 def crear_especie(especie: EspecieCreate, db: Session = Depends(get_db)):
@@ -189,7 +224,7 @@ def obtener_todas_las_especies(db: Session = Depends(get_db)):
 
 # HU 7: Como veterinaria quiero buscar pacientes, tutores y fichas con su información 
 # clave para recuperar información importante de forma flexible y rápida
-""" Rutas para fichas de pacientes (consultas) """
+""" RUTAS PARA FICHAS DE PACIENTES (CONSULTAS) """
 # Ruta POST para añadir una consulta
 @app.post("/consultas/", response_model=ConsultaResponse)
 def crear_consulta(consulta: ConsultaCreate, db: Session = Depends(get_db)):
@@ -223,3 +258,56 @@ def obtener_consultas_por_nombre_paciente(nombre_paciente: str, db: Session = De
         raise HTTPException(status_code=404, detail="No se encontraron consultas para ese paciente")
     return db_consultas
 
+
+# HU 8: Como Veterinaria quiero ver el detalle de los pacientes, 
+# para saber su estado y cuándo es su proxima vacuna y/o cita
+""" RUTAS PARA TRATAMIENTOS """
+# Ruta POST para añadir un tratamiento
+@app.post("/tratamientos/", response_model=TratamientoResponse)
+def crear_tratamiento(tratamiento: TratamientoCreate, db: Session = Depends(get_db)):
+    db_tratamiento = models.Tratamiento(**tratamiento.dict())
+    db.add(db_tratamiento)
+    db.commit()
+    db.refresh(db_tratamiento)
+    return db_tratamiento
+
+# Ruta GET para obtener todos los tratamientos
+@app.get("/tratamientos/", response_model=List[TratamientoResponse])
+def obtener_todos_los_tratamientos(db: Session = Depends(get_db)):
+    db_tratamientos = db.query(models.Tratamiento).all()
+    if not db_tratamientos:
+        raise HTTPException(status_code=404, detail="No se encontraron tratamientos")
+    return db_tratamientos
+
+# Ruta GET para obtener un tratamiento por su nombre
+@app.get("/tratamientos/nombre/{nombre}", response_model=TratamientoResponse)
+def obtener_tratamiento_por_nombre(nombre: str, db: Session = Depends(get_db)):
+    db_tratamiento = db.query(models.Tratamiento).filter(models.Tratamiento.nombre.ilike(f"%{nombre}%")).first()
+    if not db_tratamiento:
+        raise HTTPException(status_code=404, detail="Tratamiento no encontrado")
+    return db_tratamiento
+
+# Ruta POST para consulta_tratamiento
+@app.post("/consultas_tratamientos/", response_model=consultaTratamientoResponse)
+def crear_consulta_tratamiento(consulta_tratamiento: consultaTratamientoBase, db: Session = Depends(get_db)):
+    db_consulta_tratamiento = models.ConsultaTratamiento(**consulta_tratamiento.dict())
+    db.add(db_consulta_tratamiento)
+    db.commit()
+    db.refresh(db_consulta_tratamiento)
+    return db_consulta_tratamiento
+
+# Ruta GET para obtener todos los registros de consulta_tratamiento
+@app.get("/consultas_tratamientos/", response_model=List[consultaTratamientoResponse])
+def obtener_todas_las_consultas_tratamiento(db: Session = Depends(get_db)):
+    db_consultas_tratamiento = db.query(models.ConsultaTratamiento).all()
+    if not db_consultas_tratamiento:
+        raise HTTPException(status_code=404, detail="No se encontraron tratamientos asociados a consultas")
+    return db_consultas_tratamiento
+
+# Ruta GET para obtener registros de consulta_tratamiento por nombre de paciente
+@app.get("/consultas_tratamientos/paciente/{nombre_paciente}", response_model=List[consultaTratamientoResponse])
+def obtener_consultas_tratamiento_por_nombre_paciente(nombre_paciente: str, db: Session = Depends(get_db)):
+    db_consultas_tratamiento = db.query(models.ConsultaTratamiento).join(models.Paciente).filter(models.Paciente.nombre.ilike(f"%{nombre_paciente}%")).all()
+    if not db_consultas_tratamiento:
+        raise HTTPException(status_code=404, detail="No se encontraron tratamientos para ese paciente")
+    return db_consultas_tratamiento
