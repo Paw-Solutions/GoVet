@@ -1,4 +1,13 @@
 -- DROP SCHEMA govet;
+DO $$
+BEGIN
+   IF NOT EXISTS (
+      SELECT FROM pg_database WHERE datname = 'govet'
+   ) THEN
+      CREATE DATABASE govet;
+   END IF;
+END
+$$;
 
 CREATE SCHEMA govet AUTHORIZATION pg_database_owner;
 
