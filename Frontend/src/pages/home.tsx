@@ -12,7 +12,9 @@ import {
   IonGrid,
   IonRow,
   IonCol,
+  IonIcon,
 } from "@ionic/react";
+import { add, logoApple, pawOutline, personAddOutline, settingsSharp } from "ionicons/icons";
 import { useHistory } from "react-router-dom";
 
 const Home: React.FC = () => {
@@ -44,26 +46,26 @@ const Home: React.FC = () => {
         </IonHeader>
         <IonGrid>
           <IonRow>
-            <IonCol className="ion-text-center">
-              <IonButton
-                expand="block"
-                onClick={navegarARegistroTutor}
-                style={{ margin: "10px 0" }}
-              >
-                Registro Tutor
-              </IonButton>
-            </IonCol>
+            <IonButton
+              className="custom-button"
+              expand="block"
+              onClick={navegarARegistroTutor}
+              style={{ margin: "10px 0" }}
+            >
+              <IonIcon className="button-icon" slot="icon-only" ios={personAddOutline} md={personAddOutline}></IonIcon>
+              Registro Tutor
+            </IonButton>
           </IonRow>
           <IonRow>
-            <IonCol className="ion-text-center">
-              <IonButton
-                expand="block"
-                onClick={navegarARegistroPaciente}
-                style={{ margin: "10px 0" }}
-              >
-                Registro Paciente KJSLKDJads
-              </IonButton>
-            </IonCol>
+            <IonButton
+              className="custom-button"
+              expand="block"
+              onClick={navegarARegistroPaciente}
+              style={{ margin: "10px 0" }}
+            >
+              <IonIcon className="button-icon" slot="icon-only" ios={pawOutline} md={pawOutline}></IonIcon>
+              Registro Paciente
+            </IonButton>
           </IonRow>
         </IonGrid>
       </IonContent>

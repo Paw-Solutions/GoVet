@@ -22,7 +22,8 @@ import {
   IonToast,
   IonText,
 } from "@ionic/react";
-import "./registroTutor.css";
+import "../styles/registroTutor.css";
+import Example from "../components/ejemploTel";
 
 const RegistroTutor: React.FC = () => {
   // Estado para los campos del formulario
@@ -40,7 +41,11 @@ const RegistroTutor: React.FC = () => {
     region: '',
     email: ''
   });
-  
+
+  const handlePhoneChange = (phone: string) => {
+    console.log("Número recibido del hijo:", phone);
+    // Aquí lo puedes guardar en un state global, enviar al backend, etc.
+  };
   // Estado para mostrar mensaje de éxito/error
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
@@ -74,12 +79,12 @@ const RegistroTutor: React.FC = () => {
           apellido_paterno: '',
           rut: '',
           direccion: '',
-          telefono: 0,
+          telefono: 9,
           telefono2: 0,
           comuna: '',
           region: '',
-          celular: 0,
-          celular2: 0,
+          celular: 9,
+          celular2: 9,
           email: ''
         });
       } else {
@@ -125,7 +130,6 @@ const RegistroTutor: React.FC = () => {
                       Nombre <IonText color="danger">(*)</IonText>
                     </div>
                   </IonInput>
-                  
                 </IonItem>
               </IonCol>
             </IonRow>
@@ -171,7 +175,7 @@ const RegistroTutor: React.FC = () => {
                   type="text"
                   labelPlacement="stacked"
                   fill="outline"
-                  placeholder="Ej: Calle Falsa 123"
+                  placeholder="Calle Falsa 123"
                   name="direccion"
                   value={formData.direccion}
                   onIonChange={handleInputChange}
@@ -190,7 +194,7 @@ const RegistroTutor: React.FC = () => {
                   type="tel"
                   labelPlacement="stacked"
                   fill="outline"
-                  placeholder="Ej: 9XXXXXXXX"
+                  placeholder="9XXXXXXXX"
                   name="telefono"
                   value={formData.telefono}
                   onIonChange={handleInputChange}
@@ -204,13 +208,56 @@ const RegistroTutor: React.FC = () => {
           </IonRow>
           <IonRow>
             <IonCol>
+              <Example onPhoneChange={handlePhoneChange} />
+            </IonCol>
+          </IonRow>
+          <IonRow>
+            <IonCol>
+              <IonItem lines="none">
+                <IonInput
+                  type="text"
+                  labelPlacement="stacked"
+                  fill="outline"
+                  placeholder="XIV Los Ríos"
+                  name="region"
+                  value={formData.region}
+                  onIonChange={handleInputChange}
+                >
+                  <div slot="label">
+                    Región
+                  </div>
+                </IonInput>
+              </IonItem>
+            </IonCol>
+          </IonRow>
+          <IonRow>
+            <IonCol>
+              <IonItem lines="none">
+                <IonInput
+                  type="text"
+                  labelPlacement="stacked"
+                  fill="outline"
+                  placeholder="Valdivia"
+                  name="comuna"
+                  value={formData.comuna}
+                  onIonChange={handleInputChange}
+                >
+                  <div slot="label">
+                    Comuna
+                  </div>
+                </IonInput>
+              </IonItem>
+            </IonCol>
+          </IonRow>
+          <IonRow>
+            <IonCol>
               <IonItem lines="none">
                 <IonInput
                   required
                   type="email"
                   labelPlacement="stacked"
                   fill="outline"
-                  placeholder="Ej: govet@paw-solutions.com"
+                  placeholder="govet@paw-solutions.com"
                   name="email"
                   value={formData.email}
                   onIonChange={handleInputChange}

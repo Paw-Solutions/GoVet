@@ -22,8 +22,8 @@ import {
   IonSearchbar,
   IonToast,
 } from "@ionic/react";
-import "./registroPaciente.css";
-import "./main.css";
+import "../styles/registroPaciente.css";
+import "../styles/main.css";
 
 const RegistroPaciente: React.FC = () => {
   const [formData, setFormData] = useState({

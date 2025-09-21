@@ -9,7 +9,7 @@ import {
 } from "@ionic/react";
 import { home, eye, add, calendar, menu } from "ionicons/icons";
 import { useHistory } from "react-router-dom";
-import "./BarraLateral.css";
+import "../styles/BarraLateral.css";
 
 const BarraLateral: React.FC = () => {
   const history = useHistory(); /* Hook para navegación programática */
