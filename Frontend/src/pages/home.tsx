@@ -35,6 +35,7 @@ import "../styles/home.css";
 
 const Home: React.FC = () => {
   const history = useHistory();
+  const API_URL = import.meta.env.VITE_API_URL; // usa tu variable de entorno
 
   // Estado para los últimos tutores
   const [ultimosTutores, setUltimosTutores] = useState<any[]>([]);
@@ -46,7 +47,7 @@ const Home: React.FC = () => {
     try {
       setLoadingTutores(true);
       setErrorTutores("");
-      const response = await fetch("http://localhost:8000/tutores/");
+      const response = await fetch(`${API_URL}/tutores/`);
 
       if (response.ok) {
         const tutores = await response.json();
@@ -92,8 +93,9 @@ const Home: React.FC = () => {
           </IonToolbar>
         </IonHeader>
         <IonGrid>
-          <IonRow>
+          <IonRow className="button-row">
             <IonCol>
+              <IonItem>
               <IonButton
                 className="custom-button"
                 expand="block"
@@ -107,9 +109,8 @@ const Home: React.FC = () => {
                 ></IonIcon>
                 Registro Tutor
               </IonButton>
+              </IonItem>
             </IonCol>
-          </IonRow>
-          <IonRow>
             <IonCol>
               <IonButton
                 className="custom-button"
@@ -126,7 +127,6 @@ const Home: React.FC = () => {
               </IonButton>
             </IonCol>
           </IonRow>
-
           {/* Recuadro de últimos tutores registrados */}
           <IonRow>
             <IonCol>
@@ -184,6 +184,19 @@ const Home: React.FC = () => {
                   >
                     <IonIcon icon={timeOutline} slot="start" />
                     Actualizar
+                  </IonButton>
+                  <IonButton
+                    className="custom-button"
+                    expand="block"
+                    onClick={navegarARegistroTutor}
+                    style={{ margin: "10px 0" }}
+                  >
+                    <IonIcon
+                      className="button-icon"
+                      slot="start"
+                      icon={personAddOutline}
+                    ></IonIcon>
+                    Registro Tutor
                   </IonButton>
                 </IonCardContent>
               </IonCard>

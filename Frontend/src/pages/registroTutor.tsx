@@ -26,13 +26,19 @@ import "../styles/registroTutor.css";
 import InputTelefono, { InputTelefonoHandle } from "../components/inputTelefono";
 import InputRut, { InputRutHandle } from "../components/inputRut";
 import { Input } from "postcss";
+import { crearTutor } from "../api/registros/tutoresApi";
 
 
 // Estado para mostrar mensaje de éxito/error (temporal)
 
 const RegistroTutor: React.FC = () => {
+  const API_URL = import.meta.env.VITE_API_URL; // usa tu variable de entorno
+
+  console.log(`${API_URL}`);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
   // Estado para los campos del formulario
   const [formData, setFormData] = useState({
     nombre: "",
@@ -95,42 +101,38 @@ const RegistroTutor: React.FC = () => {
 
 
   // Función para registrar tutor
-  const registra_tutor = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    console.log("Formulario enviado:", formData);
+    e.preventDefault();
+    setIsLoading(true);
     try {
-      const response = await fetch('http://127.0.0.1:8000/tutores', {
-        method: 'POST',
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
+      const respuesta = await crearTutor(formData);
+      console.log("Tutor creado:", respuesta);
+      setToastMessage("Tutor registrado exitosamente");
+      // Limpiar formulario
+      setFormData({
+        nombre: "",
+        apellido_materno: "",
+        apellido_paterno: "",
+        rut: "",
+        direccion: "",
+        telefono: 0,
+        telefono2: 0,
+        comuna: "",
+        region: "",
+        celular: 0,
+        celular2: 0,
+        email: "",
       });
-
-      if (response.ok) {
-        setToastMessage("Tutor registrado exitosamente");
-        // Limpiar formulario
-        setFormData({
-          nombre: "",
-          apellido_materno: "",
-          apellido_paterno: "",
-          rut: "",
-          direccion: "",
-          telefono: 9,
-          telefono2: 0,
-          comuna: "",
-          region: "",
-          celular: 9,
-          celular2: 9,
-          email: "",
-        });
-        resetRut();
-        resetTelefono();
-      } else {
-        setToastMessage("Error al registrar tutor");
-      }
+      resetRut();
+      resetTelefono();
     } catch (error) {
+      console.error("Fallo al crear tutor:", error);
       setToastMessage("Error de conexión");
+    } finally {
+      setIsLoading(false);
+      setShowToast(true);
     }
-    setShowToast(true);
   };
 
   return (
@@ -304,9 +306,10 @@ const RegistroTutor: React.FC = () => {
           <IonRow>
             <IonCol className="ion-text-center">
               <IonButton
+                type="submit"
                 className="custom-button"
                 expand="block"
-                onClick={registra_tutor}
+                onClick={handleSubmit}
               >
                 Registrar tutor
               </IonButton>

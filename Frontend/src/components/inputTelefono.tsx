@@ -64,14 +64,14 @@ const InputTelefono = forwardRef<InputTelefonoHandle, InputTelefonoProps>(
           type="tel"
           labelPlacement="stacked"
           fill="outline"
-          name="telefono"
+          name="celular"
           ref={phoneInputRef}
           value={myPhoneNumber}
           onIonInput={handleInput}
           placeholder="+56 9 "
         >
           <div slot="label">
-            Teléfono <IonText color="danger">(*)</IonText>
+            Celular <IonText color="danger">(*)</IonText>
           </div>
         </IonInput>
       </IonItem>

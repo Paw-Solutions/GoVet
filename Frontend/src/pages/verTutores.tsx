@@ -48,6 +48,7 @@ interface Tutor {
 }
 
 const VerTutores: React.FC = () => {
+  const API_URL = import.meta.env.VITE_API_URL; // usa tu variable de entorno
   const [tutores, setTutores] = useState<Tutor[]>([]);
   const [tutoresFiltrados, setTutoresFiltrados] = useState<Tutor[]>([]);
   const [loading, setLoading] = useState(false);
@@ -59,7 +60,7 @@ const VerTutores: React.FC = () => {
     try {
       setLoading(true);
       setError("");
-      const response = await fetch("http://localhost:8000/tutores/");
+      const response = await fetch(`${API_URL}/tutores/`);
 
       if (response.ok) {
         const data = await response.json();

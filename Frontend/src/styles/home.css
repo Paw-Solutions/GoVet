@@ -107,6 +107,9 @@
   font-style: italic;
 }
 
+ion-row.button-row {
+  --ion-grid-column-padd: 50%;
+}
 /* Estilos específicos para PWA */
 .pwa-card {
   border-radius: 1rem !important;
