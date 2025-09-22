@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   IonPage,
   IonHeader,
@@ -21,6 +21,7 @@ import {
   IonCol,
   IonSearchbar,
   IonToast,
+  IonSpinner,
 } from "@ionic/react";
 import "../styles/registroPaciente.css";
 import "../styles/main.css";
@@ -38,37 +39,11 @@ const RegistroPaciente: React.FC = () => {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
 
-  // Datos de especies y razas (a futuro vendrán de BD)
-  //Para conectar con base de datos en el futuro:
-  //Reemplazar especiesData y razasData con llamadas a API
-  //Agregar estados de loading
-  //implementar debounce para las búsquedas
-  //Manejar errores de red
-  const especiesData = [
-    { nombre: "Perro", id: "perro" },
-    { nombre: "Gato", id: "gato" },
-  ];
-
-  const razasData = {
-    perro: [
-      "Golden Retriever",
-      "Labrador",
-      "Pastor Alemán",
-      "Bulldog",
-      "Poodle",
-      "Chihuahua",
-      "Mestizo",
-    ],
-    gato: [
-      "Persa",
-      "Siamés",
-      "Maine Coon",
-      "Bengala",
-      "Ragdoll",
-      "British Shorthair",
-      "Mestizo",
-    ],
-  };
+  // Estados para datos de la API
+  const [especiesData, setEspeciesData] = useState<any[]>([]);
+  const [razasData, setRazasData] = useState<any[]>([]);
+  const [loadingEspecies, setLoadingEspecies] = useState(false);
+  const [loadingRazas, setLoadingRazas] = useState(false);
 
   // Estados para el filtrado
   const [especieQuery, setEspecieQuery] = useState("");
@@ -76,19 +51,78 @@ const RegistroPaciente: React.FC = () => {
   const [showEspecieList, setShowEspecieList] = useState(false);
   const [showRazaList, setShowRazaList] = useState(false);
 
+  // Función para cargar especies desde la API
+  const cargarEspecies = async () => {
+    try {
+      setLoadingEspecies(true);
+      const response = await fetch("http://localhost:8000/especies/");
+      if (response.ok) {
+        const especies = await response.json();
+        setEspeciesData(especies);
+      } else {
+        setToastMessage("Error al cargar especies");
+        setShowToast(true);
+      }
+    } catch (error) {
+      setToastMessage("Error de conexión al cargar especies");
+      setShowToast(true);
+    } finally {
+      setLoadingEspecies(false);
+    }
+  };
+
+  // Función para cargar razas por especie
+  const cargarRazasPorEspecie = async (nombreEspecie: string) => {
+    try {
+      setLoadingRazas(true);
+      const response = await fetch(
+        `http://localhost:8000/razas/especie/${nombreEspecie}`
+      );
+      if (response.ok) {
+        const razas = await response.json();
+        setRazasData(razas);
+      } else {
+        setRazasData([]);
+      }
+    } catch (error) {
+      setRazasData([]);
+    } finally {
+      setLoadingRazas(false);
+    }
+  };
+
+  // Cargar especies al montar el componente
+  useEffect(() => {
+    cargarEspecies();
+  }, []);
+
+  // Cargar razas cuando cambia la especie seleccionada
+  useEffect(() => {
+    if (formData.especie) {
+      const especieSeleccionada = especiesData.find(
+        (esp) => esp.id_especie === parseInt(formData.especie)
+      );
+      if (especieSeleccionada) {
+        cargarRazasPorEspecie(especieSeleccionada.nombre_comun);
+      }
+    } else {
+      setRazasData([]);
+    }
+  }, [formData.especie, especiesData]);
+
   // Filtrar especies
   const filteredEspecies = especiesData
     .filter((especie) =>
-      especie.nombre.toLowerCase().includes(especieQuery.toLowerCase())
+      especie.nombre_comun.toLowerCase().includes(especieQuery.toLowerCase())
     )
     .slice(0, 4); // Limitar a 4 resultados
 
   // Filtrar razas según la especie seleccionada
-  const filteredRazas = formData.especie
-    ? (razasData[formData.especie as keyof typeof razasData] || [])
-        .filter((raza) => raza.toLowerCase().includes(razaQuery.toLowerCase()))
-        .slice(0, 4) // Limitar a 4 resultados
-    : [];
+  const filteredRazas = razasData
+    .filter((raza: any) =>
+      raza.nombre.toLowerCase().includes(razaQuery.toLowerCase())
+    )
+    .slice(0, 4); // Limitar a 4 resultados
 
   // Manejador de cambios en los inputs
   const handleInputChange = (e: any) => {
@@ -100,10 +134,10 @@ const RegistroPaciente: React.FC = () => {
   };
 
   // Seleccionar especie
-  const selectEspecie = (especieId: string, especieNombre: string) => {
+  const selectEspecie = (especieId: number, especieNombre: string) => {
     setFormData((prev) => ({
       ...prev,
-      especie: especieId,
+      especie: especieId.toString(),
       raza: "", // Limpiar raza cuando cambia la especie
     }));
     setEspecieQuery(especieNombre);
@@ -112,23 +146,32 @@ const RegistroPaciente: React.FC = () => {
   };
 
   // Seleccionar raza
-  const selectRaza = (raza: string) => {
+  const selectRaza = (razaId: number, razaNombre: string) => {
     setFormData((prev) => ({
       ...prev,
-      raza: raza,
+      raza: razaId.toString(),
     }));
-    setRazaQuery(raza);
+    setRazaQuery(razaNombre);
     setShowRazaList(false);
   };
 
   const registraPaciente = async () => {
     try {
-      const response = await fetch("DaniAPI/tutores", {
+      // Preparar los datos para enviar al backend
+      const pacienteData = {
+        nombre: formData.nombre,
+        id_raza: parseInt(formData.raza),
+        sexo: formData.sexo,
+        color: formData.color,
+        fecha_nacimiento: formData.fechaNacimiento,
+      };
+
+      const response = await fetch("http://localhost:8000/pacientes/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(pacienteData),
       });
 
       if (response.ok) {
@@ -142,8 +185,15 @@ const RegistroPaciente: React.FC = () => {
           color: "",
           fechaNacimiento: "",
         });
+        setEspecieQuery("");
+        setRazaQuery("");
       } else {
-        setToastMessage("Error al registrar paciente");
+        const errorData = await response.json();
+        setToastMessage(
+          `Error al registrar paciente: ${
+            errorData.detail || "Error desconocido"
+          }`
+        );
       }
     } catch (error) {
       setToastMessage("Error de conexión");
@@ -210,17 +260,27 @@ const RegistroPaciente: React.FC = () => {
                   especieQuery &&
                   filteredEspecies.length > 0 && (
                     <IonList className="filter-list">
-                      {filteredEspecies.map((especie) => (
-                        <IonItem
-                          key={especie.id}
-                          button
-                          onClick={() =>
-                            selectEspecie(especie.id, especie.nombre)
-                          }
-                        >
-                          <IonLabel>{especie.nombre}</IonLabel>
+                      {loadingEspecies ? (
+                        <IonItem>
+                          <IonSpinner />
+                          <IonLabel>Cargando especies...</IonLabel>
                         </IonItem>
-                      ))}
+                      ) : (
+                        filteredEspecies.map((especie) => (
+                          <IonItem
+                            key={especie.id_especie}
+                            button
+                            onClick={() =>
+                              selectEspecie(
+                                especie.id_especie,
+                                especie.nombre_comun
+                              )
+                            }
+                          >
+                            <IonLabel>{especie.nombre_comun}</IonLabel>
+                          </IonItem>
+                        ))
+                      )}
                     </IonList>
                   )}
               </IonCol>
@@ -263,15 +323,24 @@ const RegistroPaciente: React.FC = () => {
                   formData.especie &&
                   filteredRazas.length > 0 && (
                     <IonList className="filter-list">
-                      {filteredRazas.map((raza) => (
-                        <IonItem
-                          key={raza}
-                          button
-                          onClick={() => selectRaza(raza)}
-                        >
-                          <IonLabel>{raza}</IonLabel>
+                      {loadingRazas ? (
+                        <IonItem>
+                          <IonSpinner />
+                          <IonLabel>Cargando razas...</IonLabel>
                         </IonItem>
-                      ))}
+                      ) : (
+                        filteredRazas.map((raza: any) => (
+                          <IonItem
+                            key={raza.id_raza}
+                            button
+                            onClick={() =>
+                              selectRaza(raza.id_raza, raza.nombre)
+                            }
+                          >
+                            <IonLabel>{raza.nombre}</IonLabel>
+                          </IonItem>
+                        ))
+                      )}
                     </IonList>
                   )}
               </IonCol>
@@ -304,10 +373,10 @@ const RegistroPaciente: React.FC = () => {
                       setFormData((prev) => ({ ...prev, sexo: e.detail.value }))
                     }
                   >
-                    <IonRadio slot="start" value="macho">
+                    <IonRadio slot="start" value="M">
                       M
                     </IonRadio>
-                    <IonRadio slot="start" value="hembra">
+                    <IonRadio slot="start" value="H">
                       H
                     </IonRadio>
                   </IonRadioGroup>

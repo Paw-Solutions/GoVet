@@ -26,6 +26,10 @@ const BarraLateral: React.FC = () => {
     history.push("/");
   };
 
+  const navegarAVerTutores = () => {
+    history.push("/ver-tutores");
+  };
+
   const cerrarMenu = () => {
     const menu = document.querySelector("ion-menu");
     if (menu) {
@@ -34,7 +38,12 @@ const BarraLateral: React.FC = () => {
   };
 
   return (
-    <IonMenu contentId="main-content" side="start" menuId="main-menu" type="overlay">
+    <IonMenu
+      contentId="main-content"
+      side="start"
+      menuId="main-menu"
+      type="overlay"
+    >
       <IonContent>
         <IonList>
           {/* Íconos de navegación centrados */}
@@ -44,7 +53,7 @@ const BarraLateral: React.FC = () => {
           <IonItem button lines="none" onClick={navegarAHome}>
             <IonIcon icon={home} />
           </IonItem>
-          <IonItem button lines="none">
+          <IonItem button lines="none" onClick={navegarAVerTutores}>
             <IonIcon icon={eye} />
           </IonItem>
           <IonItem button lines="none" onClick={navegarARegistroTutor}>

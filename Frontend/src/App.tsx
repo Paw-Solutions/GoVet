@@ -5,6 +5,7 @@ import BarraLateral from "./components/BarraLateral";
 import Home from "./pages/home";
 import RegistroTutor from "./pages/registroTutor";
 import RegistroPaciente from "./pages/registroPaciente";
+import VerTutores from "./pages/verTutores";
 /* Core CSS required for Ionic components to work properly */
 import "@ionic/react/css/core.css";
 
@@ -46,6 +47,7 @@ const App: React.FC = () => (
           <Home />
         </Route>
         <Route exact path="/registro-tutor" component={RegistroTutor}></Route>
+        <Route exact path="/ver-tutores" component={VerTutores}></Route>
         <Route
           exact
           path="/registro-paciente"

@@ -1,0 +1,204 @@
+/* Estilos para la página de inicio - Home */
+/* Usando rem para PWA - Responsive y escalable */
+
+/* Estilo para las tarjetas principales */
+.home-card {
+  border-radius: 1rem !important;
+  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.1) !important;
+  margin: 1rem 0;
+  background: var(--ion-color-light);
+}
+
+/* Estilo para los botones principales */
+.home-button {
+  border-radius: 0.75rem !important;
+  margin: 0.5rem 0 !important;
+  height: 3.75rem;
+  font-weight: 600;
+  --box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.15);
+}
+
+/* Estilo para el header de las tarjetas */
+.home-card-header {
+  border-radius: 1rem 1rem 0 0 !important;
+  background: linear-gradient(
+    135deg,
+    var(--ion-color-primary),
+    var(--ion-color-primary-shade)
+  );
+  color: white;
+}
+
+.home-card-title {
+  color: white !important;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+}
+
+/* Estilo para la lista de tutores */
+.tutores-list {
+  border-radius: 0.75rem;
+  overflow: hidden;
+  margin: 1rem 0;
+}
+
+.tutor-item {
+  border-radius: 0.5rem !important;
+  margin: 0.5rem 0;
+  background: var(--ion-color-light-tint);
+  --inner-padding-end: 1rem;
+  --inner-padding-start: 1rem;
+  --padding-start: 0;
+  --padding-end: 0;
+}
+
+.tutor-item:hover {
+  background: var(--ion-color-medium-tint);
+  transition: background 0.3s ease;
+}
+
+/* Estilo para las etiquetas de información del tutor */
+.tutor-label h2 {
+  color: var(--ion-color-dark);
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.tutor-label p {
+  color: var(--ion-color-medium-shade);
+  font-size: 0.9rem;
+  margin: 0.125rem 0;
+}
+
+/* Estilo para el botón de actualizar */
+.refresh-button {
+  border-radius: 1.25rem !important;
+  --color: var(--ion-color-primary);
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+}
+
+/* Estilo para el contenedor principal */
+.home-container {
+  padding: 1rem;
+}
+
+/* Estilo para los iconos */
+.home-icon {
+  margin-right: 0.5rem;
+  font-size: 1.2rem;
+}
+
+/* Estilo para el estado de carga */
+.loading-container {
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+.loading-container ion-spinner {
+  margin-bottom: 1rem;
+}
+
+/* Estilo para mensajes de estado */
+.status-message {
+  text-align: center;
+  padding: 1.5rem 1rem;
+  font-style: italic;
+}
+
+/* Estilos específicos para PWA */
+.pwa-card {
+  border-radius: 1rem !important;
+  box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1),
+    0 0.125rem 0.25rem rgba(0, 0, 0, 0.06) !important;
+  margin: 1rem 0;
+  overflow: hidden;
+  background: var(--ion-color-light);
+  backdrop-filter: blur(0.5rem);
+}
+
+.pwa-card-content {
+  padding: 1rem;
+}
+
+.tutores-recent-card {
+  border-radius: 1rem !important;
+  margin: 1rem 0;
+  box-shadow: 0 0.25rem 1rem rgba(0, 0, 0, 0.08),
+    0 0.125rem 0.5rem rgba(0, 0, 0, 0.04) !important;
+}
+
+.tutores-recent-header {
+  background: linear-gradient(
+    135deg,
+    var(--ion-color-primary-tint),
+    var(--ion-color-primary)
+  );
+  border-radius: 1rem 1rem 0 0;
+  color: white;
+  padding: 1rem;
+}
+
+.tutores-recent-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: white !important;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+/* Responsive design para PWA */
+@media (min-width: 48rem) {
+  /* 768px */
+  .home-card,
+  .pwa-card,
+  .tutores-recent-card {
+    max-width: 37.5rem; /* 600px */
+    margin: 1rem auto;
+  }
+
+  .home-button {
+    max-width: 25rem; /* 400px */
+    margin: 0.5rem auto !important;
+  }
+
+  .home-container {
+    padding: 1.5rem;
+  }
+}
+
+@media (min-width: 64rem) {
+  /* 1024px */
+  .home-grid {
+    max-width: 50rem; /* 800px */
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+}
+
+/* Animaciones suaves para PWA */
+.home-card,
+.tutor-item,
+.home-button,
+.pwa-card,
+.tutores-recent-card {
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.home-card:hover,
+.pwa-card:hover,
+.tutores-recent-card:hover {
+  transform: translateY(-0.125rem);
+  box-shadow: 0 0.375rem 1rem rgba(0, 0, 0, 0.12),
+    0 0.125rem 0.5rem rgba(0, 0, 0, 0.08) !important;
+}
+
+.home-button:hover {
+  transform: translateY(-0.0625rem);
+}
+
+.tutor-item:hover {
+  transform: translateX(0.25rem);
+}
