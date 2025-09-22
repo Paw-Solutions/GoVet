@@ -50,8 +50,8 @@ const Home: React.FC = () => {
 
       if (response.ok) {
         const tutores = await response.json();
-        // Mostrar solo los últimos 5 tutores
-        setUltimosTutores(tutores.slice(-5).reverse());
+        // Mostrar solo los últimos 3 tutores
+        setUltimosTutores(tutores.slice(-3).reverse());
       } else {
         setErrorTutores("No se pudieron cargar los tutores");
       }
