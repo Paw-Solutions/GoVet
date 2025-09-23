@@ -20,9 +20,11 @@ import {
   IonLabel,
   IonSpinner,
   IonText,
+  IonFooter,
 } from "@ionic/react";
 import {
   add,
+  addOutline,
   logoApple,
   pawOutline,
   personAddOutline,
@@ -30,7 +32,8 @@ import {
   timeOutline,
 } from "ionicons/icons";
 import { useHistory } from "react-router-dom";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import BotonAnadir from "../components/BotonAnadir";
 import "../styles/home.css";
 
 const Home: React.FC = () => {
@@ -189,6 +192,12 @@ const Home: React.FC = () => {
           </IonRow>
         </IonGrid>
       </IonContent>
+      <IonFooter className="ion-no-border">
+        <div className="boton-anadir-container">
+          {/* Botón con opciones automáticas por defecto */}
+          <BotonAnadir tipo="opcionesDefault" color="#c757c0" />
+        </div>
+      </IonFooter>
     </IonPage>
   );
 };

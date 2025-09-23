@@ -1,0 +1,122 @@
+/* Estilos para el Botón Añadir (Floating Action Button) */
+.boton-anadir {
+  --background: #c757c0;
+  --color: white;
+  --border-radius: 50%;
+  width: 4rem;
+  height: 4rem;
+  --box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.boton-anadir:hover {
+  --background: #b84bb7;
+  --box-shadow: 0 0.375rem 0.75rem rgba(0, 0, 0, 0.3);
+  transform: scale(1.05);
+}
+
+.boton-anadir:active {
+  transform: scale(0.95);
+}
+
+/* Contenedor para posicionar el botón */
+.boton-anadir-container {
+  display: flex;
+  justify-content: flex-end;
+  padding: 1rem;
+}
+
+/* Variantes de color */
+.boton-anadir.primary {
+  --background: var(--ion-color-primary);
+}
+
+.boton-anadir.secondary {
+  --background: var(--ion-color-secondary);
+}
+
+.boton-anadir.success {
+  --background: var(--ion-color-success);
+}
+
+.boton-anadir.warning {
+  --background: var(--ion-color-warning);
+}
+
+.boton-anadir.danger {
+  --background: var(--ion-color-danger);
+}
+
+/* Tamaños */
+.boton-anadir.small {
+  width: 3rem;
+  height: 3rem;
+}
+
+.boton-anadir.large {
+  width: 5rem;
+  height: 5rem;
+}
+
+/* Estilos para el popover con backdrop atenuado */
+ion-popover::part(backdrop) {
+  background: rgba(
+    0,
+    0,
+    0,
+    0.4
+  ) !important; /* Fondo semi-transparente para atenuar */
+  backdrop-filter: blur(0.125rem); /* Efecto de desenfoque opcional */
+}
+
+ion-popover::part(content) {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  --background: transparent !important;
+}
+
+.popover-content {
+  padding: 0.75rem;
+  min-width: 15rem;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.opcion-menu {
+  --color: var(--ion-color-dark);
+  --background: white;
+  margin: 1.5em 0; /* ← ESTE ES EL VALOR QUE CONTROLA EL PADDING ENTRE OPCIONES */
+  text-align: left;
+  justify-content: flex-start;
+  --border-radius: 2rem;
+  --box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.1);
+  --padding-start: 1rem;
+  --padding-end: 1rem;
+  --padding-top: 0.75rem;
+  --padding-bottom: 0.75rem;
+  height: auto;
+  min-height: 3rem;
+  font-weight: 500;
+}
+
+.opcion-menu:hover {
+  --background: #f8f9fa;
+  --box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.15);
+  transform: translateY(-0.0625rem);
+  transition: all 0.2s ease;
+}
+
+.opcion-menu ion-icon {
+  margin-right: 0.75rem;
+  font-size: 1.3rem;
+  color: var(--ion-color-medium-shade);
+}
+
+/* Estilo para el texto de las opciones */
+.opcion-menu .button-inner {
+  justify-content: flex-start;
+  align-items: center;
+}
