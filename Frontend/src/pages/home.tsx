@@ -96,38 +96,6 @@ const Home: React.FC = () => {
           </IonToolbar>
         </IonHeader>
         <IonGrid>
-          <IonRow className="button-row">
-            <IonCol>
-              <IonButton
-                className="custom-button"
-                expand="block"
-                onClick={navegarARegistroTutor}
-                style={{ margin: "10px 0" }}
-              >
-                <IonIcon
-                  className="button-icon"
-                  slot="start"
-                  icon={personAddOutline}
-                ></IonIcon>
-                Registro Tutor
-              </IonButton>
-            </IonCol>
-            <IonCol>
-              <IonButton
-                className="custom-button"
-                expand="block"
-                onClick={navegarARegistroPaciente}
-                style={{ margin: "10px 0" }}
-              >
-                <IonIcon
-                  className="button-icon"
-                  slot="start"
-                  icon={pawOutline}
-                ></IonIcon>
-                Registro Paciente
-              </IonButton>
-            </IonCol>
-          </IonRow>
           {/* Recuadro de últimos tutores registrados */}
           <IonRow>
             <IonCol>

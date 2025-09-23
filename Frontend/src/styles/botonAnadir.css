@@ -59,16 +59,19 @@
   height: 5rem;
 }
 
-/* Estilos para el popover con backdrop atenuado */
+/* Estilos para el popover usando opacidad en lugar de rgba */
 ion-popover::part(backdrop) {
-  background: rgba(
-    0,
-    0,
-    0,
-    0.4
-  ) !important; /* Fondo semi-transparente para atenuar */
-  backdrop-filter: blur(0.125rem); /* Efecto de desenfoque opcional */
+  background: #000000 !important;
+  opacity: 0.2 !important; /* Controla la intensidad del oscurecimiento */
+  backdrop-filter: none;
 }
+
+/* Alternativa con el color de la barra lateral usando opacidad */
+/* ion-popover::part(backdrop) {
+  background: #ddcfe4 !important;
+  opacity: 0.6 !important;
+  backdrop-filter: none;
+} */
 
 ion-popover::part(content) {
   background: transparent !important;
@@ -86,9 +89,9 @@ ion-popover::part(content) {
 }
 
 .opcion-menu {
-  --color: var(--ion-color-dark);
-  --background: white;
-  margin: 1.5em 0; /* ← ESTE ES EL VALOR QUE CONTROLA EL PADDING ENTRE OPCIONES */
+  --color: white;
+  --background: #c757c0;
+  margin: 1.5em 0;
   text-align: left;
   justify-content: flex-start;
   --border-radius: 2rem;
@@ -100,6 +103,15 @@ ion-popover::part(content) {
   height: auto;
   min-height: 3rem;
   font-weight: 500;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+}
+
+.opcion-menu span {
+  flex: 1;
+  text-align: left;
+  margin-left: 0;
 }
 
 .opcion-menu:hover {
@@ -112,7 +124,7 @@ ion-popover::part(content) {
 .opcion-menu ion-icon {
   margin-right: 0.75rem;
   font-size: 1.3rem;
-  color: var(--ion-color-medium-shade);
+  color: white;
 }
 
 /* Estilo para el texto de las opciones */
