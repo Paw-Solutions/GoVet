@@ -32,6 +32,7 @@ import {
   locationOutline,
   refreshOutline,
 } from "ionicons/icons";
+import { obtenerTutores } from "../api/tutores";
 import "../styles/verTutores.css";
 
 interface Tutor {
@@ -55,25 +56,20 @@ const VerTutores: React.FC = () => {
   const [error, setError] = useState("");
   const [busqueda, setBusqueda] = useState("");
 
-  // Función para cargar todos los tutores
-  const cargarTutores = async () => {
-    try {
-      setLoading(true);
-      setError("");
-      const response = await fetch(`${API_URL}/tutores/`);
+  const handleGetTutores = async () => {
+    setLoading(true);
+    setError("");
 
-      if (response.ok) {
-        const data = await response.json();
-        setTutores(data);
-        setTutoresFiltrados(data);
-      } else {
-        setError("Error al cargar los tutores");
-      }
+    try {
+      const data = await obtenerTutores();
+      console.log("Iniciando petición para obtener tutores...");
+      setTutores(data);
+      setTutoresFiltrados(data);
     } catch (error) {
-      setError("Error de conexión al cargar tutores");
-      console.error("Error:", error);
+        setError("Error de conexión al cargar tutores");
+        console.error("Error:", error);
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
   };
 
@@ -107,13 +103,13 @@ const VerTutores: React.FC = () => {
 
   // Función para manejar el refresh
   const handleRefresh = async (event: CustomEvent) => {
-    await cargarTutores();
+    await handleGetTutores();
     event.detail.complete();
   };
 
   // Cargar tutores al montar el componente
   useEffect(() => {
-    cargarTutores();
+    handleGetTutores();
   }, []);
 
   // Función para formatear el teléfono
@@ -131,7 +127,7 @@ const VerTutores: React.FC = () => {
           </IonButtons>
           <IonTitle>Ver Tutores</IonTitle>
           <IonButtons slot="end">
-            <IonButton onClick={cargarTutores} disabled={loading}>
+            <IonButton onClick={handleGetTutores} disabled={loading}>
               <IonIcon icon={refreshOutline} />
             </IonButton>
           </IonButtons>
@@ -179,7 +175,7 @@ const VerTutores: React.FC = () => {
               </IonText>
               <IonButton
                 fill="outline"
-                onClick={cargarTutores}
+                onClick={handleGetTutores}
                 className="retry-button"
               >
                 <IonIcon icon={refreshOutline} slot="start" />

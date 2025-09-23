@@ -227,7 +227,7 @@ const RegistroPaciente: React.FC = () => {
                     name="nombre"
                     label="Nombre"
                     type="text"
-                    labelPlacement="floating"
+                    labelPlacement="stacked"
                     fill="outline"
                     placeholder="Ej: copito"
                     value={formData.nombre}
@@ -245,7 +245,7 @@ const RegistroPaciente: React.FC = () => {
                 <IonItem lines="none" className="searchbar-container">
                   <IonInput
                     label="Especie"
-                    labelPlacement="floating"
+                    labelPlacement="stacked"
                     fill="outline"
                     placeholder="Buscar especie..."
                     value={especieQuery}
@@ -294,7 +294,7 @@ const RegistroPaciente: React.FC = () => {
                 <IonItem lines="none" className="searchbar-container">
                   <IonInput
                     label="Raza"
-                    labelPlacement="floating"
+                    labelPlacement="stacked"
                     fill="outline"
                     placeholder={
                       formData.especie
@@ -356,7 +356,7 @@ const RegistroPaciente: React.FC = () => {
                     name="color"
                     label="Color"
                     type="text"
-                    labelPlacement="floating"
+                    labelPlacement="stacked"
                     fill="outline"
                     placeholder="Ej: Naranja demoniaco"
                     value={formData.color}
@@ -394,7 +394,7 @@ const RegistroPaciente: React.FC = () => {
                     name="fechaNacimiento"
                     label="Fecha de nacimiento"
                     type="date"
-                    labelPlacement="floating"
+                    labelPlacement="stacked"
                     fill="outline"
                     placeholder="Ej: dd-mm-aaaa"
                     value={formData.fechaNacimiento}

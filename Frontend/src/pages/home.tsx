@@ -95,7 +95,6 @@ const Home: React.FC = () => {
         <IonGrid>
           <IonRow className="button-row">
             <IonCol>
-              <IonItem>
               <IonButton
                 className="custom-button"
                 expand="block"
@@ -109,7 +108,6 @@ const Home: React.FC = () => {
                 ></IonIcon>
                 Registro Tutor
               </IonButton>
-              </IonItem>
             </IonCol>
             <IonCol>
               <IonButton
@@ -184,19 +182,6 @@ const Home: React.FC = () => {
                   >
                     <IonIcon icon={timeOutline} slot="start" />
                     Actualizar
-                  </IonButton>
-                  <IonButton
-                    className="custom-button"
-                    expand="block"
-                    onClick={navegarARegistroTutor}
-                    style={{ margin: "10px 0" }}
-                  >
-                    <IonIcon
-                      className="button-icon"
-                      slot="start"
-                      icon={personAddOutline}
-                    ></IonIcon>
-                    Registro Tutor
                   </IonButton>
                 </IonCardContent>
               </IonCard>
