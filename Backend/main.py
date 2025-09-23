@@ -1,5 +1,5 @@
 from datetime import date
-from sqlalchemy import create_engine, between, or_, func
+from sqlalchemy import create_engine, between, or_, func, desc
 from sqlalchemy.orm import Session, sessionmaker
 from schemas import (
     PacienteBase, PacienteCreate, PacienteResponse,
@@ -245,7 +245,7 @@ def obtener_consulta_por_id(id_consulta: int, db: Session = Depends(get_db)):
 # Ruta GET para obtener todas las consultas
 @app.get("/consultas/", response_model=List[ConsultaResponse])
 def obtener_todas_las_consultas(db: Session = Depends(get_db)):
-    db_consultas = db.query(models.Consulta).all()
+    db_consultas = db.query(models.Consulta).order_by(desc(models.Consulta.fecha_consulta)).all()
     if not db_consultas:
         raise HTTPException(status_code=404, detail="No se encontraron consultas")
     return db_consultas
@@ -253,7 +253,7 @@ def obtener_todas_las_consultas(db: Session = Depends(get_db)):
 # Ruta GET para obtener consultas por nombre de paciente
 @app.get("/consultas/paciente/{nombre_paciente}", response_model=List[ConsultaResponse])
 def obtener_consultas_por_nombre_paciente(nombre_paciente: str, db: Session = Depends(get_db)):
-    db_consultas = db.query(models.Consulta).join(models.Paciente).filter(models.Paciente.nombre.ilike(f"%{nombre_paciente}%")).all()
+    db_consultas = db.query(models.Consulta).join(models.Paciente).filter(models.Paciente.nombre.ilike(f"%{nombre_paciente}%")).order_by(desc(models.Consulta.fecha_consulta)).all()
     if not db_consultas:
         raise HTTPException(status_code=404, detail="No se encontraron consultas para ese paciente")
     return db_consultas
@@ -299,7 +299,7 @@ def crear_consulta_tratamiento(consulta_tratamiento: consultaTratamientoBase, db
 # Ruta GET para obtener todos los registros de consulta_tratamiento
 @app.get("/consultas_tratamientos/", response_model=List[consultaTratamientoResponse])
 def obtener_todas_las_consultas_tratamiento(db: Session = Depends(get_db)):
-    db_consultas_tratamiento = db.query(models.ConsultaTratamiento).all()
+    db_consultas_tratamiento = db.query(models.ConsultaTratamiento).order_by(desc(models.ConsultaTratamiento.fecha_tratamiento)).all()
     if not db_consultas_tratamiento:
         raise HTTPException(status_code=404, detail="No se encontraron tratamientos asociados a consultas")
     return db_consultas_tratamiento
@@ -307,7 +307,7 @@ def obtener_todas_las_consultas_tratamiento(db: Session = Depends(get_db)):
 # Ruta GET para obtener registros de consulta_tratamiento por nombre de paciente
 @app.get("/consultas_tratamientos/paciente/{nombre_paciente}", response_model=List[consultaTratamientoResponse])
 def obtener_consultas_tratamiento_por_nombre_paciente(nombre_paciente: str, db: Session = Depends(get_db)):
-    db_consultas_tratamiento = db.query(models.ConsultaTratamiento).join(models.Paciente).filter(models.Paciente.nombre.ilike(f"%{nombre_paciente}%")).all()
+    db_consultas_tratamiento = db.query(models.ConsultaTratamiento).join(models.Paciente).filter(models.Paciente.nombre.ilike(f"%{nombre_paciente}%")).order_by(desc(models.ConsultaTratamiento.fecha_tratamiento)).all()
     if not db_consultas_tratamiento:
         raise HTTPException(status_code=404, detail="No se encontraron tratamientos para ese paciente")
     return db_consultas_tratamiento
