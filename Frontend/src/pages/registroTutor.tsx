@@ -26,15 +26,12 @@ import "../styles/registroTutor.css";
 import InputTelefono, { InputTelefonoHandle } from "../components/inputTelefono";
 import InputRut, { InputRutHandle } from "../components/inputRut";
 import { Input } from "postcss";
-import { crearTutor } from "../api/registros/tutoresApi";
+import { crearTutor } from "../api/tutores";
 
 
 // Estado para mostrar mensaje de éxito/error (temporal)
 
 const RegistroTutor: React.FC = () => {
-  const API_URL = import.meta.env.VITE_API_URL; // usa tu variable de entorno
-
-  console.log(`${API_URL}`);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
