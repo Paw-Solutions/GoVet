@@ -11,112 +11,111 @@ import {
   IonList,
   IonItem,
   IonLabel,
-  IonCard,
-  IonCardHeader,
-  IonCardTitle,
-  IonCardContent,
   IonSpinner,
   IonText,
-  IonGrid,
-  IonRow,
-  IonCol,
   IonIcon,
   IonButton,
   IonRefresher,
   IonRefresherContent,
+  IonInfiniteScroll,
+  IonInfiniteScrollContent,
 } from "@ionic/react";
 import {
   personOutline,
-  mailOutline,
-  callOutline,
-  locationOutline,
   refreshOutline,
 } from "ionicons/icons";
-import { obtenerTutores } from "../api/tutores";
+import { TutorData } from "../api/tutores";
+import { obtenerTutoresPaginados } from "../components/listaTutores";
 import "../styles/verTutores.css";
 
-interface Tutor {
-  rut: string;
-  nombre: string;
-  apellido_paterno: string;
-  apellido_materno?: string;
-  direccion?: string;
-  telefono?: number;
-  celular?: number;
-  comuna?: string;
-  region?: string;
-  email?: string;
+interface PaginatedResponse {
+  tutores: TutorData[];
+  pagination: {
+    current_page: number;
+    total_pages: number;
+    total_count: number;
+    limit: number;
+    has_next: boolean;
+    has_previous: boolean;
+    next_page: number | null;
+    previous_page: number | null;
+  };
 }
 
 const VerTutores: React.FC = () => {
-  const API_URL = import.meta.env.VITE_API_URL; // usa tu variable de entorno
-  const [tutores, setTutores] = useState<Tutor[]>([]);
-  const [tutoresFiltrados, setTutoresFiltrados] = useState<Tutor[]>([]);
+  const [tutores, setTutores] = useState<TutorData[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [busqueda, setBusqueda] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMoreData, setHasMoreData] = useState(true);
+  const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
 
-  const handleGetTutores = async () => {
+  // Función para cargar tutores (inicial o búsqueda)
+  const handleGetTutores = async (resetList: boolean = true, search?: string) => {
     setLoading(true);
     setError("");
 
     try {
-      const data = await obtenerTutores();
-      console.log("Iniciando petición para obtener tutores...");
-      setTutores(data);
-      setTutoresFiltrados(data);
+      const page = resetList ? 1 : currentPage + 1;
+      const data: PaginatedResponse = await obtenerTutoresPaginados(page, 50, search);
+      
+      if (resetList) {
+        setTutores(data.tutores);
+        setCurrentPage(1);
+      } else {
+        setTutores(prev => [...prev, ...data.tutores]);
+        setCurrentPage(page);
+      }
+      
+      setHasMoreData(data.pagination.has_next);
     } catch (error) {
-        setError("Error de conexión al cargar tutores");
-        console.error("Error:", error);
+      setError("Error de conexión al cargar tutores");
+      console.error("Error:", error);
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
   };
 
-  // Función para filtrar tutores
-  const filtrarTutores = (texto: string) => {
+  // Función para manejar búsqueda con debounce
+  const handleSearch = (texto: string) => {
     setBusqueda(texto);
-    if (!texto.trim()) {
-      setTutoresFiltrados(tutores);
-      return;
+    
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
     }
+    
+    const timeout = setTimeout(() => {
+      handleGetTutores(true, texto.trim() || undefined);
+    }, 500);
+    
+    setSearchTimeout(timeout);
+  };
 
-    const textoLower = texto.toLowerCase();
-    const filtrados = tutores.filter((tutor) => {
-      const nombreCompleto = `${tutor.nombre} ${tutor.apellido_paterno} ${
-        tutor.apellido_materno || ""
-      }`.toLowerCase();
-      const rut = tutor.rut.toLowerCase();
-      const email = tutor.email?.toLowerCase() || "";
-      const comuna = tutor.comuna?.toLowerCase() || "";
-
-      return (
-        nombreCompleto.includes(textoLower) ||
-        rut.includes(textoLower) ||
-        email.includes(textoLower) ||
-        comuna.includes(textoLower)
-      );
-    });
-
-    setTutoresFiltrados(filtrados);
+  // Función para cargar más datos (scroll infinito)
+  const loadMoreData = async (event: CustomEvent) => {
+    if (hasMoreData && !loading) {
+      await handleGetTutores(false, busqueda.trim() || undefined);
+    }
+    (event.target as HTMLIonInfiniteScrollElement).complete();
   };
 
   // Función para manejar el refresh
   const handleRefresh = async (event: CustomEvent) => {
-    await handleGetTutores();
+    await handleGetTutores(true, busqueda.trim() || undefined);
     event.detail.complete();
   };
 
   // Cargar tutores al montar el componente
   useEffect(() => {
     handleGetTutores();
+    
+    return () => {
+      if (searchTimeout) {
+        clearTimeout(searchTimeout);
+      }
+    };
   }, []);
-
-  // Función para formatear el teléfono
-  const formatearTelefono = (telefono?: number) => {
-    if (!telefono) return "No disponible";
-    return telefono.toString();
-  };
 
   return (
     <IonPage>
@@ -127,7 +126,7 @@ const VerTutores: React.FC = () => {
           </IonButtons>
           <IonTitle>Ver Tutores</IonTitle>
           <IonButtons slot="end">
-            <IonButton onClick={handleGetTutores} disabled={loading}>
+            <IonButton onClick={() => handleGetTutores(true, busqueda.trim() || undefined)} disabled={loading}>
               <IonIcon icon={refreshOutline} />
             </IonButton>
           </IonButtons>
@@ -150,15 +149,15 @@ const VerTutores: React.FC = () => {
           <div className="search-container">
             <IonSearchbar
               value={busqueda}
-              onIonInput={(e) => filtrarTutores(e.detail.value!)}
-              placeholder="Buscar por nombre, RUT o comuna..."
+              onIonInput={(e) => handleSearch(e.detail.value!)}
+              placeholder="Buscar por nombre, apellido, RUT o email..."
               showClearButton="focus"
               className="tutores-searchbar"
             />
           </div>
 
-          {/* Estado de carga */}
-          {loading && (
+          {/* Estado de carga inicial */}
+          {loading && tutores.length === 0 && (
             <div className="loading-container">
               <IonSpinner />
               <IonText>
@@ -175,7 +174,7 @@ const VerTutores: React.FC = () => {
               </IonText>
               <IonButton
                 fill="outline"
-                onClick={handleGetTutores}
+                onClick={() => handleGetTutores(true, busqueda.trim() || undefined)}
                 className="retry-button"
               >
                 <IonIcon icon={refreshOutline} slot="start" />
@@ -184,115 +183,59 @@ const VerTutores: React.FC = () => {
             </div>
           )}
 
-          {/* Lista de tutores */}
-          {!loading && !error && (
+          {/* Lista infinita de tutores */}
+          {!loading && !error && tutores.length === 0 ? (
+            <div className="no-results">
+              <IonText>
+                <h3>No se encontraron tutores</h3>
+                <p>
+                  {busqueda
+                    ? `No hay tutores que coincidan con "${busqueda}"`
+                    : "No hay tutores registrados aún"}
+                </p>
+              </IonText>
+            </div>
+          ) : (
             <>
               {/* Contador de resultados */}
               <div className="results-counter">
                 <IonText>
                   <p>
-                    {tutoresFiltrados.length} tutor
-                    {tutoresFiltrados.length !== 1 ? "es" : ""}
-                    {busqueda &&
-                      ` encontrado${
-                        tutoresFiltrados.length !== 1 ? "s" : ""
-                      } para "${busqueda}"`}
+                    {tutores.length} tutor{tutores.length !== 1 ? "es" : ""} cargado{tutores.length !== 1 ? "s" : ""}
+                    {busqueda && ` para "${busqueda}"`}
+                    {hasMoreData && " (desliza hacia abajo para cargar más)"}
                   </p>
                 </IonText>
               </div>
 
-              {/* Tarjetas de tutores */}
-              {tutoresFiltrados.length > 0 ? (
-                <IonList className="tutores-list">
-                  {tutoresFiltrados.map((tutor) => (
-                    <IonCard key={tutor.rut} className="tutor-card">
-                      <IonCardHeader className="tutor-card-header">
-                        <IonCardTitle className="tutor-name">
-                          <IonIcon
-                            icon={personOutline}
-                            className="tutor-icon"
-                          />
-                          {tutor.nombre} {tutor.apellido_paterno}{" "}
-                          {tutor.apellido_materno}
-                        </IonCardTitle>
-                      </IonCardHeader>
+              {/* Lista simple de tutores */}
+              <IonList className="tutores-list">
+                {tutores.map((tutor, index) => (
+                  <IonItem key={`${tutor.rut}-${index}`} button lines="full">
+                    <IonIcon icon={personOutline} slot="start" />
+                    <IonLabel>
+                      <h2>{tutor.nombre} {tutor.apellido_paterno} {tutor.apellido_materno}</h2>
+                      <p><strong>RUT:</strong> {tutor.rut}</p>
+                      {tutor.email && <p><strong>Email:</strong> {tutor.email}</p>}
+                      {tutor.comuna && tutor.region && (
+                        <p><strong>Ubicación:</strong> {tutor.comuna}, {tutor.region}</p>
+                      )}
+                    </IonLabel>
+                  </IonItem>
+                ))}
+              </IonList>
 
-                      <IonCardContent className="tutor-card-content">
-                        <IonGrid>
-                          <IonRow>
-                            <IonCol size="12" size-md="6">
-                              <div className="tutor-info-item">
-                                <strong>RUT:</strong> {tutor.rut}
-                              </div>
-                              {tutor.email && (
-                                <div className="tutor-info-item">
-                                  <IonIcon
-                                    icon={mailOutline}
-                                    className="info-icon"
-                                  />
-                                  <strong>Email:</strong> {tutor.email}
-                                </div>
-                              )}
-                              {tutor.telefono && (
-                                <div className="tutor-info-item">
-                                  <IonIcon
-                                    icon={callOutline}
-                                    className="info-icon"
-                                  />
-                                  <strong>Teléfono:</strong>{" "}
-                                  {formatearTelefono(tutor.telefono)}
-                                </div>
-                              )}
-                            </IonCol>
-                            <IonCol size="12" size-md="6">
-                              {tutor.celular && (
-                                <div className="tutor-info-item">
-                                  <IonIcon
-                                    icon={callOutline}
-                                    className="info-icon"
-                                  />
-                                  <strong>Celular:</strong>{" "}
-                                  {formatearTelefono(tutor.celular)}
-                                </div>
-                              )}
-                              {tutor.direccion && (
-                                <div className="tutor-info-item">
-                                  <IonIcon
-                                    icon={locationOutline}
-                                    className="info-icon"
-                                  />
-                                  <strong>Dirección:</strong> {tutor.direccion}
-                                </div>
-                              )}
-                              {tutor.comuna && tutor.region && (
-                                <div className="tutor-info-item">
-                                  <IonIcon
-                                    icon={locationOutline}
-                                    className="info-icon"
-                                  />
-                                  <strong>Ubicación:</strong> {tutor.comuna},{" "}
-                                  {tutor.region}
-                                </div>
-                              )}
-                            </IonCol>
-                          </IonRow>
-                        </IonGrid>
-                      </IonCardContent>
-                    </IonCard>
-                  ))}
-                </IonList>
-              ) : (
-                <div className="no-results">
-                  <IonText>
-                    <h3>No se encontraron tutores</h3>
-                    <p>
-                      {busqueda
-                        ? `No hay tutores que coincidan con "${busqueda}"`
-                        : "No hay tutores registrados aún"}
-                    </p>
-                  </IonText>
-                </div>
-              )}
+              {/* Scroll infinito */}
+              <IonInfiniteScroll
+                onIonInfinite={loadMoreData}
+                threshold="100px"
+                disabled={!hasMoreData}
+              >
+                <IonInfiniteScrollContent
+                  loadingSpinner="bubbles"
+                  loadingText="Cargando más tutores..."
+                />
+              </IonInfiniteScroll>
             </>
           )}
         </div>

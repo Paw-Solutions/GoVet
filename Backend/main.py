@@ -11,12 +11,12 @@ from schemas import (
     consultaTratamientoBase, consultaTratamientoCreate, consultaTratamientoResponse,
     ConsultaBase, ConsultaCreate, ConsultaResponse
 )
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, Query
 from pydantic import BaseModel
 from database import Base, engine
 import models # Donde están las tablas de la base de datos
 from fastapi.middleware.cors import CORSMiddleware
-from typing import List, Annotated
+from typing import List, Annotated, Optional
 from database import engine, SessionLocal
 from dotenv import load_dotenv
 import os
@@ -77,6 +77,53 @@ def obtener_todos_los_tutores(db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="No se encontraron tutores")
     return db_tutores
 
+# Ruta GET para obtener tutores con paginación
+# Opción alternativa más corta
+@app.get("/tutores/paginated/")
+def obtener_tutores_paginados(
+    page: int = Query(1, ge=1),
+    limit: int = Query(50, ge=1, le=100),
+    search: Optional[str] = Query(None),
+    db: Session = Depends(get_db)
+):
+    offset = (page - 1) * limit
+    query = db.query(models.Tutor)
+    
+    if search:
+        search_pattern = f"%{search}%"
+        query = query.filter(
+            or_(
+                models.Tutor.nombre.ilike(search_pattern),
+                models.Tutor.apellido_paterno.ilike(search_pattern),
+                models.Tutor.apellido_materno.ilike(search_pattern),
+                models.Tutor.rut.ilike(search_pattern),
+                models.Tutor.email.ilike(search_pattern)
+            )
+        )
+    
+    total_count = query.count()
+    tutores_db = query.order_by(models.Tutor.rut).offset(offset).limit(limit).all()
+    
+    total_pages = (total_count + limit - 1) // limit
+    has_next = page < total_pages
+    has_previous = page > 1
+    
+    # Usar el esquema Pydantic para convertir cada objeto
+    tutores_serializados = [TutorResponse.model_validate(tutor).model_dump() for tutor in tutores_db]
+    
+    return {
+        "tutores": tutores_serializados,
+        "pagination": {
+            "current_page": page,
+            "total_pages": total_pages,
+            "total_count": total_count,
+            "limit": limit,
+            "has_next": has_next,
+            "has_previous": has_previous,
+            "next_page": page + 1 if has_next else None,
+            "previous_page": page - 1 if has_previous else None
+        }
+    }
 
 # HU 3: Como Veterinaria, quiero poder almacenar el paciente por su nombre y raza para indentificarlos y buscarlos facilmente
 """ RUTAS PARA PACIENTES (mascotas) """

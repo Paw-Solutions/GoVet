@@ -4,7 +4,7 @@ import { IonInput, IonItem, IonText } from '@ionic/react';
 import { MaskitoOptions, maskitoTransform } from '@maskito/core';
 import { useMaskito } from '@maskito/react';
 
-import '../styles/registroTutor.css';
+import '../../styles/registroTutor.css';
 
 interface InputTelefonoProps {
   onPhoneChange: (phone: string) => void;

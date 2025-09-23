@@ -9,7 +9,7 @@ class Tutor(Base):
     nombre = Column(String)
     telefono = Column(BigInteger, nullable=True) # int8
     email = Column(String, nullable=True)
-    direccion = Column(String)
+    direccion = Column(String, nullable=True)
     rut = Column(String, primary_key=True)
     apellido_paterno = Column(String, nullable=True)
     apellido_materno = Column(String, nullable=True)

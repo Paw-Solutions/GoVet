@@ -23,8 +23,8 @@ import {
   IonText,
 } from "@ionic/react";
 import "../styles/registroTutor.css";
-import InputTelefono, { InputTelefonoHandle } from "../components/inputTelefono";
-import InputRut, { InputRutHandle } from "../components/inputRut";
+import InputTelefono, { InputTelefonoHandle } from "../components/registroTutor/inputTelefono";
+import InputRut, { InputRutHandle } from "../components/registroTutor/inputRut";
 import { Input } from "postcss";
 import { crearTutor } from "../api/tutores";
 
