@@ -7,18 +7,18 @@ class Tutor(Base):
     __table_args__ = {'schema': 'govet'}
     
     nombre = Column(String)
-    telefono = Column(BigInteger) # int8
-    email = Column(String)
+    telefono = Column(BigInteger, nullable=True) # int8
+    email = Column(String, nullable=True)
     direccion = Column(String)
     rut = Column(String, primary_key=True)
-    apellido_paterno = Column(String)
-    apellido_materno = Column(String)
-    celular = Column(BigInteger)
-    celular2 = Column(BigInteger)
-    comuna = Column(String)
-    region = Column(String)
-    observacion = Column(String)
-    telefono2 = Column(BigInteger)
+    apellido_paterno = Column(String, nullable=True)
+    apellido_materno = Column(String, nullable=True)
+    celular = Column(BigInteger, nullable=True)
+    celular2 = Column(BigInteger, nullable=True)
+    comuna = Column(String, nullable=True)
+    region = Column(String, nullable=True)
+    observacion = Column(String, nullable=True)
+    telefono2 = Column(BigInteger, nullable=True)
 
     # Relaciones
     consultas = relationship("Consulta", back_populates="tutor")

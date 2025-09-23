@@ -72,13 +72,13 @@ class TutorBase(BaseModel):
     apellido_materno: Optional[str] = None
     celular: Optional[int] = None
     celular2: Optional[int] = None
-    comuna: str
-    region: str
+    comuna: Optional[str] = None
+    region: Optional[str] = None
     observacion: Optional[str] = None
-    telefono: int
+    telefono: Optional[int] = None
     telefono2: Optional[int] = None
-    direccion: str
-    email: str
+    direccion: Optional[str] = None
+    email: Optional[str] = None
 
     class Config:
         from_attributes = True
