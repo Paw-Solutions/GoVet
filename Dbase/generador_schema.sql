@@ -230,7 +230,7 @@ GRANT ALL ON TABLE govet.tratamiento TO pawsolutions;
 -- DROP TABLE govet.tutor;
 
 CREATE TABLE govet.tutor (
-	nombre varchar NULL, -- Nombre del tutor
+	nombre varchar NOT NULL, -- Nombre del tutor
 	telefono int8 NULL, -- Numero telefonico del tutor
 	email varchar NULL, -- Correo electronico del tutor
 	direccion varchar NULL, -- Direccion del tutor
@@ -278,7 +278,7 @@ GRANT ALL ON TABLE govet.tutor TO pawsolutions;
 CREATE TABLE govet.raza (
 	id_raza bigserial NOT NULL, -- Identificador de la raza del animal
 	nombre varchar NOT NULL, -- nombre de la raza
-	id_especie int8 NULL, -- identificador de la especie asociada del animal
+	id_especie int8 NOT NULL, -- identificador de la especie asociada del animal
 	CONSTRAINT raza_pk PRIMARY KEY (id_raza),
 	CONSTRAINT raza_especie_fk FOREIGN KEY (id_especie) REFERENCES govet.especie(id_especie)
 );
@@ -304,8 +304,8 @@ GRANT ALL ON TABLE govet.raza TO pawsolutions;
 
 CREATE TABLE govet.paciente (
 	id_paciente int8 DEFAULT nextval('govet.mascota_id_mascota_seq'::regclass) NOT NULL, -- identificador de la mascota
-	nombre varchar NULL, -- nombre de la mascota
-	color varchar NULL, -- color del pelaje del animal
+	nombre varchar NOT NULL, -- nombre de la mascota
+	color varchar NOT NULL, -- color del pelaje del animal
 	sexo bpchar(1) NOT NULL, -- M: Macho¶H: Hembra
 	esterilizado bool DEFAULT false NULL, -- V: si la mascota se encuentra esterelizada¶F: si no
 	fecha_nacimiento date NOT NULL, -- Fecha de nacimiento de la mascota
@@ -367,8 +367,8 @@ GRANT ALL ON TABLE govet.tutor_paciente TO pawsolutions;
 -- DROP TABLE govet.consulta;
 
 CREATE TABLE govet.consulta (
-	id_paciente int8 NULL,
-	rut varchar NULL,
+	id_paciente int8 NOT NULL,
+	rut varchar NOT NULL,
 	diagnostico varchar NULL,
 	id_consulta bigserial NOT NULL,
 	estado_pelaje varchar NULL,
