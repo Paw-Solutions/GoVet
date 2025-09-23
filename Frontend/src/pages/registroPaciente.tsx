@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
+import RegistroTutor from "./registroTutor";
 import {
+  IonModal,
   IonPage,
   IonHeader,
   IonToolbar,
@@ -22,6 +24,7 @@ import {
   IonSearchbar,
   IonToast,
   IonSpinner,
+  IonText,
 } from "@ionic/react";
 import "../styles/registroPaciente.css";
 import "../styles/main.css";
@@ -38,9 +41,11 @@ const RegistroPaciente: React.FC = () => {
     codigo_chip: "",
   });
 
+  const [showModal, setShowModal] = useState(false);
+  
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
-
+  
   // Estados para datos de la API
   const [especiesData, setEspeciesData] = useState<any[]>([]);
   const [razasData, setRazasData] = useState<any[]>([]);
@@ -230,10 +235,8 @@ const RegistroPaciente: React.FC = () => {
                 </IonItem>
               </IonCol>
             </IonRow>
-          </IonGrid>
 
           {/* Input Especie con filtro*/}
-          <IonGrid>
             <IonRow>
               <IonCol>
                 <IonItem lines="none" className="searchbar-container">
@@ -279,10 +282,8 @@ const RegistroPaciente: React.FC = () => {
                   )}
               </IonCol>
             </IonRow>
-          </IonGrid>
 
           {/* Input Raza con filtro*/}
-          <IonGrid>
             <IonRow>
               <IonCol>
                 <IonItem lines="none" className="searchbar-container">
@@ -339,10 +340,8 @@ const RegistroPaciente: React.FC = () => {
                   )}
               </IonCol>
             </IonRow>
-          </IonGrid>
 
           {/* Input Color y sexo*/}
-          <IonGrid>
             <IonRow>
               <IonCol>
                 <IonItem lines="none">
@@ -377,10 +376,8 @@ const RegistroPaciente: React.FC = () => {
                 </IonItem>
               </IonCol>
             </IonRow>
-          </IonGrid>
 
           {/* Input Fecha de nacimiento*/}
-          <IonGrid>
             <IonRow>
               <IonCol>
                 <IonItem lines="none">
@@ -398,31 +395,60 @@ const RegistroPaciente: React.FC = () => {
               </IonCol>
             </IonRow>
           </IonGrid>
-
-          {/*select de prueba */}
+          <hr style={{ border: "1px solid #ccc", margin: "16px 0" }} />
           <IonGrid>
-            <IonRow>
-              <IonCol>
-                <IonItem lines="none">
-                  <IonSelect
-                    label="Popover"
+          {/* Interfaz mini registro tutor*/}
+          <IonRow>
+            <IonCol className="ion-text-center ion-justify-content-center ion-align-items-center">
+              <IonText className="ion-text-center">
+                <IonLabel>
+                  <p style={{ fontSize: "20px", fontWeight: "bold", paddingBottom:"5px"}}>Asignar Tutor</p>
+                </IonLabel>
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        gap: '12px',
+                        textAlign: 'center'
+                      }}
+                    >
+                      <IonLabel>
+                        ¿El tutor no está?
+                      </IonLabel>
+                      <span
+                        style={{ color: '#87216c', textDecoration: 'underline', cursor: 'pointer' }}
+                        onClick={() => setShowModal(true)}
+                      >
+                        Regístralo
+                      </span>
+                    </div>
+                  <IonModal isOpen={showModal} onDidDismiss={() => setShowModal(false)}>
+                    <RegistroTutor />
+                  </IonModal>
+              </IonText>
+            </IonCol>
+              
+            
+          </IonRow>
+          <IonRow>
+            <IonCol>
+              <IonItem>
+                  <IonInput
+                    name="rut"
+                    label="Rut"
+                    labelPlacement="stacked"
                     fill="outline"
-                    interface="popover"
-                    placeholder="Select One"
-                  >
-                    <IonSelectOption value="brown">Brown</IonSelectOption>
-                    <IonSelectOption value="blonde">Blonde</IonSelectOption>
-                    <IonSelectOption value="red">Red</IonSelectOption>
-                  </IonSelect>
-                </IonItem>
-              </IonCol>
-            </IonRow>
-          </IonGrid>
+                    placeholder="Ej: 12345678-9"
+                  ></IonInput>
+                  </IonItem>
+                </IonCol>
+          </IonRow>
 
           {/* Botón Registrar */}
-          <IonGrid>
-            <IonRow>
-              <IonCol className="ion-text-center">
+          </IonGrid>
+        </IonList>
+        <IonToolbar>
                 <IonButton
                   className="custom-button"
                   expand="block"
@@ -430,10 +456,7 @@ const RegistroPaciente: React.FC = () => {
                 >
                   Registrar paciente
                 </IonButton>
-              </IonCol>
-            </IonRow>
-          </IonGrid>
-        </IonList>
+        </IonToolbar>
         <IonToast
           isOpen={showToast}
           onDidDismiss={() => setShowToast(false)}
