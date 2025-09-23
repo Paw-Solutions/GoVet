@@ -25,6 +25,7 @@ import {
 } from "@ionic/react";
 import "../styles/registroPaciente.css";
 import "../styles/main.css";
+import { obtenerEspecies, obtenerRazas } from "../api/especies";
 
 const RegistroPaciente: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -34,6 +35,7 @@ const RegistroPaciente: React.FC = () => {
     sexo: "",
     color: "",
     fechaNacimiento: "",
+    codigo_chip: "",
   });
 
   const [showToast, setShowToast] = useState(false);
@@ -52,17 +54,12 @@ const RegistroPaciente: React.FC = () => {
   const [showRazaList, setShowRazaList] = useState(false);
 
   // Función para cargar especies desde la API
-  const cargarEspecies = async () => {
+  const handleCargarEspecies = async () => {
+    setLoadingEspecies(true);
     try {
-      setLoadingEspecies(true);
-      const response = await fetch("http://localhost:8000/especies/");
-      if (response.ok) {
-        const especies = await response.json();
-        setEspeciesData(especies);
-      } else {
-        setToastMessage("Error al cargar especies");
-        setShowToast(true);
-      }
+      const especies = await obtenerEspecies();
+      console.log("Iniciando petición para obtener especies...");
+      setEspeciesData(especies);
     } catch (error) {
       setToastMessage("Error de conexión al cargar especies");
       setShowToast(true);
@@ -71,21 +68,22 @@ const RegistroPaciente: React.FC = () => {
     }
   };
 
-  // Función para cargar razas por especie
-  const cargarRazasPorEspecie = async (nombreEspecie: string) => {
+  const handleCargarRazas = async (nombreEspecie: string) => {
+    console.log("Cargando razas...");
+    setLoadingRazas(true);
     try {
-      setLoadingRazas(true);
-      const response = await fetch(
-        `http://localhost:8000/razas/especie/${nombreEspecie}`
-      );
-      if (response.ok) {
-        const razas = await response.json();
+      const razas = await obtenerRazas(nombreEspecie);
+      if (razas) {
         setRazasData(razas);
       } else {
         setRazasData([]);
       }
+      console.log("Razas cargadas:", razas);
     } catch (error) {
+      console.log("Error cargando razas:", error);
       setRazasData([]);
+      setToastMessage("Error de conexión al cargar razas");
+      setShowToast(true);
     } finally {
       setLoadingRazas(false);
     }
@@ -93,7 +91,7 @@ const RegistroPaciente: React.FC = () => {
 
   // Cargar especies al montar el componente
   useEffect(() => {
-    cargarEspecies();
+    handleCargarEspecies();
   }, []);
 
   // Cargar razas cuando cambia la especie seleccionada
@@ -103,7 +101,8 @@ const RegistroPaciente: React.FC = () => {
         (esp) => esp.id_especie === parseInt(formData.especie)
       );
       if (especieSeleccionada) {
-        cargarRazasPorEspecie(especieSeleccionada.nombre_comun);
+        console.log("Especie encontrada:", especieSeleccionada, ".Cargando razas...");
+        handleCargarRazas(especieSeleccionada.nombre_comun);
       }
     } else {
       setRazasData([]);
@@ -164,16 +163,10 @@ const RegistroPaciente: React.FC = () => {
         sexo: formData.sexo,
         color: formData.color,
         fecha_nacimiento: formData.fechaNacimiento,
+        codigo_chip: "", // Asumiendo que el código de chip es opcional y no se ingresa en este formulario
       };
 
-      const response = await fetch("http://localhost:8000/pacientes/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(pacienteData),
-      });
-
+      const response = await obtenerEspecies();
       if (response.ok) {
         setToastMessage("Paciente registrado exitosamente");
         // Limpiar formulario
@@ -184,6 +177,7 @@ const RegistroPaciente: React.FC = () => {
           sexo: "",
           color: "",
           fechaNacimiento: "",
+          codigo_chip: "",
         });
         setEspecieQuery("");
         setRazaQuery("");
