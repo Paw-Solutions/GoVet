@@ -7,7 +7,7 @@ from datetime import date
 # No incluye el id_paciente, que es generado automáticamente por la base de datos al momento de hacer el commit.
 class PacienteBase(BaseModel):
     nombre: str 
-    color: Optional[str] = None 
+    color: str
     sexo: str
     esterilizado: Optional[bool] = None
     fecha_nacimiento: date
@@ -132,7 +132,7 @@ class TratamientoResponse(TratamientoBase):
 
 # --------------------------------------------------------------
 class consultaTratamientoBase(BaseModel):
-    id_consulta: int
+    id_consulta: Optional[int] = None
     id_tratamiento: int
     id_paciente: int
     dosis: str
