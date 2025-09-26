@@ -21,7 +21,7 @@ export interface TutorData {
 export async function crearTutor(formData: TutorData) {
   try {
     console.log("Enviando datos al servidor:", formData);
-    const response = await fetch(`${API_URL}/tutores`, {
+    const response = await fetch(`${API_URL}/tutores/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -46,7 +46,7 @@ export async function crearTutor(formData: TutorData) {
 export async function obtenerTutores() {
   try {
     console.log("Obteniendo tutores del servidor...");
-    const response = await fetch(`${API_URL}/tutores`, {
+    const response = await fetch(`${API_URL}/tutores/`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

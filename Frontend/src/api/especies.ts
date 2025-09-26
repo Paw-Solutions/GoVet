@@ -5,7 +5,7 @@ const API_URL = import.meta.env.VITE_API_URL; // usa tu variable de entorno
 export async function obtenerEspecies() {
   try {
     console.log("Obteniendo especies...");
-    const response = await fetch(`${API_URL}/especies`, {
+    const response = await fetch(`${API_URL}/especies/`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

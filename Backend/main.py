@@ -20,11 +20,15 @@ from typing import List, Annotated, Optional
 from database import engine, SessionLocal
 from dotenv import load_dotenv
 import os
+from prefix_middleware import StripAPIPrefixMiddleware
 
 # Cargar variables de entorno desde el archivo .env
 load_dotenv()
 
 app = FastAPI()
+
+app.add_middleware(StripAPIPrefixMiddleware)
+
 
 # CORS
 allowed_origins = os.getenv("ALLOWED_ORIGINS", "").split(",")
