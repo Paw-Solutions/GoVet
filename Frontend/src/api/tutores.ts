@@ -17,7 +17,7 @@ export interface TutorData {
   email: string;
 }
 
-{/* Ruta para crear un nuevo tutor */}
+// Ruta para crear un nuevo tutor
 export async function crearTutor(formData: TutorData) {
   try {
     console.log("Enviando datos al servidor:", formData);
@@ -42,7 +42,7 @@ export async function crearTutor(formData: TutorData) {
   }
 }
 
-{/* Ruta para obtener todos los tutores */}
+// Ruta para obtener todos los tutores
 export async function obtenerTutores() {
   try {
     console.log("Obteniendo tutores del servidor...");

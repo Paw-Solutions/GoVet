@@ -209,5 +209,5 @@ ion-row.button-row {
 .footer-right {
   display: flex;
   justify-content: flex-end;
-  padding: 16px;
+  padding: 1rem;
 }

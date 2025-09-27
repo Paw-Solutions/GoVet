@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import RegistroTutor from "./registroTutor";
+import React, { useState } from "react";
 import {
   IonModal,
   IonPage,
@@ -11,194 +10,76 @@ import {
   IonItem,
   IonLabel,
   IonInput,
-  IonSelect,
-  IonSelectOption,
-  IonRadioGroup,
-  IonRadio,
   IonButton,
   IonButtons,
   IonMenuButton,
   IonGrid,
   IonRow,
   IonCol,
-  IonSearchbar,
   IonToast,
   IonSpinner,
   IonText,
+  IonRadioGroup,
+  IonRadio,
 } from "@ionic/react";
 import "../styles/registroPaciente.css";
 import "../styles/main.css";
-import { obtenerEspecies, obtenerRazas } from "../api/especies";
+import { useRegistroPaciente } from "../hooks/useRegistroPaciente";
+import { SelectorEspecie } from "../components/registroPaciente/SelectorEspecie";
+import { SelectorRaza } from "../components/registroPaciente/SelectorRaza";
+import RegistroTutor from "./registroTutor";
 
 const RegistroPaciente: React.FC = () => {
-  const [formData, setFormData] = useState({
-    nombre: "",
-    especie: "",
-    raza: "",
-    sexo: "",
-    color: "",
-    fechaNacimiento: "",
-    codigo_chip: "",
-  });
-
   const [showModal, setShowModal] = useState(false);
-  
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState("");
-  
-  // Estados para datos de la API
-  const [especiesData, setEspeciesData] = useState<any[]>([]);
-  const [razasData, setRazasData] = useState<any[]>([]);
-  const [loadingEspecies, setLoadingEspecies] = useState(false);
-  const [loadingRazas, setLoadingRazas] = useState(false);
 
-  // Estados para el filtrado
-  const [especieQuery, setEspecieQuery] = useState("");
-  const [razaQuery, setRazaQuery] = useState("");
-  const [showEspecieList, setShowEspecieList] = useState(false);
-  const [showRazaList, setShowRazaList] = useState(false);
+  const {
+    formData,
+    setFormData,
+    especiesData,
+    razasData,
+    loadingEspecies,
+    loadingRazas,
+    initialLoading,
+    especieQuery,
+    razaQuery,
+    showEspecieList,
+    showRazaList,
+    showToast,
+    toastMessage,
+    setEspecieQuery,
+    setRazaQuery,
+    setShowEspecieList,
+    setShowRazaList,
+    setShowToast,
+    handleInputChange,
+    selectEspecie,
+    selectRaza,
+    registraPaciente,
+  } = useRegistroPaciente();
 
-  // Función para cargar especies desde la API
-  const handleCargarEspecies = async () => {
-    setLoadingEspecies(true);
-    try {
-      const especies = await obtenerEspecies();
-      console.log("Iniciando petición para obtener especies...");
-      setEspeciesData(especies);
-    } catch (error) {
-      setToastMessage("Error de conexión al cargar especies");
-      setShowToast(true);
-    } finally {
-      setLoadingEspecies(false);
-    }
-  };
-
-  const handleCargarRazas = async (nombreEspecie: string) => {
-    console.log("Cargando razas...");
-    setLoadingRazas(true);
-    try {
-      const razas = await obtenerRazas(nombreEspecie);
-      if (razas) {
-        setRazasData(razas);
-      } else {
-        setRazasData([]);
-      }
-      console.log("Razas cargadas:", razas);
-    } catch (error) {
-      console.log("Error cargando razas:", error);
-      setRazasData([]);
-      setToastMessage("Error de conexión al cargar razas");
-      setShowToast(true);
-    } finally {
-      setLoadingRazas(false);
-    }
-  };
-
-  // Cargar especies al montar el componente
-  useEffect(() => {
-    handleCargarEspecies();
-  }, []);
-
-  // Cargar razas cuando cambia la especie seleccionada
-  useEffect(() => {
-    if (formData.especie) {
-      const especieSeleccionada = especiesData.find(
-        (esp) => esp.id_especie === parseInt(formData.especie)
-      );
-      if (especieSeleccionada) {
-        console.log("Especie encontrada:", especieSeleccionada, ".Cargando razas...");
-        handleCargarRazas(especieSeleccionada.nombre_comun);
-      }
-    } else {
-      setRazasData([]);
-    }
-  }, [formData.especie, especiesData]);
-
-  // Filtrar especies
+  // Filtros
   const filteredEspecies = especiesData
     .filter((especie) =>
       especie.nombre_comun.toLowerCase().includes(especieQuery.toLowerCase())
     )
-    .slice(0, 4); // Limitar a 4 resultados
+    .slice(0, 4);
 
-  // Filtrar razas según la especie seleccionada
   const filteredRazas = razasData
     .filter((raza: any) =>
       raza.nombre.toLowerCase().includes(razaQuery.toLowerCase())
     )
-    .slice(0, 4); // Limitar a 4 resultados
+    .slice(0, 4);
 
-  // Manejador de cambios en los inputs
-  const handleInputChange = (e: any) => {
-    const { name, value } = e.target;
-    setFormData((prevState) => ({
-      ...prevState,
-      [name]: value,
-    }));
-  };
-
-  // Seleccionar especie
-  const selectEspecie = (especieId: number, especieNombre: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      especie: especieId.toString(),
-      raza: "", // Limpiar raza cuando cambia la especie
-    }));
-    setEspecieQuery(especieNombre);
-    setShowEspecieList(false);
-    setRazaQuery(""); // Limpiar búsqueda de raza
-  };
-
-  // Seleccionar raza
-  const selectRaza = (razaId: number, razaNombre: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      raza: razaId.toString(),
-    }));
-    setRazaQuery(razaNombre);
-    setShowRazaList(false);
-  };
-
-  const registraPaciente = async () => {
-    try {
-      // Preparar los datos para enviar al backend
-      const pacienteData = {
-        nombre: formData.nombre,
-        id_raza: parseInt(formData.raza),
-        sexo: formData.sexo,
-        color: formData.color,
-        fecha_nacimiento: formData.fechaNacimiento,
-        codigo_chip: "", // Asumiendo que el código de chip es opcional y no se ingresa en este formulario
-      };
-
-      const response = await obtenerEspecies();
-      if (response.ok) {
-        setToastMessage("Paciente registrado exitosamente");
-        // Limpiar formulario
-        setFormData({
-          nombre: "",
-          especie: "",
-          raza: "",
-          sexo: "",
-          color: "",
-          fechaNacimiento: "",
-          codigo_chip: "",
-        });
-        setEspecieQuery("");
-        setRazaQuery("");
-      } else {
-        const errorData = await response.json();
-        setToastMessage(
-          `Error al registrar paciente: ${
-            errorData.detail || "Error desconocido"
-          }`
-        );
-      }
-    } catch (error) {
-      setToastMessage("Error de conexión");
-    }
-    setShowToast(true);
-  };
+  if (initialLoading) {
+    return (
+      <IonPage>
+        <IonContent className="ion-text-center ion-padding">
+          <IonSpinner name="crescent" color="primary" />
+          <p>Cargando formulario...</p>
+        </IonContent>
+      </IonPage>
+    );
+  }
 
   return (
     <IonPage>
@@ -210,15 +91,17 @@ const RegistroPaciente: React.FC = () => {
           <IonTitle>Registrar Paciente</IonTitle>
         </IonToolbar>
       </IonHeader>
+
       <IonContent fullscreen={true}>
         <IonHeader collapse="condense">
           <IonToolbar>
             <IonTitle size="large">Registrar Paciente</IonTitle>
           </IonToolbar>
         </IonHeader>
+
         <IonList>
-          {/* Input Nombre*/}
           <IonGrid>
+            {/* 1. Nombre del paciente */}
             <IonRow>
               <IonCol>
                 <IonItem lines="none">
@@ -231,117 +114,43 @@ const RegistroPaciente: React.FC = () => {
                     placeholder="Ej: copito"
                     value={formData.nombre}
                     onIonInput={handleInputChange}
-                  ></IonInput>
-                </IonItem>
-              </IonCol>
-            </IonRow>
-
-          {/* Input Especie con filtro*/}
-            <IonRow>
-              <IonCol>
-                <IonItem lines="none" className="searchbar-container">
-                  <IonInput
-                    label="Especie"
-                    labelPlacement="stacked"
-                    fill="outline"
-                    placeholder="Buscar especie..."
-                    value={especieQuery}
-                    onIonInput={(e) => {
-                      setEspecieQuery(e.detail.value!);
-                      setShowEspecieList(true);
-                    }}
-                    onIonFocus={() => setShowEspecieList(true)}
                   />
                 </IonItem>
-                {showEspecieList &&
-                  especieQuery &&
-                  filteredEspecies.length > 0 && (
-                    <IonList className="filter-list">
-                      {loadingEspecies ? (
-                        <IonItem>
-                          <IonSpinner />
-                          <IonLabel>Cargando especies...</IonLabel>
-                        </IonItem>
-                      ) : (
-                        filteredEspecies.map((especie) => (
-                          <IonItem
-                            key={especie.id_especie}
-                            button
-                            onClick={() =>
-                              selectEspecie(
-                                especie.id_especie,
-                                especie.nombre_comun
-                              )
-                            }
-                          >
-                            <IonLabel>{especie.nombre_comun}</IonLabel>
-                          </IonItem>
-                        ))
-                      )}
-                    </IonList>
-                  )}
               </IonCol>
             </IonRow>
 
-          {/* Input Raza con filtro*/}
+            {/* 2. Selección de especie */}
             <IonRow>
               <IonCol>
-                <IonItem lines="none" className="searchbar-container">
-                  <IonInput
-                    label="Raza"
-                    labelPlacement="stacked"
-                    fill="outline"
-                    placeholder={
-                      formData.especie
-                        ? "Buscar raza..."
-                        : "Primero selecciona una especie"
-                    }
-                    value={razaQuery}
-                    disabled={!formData.especie} // Deshabilitado si no hay especie
-                    onIonInput={(e) => {
-                      if (formData.especie) {
-                        // Solo funciona si hay especie
-                        setRazaQuery(e.detail.value!);
-                        setShowRazaList(true);
-                      }
-                    }}
-                    onIonFocus={() => {
-                      if (formData.especie) {
-                        // Solo se abre la lista si hay especie
-                        setShowRazaList(true);
-                      }
-                    }}
-                  />
-                </IonItem>
-                {showRazaList &&
-                  razaQuery &&
-                  formData.especie &&
-                  filteredRazas.length > 0 && (
-                    <IonList className="filter-list">
-                      {loadingRazas ? (
-                        <IonItem>
-                          <IonSpinner />
-                          <IonLabel>Cargando razas...</IonLabel>
-                        </IonItem>
-                      ) : (
-                        filteredRazas.map((raza: any) => (
-                          <IonItem
-                            key={raza.id_raza}
-                            button
-                            onClick={() =>
-                              selectRaza(raza.id_raza, raza.nombre)
-                            }
-                          >
-                            <IonLabel>{raza.nombre}</IonLabel>
-                          </IonItem>
-                        ))
-                      )}
-                    </IonList>
-                  )}
+                <SelectorEspecie
+                  especieQuery={especieQuery}
+                  setEspecieQuery={setEspecieQuery}
+                  showEspecieList={showEspecieList}
+                  setShowEspecieList={setShowEspecieList}
+                  filteredEspecies={filteredEspecies}
+                  loadingEspecies={loadingEspecies}
+                  selectEspecie={selectEspecie}
+                />
               </IonCol>
             </IonRow>
 
-          {/* Input Color y sexo*/}
+            {/* 3. Selección de raza */}
+            <IonRow>
+              <IonCol>
+                <SelectorRaza
+                  razaQuery={razaQuery}
+                  setRazaQuery={setRazaQuery}
+                  showRazaList={showRazaList}
+                  setShowRazaList={setShowRazaList}
+                  filteredRazas={filteredRazas}
+                  loadingRazas={loadingRazas}
+                  selectRaza={selectRaza}
+                  especieSeleccionada={!!formData.especie}
+                />
+              </IonCol>
+            </IonRow>
+
+            {/* 4. Color y Sexo */}
             <IonRow>
               <IonCol>
                 <IonItem lines="none">
@@ -354,7 +163,7 @@ const RegistroPaciente: React.FC = () => {
                     placeholder="Ej: Naranja demoniaco"
                     value={formData.color}
                     onIonInput={handleInputChange}
-                  ></IonInput>
+                  />
                 </IonItem>
               </IonCol>
               <IonCol>
@@ -377,7 +186,7 @@ const RegistroPaciente: React.FC = () => {
               </IonCol>
             </IonRow>
 
-          {/* Input Fecha de nacimiento*/}
+            {/* 5. Fecha de nacimiento */}
             <IonRow>
               <IonCol>
                 <IonItem lines="none">
@@ -387,76 +196,86 @@ const RegistroPaciente: React.FC = () => {
                     type="date"
                     labelPlacement="stacked"
                     fill="outline"
-                    placeholder="Ej: dd-mm-aaaa"
                     value={formData.fechaNacimiento}
                     onIonInput={handleInputChange}
-                  ></IonInput>
+                  />
+                </IonItem>
+              </IonCol>
+            </IonRow>
+
+            {/* 6. Código Chip (Opcional) */}
+            <IonRow>
+              <IonCol>
+                <IonItem lines="none">
+                  <IonInput
+                    name="codigo_chip"
+                    label="Código Chip (Opcional)"
+                    type="text"
+                    labelPlacement="stacked"
+                    fill="outline"
+                    placeholder="Ej: 123456789012345"
+                    value={formData.codigo_chip}
+                    onIonInput={handleInputChange}
+                  />
                 </IonItem>
               </IonCol>
             </IonRow>
           </IonGrid>
-          <hr style={{ border: "1px solid #ccc", margin: "16px 0" }} />
-          <IonGrid>
-          {/* Interfaz mini registro tutor*/}
-          <IonRow>
-            <IonCol className="ion-text-center ion-justify-content-center ion-align-items-center">
-              <IonText className="ion-text-center">
-                <IonLabel>
-                  <p style={{ fontSize: "20px", fontWeight: "bold", paddingBottom:"5px"}}>Asignar Tutor</p>
-                </IonLabel>
-                    <div
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        gap: '12px',
-                        textAlign: 'center'
-                      }}
-                    >
-                      <IonLabel>
-                        ¿El tutor no está?
-                      </IonLabel>
+
+          <hr className="section-separator" />
+
+          <div className="tutor-section">
+            <IonGrid>
+              <IonRow>
+                <IonCol className="tutor-header">
+                  <IonText>
+                    <IonLabel>
+                      <p className="tutor-title">Asignar Tutor</p>
+                    </IonLabel>
+                    <div className="tutor-register-container">
+                      <IonLabel>¿El tutor no está?</IonLabel>
                       <span
-                        style={{ color: '#87216c', textDecoration: 'underline', cursor: 'pointer' }}
+                        className="tutor-register-link"
                         onClick={() => setShowModal(true)}
                       >
                         Regístralo
                       </span>
                     </div>
-                  <IonModal isOpen={showModal} onDidDismiss={() => setShowModal(false)}>
-                    <RegistroTutor />
-                  </IonModal>
-              </IonText>
-            </IonCol>
-              
-            
-          </IonRow>
-          <IonRow>
-            <IonCol>
-              <IonItem>
-                  <IonInput
-                    name="rut"
-                    label="Rut"
-                    labelPlacement="stacked"
-                    fill="outline"
-                    placeholder="Ej: 12345678-9"
-                  ></IonInput>
+                  </IonText>
+                </IonCol>
+              </IonRow>
+
+              <IonRow>
+                <IonCol>
+                  <IonItem>
+                    <IonInput
+                      name="rut"
+                      label="Rut"
+                      labelPlacement="stacked"
+                      fill="outline"
+                      placeholder="Ej: 12345678-9"
+                    />
                   </IonItem>
                 </IonCol>
-          </IonRow>
-
-          {/* Botón Registrar */}
-          </IonGrid>
+              </IonRow>
+            </IonGrid>
+          </div>
         </IonList>
+
         <IonToolbar>
-                <IonButton
-                  className="custom-button"
-                  expand="block"
-                  onClick={registraPaciente}
-                >
-                  Registrar paciente
-                </IonButton>
+          <IonButton
+            className="custom-button"
+            expand="block"
+            onClick={registraPaciente}
+          >
+            Registrar paciente
+          </IonButton>
         </IonToolbar>
+
+        <IonModal isOpen={showModal} onDidDismiss={() => setShowModal(false)}>
+          <RegistroTutor />
+        </IonModal>
+
         <IonToast
           isOpen={showToast}
           onDidDismiss={() => setShowToast(false)}
@@ -469,4 +288,5 @@ const RegistroPaciente: React.FC = () => {
     </IonPage>
   );
 };
+
 export default RegistroPaciente;

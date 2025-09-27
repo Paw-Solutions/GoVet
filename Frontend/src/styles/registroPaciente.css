@@ -1,12 +1,12 @@
 .popup-modal .modal-wrapper {
-  width: 350px;
+  width: 21.875rem;
   max-width: 90vw;
   height: auto;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  border-radius: 16px;
-  padding: 24px;
+  border-radius: 1rem;
+  padding: 1.5rem;
 }
 
 /* Evita que los labels flotantes se corten visualmente cuando están activos */
@@ -113,4 +113,88 @@ ion-header ion-menu-button {
 /* Espaciado del texto dentro de cada sugerencia */
 .filter-list ion-label {
   margin: 0.5rem 0; /* Margen vertical de 8px */
+}
+
+/* Sección de asignar tutor */
+.tutor-section {
+  margin: 1rem 0;
+  padding: 1rem 0;
+  border-top: 0.0625rem solid #ccc;
+}
+
+.tutor-header {
+  text-align: center;
+}
+
+.tutor-title {
+  font-size: 1.25rem;
+  font-weight: bold;
+  padding-bottom: 0.3125rem;
+  margin: 0;
+}
+
+.tutor-register-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.tutor-register-link {
+  color: #87216c;
+  text-decoration: underline;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.tutor-register-link:hover {
+  color: #5f1849;
+}
+
+/* Separador visual */
+.section-separator {
+  border: none;
+  border-top: 0.0625rem solid #ccc;
+  margin: 1rem 0;
+  opacity: 0.6;
+}
+
+/* Spinner de carga inicial */
+.initial-loading {
+  text-align: center;
+  padding: 2rem;
+}
+
+.initial-loading p {
+  margin-top: 1rem;
+  color: #666;
+  font-size: 0.875rem;
+}
+
+/* Container para mejor organización */
+.form-section {
+  padding: 0 1rem;
+}
+
+.button-section {
+  padding: 1rem;
+  background: var(--ion-color-light);
+  margin-top: 1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .tutor-title {
+    font-size: 1.125rem;
+  }
+
+  .tutor-register-container {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .form-section {
+    padding: 0 0.5rem;
+  }
 }

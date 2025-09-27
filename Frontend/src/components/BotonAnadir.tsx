@@ -62,6 +62,12 @@ const BotonAnadir: React.FC<BotonAnadirProps> = ({
       icon: timeOutline,
       ruta: "/ver-tutores",
     },
+    {
+      value: "ver-pacientes",
+      label: "Ver Pacientes",
+      icon: pawOutline,
+      ruta: "/ver-pacientes",
+    },
   ];
 
   // Seleccionar opciones según el tipo
