@@ -171,7 +171,7 @@ const RegistroPaciente: React.FC = () => {
                     type="text"
                     labelPlacement="stacked"
                     fill="outline"
-                    placeholder="Ej: Naranja demoniaco"
+                    placeholder="Ej: Naranja"
                     value={formData.color}
                     onIonInput={handleInputChange}
                     onKeyDown={(e) => {
