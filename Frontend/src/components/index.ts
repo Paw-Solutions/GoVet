@@ -2,5 +2,5 @@
 export { default as BotonAnadir } from "./BotonAnadir";
 export { default as BarraLateral } from "./BarraLateral";
 export { default as ExploreContainer } from "./ExploreContainer";
-export { default as InputRut } from "./inputRut";
-export { default as InputTelefono } from "./inputTelefono";
+export { default as InputRut } from "./registroTutor/inputRut";
+export { default as InputTelefono } from "./registroTutor/inputTelefono";

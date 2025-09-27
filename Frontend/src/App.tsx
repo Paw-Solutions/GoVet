@@ -21,6 +21,8 @@ import "@ionic/react/css/text-alignment.css";
 import "@ionic/react/css/text-transformation.css";
 import "@ionic/react/css/flex-utils.css";
 import "@ionic/react/css/display.css";
+import RellenarFicha from "./pages/rellenarFicha";
+import ModalEscogerPaciente from "./components/modalEscogerPaciente";
 
 /*
  * Ionic Dark Mode
@@ -53,7 +55,9 @@ const App: React.FC = () => (
           path="/registro-paciente"
           component={RegistroPaciente}
         ></Route>
-      </IonRouterOutlet>
+        <Route exact path="/rellenar-ficha" component={RellenarFicha}></Route>
+        <Route exact path="/test" component={ModalEscogerPaciente}></Route>
+      </IonRouterOutlet>  
     </IonReactRouter>
   </IonApp>
 );

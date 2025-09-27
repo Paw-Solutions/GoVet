@@ -5,6 +5,7 @@ import {
   personAddOutline,
   pawOutline,
   timeOutline,
+  clipboardOutline,
 } from "ionicons/icons";
 import { useHistory } from "react-router-dom";
 import "../styles/botonAnadir.css";
@@ -63,6 +64,12 @@ const BotonAnadir: React.FC<BotonAnadirProps> = ({
       ruta: "/ver-tutores",
     },
     {
+      value: "rellenar-ficha",
+      label: "Generar ficha",
+      icon: clipboardOutline,
+      ruta: "/rellenar-ficha",
+    },
+    {
       value: "ver-pacientes",
       label: "Ver Pacientes",
       icon: pawOutline,
@@ -85,6 +92,7 @@ const BotonAnadir: React.FC<BotonAnadirProps> = ({
     }
     // Si no hay callback pero hay ruta, navegar automáticamente
     else if (opcion.ruta) {
+      console.log("Navegando a:", opcion.ruta);
       history.push(opcion.ruta);
     }
 

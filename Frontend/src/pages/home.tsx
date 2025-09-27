@@ -73,14 +73,6 @@ const Home: React.FC = () => {
     cargarUltimosTutores();
   }, []);
 
-  const navegarARegistroTutor = () => {
-    history.push("/registro-tutor");
-  };
-
-  const navegarARegistroPaciente = () => {
-    history.push("/registro-paciente");
-  };
-
   return (
     <IonPage>
       <IonHeader translucent={true}>

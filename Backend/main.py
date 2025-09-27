@@ -180,6 +180,104 @@ def obtener_pacientes_por_rut_tutor(rut: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="No se encontraron pacientes para ese tutor")
     return db_pacientes
 
+# Ruta GET para obtener pacientes con paginación y búsqueda avanzada
+@app.get("/pacientes/paginated/")
+def obtener_pacientes_paginados(
+    page: int = Query(1, ge=1),
+    limit: int = Query(50, ge=1, le=100),
+    search: Optional[str] = Query(None),
+    db: Session = Depends(get_db)
+):
+    offset = (page - 1) * limit
+    
+    # Query con joins para obtener información relacionada
+    query = db.query(
+        models.Paciente,
+        models.Raza.nombre.label('raza_nombre'),
+        models.Especie.nombre_comun.label('especie_nombre'),
+        models.Tutor.nombre.label('tutor_nombre'),
+        models.Tutor.apellido_paterno.label('tutor_apellido_paterno'),
+        models.Tutor.apellido_materno.label('tutor_apellido_materno'),
+        models.Tutor.rut.label('tutor_rut'),
+        models.Tutor.telefono.label('tutor_telefono'),
+        models.Tutor.email.label('tutor_email')
+    ).join(
+        models.Raza, models.Paciente.id_raza == models.Raza.id_raza, isouter=True
+    ).join(
+        models.Especie, models.Raza.id_especie == models.Especie.id_especie, isouter=True
+    ).join(
+        models.TutorPaciente, models.Paciente.id_paciente == models.TutorPaciente.id_paciente, isouter=True
+    ).join(
+        models.Tutor, models.TutorPaciente.rut == models.Tutor.rut, isouter=True
+    )
+    
+    if search:
+        search_pattern = f"%{search}%"
+        query = query.filter(
+            or_(
+                models.Paciente.nombre.ilike(search_pattern),
+                models.Raza.nombre.ilike(search_pattern),
+                models.Especie.nombre_comun.ilike(search_pattern),
+                models.Tutor.nombre.ilike(search_pattern),
+                models.Tutor.apellido_paterno.ilike(search_pattern),
+                models.Tutor.rut.ilike(search_pattern)
+            )
+        )
+    
+    # Contar total sin aplicar offset/limit
+    total_count = query.count()
+    
+    # Aplicar paginación y obtener resultados
+    results = query.order_by(models.Paciente.id_paciente).offset(offset).limit(limit).all()
+    
+    total_pages = (total_count + limit - 1) // limit
+    has_next = page < total_pages
+    has_previous = page > 1
+    
+    # Construir respuesta personalizada con información completa
+    pacientes_serializados = []
+    for result in results:
+        paciente = result[0]  # El objeto Paciente
+        
+        # Construir el diccionario con información completa
+        paciente_dict = {
+            "id_paciente": paciente.id_paciente,
+            "nombre": paciente.nombre,
+            "fecha_nacimiento": paciente.fecha_nacimiento.isoformat() if paciente.fecha_nacimiento else None,
+            "color": paciente.color,
+            "esterilizado": paciente.esterilizado,
+            "id_raza": paciente.id_raza,
+            # Información de la raza
+            "raza": result.raza_nombre if result.raza_nombre else None,
+            # Información de la especie
+            "especie": result.especie_nombre if result.especie_nombre else None,
+            # Información del tutor
+            "tutor": {
+                "nombre": result.tutor_nombre if result.tutor_nombre else None,
+                "apellido_paterno": result.tutor_apellido_paterno if result.tutor_apellido_paterno else None,
+                "apellido_materno": result.tutor_apellido_materno if result.tutor_apellido_materno else None,
+                "rut": result.tutor_rut if result.tutor_rut else None,
+                "telefono": result.tutor_telefono if result.tutor_telefono else None,
+                "email": result.tutor_email if result.tutor_email else None
+            } if result.tutor_nombre else None
+        }
+        
+        pacientes_serializados.append(paciente_dict)
+
+    return {
+        "pacientes": pacientes_serializados,
+        "pagination": {
+            "current_page": page,
+            "total_pages": total_pages,
+            "total_count": total_count,
+            "limit": limit,
+            "has_next": has_next,
+            "has_previous": has_previous,
+            "next_page": page + 1 if has_next else None,
+            "previous_page": page - 1 if has_previous else None
+        }
+    }
+
 """ RUTAS PARA ASOCIAR TUTORES Y PACIENTES """
 # Ruta POST para asociar un tutor a un paciente (tutor_paciente)
 @app.post("/tutores/{rut_tutor}/pacientes/{id_paciente}", response_model=TutorPacienteResponse)
@@ -206,7 +304,6 @@ def obtener_mascotas_por_tutor(rut: str, db: Session = Depends(get_db)):
     if not db_mascotas:
         raise HTTPException(status_code=404, detail="No se encontraron mascotas para ese tutor")
     return db_mascotas
-
 
 """ RUTAS PARA RAZAS """
 # Ruta POST para añadir una raza

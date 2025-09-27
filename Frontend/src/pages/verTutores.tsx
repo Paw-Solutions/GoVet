@@ -155,7 +155,9 @@ const VerTutores: React.FC = () => {
               className="tutores-searchbar"
             />
           </div>
-
+          <div>
+            <div style={{ height: "25px" }}></div>
+          </div>
           {/* Estado de carga inicial */}
           {loading && tutores.length === 0 && (
             <div className="loading-container">
