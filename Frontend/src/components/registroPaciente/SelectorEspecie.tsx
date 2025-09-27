@@ -9,6 +9,8 @@ interface SelectorEspecieProps {
   filteredEspecies: any[];
   loadingEspecies: boolean;
   selectEspecie: (id: number, nombre: string) => void;
+  onClearEspecie?: () => void;
+  hasSelectedEspecie?: boolean; // Nueva prop para saber si hay especie seleccionada
 }
 
 export const SelectorEspecie: React.FC<SelectorEspecieProps> = ({
@@ -19,6 +21,8 @@ export const SelectorEspecie: React.FC<SelectorEspecieProps> = ({
   filteredEspecies,
   loadingEspecies,
   selectEspecie,
+  onClearEspecie,
+  hasSelectedEspecie,
 }) => {
   return (
     <>
@@ -30,12 +34,17 @@ export const SelectorEspecie: React.FC<SelectorEspecieProps> = ({
           placeholder="Buscar especie..."
           value={especieQuery}
           onIonInput={(e) => {
-            setEspecieQuery(e.detail.value!);
+            const value = e.detail.value!;
+            setEspecieQuery(value);
             setShowEspecieList(true);
+
+            // Si se borra todo el contenido y había una especie seleccionada
+            if (value.trim() === "" && hasSelectedEspecie && onClearEspecie) {
+              onClearEspecie();
+            }
           }}
           onIonFocus={() => setShowEspecieList(true)}
           onIonBlur={() => {
-            // Pequeño delay para permitir que el click en la lista se registre
             setTimeout(() => {
               setShowEspecieList(false);
             }, 150);

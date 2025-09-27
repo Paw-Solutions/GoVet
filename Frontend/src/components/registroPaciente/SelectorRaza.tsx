@@ -48,7 +48,6 @@ export const SelectorRaza: React.FC<SelectorRazaProps> = ({
             }
           }}
           onIonBlur={() => {
-            // Pequeño delay para permitir que el click en la lista se registre
             setTimeout(() => {
               setShowRazaList(false);
             }, 150);

@@ -55,16 +55,15 @@ const RegistroPaciente: React.FC = () => {
     selectEspecie,
     selectRaza,
     registraPaciente,
+    clearEspecie, // Agregar esta línea
   } = useRegistroPaciente();
 
   // Filtros
   const filteredEspecies = especiesData
     .filter((especie) => {
-      // Si no hay búsqueda, mostrar todas las especies (limitadas)
       if (!especieQuery.trim()) {
-        return true;
+        return true; // Mostrar todas si no hay búsqueda
       }
-      // Si hay búsqueda, filtrar por nombre
       return especie.nombre_comun
         .toLowerCase()
         .includes(especieQuery.toLowerCase());
@@ -73,11 +72,9 @@ const RegistroPaciente: React.FC = () => {
 
   const filteredRazas = razasData
     .filter((raza: any) => {
-      // Si no hay búsqueda, mostrar todas las razas (limitadas)
       if (!razaQuery.trim()) {
-        return true;
+        return true; // Mostrar todas las razas si no hay búsqueda
       }
-      // Si hay búsqueda, filtrar por nombre
       return raza.nombre.toLowerCase().includes(razaQuery.toLowerCase());
     })
     .slice(0, 4);
@@ -142,6 +139,8 @@ const RegistroPaciente: React.FC = () => {
                   filteredEspecies={filteredEspecies}
                   loadingEspecies={loadingEspecies}
                   selectEspecie={selectEspecie}
+                  onClearEspecie={clearEspecie} // Agregar esta línea
+                  hasSelectedEspecie={!!formData.especie} // Agregar esta línea
                 />
               </IonCol>
             </IonRow>

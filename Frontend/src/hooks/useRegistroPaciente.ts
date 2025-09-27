@@ -119,6 +119,17 @@ export const useRegistroPaciente = () => {
     setShowRazaList(false);
   };
 
+  // Nueva función para limpiar especie y raza
+  const clearEspecie = () => {
+    setFormData((prev) => ({
+      ...prev,
+      especie: "",
+      raza: "",
+    }));
+    setRazaQuery("");
+    setRazasData([]); // Limpiar las razas disponibles
+  };
+
   const registraPaciente = async () => {
     try {
       if (
@@ -187,6 +198,7 @@ export const useRegistroPaciente = () => {
     handleInputChange,
     selectEspecie,
     selectRaza,
+    clearEspecie, // Agregar la nueva función
     registraPaciente,
   };
 };
