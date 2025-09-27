@@ -1,6 +1,6 @@
 /* Estilos para el Botón Añadir (Floating Action Button) */
 .boton-anadir {
-  --background: #c757c0;
+  --background: var(--ion-color-tertiary);
   --color: white;
   --border-radius: 50%;
   width: 4rem;

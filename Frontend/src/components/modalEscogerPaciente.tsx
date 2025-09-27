@@ -151,16 +151,6 @@ const ModalEscogerPaciente: React.FC<ModalEscogerPacienteProps> = ({
               <IonIcon icon={closeOutline} />
             </IonButton>
           </IonButtons>
-          <IonButtons slot="end">
-            <IonButton 
-              onClick={handleConfirmSelection} 
-              disabled={!selectedPaciente}
-              color="secondary"
-            >
-              <IonIcon icon={checkmarkOutline} slot="start" />
-              Seleccionar
-            </IonButton>
-          </IonButtons>
         </IonToolbar>
       </IonHeader>
 
@@ -240,7 +230,15 @@ const ModalEscogerPaciente: React.FC<ModalEscogerPacienteProps> = ({
                   </p>
                 </IonText>
               </div>
-
+              <IonButton 
+                onClick={handleConfirmSelection} 
+                disabled={!selectedPaciente}
+                color="tertiary"
+                style={{ position: 'fixed', bottom: '25px', right: '25px', zIndex: 1001}}
+              >
+                <IonIcon icon={checkmarkOutline} slot="start" />
+                Seleccionar
+              </IonButton>
               {/* Lista simple de pacientes */}
               <IonList className="pacientes-list">
                 {pacientes.map((paciente, index) => (

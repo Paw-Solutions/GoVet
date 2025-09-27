@@ -154,7 +154,7 @@ const Home: React.FC = () => {
           </IonRow>
         </IonGrid>
       </IonContent>
-      <IonFooter className="ion-no-border">
+      <IonFooter>
         <div className="boton-anadir-container">
           {/* Botón con opciones automáticas por defecto */}
           <BotonAnadir tipo="opcionesDefault" />

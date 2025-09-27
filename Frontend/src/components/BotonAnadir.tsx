@@ -22,7 +22,6 @@ interface BotonAnadirProps {
   icon?: string;
   className?: string;
   disabled?: boolean;
-  color?: string;
   opciones?: OpcionMenu[];
   onSeleccionarOpcion?: (valor: string) => void;
   tieneSelect?: boolean;
@@ -34,7 +33,6 @@ const BotonAnadir: React.FC<BotonAnadirProps> = ({
   icon = addOutline,
   className = "",
   disabled = false,
-  color = "#c757c0",
   opciones = [],
   onSeleccionarOpcion,
   tieneSelect = false,
@@ -107,7 +105,6 @@ const BotonAnadir: React.FC<BotonAnadirProps> = ({
           id="trigger-button"
           className={`boton-anadir ${className}`}
           disabled={disabled}
-          style={{ "--background": color }}
           onClick={() => setIsOpen(true)}
         >
           <IonIcon slot="icon-only" icon={addOutline} />
@@ -146,7 +143,6 @@ const BotonAnadir: React.FC<BotonAnadirProps> = ({
       className={`boton-anadir ${className}`}
       onClick={onClick}
       disabled={disabled}
-      style={{ "--background": color }}
     >
       <IonIcon slot="icon-only" icon={icon} />
     </IonButton>

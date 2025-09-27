@@ -203,279 +203,265 @@ const RellenarFicha: React.FC = () => {
         </IonHeader>
 
         {/* Indicador de progreso */}
-        <div style={{ padding: '10px 20px' }}>
-          <IonText>
-            <h3>{getStepTitle()}</h3>
-            <p color="medium">Paso {getStepNumber()} de 3</p>
-          </IonText>
-        </div>
+        <IonItem>
+            <div>
+                <IonText>
+                    <h3>{getStepTitle()}</h3>
+                    <p color="medium">Paso {getStepNumber()} de 3</p>
+                </IonText>
+            </div>
+        </IonItem>
 
         {/* Paso 1: Información General */}
         {currentStep === 'general' && (
-          <IonCard>
-            <IonCardHeader>
-              <IonCardTitle>
-                <IonIcon icon={pawOutline} style={{ marginRight: '8px' }} />
-                Seleccionar Paciente
-              </IonCardTitle>
-            </IonCardHeader>
-            <IonCardContent>
-              <IonGrid>
-                <IonRow>
-                  <IonCol size="12">
+            <IonGrid>
+            <IonRow>
+                <IonCol>
                     <IonButton 
-                      expand="block" 
-                      fill="outline" 
-                      onClick={() => setShowModalPacientes(true)}
+                        expand="block" 
+                        fill="outline" 
+                        onClick={() => setShowModalPacientes(true)}
                     >
-                      <IonIcon icon={pawOutline} slot="start" />
-                      {selectedPaciente ? `${selectedPaciente.nombre} - ${selectedPaciente.especie}` : 'Seleccionar Paciente'}
+                        <IonIcon icon={pawOutline} slot="start" />
+                        {selectedPaciente ? `${selectedPaciente.nombre} - ${selectedPaciente.especie}` : 'Seleccionar Paciente'}
                     </IonButton>
-                  </IonCol>
-                </IonRow>
+                </IonCol>
+            </IonRow>
 
-                {/* Información del tutor (solo si hay paciente seleccionado) */}
-                {selectedPaciente && selectedPaciente.tutor && (
-                  <IonRow>
-                    <IonCol size="12">
-                      <div style={{ 
-                        padding: '12px', 
-                        backgroundColor: 'var(--ion-color-light)', 
-                        borderRadius: '8px',
-                        marginTop: '10px'
-                      }}>
+            {/* Información del tutor (solo si hay paciente seleccionado) */}
+            <IonRow>
+            <IonCol>
+                {selectedPaciente && selectedPaciente.tutor ? (
+                <div>
+                    <IonText>
+                    <div>
+                        <IonIcon icon={personOutline} />
+                        <strong> Información del Tutor</strong>
+                    </div>
+                    <div>
+                        <p>
+                        <strong>Nombre:</strong> {selectedPaciente.tutor.nombre}{" "}
+                        {selectedPaciente.tutor.apellido_paterno}{" "}
+                        {selectedPaciente.tutor.apellido_materno}
+                        </p>
+                        <p>
+                        <strong>RUT:</strong> {selectedPaciente.tutor.rut}
+                        </p>
+                        {selectedPaciente.tutor.telefono && (
+                        <p>
+                            <strong>Teléfono:</strong> {selectedPaciente.tutor.telefono}
+                        </p>
+                        )}
+                        {selectedPaciente.tutor.email && (
+                        <p>
+                            <strong>Email:</strong> {selectedPaciente.tutor.email}
+                        </p>
+                        )}
+                    </div>
+                    </IonText>
+                </div>
+                ) : (
+                <IonCard>
+                    <IonCardContent>
+                    <IonIcon icon={personOutline} style={{ marginRight: "8px" }} />
                         <IonText>
-                          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-                            <IonIcon icon={personOutline} style={{ marginRight: '6px', fontSize: '16px' }} />
-                            <strong style={{ fontSize: '14px' }}>Información del Tutor</strong>
-                          </div>
-                          <div style={{ fontSize: '12px', color: 'var(--ion-color-medium)' }}>
-                            <p style={{ margin: '2px 0' }}>
-                              <strong>Nombre:</strong> {selectedPaciente.tutor.nombre} {selectedPaciente.tutor.apellido_paterno} {selectedPaciente.tutor.apellido_materno}
-                            </p>
-                            <p style={{ margin: '2px 0' }}>
-                              <strong>RUT:</strong> {selectedPaciente.tutor.rut}
-                            </p>
-                            {selectedPaciente.tutor.telefono && (
-                              <p style={{ margin: '2px 0' }}>
-                                <strong>Teléfono:</strong> {selectedPaciente.tutor.telefono}
-                              </p>
-                            )}
-                            {selectedPaciente.tutor.email && (
-                              <p style={{ margin: '2px 0' }}>
-                                <strong>Email:</strong> {selectedPaciente.tutor.email}
-                              </p>
-                            )}
-                          </div>
+                            No existe información del tutor
                         </IonText>
-                      </div>
-                    </IonCol>
-                  </IonRow>
+                    </IonCardContent>
+                </IonCard>
                 )}
+            </IonCol>
+            </IonRow>
 
-                <IonRow>
-                  <IonCol size="12">
+
+            <IonRow>
+                <IonCol>
                     <IonItem>
-                      <IonTextarea
+                        <IonTextarea
                         label="Motivo de la Consulta"
-                        labelPlacement="floating"
+                        labelPlacement="stacked"
                         fill="outline"
                         placeholder="Describa el motivo de la consulta"
                         rows={4}
                         name="motivo"
                         value={formData.motivo}
                         onIonChange={handleInputChange}
-                      />
+                        />
                     </IonItem>
-                  </IonCol>
-                </IonRow>
-              </IonGrid>
-            </IonCardContent>
-          </IonCard>
+                </IonCol>
+            </IonRow>
+            </IonGrid>
         )}
 
         {/* Paso 2: Examen Físico */}
         {currentStep === 'fisico' && (
-          <IonCard>
-            <IonCardHeader>
-              <IonCardTitle>Examen Físico</IonCardTitle>
-            </IonCardHeader>
-            <IonCardContent>
-              <IonList>
-                <IonGrid>
-                  <IonRow>
-                    <IonCol size="12" size-md="6">
-                      <IonItem>
-                        <IonInput
-                          label="Peso (kg)"
-                          type="number"
-                          labelPlacement="floating"
-                          fill="outline"
-                          placeholder="Ej: 25.5"
-                          name="peso"
-                          value={formData.peso}
-                          onIonChange={handleNumericChange}
-                        />
-                      </IonItem>
-                    </IonCol>
-                    <IonCol size="12" size-md="6">
-                      <IonItem>
-                        <IonSelect
-                          label="Condición Corporal"
-                          labelPlacement="floating"
-                          fill="outline"
-                          placeholder="Seleccione condición"
-                          name="condicion_corporal"
-                          value={formData.condicion_corporal}
-                          onIonChange={handleInputChange}
-                        >
-                          <IonSelectOption value="muy_delgado">Muy Delgado (1/5)</IonSelectOption>
-                          <IonSelectOption value="delgado">Delgado (2/5)</IonSelectOption>
-                          <IonSelectOption value="ideal">Ideal (3/5)</IonSelectOption>
-                          <IonSelectOption value="sobrepeso">Sobrepeso (4/5)</IonSelectOption>
-                          <IonSelectOption value="obeso">Obeso (5/5)</IonSelectOption>
-                        </IonSelect>
-                      </IonItem>
-                    </IonCol>
-                  </IonRow>
-                  <IonRow>
-                    <IonCol size="12" size-md="6">
-                      <IonItem>
-                        <IonSelect
-                          label="Estado del Pelaje"
-                          labelPlacement="floating"
-                          fill="outline"
-                          placeholder="Seleccione estado"
-                          name="estado_pelaje"
-                          value={formData.estado_pelaje}
-                          onIonChange={handleInputChange}
-                        >
-                          <IonSelectOption value="excelente">Excelente</IonSelectOption>
-                          <IonSelectOption value="bueno">Bueno</IonSelectOption>
-                          <IonSelectOption value="regular">Regular</IonSelectOption>
-                          <IonSelectOption value="malo">Malo</IonSelectOption>
-                          <IonSelectOption value="muy_malo">Muy Malo</IonSelectOption>
-                        </IonSelect>
-                      </IonItem>
-                    </IonCol>
-                    <IonCol size="12" size-md="6">
-                      <IonItem>
-                        <IonSelect
-                          label="Mucosas"
-                          labelPlacement="floating"
-                          fill="outline"
-                          placeholder="Seleccione estado"
-                          name="mucosas"
-                          value={formData.mucosas}
-                          onIonChange={handleInputChange}
-                        >
-                          <IonSelectOption value="rosadas">Rosadas (Normal)</IonSelectOption>
-                          <IonSelectOption value="palidas">Pálidas</IonSelectOption>
-                          <IonSelectOption value="cianoticas">Cianóticas</IonSelectOption>
-                          <IonSelectOption value="ictericas">Ictéricas</IonSelectOption>
-                        </IonSelect>
-                      </IonItem>
-                    </IonCol>
-                  </IonRow>
-                  <IonRow>
-                    <IonCol size="12">
-                      <IonItem>
-                        <IonTextarea
-                          label="Nódulos Linfáticos"
-                          labelPlacement="floating"
-                          fill="outline"
-                          placeholder="Describa el estado de los nódulos linfáticos"
-                          rows={3}
-                          name="nodulos_linfaticos"
-                          value={formData.nodulos_linfaticos}
-                          onIonChange={handleInputChange}
-                        />
-                      </IonItem>
-                    </IonCol>
-                  </IonRow>
-                </IonGrid>
-              </IonList>
-            </IonCardContent>
-          </IonCard>
+        <IonList>
+        <IonGrid>
+            <IonRow>
+            <IonCol size="12" size-md="6">
+                <IonItem>
+                <IonInput
+                    label="Peso (kg)"
+                    type="number"
+                    labelPlacement="stacked"
+                    fill="outline"
+                    placeholder="Ej: 25.5"
+                    name="peso"
+                    value={formData.peso}
+                    clearOnEdit={true}
+                    onIonChange={handleNumericChange}
+                />
+                </IonItem>
+            </IonCol>
+            <IonCol size="12" size-md="6">
+                <IonItem>
+                <IonSelect
+                    label="Condición Corporal"
+                    labelPlacement="stacked"
+                    fill="outline"
+                    placeholder="Seleccione condición"
+                    name="condicion_corporal"
+                    value={formData.condicion_corporal}
+                    onIonChange={handleInputChange}
+                >
+                    <IonSelectOption value="muy_delgado">Muy Delgado</IonSelectOption>
+                    <IonSelectOption value="delgado">Delgado</IonSelectOption>
+                    <IonSelectOption value="ideal">Ideal</IonSelectOption>
+                    <IonSelectOption value="sobrepeso">Sobrepeso</IonSelectOption>
+                    <IonSelectOption value="obeso">Obeso</IonSelectOption>
+                </IonSelect>
+                </IonItem>
+            </IonCol>
+            </IonRow>
+            <IonRow>
+            <IonCol size="12" size-md="6">
+                <IonItem>
+                <IonSelect
+                    label="Estado del Pelaje"
+                    labelPlacement="stacked"
+                    fill="outline"
+                    placeholder="Seleccione estado"
+                    name="estado_pelaje"
+                    value={formData.estado_pelaje}
+                    onIonChange={handleInputChange}
+                >
+                    <IonSelectOption value="excelente">Excelente</IonSelectOption>
+                    <IonSelectOption value="bueno">Bueno</IonSelectOption>
+                    <IonSelectOption value="regular">Regular</IonSelectOption>
+                    <IonSelectOption value="malo">Malo</IonSelectOption>
+                    <IonSelectOption value="muy_malo">Muy Malo</IonSelectOption>
+                </IonSelect>
+                </IonItem>
+            </IonCol>
+            <IonCol size="12" size-md="6">
+                <IonItem>
+                <IonSelect
+                    label="Mucosas"
+                    labelPlacement="stacked"
+                    fill="outline"
+                    placeholder="Seleccione estado"
+                    name="mucosas"
+                    value={formData.mucosas}
+                    onIonChange={handleInputChange}
+                >
+                    <IonSelectOption value="rosadas">Rosadas (Normal)</IonSelectOption>
+                    <IonSelectOption value="palidas">Pálidas</IonSelectOption>
+                    <IonSelectOption value="cianoticas">Cianóticas</IonSelectOption>
+                    <IonSelectOption value="ictericas">Ictéricas</IonSelectOption>
+                </IonSelect>
+                </IonItem>
+            </IonCol>
+            </IonRow>
+            <IonRow>
+            <IonCol size="12">
+                <IonItem>
+                <IonTextarea
+                    label="Nódulos Linfáticos"
+                    labelPlacement="stacked"
+                    fill="outline"
+                    placeholder="Describa el estado de los nódulos linfáticos"
+                    rows={3}
+                    name="nodulos_linfaticos"
+                    value={formData.nodulos_linfaticos}
+                    onIonChange={handleInputChange}
+                />
+                </IonItem>
+            </IonCol>
+            </IonRow>
+        </IonGrid>
+        </IonList>
         )}
 
         {/* Paso 3: Examen Clínico */}
         {currentStep === 'clinico' && (
-          <IonCard>
-            <IonCardHeader>
-              <IonCardTitle>Examen Clínico</IonCardTitle>
-            </IonCardHeader>
-            <IonCardContent>
-              <IonList>
-                <IonGrid>
-                  <IonRow>
-                    <IonCol size="12">
-                      <IonItem>
-                        <IonTextarea
-                          label="DHT (Deshidratación, Hidratación, Temperatura)"
-                          labelPlacement="floating"
-                          fill="outline"
-                          placeholder="Describa el estado de DHT"
-                          rows={3}
-                          name="dht"
-                          value={formData.dht}
-                          onIonChange={handleInputChange}
-                        />
-                      </IonItem>
-                    </IonCol>
-                  </IonRow>
-                  <IonRow>
-                    <IonCol size="12">
-                      <IonItem>
-                        <IonTextarea
-                          label="Auscultación Cardíaca y Torácica"
-                          labelPlacement="floating"
-                          fill="outline"
-                          placeholder="Describa los hallazgos de auscultación"
-                          rows={3}
-                          name="auscultacion_cardiaca_toraxica"
-                          value={formData.auscultacion_cardiaca_toraxica}
-                          onIonChange={handleInputChange}
-                        />
-                      </IonItem>
-                    </IonCol>
-                  </IonRow>
-                  <IonRow>
-                    <IonCol size="12">
-                      <IonItem>
-                        <IonTextarea
-                          label="Diagnóstico"
-                          labelPlacement="floating"
-                          fill="outline"
-                          placeholder="Ingrese el diagnóstico"
-                          rows={4}
-                          name="diagnostico"
-                          value={formData.diagnostico}
-                          onIonChange={handleInputChange}
-                        />
-                      </IonItem>
-                    </IonCol>
-                  </IonRow>
-                  <IonRow>
-                    <IonCol size="12">
-                      <IonItem>
-                        <IonTextarea
-                          label="Observaciones"
-                          labelPlacement="floating"
-                          fill="outline"
-                          placeholder="Observaciones adicionales"
-                          rows={4}
-                          name="observaciones"
-                          value={formData.observaciones}
-                          onIonChange={handleInputChange}
-                        />
-                      </IonItem>
-                    </IonCol>
-                  </IonRow>
-                </IonGrid>
-              </IonList>
-            </IonCardContent>
-          </IonCard>
+        <IonList>
+        <IonGrid>
+            <IonRow>
+            <IonCol size="12">
+                <IonItem>
+                <IonTextarea
+                    label="DHT (Deshidratación, Hidratación, Temperatura)"
+                    labelPlacement="stacked"
+                    fill="outline"
+                    placeholder="Describa el estado de DHT"
+                    rows={3}
+                    name="dht"
+                    value={formData.dht}
+                    onIonChange={handleInputChange}
+                />
+                </IonItem>
+            </IonCol>
+            </IonRow>
+            <IonRow>
+            <IonCol size="12">
+                <IonItem>
+                <IonTextarea
+                    label="Auscultación Cardíaca y Torácica"
+                    labelPlacement="stacked"
+                    fill="outline"
+                    placeholder="Describa los hallazgos de auscultación"
+                    rows={3}
+                    name="auscultacion_cardiaca_toraxica"
+                    value={formData.auscultacion_cardiaca_toraxica}
+                    onIonChange={handleInputChange}
+                />
+                </IonItem>
+            </IonCol>
+            </IonRow>
+            <IonRow>
+            <IonCol size="12">
+                <IonItem>
+                <IonTextarea
+                    label="Diagnóstico"
+                    labelPlacement="stacked"
+                    fill="outline"
+                    placeholder="Ingrese el diagnóstico"
+                    rows={4}
+                    name="diagnostico"
+                    value={formData.diagnostico}
+                    onIonChange={handleInputChange}
+                />
+                </IonItem>
+            </IonCol>
+            </IonRow>
+            <IonRow>
+            <IonCol size="12">
+                <IonItem>
+                <IonTextarea
+                    label="Observaciones"
+                    labelPlacement="stacked"
+                    fill="outline"
+                    placeholder="Observaciones adicionales"
+                    rows={4}
+                    name="observaciones"
+                    value={formData.observaciones}
+                    onIonChange={handleInputChange}
+                />
+                </IonItem>
+            </IonCol>
+            </IonRow>
+        </IonGrid>
+        </IonList>
         )}
 
         {/* Espaciado para el footer */}
