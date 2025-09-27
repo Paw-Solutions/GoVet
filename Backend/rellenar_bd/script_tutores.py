@@ -50,6 +50,8 @@ for _, row in df.iterrows():
     else:
         celular2 = None
 
+    rut = rut.lower()
+
     cur.execute("""
         INSERT INTO govet.tutor (rut, nombre, apellido_paterno, apellido_materno, telefono, telefono2, celular, celular2, region, comuna, direccion, email, observacion)
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
