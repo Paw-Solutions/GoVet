@@ -54,40 +54,43 @@ export const SelectorComuna: React.FC<SelectorComunaProps> = ({
               setShowComunaList(true);
             }
           }}
+          onIonBlur={() => {
+            // Pequeño delay para permitir que el click en la lista se registre
+            setTimeout(() => {
+              setShowComunaList(false);
+            }, 150);
+          }}
         >
           <div slot="label">
             Comuna <IonText color="danger">(*)</IonText>
           </div>
         </IonInput>
       </IonItem>
-      {showComunaList &&
-        comunaQuery &&
-        regionSeleccionada &&
-        filteredComunas.length > 0 && (
-          <IonList className="filter-list">
-            {loadingComunas ? (
-              <IonItem>
-                <IonSpinner />
-                <IonLabel>Cargando comunas...</IonLabel>
-              </IonItem>
-            ) : (
-              filteredComunas.map((comuna: any, index: number) => {
-                const formattedName = formatComunaName(comuna.name);
-                return (
-                  <IonItem
-                    key={`${comuna.id || index}`}
-                    button
-                    onClick={() =>
-                      selectComuna(comuna.id || index.toString(), formattedName)
-                    }
-                  >
-                    <IonLabel>{formattedName}</IonLabel>
-                  </IonItem>
-                );
-              })
-            )}
-          </IonList>
-        )}
+      {showComunaList && regionSeleccionada && filteredComunas.length > 0 && (
+        <IonList className="filter-list">
+          {loadingComunas ? (
+            <IonItem>
+              <IonSpinner />
+              <IonLabel>Cargando comunas...</IonLabel>
+            </IonItem>
+          ) : (
+            filteredComunas.map((comuna: any, index: number) => {
+              const formattedName = formatComunaName(comuna.name);
+              return (
+                <IonItem
+                  key={`${comuna.id || index}`}
+                  button
+                  onClick={() =>
+                    selectComuna(comuna.id || index.toString(), formattedName)
+                  }
+                >
+                  <IonLabel>{formattedName}</IonLabel>
+                </IonItem>
+              );
+            })
+          )}
+        </IonList>
+      )}
     </>
   );
 };

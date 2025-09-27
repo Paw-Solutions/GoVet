@@ -41,13 +41,19 @@ export const SelectorRegion: React.FC<SelectorRegionProps> = ({
             setShowRegionList(true);
           }}
           onIonFocus={() => setShowRegionList(true)}
+          onIonBlur={() => {
+            // Pequeño delay para permitir que el click en la lista se registre
+            setTimeout(() => {
+              setShowRegionList(false);
+            }, 150);
+          }}
         >
           <div slot="label">
             Región <IonText color="danger">(*)</IonText>
           </div>
         </IonInput>
       </IonItem>
-      {showRegionList && regionQuery && filteredRegiones.length > 0 && (
+      {showRegionList && filteredRegiones.length > 0 && (
         <IonList className="filter-list">
           {loadingRegiones ? (
             <IonItem>

@@ -59,15 +59,27 @@ const RegistroPaciente: React.FC = () => {
 
   // Filtros
   const filteredEspecies = especiesData
-    .filter((especie) =>
-      especie.nombre_comun.toLowerCase().includes(especieQuery.toLowerCase())
-    )
+    .filter((especie) => {
+      // Si no hay búsqueda, mostrar todas las especies (limitadas)
+      if (!especieQuery.trim()) {
+        return true;
+      }
+      // Si hay búsqueda, filtrar por nombre
+      return especie.nombre_comun
+        .toLowerCase()
+        .includes(especieQuery.toLowerCase());
+    })
     .slice(0, 4);
 
   const filteredRazas = razasData
-    .filter((raza: any) =>
-      raza.nombre.toLowerCase().includes(razaQuery.toLowerCase())
-    )
+    .filter((raza: any) => {
+      // Si no hay búsqueda, mostrar todas las razas (limitadas)
+      if (!razaQuery.trim()) {
+        return true;
+      }
+      // Si hay búsqueda, filtrar por nombre
+      return raza.nombre.toLowerCase().includes(razaQuery.toLowerCase());
+    })
     .slice(0, 4);
 
   if (initialLoading) {
@@ -169,10 +181,19 @@ const RegistroPaciente: React.FC = () => {
 
                       // Lista blanca de teclas de control
                       const teclasPermitidas = [
-                        "Backspace", "Delete", "ArrowLeft", "ArrowRight", "Tab", "Home", "End"
+                        "Backspace",
+                        "Delete",
+                        "ArrowLeft",
+                        "ArrowRight",
+                        "Tab",
+                        "Home",
+                        "End",
                       ];
 
-                      if (!regex.test(e.key) && !teclasPermitidas.includes(e.key)) {
+                      if (
+                        !regex.test(e.key) &&
+                        !teclasPermitidas.includes(e.key)
+                      ) {
                         e.preventDefault(); // bloquea lo demás
                       }
                     }}

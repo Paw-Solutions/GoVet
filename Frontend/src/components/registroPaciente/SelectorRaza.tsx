@@ -47,31 +47,34 @@ export const SelectorRaza: React.FC<SelectorRazaProps> = ({
               setShowRazaList(true);
             }
           }}
+          onIonBlur={() => {
+            // Pequeño delay para permitir que el click en la lista se registre
+            setTimeout(() => {
+              setShowRazaList(false);
+            }, 150);
+          }}
         />
       </IonItem>
-      {showRazaList &&
-        razaQuery &&
-        especieSeleccionada &&
-        filteredRazas.length > 0 && (
-          <IonList className="filter-list">
-            {loadingRazas ? (
-              <IonItem>
-                <IonSpinner />
-                <IonLabel>Cargando razas...</IonLabel>
+      {showRazaList && especieSeleccionada && filteredRazas.length > 0 && (
+        <IonList className="filter-list">
+          {loadingRazas ? (
+            <IonItem>
+              <IonSpinner />
+              <IonLabel>Cargando razas...</IonLabel>
+            </IonItem>
+          ) : (
+            filteredRazas.map((raza: any) => (
+              <IonItem
+                key={raza.id_raza}
+                button
+                onClick={() => selectRaza(raza.id_raza, raza.nombre)}
+              >
+                <IonLabel>{raza.nombre}</IonLabel>
               </IonItem>
-            ) : (
-              filteredRazas.map((raza: any) => (
-                <IonItem
-                  key={raza.id_raza}
-                  button
-                  onClick={() => selectRaza(raza.id_raza, raza.nombre)}
-                >
-                  <IonLabel>{raza.nombre}</IonLabel>
-                </IonItem>
-              ))
-            )}
-          </IonList>
-        )}
+            ))
+          )}
+        </IonList>
+      )}
     </>
   );
 };

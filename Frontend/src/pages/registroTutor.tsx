@@ -86,8 +86,12 @@ const RegistroTutor: React.FC = () => {
 
   // Filtrar regiones basado en la búsqueda (ahora busca en el formato legible)
   const filteredRegiones = useMemo(() => {
-    if (!regionQuery.trim()) return [];
     return regiones.filter((region) => {
+      // Si no hay búsqueda, mostrar todas las regiones
+      if (!regionQuery.trim()) {
+        return true;
+      }
+      // Si hay búsqueda, filtrar por nombre
       const formattedName = formatRegionName(region);
       return (
         formattedName.toLowerCase().includes(regionQuery.toLowerCase()) ||
@@ -98,11 +102,16 @@ const RegistroTutor: React.FC = () => {
 
   // Filtrar comunas basado en la región seleccionada y la búsqueda
   const filteredComunas = useMemo(() => {
-    if (!selectedRegion || !comunaQuery.trim()) return [];
+    if (!selectedRegion) return [];
     const region = regiones.find((r) => r.id === selectedRegion.id);
     if (!region || !region.communes) return [];
 
     return region.communes.filter((comuna: any) => {
+      // Si no hay búsqueda, mostrar todas las comunas
+      if (!comunaQuery.trim()) {
+        return true;
+      }
+      // Si hay búsqueda, filtrar por nombre
       const formattedName = formatComunaName(comuna.name);
       return (
         formattedName.toLowerCase().includes(comunaQuery.toLowerCase()) ||

@@ -34,9 +34,15 @@ export const SelectorEspecie: React.FC<SelectorEspecieProps> = ({
             setShowEspecieList(true);
           }}
           onIonFocus={() => setShowEspecieList(true)}
+          onIonBlur={() => {
+            // Pequeño delay para permitir que el click en la lista se registre
+            setTimeout(() => {
+              setShowEspecieList(false);
+            }, 150);
+          }}
         />
       </IonItem>
-      {showEspecieList && especieQuery && filteredEspecies.length > 0 && (
+      {showEspecieList && filteredEspecies.length > 0 && (
         <IonList className="filter-list">
           {loadingEspecies ? (
             <IonItem>
