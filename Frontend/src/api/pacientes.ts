@@ -1,28 +1,38 @@
 const API_URL = import.meta.env.VITE_API_URL; // usa tu variable de entorno
 
+// Interfaz para crear un paciente (solo los campos necesarios)
+export interface PacienteCreate {
+  nombre: string;
+  id_raza: number;
+  sexo: string;
+  color: string;
+  fecha_nacimiento: string;
+  codigo_chip?: string;
+}
+
 export interface PacienteData {
-    id_paciente: number;
-    nombre: string;
-    fecha_nacimiento: string | null; // Formato ISO 8601: "YYYY-MM-DD"
-    color: string | null;
-    esterilizado: boolean | null;
-    id_raza: number | null;
-    // Información de la raza
-    raza: string | null;
-    // Información de la especie
-    especie: string | null;
-    // Información del tutor
-    tutor: {
-        nombre: string | null;
-        apellido_paterno: string | null;
-        apellido_materno: string | null;
-        rut: string | null;
-        telefono: number | null;
-        email: string | null;
-    } | null;
-    // Campos opcionales que podrías tener en el modelo
-    sexo?: string;
-    codigo_chip?: string;
+  id_paciente: number;
+  nombre: string;
+  fecha_nacimiento: string | null; // Formato ISO 8601: "YYYY-MM-DD"
+  color: string | null;
+  esterilizado: boolean | null;
+  id_raza: number | null;
+  // Información de la raza
+  raza: string | null;
+  // Información de la especie
+  especie: string | null;
+  // Información del tutor
+  tutor: {
+    nombre: string | null;
+    apellido_paterno: string | null;
+    apellido_materno: string | null;
+    rut: string | null;
+    telefono: number | null;
+    email: string | null;
+  } | null;
+  // Campos opcionales que podrías tener en el modelo
+  sexo?: string;
+  codigo_chip?: string;
 }
 
 // Agregar interfaces para la respuesta paginada
@@ -40,8 +50,10 @@ export interface PaginatedResponse {
   };
 }
 
-{/* Ruta para crear un nuevo paciente */}
-export async function crearPaciente(formData: PacienteData) {
+{
+  /* Ruta para crear un nuevo paciente */
+}
+export async function crearPaciente(formData: PacienteCreate) {
   try {
     console.log("Enviando datos al servidor:", formData);
     const response = await fetch(`${API_URL}/pacientes/`, {
@@ -60,7 +72,7 @@ export async function crearPaciente(formData: PacienteData) {
     console.log("Respuesta del servidor:", data);
     return data;
   } catch (error) {
-    console.error("Error creando tutor:", error);
+    console.error("Error creando paciente:", error);
     throw error;
   }
 }
@@ -99,9 +111,9 @@ export async function obtenerPacientesPaginados(
       page: page.toString(),
       limit: limit.toString(),
     });
-    
+
     if (search) {
-      params.append('search', search);
+      params.append("search", search);
     }
 
     console.log(`Obteniendo pacientes página ${page}...`);
@@ -117,7 +129,7 @@ export async function obtenerPacientesPaginados(
     }
 
     const data = await response.json();
-    console.log("Tutores paginados obtenidos:", data);
+    console.log("Pacientes paginados obtenidos:", data);
     return data;
   } catch (error) {
     console.error("Error obteniendo pacientes paginados:", error);

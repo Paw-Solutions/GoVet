@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { obtenerEspecies, obtenerRazas } from "../api/especies";
-import { registrarPaciente, PacienteData } from "../api/pacientes";
+import { crearPaciente, PacienteCreate } from "../api/pacientes";
 
 export interface FormData {
   nombre: string;
@@ -133,7 +133,7 @@ export const useRegistroPaciente = () => {
         return;
       }
 
-      const pacienteData: PacienteData = {
+      const pacienteData: PacienteCreate = {
         nombre: formData.nombre,
         id_raza: parseInt(formData.raza),
         sexo: formData.sexo,
@@ -142,7 +142,7 @@ export const useRegistroPaciente = () => {
         codigo_chip: formData.codigo_chip || "",
       };
 
-      const resultado = await registrarPaciente(pacienteData);
+      const resultado = await crearPaciente(pacienteData);
       console.log("✅ Paciente registrado exitosamente:", resultado);
       setToastMessage("Paciente registrado exitosamente");
 
