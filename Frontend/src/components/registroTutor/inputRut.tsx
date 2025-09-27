@@ -16,7 +16,7 @@ const InputRut = forwardRef<InputRutHandle, InputRutProps>(({ onRutChange }, ref
     mask: [
       /\d/, /\d/, '.',
       /\d/, /\d/, /\d/, '.',
-      /\d/, /\d/, /\d/, '-', /\d/,
+      /\d/, /\d/, /\d/, '-',  /[\dKk]/,
     ],
   };
   const rutMask = useMaskito({ options: rutMaskOptions });
@@ -47,7 +47,7 @@ const InputRut = forwardRef<InputRutHandle, InputRutProps>(({ onRutChange }, ref
   };
 
   const handleBlur = () => {
-    let cleanRut = myRut.replace(/\D/g, '');
+    let cleanRut = myRut.replace(/[^0-9Kk]/g, '');
     if (cleanRut.length === 8) {
       cleanRut = '0' + cleanRut;
       const formattedRut = maskitoTransform(cleanRut, rutMaskOptions);

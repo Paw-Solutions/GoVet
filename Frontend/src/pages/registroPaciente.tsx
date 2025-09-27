@@ -163,6 +163,19 @@ const RegistroPaciente: React.FC = () => {
                     placeholder="Ej: Naranja demoniaco"
                     value={formData.color}
                     onIonInput={handleInputChange}
+                    onKeyDown={(e) => {
+                      // Permitimos letras con acentos y ñ
+                      const regex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]$/;
+
+                      // Lista blanca de teclas de control
+                      const teclasPermitidas = [
+                        "Backspace", "Delete", "ArrowLeft", "ArrowRight", "Tab", "Home", "End"
+                      ];
+
+                      if (!regex.test(e.key) && !teclasPermitidas.includes(e.key)) {
+                        e.preventDefault(); // bloquea lo demás
+                      }
+                    }}
                   />
                 </IonItem>
               </IonCol>
