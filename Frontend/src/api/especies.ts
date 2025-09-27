@@ -28,7 +28,7 @@ export async function obtenerEspecies() {
 export async function obtenerRazas(especieId: string) {
   try {
     console.log(`Obteniendo razas para la especie ID: ${especieId}...`);
-    const response = await fetch(`${API_URL}/razas/especie/${especieId}/`, {
+    const response = await fetch(`${API_URL}/razas/especie/${especieId}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
