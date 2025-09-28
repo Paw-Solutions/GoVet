@@ -34,8 +34,15 @@ import {
   saveOutline,
   pawOutline,
   personOutline,
+  idCardOutline,
+  mailOutline,
+  callOutline,
+  calendarOutline,
+  fishOutline,
+  informationOutline,
+  informationCircleOutline
 } from "ionicons/icons";
-import "../styles/registroTutor.css";
+import "../styles/rellenarFicha.css";
 import "../styles/variables.css";
 import ModalEscogerPaciente from '../components/modalEscogerPaciente';
 import { PacienteData } from '../api/pacientes'; // Importar la interfaz correcta
@@ -217,66 +224,7 @@ const RellenarFicha: React.FC = () => {
             <IonGrid>
             <IonRow>
                 <IonCol>
-                    <IonButton 
-                        expand="block" 
-                        fill="outline" 
-                        onClick={() => setShowModalPacientes(true)}
-                    >
-                        <IonIcon icon={pawOutline} slot="start" />
-                        {selectedPaciente ? `${selectedPaciente.nombre} - ${selectedPaciente.especie}` : 'Seleccionar Paciente'}
-                    </IonButton>
-                </IonCol>
-            </IonRow>
-
-            {/* Información del tutor (solo si hay paciente seleccionado) */}
-            <IonRow>
-            <IonCol>
-                {selectedPaciente && selectedPaciente.tutor ? (
-                <div>
-                    <IonText>
-                    <div>
-                        <IonIcon icon={personOutline} />
-                        <strong> Información del Tutor</strong>
-                    </div>
-                    <div>
-                        <p>
-                        <strong>Nombre:</strong> {selectedPaciente.tutor.nombre}{" "}
-                        {selectedPaciente.tutor.apellido_paterno}{" "}
-                        {selectedPaciente.tutor.apellido_materno}
-                        </p>
-                        <p>
-                        <strong>RUT:</strong> {selectedPaciente.tutor.rut}
-                        </p>
-                        {selectedPaciente.tutor.telefono && (
-                        <p>
-                            <strong>Teléfono:</strong> {selectedPaciente.tutor.telefono}
-                        </p>
-                        )}
-                        {selectedPaciente.tutor.email && (
-                        <p>
-                            <strong>Email:</strong> {selectedPaciente.tutor.email}
-                        </p>
-                        )}
-                    </div>
-                    </IonText>
-                </div>
-                ) : (
-                <IonCard>
-                    <IonCardContent>
-                    <IonIcon icon={personOutline} style={{ marginRight: "8px" }} />
-                        <IonText>
-                            No existe información del tutor
-                        </IonText>
-                    </IonCardContent>
-                </IonCard>
-                )}
-            </IonCol>
-            </IonRow>
-
-
-            <IonRow>
-                <IonCol>
-                    <IonItem>
+                    <IonItem className="padding">
                         <IonTextarea
                         label="Motivo de la Consulta"
                         labelPlacement="stacked"
@@ -290,7 +238,222 @@ const RellenarFicha: React.FC = () => {
                     </IonItem>
                 </IonCol>
             </IonRow>
+
+
+            <IonRow>
+                <IonCol className="ficha-general-container">
+                    <IonButton 
+                        expand="block" 
+                        fill="outline" 
+                        onClick={() => setShowModalPacientes(true)}
+                    >
+                        {selectedPaciente ? 'Cambiar Paciente' : 'Seleccionar Paciente'}
+                    </IonButton>
+                </IonCol>
+            </IonRow>
+
+            {/* Información del paciente seleccionado */}
+            <IonRow>
+            <IonCol className="form-element-spacing">
+            {selectedPaciente ? (
+                    <IonCard>
+                    <IonCardContent>
+                        <IonText>
+                        <div style={{ 
+                            display: 'flex', 
+                            flexDirection: 'column', 
+                            gap: '8px' 
+                        }}>
+                            {/* Nombre del paciente */}
+                            <div style={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: '8px' 
+                            }}>
+                            <IonIcon 
+                                icon={pawOutline} 
+                            />
+                            <span>
+                                <strong>
+                                {selectedPaciente.nombre}
+                                </strong>
+                            </span>
+                            </div>
+
+                            {/*Especie del paciente */}
+                            <div style={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: '8px' 
+                            }}>
+                            <IonIcon 
+                                icon={informationCircleOutline} 
+                            />
+                            <span>
+                                <strong>Especie: </strong> {selectedPaciente.especie}
+                            </span>
+                            </div>
+
+                            {/* Raza del paciente */} 
+                            <div style={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: '8px' 
+                            }}>
+                            <IonIcon 
+                                icon={informationCircleOutline} 
+                            />
+                            <span>
+                                <strong>Raza: </strong> {selectedPaciente.raza}
+                            </span>
+                            </div>
+                            {/* Sexo del paciente */} 
+                            <div style={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: '8px' 
+                            }}>
+                            <IonIcon 
+                                icon={informationCircleOutline} 
+                            />
+                            <span>
+                                <strong>Sexo: </strong> {selectedPaciente.sexo ? (selectedPaciente.sexo === "M" ? "Macho" : "Hembra") : 'No especificado'}
+                            </span>
+                            </div>
+                            {/* Edad del paciente */}
+                            {selectedPaciente.fecha_nacimiento && (
+                            <div style={{ 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                gap: '8px' 
+                            }}>
+                                <IonIcon 
+                                icon={calendarOutline} 
+                            />
+                            <span>
+                                <strong>Fecha de Nacimiento:</strong> {new Date(selectedPaciente.fecha_nacimiento).toLocaleDateString()}
+                            </span>
+                            </div>
+                            )}
+                        </div>
+                        </IonText>
+                    </IonCardContent>
+                    </IonCard>
+            ) : (
+                <IonCard>
+                    <IonCardContent style={{ 
+                              display: 'flex', 
+                              alignItems: 'center', 
+                              gap: '8px' 
+                            }}>
+                    <IonIcon icon={pawOutline} style={{ marginRight: "8px" }} />
+                        <IonText>
+                            No se ha seleccionado ningún paciente.
+                        </IonText>
+                    </IonCardContent>
+                </IonCard>
+            )}
+            </IonCol>
+            </IonRow>
+
+            {/* Información del tutor (solo si hay paciente seleccionado) */}
+            <IonRow>
+            <IonCol className="form-element-spacing">
+                {selectedPaciente && selectedPaciente.tutor ? (
+                <div>
+                  <IonCard>
+                    <IonCardContent>
+                      <IonText>
+                        <div style={{ 
+                          display: 'flex', 
+                          flexDirection: 'column', 
+                          gap: '8px' 
+                        }}>
+                          {/* Nombre del tutor */}
+                          <div style={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: '8px' 
+                          }}>
+                            <IonIcon 
+                              icon={personOutline} 
+                            />
+                            <span>
+                              <strong>
+                                {selectedPaciente.tutor.nombre} {selectedPaciente.tutor.apellido_paterno} {selectedPaciente.tutor.apellido_materno}
+                              </strong>
+                            </span>
+                          </div>
+
+                          {/* RUT del tutor */}
+                          <div style={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: '8px' 
+                          }}>
+                            <IonIcon 
+                              icon={idCardOutline} 
+                            />
+                            <span>
+                              <strong>RUT:</strong> {selectedPaciente.tutor.rut}
+                            </span>
+                          </div>
+
+                          {/* Teléfono (condicional) */}
+                          {selectedPaciente.tutor.telefono && (
+                            <div style={{ 
+                              display: 'flex', 
+                              alignItems: 'center', 
+                              gap: '8px' 
+                            }}>
+                              <IonIcon 
+                                icon={callOutline} 
+                              />
+                              <span>
+                                <strong>Teléfono:</strong> {selectedPaciente.tutor.telefono}
+                              </span>
+                            </div>
+                          )}
+
+                          {/* Email (condicional) */}
+                          {selectedPaciente.tutor.email && (
+                            <div style={{ 
+                              display: 'flex', 
+                              alignItems: 'center', 
+                              gap: '8px' 
+                            }}>
+                              <IonIcon 
+                                icon={mailOutline} 
+                              />
+                              <span>
+                                <strong>Email:</strong> {selectedPaciente.tutor.email}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </IonText>
+                    </IonCardContent>
+                  </IonCard>
+                </div>
+                
+                ) : (
+                <IonCard>
+                    <IonCardContent style={{ 
+                              display: 'flex', 
+                              alignItems: 'center', 
+                              gap: '8px' 
+                            }}>
+                    <IonIcon icon={personOutline} style={{ marginRight: "8px" }} />
+                        <IonText>
+                            No se ha seleccionado ningún paciente.
+                        </IonText>
+                    </IonCardContent>
+                </IonCard>
+                )}
+            </IonCol>
+            </IonRow>
             </IonGrid>
+            
         )}
 
         {/* Paso 2: Examen Físico */}

@@ -1,0 +1,157 @@
+/* Contenedor general para alineación consistente */
+.ficha-general-container {
+  padding: 0 16px;
+}
+
+/* Remover padding interno de los elementos para alineación perfecta */
+.ficha-general-container .ion-margin,
+.ficha-general-container .ion-padding {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Alineación del botón de seleccionar paciente */
+.ficha-general-container ion-button {
+  margin: 0px 0; /* Reducido de 16px a 0px */
+  --padding-start: 16px;
+  --padding-end: 16px;
+}
+
+/* Alineación de las cards */
+.ficha-general-container ion-card {
+  margin: 0px 0; /* Reducido de 16px a 0px */
+  width: 100%;
+}
+
+.ficha-general-container ion-card ion-card-content {
+  padding: 1px; /* Reducido de 16px a 12px */
+}
+
+/* Alineación de los inputs/textarea - MODIFICADO */
+.ficha-general-container ion-item {
+  --padding-start: 0px;
+  --padding-end: 0px;
+  --inner-padding-start: 0px;
+  --inner-padding-end: 0px;
+  margin: 0px 0; /* Reducido de 16px a 0px */
+  padding: 0; /* Remover padding por defecto */
+}
+
+/* Ajuste específico para inputs y textareas - ACTUALIZADO */
+.ficha-general-container ion-textarea,
+.ficha-general-container ion-input {
+  --padding-start: 0px; /* Cambiado de 16px a 0px */
+  --padding-end: 0px; /* Cambiado de 16px a 0px */
+  --padding-top: 16px;
+  --padding-bottom: 16px;
+  margin: 0;
+  width: 100%;
+}
+
+/* Contenedor del item para alineación perfecta - NUEVO */
+.ficha-general-container .input-container {
+  padding: 0;
+  margin: 0;
+  width: 100%;
+}
+
+/* Ajuste específico para elementos outline - NUEVO */
+.ficha-general-container ion-input[fill="outline"],
+.ficha-general-container ion-textarea[fill="outline"] {
+  --border-radius: 8px;
+  --border-width: 2px;
+  --border-color: var(--ion-color-light-shade);
+  margin: 0;
+}
+
+.ficha-general-container ion-input[fill="outline"]:focus-within,
+.ficha-general-container ion-textarea[fill="outline"]:focus-within {
+  --border-color: var(--ion-color-primary);
+}
+
+/* Información del tutor - alineación consistente */
+.tutor-info-card {
+  background: var(--ion-color-light);
+  border-radius: 0px;
+  padding: 12px; /* Reducido de 16px a 12px */
+  margin: 0px 0; /* Reducido de 16px a 0px */
+  border: 1px solid var(--ion-color-light-shade);
+}
+
+.tutor-info-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px; /* Reducido de 0px a 6px */
+}
+
+.tutor-info-header ion-icon {
+  margin-right: 6px;
+  font-size: 16px;
+}
+
+.tutor-info-content {
+  font-size: 12px;
+  color: var(--ion-color-medium);
+}
+
+.tutor-info-content p {
+  margin: 2px 0;
+}
+
+/* Remover margins por defecto de IonGrid en esta sección */
+.ficha-general-container ion-grid {
+  padding: 0;
+}
+
+.ficha-general-container ion-row {
+  margin: 0;
+}
+
+.ficha-general-container ion-col {
+  padding: 0;
+}
+
+/* Indicador de progreso alineado */
+.progress-indicator {
+  padding: 12px 16px; /* Reducido padding vertical de 16px a 12px */
+  border-bottom: 1px solid var(--ion-color-light-shade);
+  margin-bottom: 0;
+}
+
+.progress-indicator div {
+  margin: 0;
+}
+
+.progress-indicator h3 {
+  margin: 0 0 4px 0;
+  font-size: 1.2em;
+  font-weight: 600;
+}
+
+.progress-indicator p {
+  margin: 0;
+  color: var(--ion-color-medium);
+  font-size: 0.9em;
+}
+
+/* Espaciado consistente entre elementos - ACTUALIZADO */
+.form-element-spacing {
+  margin: 0px 0; /* Reducido de 16px a 0px */
+}
+
+ion-icon {
+    font-size: 16px;
+    min-width: 16px;
+    color: var(--ion-color-secondary);
+}
+
+/* Clase adicional para espaciado mínimo cuando sea necesario */
+.compact-spacing {
+  margin: 4px 0 !important;
+}
+
+
+
+.padding {
+  --padding-start: 0.5rem;
+}

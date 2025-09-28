@@ -245,6 +245,7 @@ def obtener_pacientes_paginados(
             "nombre": paciente.nombre,
             "fecha_nacimiento": paciente.fecha_nacimiento.isoformat() if paciente.fecha_nacimiento else None,
             "color": paciente.color,
+            "sexo": paciente.sexo,
             "esterilizado": paciente.esterilizado,
             "id_raza": paciente.id_raza,
             # Información de la raza
