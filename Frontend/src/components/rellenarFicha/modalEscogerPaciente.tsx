@@ -25,10 +25,10 @@ import {
   closeOutline,
   checkmarkOutline,
 } from "ionicons/icons";
-import { PacienteData, PaginatedResponse } from "../api/pacientes";
-import { obtenerPacientesPaginados } from '../api/pacientes';
-import "../styles/escogerPaciente.css";
-import "../styles/main.css"
+import { PacienteData, PaginatedResponse } from "../../api/pacientes";
+import { obtenerPacientesPaginados } from '../../api/pacientes';
+import "../../styles/escogerPaciente.css";
+import "../../styles/main.css"
 
 interface ModalEscogerPacienteProps {
   isOpen: boolean;

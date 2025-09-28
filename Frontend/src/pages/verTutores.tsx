@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   IonPage,
   IonHeader,
@@ -21,11 +21,14 @@ import {
   IonInfiniteScrollContent,
 } from "@ionic/react";
 import {
+  eyeOutline,
+  pencilOutline,
   personOutline,
   refreshOutline,
 } from "ionicons/icons";
 import { TutorData } from "../api/tutores";
-import { obtenerTutoresPaginados } from "../components/listaTutores";
+import { obtenerTutoresPaginados } from "../components/verTutores/listaTutores";
+import ModalInfoTutor from "../components/verTutores/infoTutor";
 import "../styles/verTutores.css";
 
 interface PaginatedResponse {
@@ -50,9 +53,13 @@ const VerTutores: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMoreData, setHasMoreData] = useState(true);
   const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
+  
+  // Estados para el modal de información del tutor
+  const [showTutorInfo, setShowTutorInfo] = useState(false);
+  const [selectedTutor, setSelectedTutor] = useState<TutorData | null>(null);
 
   // Función para cargar tutores (inicial o búsqueda)
-  const handleGetTutores = async (resetList: boolean = true, search?: string) => {
+  const handleGetTutores = useCallback(async (resetList: boolean = true, search?: string) => {
     setLoading(true);
     setError("");
 
@@ -75,10 +82,10 @@ const VerTutores: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage]);
 
   // Función para manejar búsqueda con debounce
-  const handleSearch = (texto: string) => {
+  const handleSearch = useCallback((texto: string) => {
     setBusqueda(texto);
     
     if (searchTimeout) {
@@ -90,32 +97,55 @@ const VerTutores: React.FC = () => {
     }, 500);
     
     setSearchTimeout(timeout);
-  };
+  }, [searchTimeout, handleGetTutores]);
+
+  // Función para ver detalles del tutor
+  const handleViewTutor = useCallback((tutor: TutorData) => {
+    setSelectedTutor(tutor);
+    setShowTutorInfo(true);
+  }, []);
+
+  // Función para cerrar el modal - MEJORADA
+  const handleCloseTutorInfo = useCallback(() => {
+    setShowTutorInfo(false);
+    // Pequeño delay para evitar conflictos de estado
+    setTimeout(() => {
+      setSelectedTutor(null);
+    }, 150);
+  }, []);
+
+  // Función para editar el tutor
+  const handleEditTutor = useCallback((tutor: TutorData) => {
+    console.log("Editar tutor:", tutor);
+  }, []);
 
   // Función para cargar más datos (scroll infinito)
-  const loadMoreData = async (event: CustomEvent) => {
+  const loadMoreData = useCallback(async (event: CustomEvent) => {
     if (hasMoreData && !loading) {
       await handleGetTutores(false, busqueda.trim() || undefined);
     }
     (event.target as HTMLIonInfiniteScrollElement).complete();
-  };
+  }, [hasMoreData, loading, handleGetTutores, busqueda]);
 
   // Función para manejar el refresh
-  const handleRefresh = async (event: CustomEvent) => {
+  const handleRefresh = useCallback(async (event: CustomEvent) => {
     await handleGetTutores(true, busqueda.trim() || undefined);
     event.detail.complete();
-  };
+  }, [handleGetTutores, busqueda]);
 
   // Cargar tutores al montar el componente
   useEffect(() => {
     handleGetTutores();
-    
+  }, []);
+
+  // Limpiar timeouts al desmontar el componente
+  useEffect(() => {
     return () => {
       if (searchTimeout) {
         clearTimeout(searchTimeout);
       }
     };
-  }, []);
+  }, [searchTimeout]);
 
   return (
     <IonPage>
@@ -126,7 +156,10 @@ const VerTutores: React.FC = () => {
           </IonButtons>
           <IonTitle>Ver Tutores</IonTitle>
           <IonButtons slot="end">
-            <IonButton onClick={() => handleGetTutores(true, busqueda.trim() || undefined)} disabled={loading}>
+            <IonButton 
+              onClick={() => handleGetTutores(true, busqueda.trim() || undefined)} 
+              disabled={loading}
+            >
               <IonIcon icon={refreshOutline} />
             </IonButton>
           </IonButtons>
@@ -158,6 +191,7 @@ const VerTutores: React.FC = () => {
           <div>
             <div style={{ height: "25px" }}></div>
           </div>
+          
           {/* Estado de carga inicial */}
           {loading && tutores.length === 0 && (
             <div className="loading-container">
@@ -213,16 +247,28 @@ const VerTutores: React.FC = () => {
               {/* Lista simple de tutores */}
               <IonList className="tutores-list">
                 {tutores.map((tutor, index) => (
-                  <IonItem key={`${tutor.rut}-${index}`} button lines="full">
+                  <IonItem key={`${tutor.rut}-${index}`} lines="full">
                     <IonIcon icon={personOutline} slot="start" />
                     <IonLabel>
                       <h2>{tutor.nombre} {tutor.apellido_paterno} {tutor.apellido_materno}</h2>
                       <p><strong>RUT:</strong> {tutor.rut}</p>
-                      {tutor.email && <p><strong>Email:</strong> {tutor.email}</p>}
-                      {tutor.comuna && tutor.region && (
-                        <p><strong>Ubicación:</strong> {tutor.comuna}, {tutor.region}</p>
-                      )}
                     </IonLabel>
+                    <IonButtons>
+                      <IonButton 
+                        fill="clear" 
+                        onClick={() => handleEditTutor(tutor)}
+                        disabled={loading}
+                      >
+                        <IonIcon className="icon" icon={pencilOutline} />
+                      </IonButton>
+                      <IonButton 
+                        fill="clear" 
+                        onClick={() => handleViewTutor(tutor)}
+                        disabled={loading}
+                      >
+                        <IonIcon className="icon" icon={eyeOutline} />
+                      </IonButton>
+                    </IonButtons>
                   </IonItem>
                 ))}
               </IonList>
@@ -242,6 +288,13 @@ const VerTutores: React.FC = () => {
           )}
         </div>
       </IonContent>
+
+      {/* Modal con información del tutor */}
+      <ModalInfoTutor
+        isOpen={showTutorInfo}
+        onDismiss={handleCloseTutorInfo}
+        tutor={selectedTutor}
+      />
     </IonPage>
   );
 };

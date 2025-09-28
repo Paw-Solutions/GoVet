@@ -44,7 +44,7 @@ import {
 } from "ionicons/icons";
 import "../styles/rellenarFicha.css";
 import "../styles/variables.css";
-import ModalEscogerPaciente from '../components/modalEscogerPaciente';
+import ModalEscogerPaciente from '../components/rellenarFicha/modalEscogerPaciente';
 import { PacienteData } from '../api/pacientes'; // Importar la interfaz correcta
 
 interface FichaVeterinaria {

@@ -22,7 +22,7 @@ import "@ionic/react/css/text-transformation.css";
 import "@ionic/react/css/flex-utils.css";
 import "@ionic/react/css/display.css";
 import RellenarFicha from "./pages/rellenarFicha";
-import ModalEscogerPaciente from "./components/modalEscogerPaciente";
+import ModalEscogerPaciente from "./components/rellenarFicha/modalEscogerPaciente";
 
 /*
  * Ionic Dark Mode

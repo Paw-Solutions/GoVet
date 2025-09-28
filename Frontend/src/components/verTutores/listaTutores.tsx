@@ -8,7 +8,7 @@ import {
   IonAvatar,
   IonLabel,
 } from '@ionic/react';
-import { TutorData } from '../api/tutores';
+import { TutorData } from '../../api/tutores';
 
 const API_URL = import.meta.env.VITE_API_URL; // Asegúrate de definir tu URL de API
 

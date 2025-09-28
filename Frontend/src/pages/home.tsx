@@ -34,7 +34,7 @@ import {
 import { useHistory } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import BotonAnadir from "../components/BotonAnadir";
-import ListaTutores from "../components/listaTutores";
+import ListaTutores from "../components/verTutores/listaTutores";
 
 import "../styles/home.css";
 
@@ -157,7 +157,7 @@ const Home: React.FC = () => {
       <IonFooter>
         <div className="boton-anadir-container">
           {/* Botón con opciones automáticas por defecto */}
-          <BotonAnadir tipo="opcionesDefault" />
+          <BotonAnadir tipo="opcionesDefault"/>
         </div>
       </IonFooter>
     </IonPage>

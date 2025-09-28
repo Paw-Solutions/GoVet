@@ -107,7 +107,7 @@ const BotonAnadir: React.FC<BotonAnadirProps> = ({
           disabled={disabled}
           onClick={() => setIsOpen(true)}
         >
-          <IonIcon slot="icon-only" icon={addOutline} />
+          <IonIcon slot="icon-only" icon={addOutline} color="white" />
         </IonButton>
 
         <IonPopover
@@ -144,7 +144,7 @@ const BotonAnadir: React.FC<BotonAnadirProps> = ({
       onClick={onClick}
       disabled={disabled}
     >
-      <IonIcon slot="icon-only" icon={icon} />
+      <IonIcon slot="icon-only" icon={icon}/>
     </IonButton>
   );
 };
