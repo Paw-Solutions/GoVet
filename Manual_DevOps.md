@@ -7,17 +7,19 @@ Estado actual de despliegue:
 - Servicios: Frontend (Vite dev server), Backend (FastAPI), Base de datos (PostgreSQL)
 - Acceso: govet.inf.uach.cl (por la configuración del servidor del curso)
 
-Contenido
-- 1. Arquitectura y servicios
-- 2. Requisitos
-- 3. Variables de entorno (.env)
-- 4. Primer despliegue (setup)
-- 5. Despliegue/actualización (release)
-- 6. Operación diaria (start/stop/restart)
-- 7. Pruebas rápidas (health checks)
-- 8. Logs y depuración
-- 9. Base de datos (shell, backup, restore)
-- 10. Versionado, releases y rollback
+--- 
+
+## Contenido
+1. [Arquitectura y servicios](#1-arquitectura-y-servicios)
+2. [Requisitos](#2-requisitos)
+3. [Variables de entorno (.env)](#3-variables-de-entorno-env)
+4. [Primer despliegue (setup)](#4-primer-despliegue-setup)
+5. [Despliegue/actualización (release)](#5-despliegue--actualización-release)
+6. [Operación diaria (start/stop/restart)](#6-operación-diaria)
+7. [Pruebas rápidas (health checks)](#7-pruebas-rápidas-health-checks-y-smoke)
+8. [Logs y depuración](#8-logs-y-depuración)
+9. [Base de datos (shell, backup, restore)](#9-base-de-datos)
+10. [Versionado, releases y rollback](#10-versionado-releases-y-rollback)
 
 ---
 
