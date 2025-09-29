@@ -16,18 +16,22 @@ const BarraLateral: React.FC = () => {
 
   const navegarARegistroTutor = () => {
     history.push("/registro-tutor");
+    cerrarMenu();
   };
 
   const navegarARegistroPaciente = () => {
     history.push("/registro-paciente");
+    cerrarMenu();
   };
 
   const navegarAHome = () => {
     history.push("/");
+    cerrarMenu();
   };
 
   const navegarAVerTutores = () => {
     history.push("/ver-tutores");
+    cerrarMenu();
   };
 
   const cerrarMenu = () => {
