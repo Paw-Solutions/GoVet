@@ -63,3 +63,9 @@
 	--ion-color-dark-tint: #444444;
 
 }
+
+.cls-1 {
+  fill: currentColor;
+  stroke-miterlimit: 10;
+  stroke-width: 1.92px;
+}

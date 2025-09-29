@@ -85,26 +85,26 @@
   font-size: 1.2rem;
 }
 
+ion-icon.pacientes-icon {
+  font-size: 1.1rem;
+}
+
 .info-card-content {
   padding: 1rem;
   background: rgba(250, 249, 251, 0.8);
 }
 
-.info-info-item {
-  display: flex;
+.info-item {
   align-items: center;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.2rem;
   padding: 0.25rem 0;
-  color: #374151;
-  font-size: 0.9rem;
-  line-height: 1.4;
 }
 
-.info-info-item:last-child {
+.info-item:last-child {
   margin-bottom: 0;
 }
 
-.info-info-item strong {
+.info-item strong {
   margin-right: 0.5rem;
   color: #8b7a94;
   min-width: 4.5rem;
@@ -179,12 +179,12 @@
     max-width: none;
   }
 
-  .info-info-item {
+  .info-item {
     font-size: 1rem;
   }
 
   .tutor-name {
-    font-size: 1.2rem;
+    font-size: 1rem;
   }
 
   .search-container {

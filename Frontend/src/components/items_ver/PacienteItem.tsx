@@ -139,61 +139,52 @@ const PacienteItem: React.FC<PacienteItemProps> = ({
   return (
     <IonItem lines="full" className="info-item">
       <IonAvatar slot="start" className={`avatar-${getAvatarColor()}`}>
-        <IonIcon icon={getIcon()} color={getAvatarColor()} size='default'/>
+        <IonIcon icon={getIcon()} size='default'/>
       </IonAvatar>
       
-      <IonLabel>
+      <IonLabel style={{ padding: '5px' }}>
         {/* Nombre del paciente */}
         <h2 className="paciente-nombre">
           {paciente.nombre}
-          {paciente.fecha_nacimiento && (
-            <IonText style={{ marginLeft: '8px'}}>
-              ({calculateAge(paciente.fecha_nacimiento)})
-            </IonText>
-          )}
           {paciente.sexo && (
-            <span style={{ marginLeft: '8px' }}>
+            <span style={{ marginLeft: '8px'}}>
               <IonIcon icon={getSexIcon(paciente.sexo)} />
             </span>
           )}
         </h2>
 
         {/* Información básica */}
-        <div className="info-info">
-          {paciente.raza && (
-            <p>{paciente.raza}</p>
-          )}
-            {paciente.color && (
-            <div className="info-info">
-                <IonIcon src="/color.svg"/>
-                <span><p>{paciente.color}</p></span>
-            </div>
-            )}
+        {paciente.raza && (
+          <div className="info-item">
+              <div>
+                  <IonIcon src="/raza.svg" className='pacientes-icon'/>
+                  <span style={{marginLeft: '8px'}}>{paciente.raza} {paciente.fecha_nacimiento && (
+                    <IonText style={{ marginLeft: '3px'}}>
+                      ({calculateAge(paciente.fecha_nacimiento)})
+                    </IonText>
+                  )}</span>
+              </div>
+          </div>
+              )}
+        {paciente.color && (
+        <div className="info-item">
+            <IonIcon src="/color.svg" className='pacientes-icon'/>
+            <span style={{marginLeft: '8px'}}>{paciente.color}</span>
         </div>
-
-        {/* Información adicional */}
-        <div className="info-details">
-          {paciente.codigo_chip && (
-            <IonText color="medium" className="info-item">
-              <span>Chip: {paciente.codigo_chip}</span>
-            </IonText>
-          )}
-        </div>
+        )}
 
         {/* Información del tutor */}
         {showTutor && (
-          <div className="info-info">
+          <div className="info-item">
+            <IonIcon className='pacientes-icon' icon={personOutline} />
             {paciente.tutor?.nombre ? (
-              <IonText color="tertiary" className="tutor-name">
-                <IonIcon icon={personSharp} />
                 <span>
                   : {paciente.tutor.nombre} {paciente.tutor.apellido_paterno}
                 </span>
-              </IonText>
             ) : (
-              <IonText color="medium" className="no-tutor">
-                <IonIcon icon={personOutline} />
-                <span>Sin tutor asignado</span>
+              <IonText className="tutor-name">
+                <IonIcon icon={personOutline} className='pacientes-icon' />
+                <span style={{ marginLeft: '8px' }}>Sin tutor asignado</span>
               </IonText>
             )}
           </div>
