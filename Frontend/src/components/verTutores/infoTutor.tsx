@@ -152,6 +152,63 @@ const ModalInfoTutor: React.FC<ModalInfoTutorProps> = ({ isOpen, onDismiss, tuto
                   </IonItem>
                 )}
 
+                {/* Teléfono 2 */}
+                {tutor.telefono2 && (
+                  <IonItem>
+                    <IonLabel>
+                      <h2>Teléfono 2</h2>
+                      <p>{tutor.telefono2}</p>
+                    </IonLabel>
+                    <IonButton
+                      fill="clear"
+                      size="small"
+                      color="secondary"
+                      onClick={() => handleCall(tutor.telefono2!)}
+                    >
+                      <IonIcon icon={callOutline} slot="start" />
+                      Llamar
+                    </IonButton>
+                  </IonItem>
+                )}
+
+                {/* Celular */}
+                {tutor.celular && (
+                  <IonItem>
+                    <IonLabel>
+                      <h2>Celular</h2>
+                      <p>{tutor.celular}</p>
+                    </IonLabel>
+                    <IonButton
+                      fill="clear"
+                      size="small"
+                      color="secondary"
+                      onClick={() => handleCall(tutor.celular!)}
+                    >
+                      <IonIcon icon={callOutline} slot="start" />
+                      Llamar
+                    </IonButton>
+                  </IonItem>
+                )}
+
+                {/* Celular 2 */}
+                {tutor.celular2 && (
+                  <IonItem>
+                    <IonLabel>
+                      <h2>Celular 2</h2>
+                      <p>{tutor.celular2}</p>
+                    </IonLabel>
+                    <IonButton
+                      fill="clear"
+                      size="small"
+                      color="secondary"
+                      onClick={() => handleCall(tutor.celular2!)}
+                    >
+                      <IonIcon icon={callOutline} slot="start" />
+                      Llamar
+                    </IonButton>
+                  </IonItem>
+                )}
+
                 {/* Email */}
                 {tutor.email && tutor.email !== "NaN" && tutor.email.trim() !== "" && (
                   <IonItem>
