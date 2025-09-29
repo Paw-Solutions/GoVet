@@ -1,6 +1,4 @@
-/* Estilos para la página Ver Tutores - PWA Optimizado */
-
-.tutores-container {
+.info-container {
   padding: 1rem;
   max-width: 75rem; /* 1200px */
   margin: 0 auto;
@@ -10,26 +8,26 @@
   margin-bottom: 1rem;
 }
 
-.tutores-searchbar {
+.searchbar {
   --background: linear-gradient(135deg, #faf9fb, #f5f3f7);
   --border-radius: 0.75rem;
-  --box-shadow: 0 0.125rem 0.5rem rgba(221, 207, 228, 0.3);
+  --box-shadow: 0 0.125rem 0.5rem rgba(209, 228, 207, 0.3);
   margin: 0.5rem 0;
   --color: #374151;
   --placeholder-color: #9ca3af;
   position: fixed;
-  top: 55px;
+  top: 130px;
   left: 0px;
   z-index: 1000;
 }
 
-.tutores-searchbar .searchbar-input {
+.searchbar .searchbar-input {
   border: 0.0625rem solid rgba(221, 207, 228, 0.4) !important;
 }
 
 .results-counter {
   text-align: center;
-  margin: 1rem 0;
+  margin-top: 2rem;
   padding: 0.5rem;
   background: rgba(245, 243, 247, 0.8);
   border-radius: 0.5rem;
@@ -43,11 +41,11 @@
   font-weight: 500;
 }
 
-.tutores-list {
+.info-list {
   padding: 0;
 }
 
-.tutor-card {
+.info-card {
   border-radius: 1rem !important;
   margin: 1rem 0;
   box-shadow: 0 0.25rem 0.75rem rgba(221, 207, 228, 0.4),
@@ -58,14 +56,14 @@
   transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-.tutor-card:hover {
+.info-card:hover {
   transform: translateY(-0.125rem);
   box-shadow: 0 0.375rem 1rem rgba(221, 207, 228, 0.5),
     0 0.125rem 0.5rem rgba(221, 207, 228, 0.3) !important;
   background: linear-gradient(145deg, #f5f3f7, #f0ebf4);
 }
 
-.tutor-card-header {
+.info-card-header {
   background: linear-gradient(135deg, #ddcfe4, #d1c2db, #c4b5d2);
   color: #4a4a4a;
   border-radius: 1rem 1rem 0 0;
@@ -75,24 +73,24 @@
 
 .tutor-name {
   color: #4a4a4a !important;
-  font-weight: 600;
-  font-size: 1.1rem;
+  font-weight: 500;
+  font-size: 13px;
   display: flex;
   align-items: center;
   margin: 0;
 }
 
-.tutor-icon {
+.info-icon {
   margin-right: 0.5rem;
   font-size: 1.2rem;
 }
 
-.tutor-card-content {
+.info-card-content {
   padding: 1rem;
   background: rgba(250, 249, 251, 0.8);
 }
 
-.tutor-info-item {
+.info-info-item {
   display: flex;
   align-items: center;
   margin-bottom: 0.75rem;
@@ -102,23 +100,17 @@
   line-height: 1.4;
 }
 
-.tutor-info-item:last-child {
+.info-info-item:last-child {
   margin-bottom: 0;
 }
 
-.tutor-info-item strong {
+.info-info-item strong {
   margin-right: 0.5rem;
   color: #8b7a94;
   min-width: 4.5rem;
   font-weight: 600;
 }
 
-.info-icon {
-  margin-right: 0.5rem;
-  color: #a99bb0;
-  font-size: 1rem;
-  min-width: 1rem;
-}
 
 /* Estados de carga y error */
 .loading-container,
@@ -179,15 +171,15 @@
 /* Responsive design para PWA */
 @media (min-width: 48rem) {
   /* 768px - Tablet */
-  .tutores-container {
+  .info-container {
     padding: 1.5rem;
   }
 
-  .tutor-card {
+  .info-card {
     max-width: none;
   }
 
-  .tutor-info-item {
+  .info-info-item {
     font-size: 1rem;
   }
 
@@ -203,11 +195,11 @@
 
 @media (min-width: 64rem) {
   /* 1024px - Desktop */
-  .tutores-container {
+  .info-container {
     padding: 2rem;
   }
 
-  .tutores-list {
+  .info-list {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(25rem, 1fr));
     gap: 1.5rem;
@@ -226,31 +218,31 @@
 
 @media (min-width: 80rem) {
   /* 1280px - Large Desktop */
-  .tutores-list {
+  .info-list {
     grid-template-columns: repeat(auto-fit, minmax(28rem, 1fr));
     gap: 2rem;
   }
 }
 
 /* Animaciones para mejorar UX en PWA */
-.tutor-card {
+.info-card {
   opacity: 0;
   animation: fadeInUp 0.4s ease-out forwards;
 }
 
-.tutor-card:nth-child(1) {
+.info-card:nth-child(1) {
   animation-delay: 0.1s;
 }
-.tutor-card:nth-child(2) {
+.info-card:nth-child(2) {
   animation-delay: 0.2s;
 }
-.tutor-card:nth-child(3) {
+.info-card:nth-child(3) {
   animation-delay: 0.3s;
 }
-.tutor-card:nth-child(4) {
+.info-card:nth-child(4) {
   animation-delay: 0.4s;
 }
-.tutor-card:nth-child(5) {
+.info-card:nth-child(5) {
   animation-delay: 0.5s;
 }
 
@@ -267,11 +259,11 @@
 
 /* Optimizaciones para dispositivos táctiles */
 @media (hover: none) and (pointer: coarse) {
-  .tutor-card:hover {
+  .info-card:hover {
     transform: none;
   }
 
-  .tutor-card:active {
+  .info-card:active {
     transform: scale(0.98);
     transition: transform 0.1s ease;
   }

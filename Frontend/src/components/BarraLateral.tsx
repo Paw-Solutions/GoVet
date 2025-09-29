@@ -29,8 +29,8 @@ const BarraLateral: React.FC = () => {
     cerrarMenu();
   };
 
-  const navegarAVerTutores = () => {
-    history.push("/ver-tutores");
+  const navegarAVer = () => {
+    history.push("/ver");
     cerrarMenu();
   };
 
@@ -57,7 +57,7 @@ const BarraLateral: React.FC = () => {
           <IonItem button lines="none" onClick={navegarAHome}>
             <IonIcon icon={home} />
           </IonItem>
-          <IonItem button lines="none" onClick={navegarAVerTutores}>
+          <IonItem button lines="none" onClick={navegarAVer}>
             <IonIcon icon={eye} />
           </IonItem>
           <IonItem button lines="none" onClick={navegarARegistroTutor}>

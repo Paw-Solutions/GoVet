@@ -26,13 +26,13 @@ import {
   personOutline,
   refreshOutline,
 } from "ionicons/icons";
-import { TutorData } from "../api/tutores";
-import { obtenerTutoresPaginados } from "../components/verTutores/listaTutores";
-import ModalInfoTutor from "../components/verTutores/infoTutor";
-import "../styles/verTutores.css";
+import { PacienteData } from "../api/pacientes";
+import { obtenerPacientesPaginados } from "../components/verPacientes/listaPacientes";
+import ModalInfoPaciente from "../components/verPacientes/infoPaciente";
+import "../styles/verPacientes.css";
 
 interface PaginatedResponse {
-  tutores: TutorData[];
+  pacientes: PacienteData[];
   pagination: {
     current_page: number;
     total_pages: number;
@@ -45,39 +45,39 @@ interface PaginatedResponse {
   };
 }
 
-const VerTutores: React.FC = () => {
-  const [tutores, setTutores] = useState<TutorData[]>([]);
+const VerPacientes: React.FC = () => {
+  const [pacientes, setPacientes] = useState<PacienteData[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [busqueda, setBusqueda] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMoreData, setHasMoreData] = useState(true);
   const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
-  
-  // Estados para el modal de información del tutor
-  const [showTutorInfo, setShowTutorInfo] = useState(false);
-  const [selectedTutor, setSelectedTutor] = useState<TutorData | null>(null);
 
-  // Función para cargar tutores (inicial o búsqueda)
-  const handleGetTutores = useCallback(async (resetList: boolean = true, search?: string) => {
+  // Estados para el modal de información del paciente
+  const [showPacienteInfo, setshowPacienteInfo] = useState(false);
+  const [selectedPaciente, setselectedPaciente] = useState<PacienteData | null>(null);
+
+  // Función para cargar pacientes (inicial o búsqueda)
+  const handleGetPacientes = useCallback(async (resetList: boolean = true, search?: string) => {
     setLoading(true);
     setError("");
 
     try {
       const page = resetList ? 1 : currentPage + 1;
-      const data: PaginatedResponse = await obtenerTutoresPaginados(page, 50, search);
+      const data: PaginatedResponse = await obtenerPacientesPaginados(page, 50, search);
       
       if (resetList) {
-        setTutores(data.tutores);
+        setPacientes(data.pacientes);
         setCurrentPage(1);
       } else {
-        setTutores(prev => [...prev, ...data.tutores]);
+        setPacientes(prev => [...prev, ...data.pacientes]);
         setCurrentPage(page);
       }
       
       setHasMoreData(data.pagination.has_next);
     } catch (error) {
-      setError("Error de conexión al cargar tutores");
+      setError("Error de conexión al cargar pacientes");
       console.error("Error:", error);
     } finally {
       setLoading(false);
@@ -93,49 +93,49 @@ const VerTutores: React.FC = () => {
     }
     
     const timeout = setTimeout(() => {
-      handleGetTutores(true, texto.trim() || undefined);
+      handleGetPacientes(true, texto.trim() || undefined);
     }, 500);
     
     setSearchTimeout(timeout);
-  }, [searchTimeout, handleGetTutores]);
+  }, [searchTimeout, handleGetPacientes]);
 
-  // Función para ver detalles del tutor
-  const handleViewTutor = useCallback((tutor: TutorData) => {
-    setSelectedTutor(tutor);
-    setShowTutorInfo(true);
+  // Función para ver detalles del paciente
+  const handleViewPaciente = useCallback((paciente: PacienteData) => {
+    setselectedPaciente(paciente);
+    setshowPacienteInfo(true);
   }, []);
 
   // Función para cerrar el modal - MEJORADA
-  const handleCloseTutorInfo = useCallback(() => {
-    setShowTutorInfo(false);
+  const handleClosePacienteInfo = useCallback(() => {
+    setshowPacienteInfo(false);
     // Pequeño delay para evitar conflictos de estado
     setTimeout(() => {
-      setSelectedTutor(null);
+      setselectedPaciente(null);
     }, 150);
   }, []);
 
-  // Función para editar el tutor
-  const handleEditTutor = useCallback((tutor: TutorData) => {
-    console.log("Editar tutor:", tutor);
+  // Función para editar el paciente
+  const handleEditPaciente = useCallback((paciente: PacienteData) => {
+    console.log("Editar paciente:", paciente);
   }, []);
 
   // Función para cargar más datos (scroll infinito)
   const loadMoreData = useCallback(async (event: CustomEvent) => {
     if (hasMoreData && !loading) {
-      await handleGetTutores(false, busqueda.trim() || undefined);
+      await handleGetPacientes(false, busqueda.trim() || undefined);
     }
     (event.target as HTMLIonInfiniteScrollElement).complete();
-  }, [hasMoreData, loading, handleGetTutores, busqueda]);
+  }, [hasMoreData, loading, handleGetPacientes, busqueda]);
 
   // Función para manejar el refresh
   const handleRefresh = useCallback(async (event: CustomEvent) => {
-    await handleGetTutores(true, busqueda.trim() || undefined);
+    await handleGetPacientes(true, busqueda.trim() || undefined);
     event.detail.complete();
-  }, [handleGetTutores, busqueda]);
+  }, [handleGetPacientes, busqueda]);
 
-  // Cargar tutores al montar el componente
+  // Cargar pacientes al montar el componente
   useEffect(() => {
-    handleGetTutores();
+    handleGetPacientes();
   }, []);
 
   // Limpiar timeouts al desmontar el componente
@@ -154,10 +154,10 @@ const VerTutores: React.FC = () => {
           <IonButtons slot="start">
             <IonMenuButton />
           </IonButtons>
-          <IonTitle>Ver Tutores</IonTitle>
+          <IonTitle>Ver pacientes</IonTitle>
           <IonButtons slot="end">
             <IonButton 
-              onClick={() => handleGetTutores(true, busqueda.trim() || undefined)} 
+              onClick={() => handleGetPacientes(true, busqueda.trim() || undefined)} 
               disabled={loading}
             >
               <IonIcon icon={refreshOutline} />
@@ -169,7 +169,7 @@ const VerTutores: React.FC = () => {
       <IonContent fullscreen={true}>
         <IonHeader collapse="condense">
           <IonToolbar>
-            <IonTitle size="large">Ver Tutores</IonTitle>
+            <IonTitle size="large">Ver pacientes</IonTitle>
           </IonToolbar>
         </IonHeader>
 
@@ -177,15 +177,15 @@ const VerTutores: React.FC = () => {
           <IonRefresherContent></IonRefresherContent>
         </IonRefresher>
 
-        <div className="tutores-container">
+        <div className="pacientes-container">
           {/* Barra de búsqueda */}
           <div className="search-container">
             <IonSearchbar
               value={busqueda}
               onIonInput={(e) => handleSearch(e.detail.value!)}
-              placeholder="Buscar por nombre, apellido, RUT o email..."
+              placeholder="Buscar por nombre"
               showClearButton="focus"
-              className="tutores-searchbar"
+              className="pacientes-searchbar"
             />
           </div>
           <div>
@@ -193,11 +193,11 @@ const VerTutores: React.FC = () => {
           </div>
           
           {/* Estado de carga inicial */}
-          {loading && tutores.length === 0 && (
+          {loading && pacientes.length === 0 && (
             <div className="loading-container">
               <IonSpinner />
               <IonText>
-                <p>Cargando tutores...</p>
+                <p>Cargando pacientes...</p>
               </IonText>
             </div>
           )}
@@ -210,7 +210,7 @@ const VerTutores: React.FC = () => {
               </IonText>
               <IonButton
                 fill="outline"
-                onClick={() => handleGetTutores(true, busqueda.trim() || undefined)}
+                onClick={() => handleGetPacientes(true, busqueda.trim() || undefined)}
                 className="retry-button"
               >
                 <IonIcon icon={refreshOutline} slot="start" />
@@ -219,15 +219,15 @@ const VerTutores: React.FC = () => {
             </div>
           )}
 
-          {/* Lista infinita de tutores */}
-          {!loading && !error && tutores.length === 0 ? (
+          {/* Lista infinita de pacientes */}
+          {!loading && !error && pacientes.length === 0 ? (
             <div className="no-results">
               <IonText>
-                <h3>No se encontraron tutores</h3>
+                <h3>No se encontraron pacientes</h3>
                 <p>
                   {busqueda
-                    ? `No hay tutores que coincidan con "${busqueda}"`
-                    : "No hay tutores registrados aún"}
+                    ? `No hay pacientes que coincidan con "${busqueda}"`
+                    : "No hay pacientes registrados aún"}
                 </p>
               </IonText>
             </div>
@@ -237,33 +237,33 @@ const VerTutores: React.FC = () => {
               <div className="results-counter">
                 <IonText>
                   <p>
-                    {tutores.length} tutor{tutores.length !== 1 ? "es" : ""} cargado{tutores.length !== 1 ? "s" : ""}
+                    {pacientes.length} paciente{pacientes.length !== 1 ? "s" : ""} cargado{pacientes.length !== 1 ? "s" : ""}
                     {busqueda && ` para "${busqueda}"`}
                     {hasMoreData && " (desliza hacia abajo para cargar más)"}
                   </p>
                 </IonText>
               </div>
 
-              {/* Lista simple de tutores */}
-              <IonList className="tutores-list">
-                {tutores.map((tutor, index) => (
-                  <IonItem key={`${tutor.rut}-${index}`} lines="full">
+              {/* Lista simple de pacientes */}
+              <IonList className="pacientes-list">
+                {pacientes.map((paciente, index) => (
+                  <IonItem key={`${paciente.nombre}-${index}`} lines="full">
                     <IonIcon icon={personOutline} slot="start" />
                     <IonLabel>
-                      <h2>{tutor.nombre} {tutor.apellido_paterno} {tutor.apellido_materno}</h2>
-                      <p><strong>RUT:</strong> {tutor.rut}</p>
+                      <h2>{paciente.nombre}</h2>
+                      <p><strong>Raza: </strong> {paciente.raza}</p>
                     </IonLabel>
                     <IonButtons>
                       <IonButton 
                         fill="clear" 
-                        onClick={() => handleEditTutor(tutor)}
+                        onClick={() => handleEditPaciente(paciente)}
                         disabled={loading}
                       >
                         <IonIcon className="icon" icon={pencilOutline} />
                       </IonButton>
                       <IonButton 
                         fill="clear" 
-                        onClick={() => handleViewTutor(tutor)}
+                        onClick={() => handleViewPaciente(paciente)}
                         disabled={loading}
                       >
                         <IonIcon className="icon" icon={eyeOutline} />
@@ -281,7 +281,7 @@ const VerTutores: React.FC = () => {
               >
                 <IonInfiniteScrollContent
                   loadingSpinner="bubbles"
-                  loadingText="Cargando más tutores..."
+                  loadingText="Cargando más pacientes..."
                 />
               </IonInfiniteScroll>
             </>
@@ -289,14 +289,14 @@ const VerTutores: React.FC = () => {
         </div>
       </IonContent>
 
-      {/* Modal con información del tutor */}
-      <ModalInfoTutor
-        isOpen={showTutorInfo}
-        onDismiss={handleCloseTutorInfo}
-        tutor={selectedTutor}
+      {/* Modal con información del paciente */}
+      <ModalInfoPaciente
+        isOpen={showPacienteInfo}
+        onDismiss={handleClosePacienteInfo}
+        paciente={selectedPaciente}
       />
     </IonPage>
   );
 };
 
-export default VerTutores;
+export default VerPacientes;

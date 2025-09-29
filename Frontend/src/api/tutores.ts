@@ -65,3 +65,40 @@ export async function obtenerTutores() {
     throw error;
   }
 }
+
+// Nueva función para obtener tutores paginados
+export async function obtenerTutoresPaginados(
+  page: number = 1,
+  limit: number = 50,
+  search?: string
+): Promise<PaginatedResponse> {
+  try {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+    });
+    
+    if (search) {
+      params.append('search', search);
+    }
+
+    console.log(`Obteniendo tutores página ${page}...`);
+    const response = await fetch(`${API_URL}/tutores/paginated/?${params}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error en la petición: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("Tutores paginados obtenidos:", data);
+    return data;
+  } catch (error) {
+    console.error("Error obteniendo tutores paginados:", error);
+    throw error;
+  }
+}

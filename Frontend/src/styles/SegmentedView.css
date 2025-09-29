@@ -1,0 +1,35 @@
+.segment-container-sticky {
+  position: sticky;
+  top: 0; /* Pegado al header */
+  z-index: 1001; /* Mayor que SearchBar */
+  background: var(--ion-background-color, white);
+  padding: 16px 16px 8px 16px;
+}
+
+.custom-segment {
+  --background: var(--ion-color-light);
+  --indicator-color: var(--ion-color-primary);
+  border-radius: 12px;
+  padding: 4px;
+}
+
+.custom-segment ion-segment-button {
+  --color: var(--ion-color-medium);
+  --color-activated: var(--ion-color-primary);
+  --indicator-box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --indicator-border-radius: 8px;
+  min-height: 44px;
+  font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .segment-container-sticky {
+    padding: 12px;
+  }
+  
+  .custom-segment ion-segment-button {
+    min-height: 40px;
+    font-size: 0.9em;
+  }
+}

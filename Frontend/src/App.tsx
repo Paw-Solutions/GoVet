@@ -5,7 +5,7 @@ import BarraLateral from "./components/BarraLateral";
 import Home from "./pages/home";
 import RegistroTutor from "./pages/registroTutor";
 import RegistroPaciente from "./pages/registroPaciente";
-import VerTutores from "./pages/verTutores";
+import VerTutores from "./pages/ver";
 /* Core CSS required for Ionic components to work properly */
 import "@ionic/react/css/core.css";
 
@@ -23,6 +23,7 @@ import "@ionic/react/css/flex-utils.css";
 import "@ionic/react/css/display.css";
 import RellenarFicha from "./pages/rellenarFicha";
 import ModalEscogerPaciente from "./components/rellenarFicha/modalEscogerPaciente";
+import Ver from "./pages/ver";
 
 /*
  * Ionic Dark Mode
@@ -49,7 +50,7 @@ const App: React.FC = () => (
           <Home />
         </Route>
         <Route exact path="/registro-tutor" component={RegistroTutor}></Route>
-        <Route exact path="/ver-tutores" component={VerTutores}></Route>
+        <Route exact path="/ver" component={Ver}></Route>
         <Route
           exact
           path="/registro-paciente"
