@@ -21,17 +21,35 @@ import {
   IonText,
   IonRadioGroup,
   IonRadio,
-  IonToggle, // Agregar esta línea
+  IonToggle,
+  IonIcon,
 } from "@ionic/react";
+import { search, add, personOutline } from "ionicons/icons";
 import "../styles/registroPaciente.css";
 import "../styles/main.css";
 import { useRegistroPaciente } from "../hooks/useRegistroPaciente";
 import { SelectorEspecie } from "../components/registroPaciente/SelectorEspecie";
 import { SelectorRaza } from "../components/registroPaciente/SelectorRaza";
+import ModalBuscarTutor from "../components/registroPaciente/ModalBuscarTutor";
 import RegistroTutor from "./registroTutor";
 
+interface Tutor {
+  rut: string;
+  nombre: string;
+  apellido: string;
+  telefono: string;
+  email: string;
+  direccion: string;
+  comuna: string;
+  region: string;
+}
+
 const RegistroPaciente: React.FC = () => {
-  const [showModal, setShowModal] = useState(false);
+  const [showModalRegistroTutor, setShowModalRegistroTutor] = useState(false);
+  const [showModalBuscarTutor, setShowModalBuscarTutor] = useState(false);
+  const [tutorSeleccionado, setTutorSeleccionado] = useState<Tutor | null>(
+    null
+  );
 
   const {
     formData,
@@ -56,14 +74,14 @@ const RegistroPaciente: React.FC = () => {
     selectEspecie,
     selectRaza,
     registraPaciente,
-    clearEspecie, // Agregar esta línea
+    clearEspecie,
   } = useRegistroPaciente();
 
   // Filtros
   const filteredEspecies = especiesData
     .filter((especie) => {
       if (!especieQuery.trim()) {
-        return true; // Mostrar todas si no hay búsqueda
+        return true;
       }
       return especie.nombre_comun
         .toLowerCase()
@@ -74,11 +92,29 @@ const RegistroPaciente: React.FC = () => {
   const filteredRazas = razasData
     .filter((raza: any) => {
       if (!razaQuery.trim()) {
-        return true; // Mostrar todas las razas si no hay búsqueda
+        return true;
       }
       return raza.nombre.toLowerCase().includes(razaQuery.toLowerCase());
     })
     .slice(0, 4);
+
+  const handleTutorSelected = (tutor: Tutor) => {
+    setTutorSeleccionado(tutor);
+    // Actualizar el formData con el RUT del tutor seleccionado
+    setFormData((prev) => ({
+      ...prev,
+      rut_tutor: tutor.rut,
+    }));
+  };
+
+  const handleRegistrarPaciente = async () => {
+    if (!tutorSeleccionado) {
+      setShowToast(true);
+      // Aquí deberías usar un mensaje de error apropiado
+      return;
+    }
+    await registraPaciente();
+  };
 
   if (initialLoading) {
     return (
@@ -140,8 +176,8 @@ const RegistroPaciente: React.FC = () => {
                   filteredEspecies={filteredEspecies}
                   loadingEspecies={loadingEspecies}
                   selectEspecie={selectEspecie}
-                  onClearEspecie={clearEspecie} // Agregar esta línea
-                  hasSelectedEspecie={!!formData.especie} // Agregar esta línea
+                  onClearEspecie={clearEspecie}
+                  hasSelectedEspecie={!!formData.especie}
                 />
               </IonCol>
             </IonRow>
@@ -176,10 +212,7 @@ const RegistroPaciente: React.FC = () => {
                     value={formData.color}
                     onIonInput={handleInputChange}
                     onKeyDown={(e) => {
-                      // Permitimos letras con acentos y ñ
                       const regex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]$/;
-
-                      // Lista blanca de teclas de control
                       const teclasPermitidas = [
                         "Backspace",
                         "Delete",
@@ -194,7 +227,7 @@ const RegistroPaciente: React.FC = () => {
                         !regex.test(e.key) &&
                         !teclasPermitidas.includes(e.key)
                       ) {
-                        e.preventDefault(); // bloquea lo demás
+                        e.preventDefault();
                       }
                     }}
                   />
@@ -277,38 +310,84 @@ const RegistroPaciente: React.FC = () => {
 
           <hr className="section-separator" />
 
+          {/* Sección de tutor */}
           <div className="tutor-section">
             <IonGrid>
               <IonRow>
-                <IonCol className="tutor-header">
+                <IonCol>
                   <IonText>
-                    <IonLabel>
-                      <p className="tutor-title">Asignar Tutor</p>
-                    </IonLabel>
-                    <div className="tutor-register-container">
-                      <IonLabel>¿El tutor no está?</IonLabel>
-                      <span
-                        className="tutor-register-link"
-                        onClick={() => setShowModal(true)}
-                      >
-                        Regístralo
-                      </span>
-                    </div>
+                    <h3>Asignar Tutor</h3>
                   </IonText>
                 </IonCol>
               </IonRow>
 
+              {tutorSeleccionado ? (
+                <IonRow>
+                  <IonCol>
+                    <IonItem
+                      lines="none"
+                      style={{
+                        border: "2px solid var(--ion-color-success)",
+                        borderRadius: "8px",
+                        background: "linear-gradient(145deg, #e8f5e8, #f0f9f0)",
+                        margin: "4px 0",
+                      }}
+                    >
+                      <IonIcon
+                        icon={personOutline}
+                        slot="start"
+                        color="success"
+                      />
+                      <IonLabel>
+                        <h2 style={{ fontWeight: "600" }}>
+                          {`${tutorSeleccionado.nombre} ${tutorSeleccionado.apellido}`}
+                        </h2>
+                        <p>
+                          <strong>RUT:</strong> {tutorSeleccionado.rut}
+                        </p>
+                        <p>
+                          <strong>Email:</strong>{" "}
+                          {tutorSeleccionado.email || "N/A"} •
+                          <strong> Tel:</strong>{" "}
+                          {tutorSeleccionado.telefono || "N/A"}
+                        </p>
+                      </IonLabel>
+                      <IonButtons slot="end">
+                        <IonButton
+                          fill="clear"
+                          onClick={() => setShowModalBuscarTutor(true)}
+                        >
+                          Cambiar
+                        </IonButton>
+                      </IonButtons>
+                    </IonItem>
+                  </IonCol>
+                </IonRow>
+              ) : (
+                <IonRow>
+                  <IonCol>
+                    <IonButton
+                      expand="block"
+                      fill="outline"
+                      onClick={() => setShowModalBuscarTutor(true)}
+                    >
+                      <IonIcon icon={search} slot="start" />
+                      Buscar Tutor
+                    </IonButton>
+                  </IonCol>
+                </IonRow>
+              )}
+
               <IonRow>
                 <IonCol>
-                  <IonItem>
-                    <IonInput
-                      name="rut"
-                      label="Rut"
-                      labelPlacement="stacked"
-                      fill="outline"
-                      placeholder="Ej: 12345678-9"
-                    />
-                  </IonItem>
+                  <IonButton
+                    expand="block"
+                    fill="clear"
+                    onClick={() => setShowModalRegistroTutor(true)}
+                  >
+                    <IonIcon icon={add} slot="start" />
+                    Registrar Nuevo Tutor
+                  </IonButton>
                 </IonCol>
               </IonRow>
             </IonGrid>
@@ -319,13 +398,26 @@ const RegistroPaciente: React.FC = () => {
           <IonButton
             className="custom-button"
             expand="block"
-            onClick={registraPaciente}
+            onClick={handleRegistrarPaciente}
+            disabled={!tutorSeleccionado}
           >
             Registrar paciente
           </IonButton>
         </IonToolbar>
 
-        <IonModal isOpen={showModal} onDidDismiss={() => setShowModal(false)}>
+        {/* Modal para buscar tutor */}
+        <ModalBuscarTutor
+          isOpen={showModalBuscarTutor}
+          onDidDismiss={() => setShowModalBuscarTutor(false)}
+          onTutorSelected={handleTutorSelected}
+          tutorSeleccionado={tutorSeleccionado}
+        />
+
+        {/* Modal para registrar tutor */}
+        <IonModal
+          isOpen={showModalRegistroTutor}
+          onDidDismiss={() => setShowModalRegistroTutor(false)}
+        >
           <RegistroTutor />
         </IonModal>
 

@@ -14,15 +14,16 @@ export interface FormData {
 }
 
 export const useRegistroPaciente = () => {
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState({
     nombre: "",
-    especie: "",
-    raza: "",
-    sexo: "",
+    especie: null as any,
+    raza: null as any,
     color: "",
+    sexo: "",
     fechaNacimiento: "",
+    esterilizado: false,
     codigo_chip: "",
-    esterilizado: false, // Agregar esta línea
+    rut_tutor: "", // Agregar esta línea
   });
 
   const [especiesData, setEspeciesData] = useState<any[]>([]);
@@ -162,13 +163,14 @@ export const useRegistroPaciente = () => {
       // Limpiar formulario
       setFormData({
         nombre: "",
-        especie: "",
-        raza: "",
-        sexo: "",
+        especie: null as any,
+        raza: null as any,
         color: "",
+        sexo: "",
         fechaNacimiento: "",
+        esterilizado: false,
         codigo_chip: "",
-        esterilizado: false, // Agregar esta línea
+        rut_tutor: "", // Agregar esta línea
       });
       setEspecieQuery("");
       setRazaQuery("");
