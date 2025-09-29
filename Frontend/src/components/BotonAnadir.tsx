@@ -56,22 +56,10 @@ const BotonAnadir: React.FC<BotonAnadirProps> = ({
       ruta: "/registro-paciente",
     },
     {
-      value: "ver-tutores",
-      label: "Ver Tutores",
-      icon: timeOutline,
-      ruta: "/ver-tutores",
-    },
-    {
       value: "rellenar-ficha",
       label: "Generar ficha",
       icon: clipboardOutline,
       ruta: "/rellenar-ficha",
-    },
-    {
-      value: "ver-pacientes",
-      label: "Ver Pacientes",
-      icon: pawOutline,
-      ruta: "/ver-pacientes",
     },
   ];
 

@@ -1,29 +1,34 @@
 import { useState, useEffect, useCallback } from "react";
 import { obtenerEspecies, obtenerRazas } from "../api/especies";
-import { crearPaciente, PacienteCreate } from "../api/pacientes";
+import {
+  crearPaciente,
+  asociarTutorAPaciente,
+  PacienteCreate,
+} from "../api/pacientes";
 
 export interface FormData {
   nombre: string;
-  especie: string;
-  raza: string;
+  especie: any;
+  raza: any;
   sexo: string;
   color: string;
   fechaNacimiento: string;
   codigo_chip: string;
-  esterilizado: boolean; // Agregar esta línea
+  esterilizado: boolean;
+  rut_tutor: string;
 }
 
 export const useRegistroPaciente = () => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     nombre: "",
-    especie: null as any,
-    raza: null as any,
+    especie: null,
+    raza: null,
     color: "",
     sexo: "",
     fechaNacimiento: "",
     esterilizado: false,
     codigo_chip: "",
-    rut_tutor: "", // Agregar esta línea
+    rut_tutor: "",
   });
 
   const [especiesData, setEspeciesData] = useState<any[]>([]);
@@ -135,18 +140,24 @@ export const useRegistroPaciente = () => {
 
   const registraPaciente = async () => {
     try {
+      console.log("📋 FormData completo antes de enviar:", formData);
+
       if (
         !formData.nombre ||
         !formData.raza ||
         !formData.sexo ||
         !formData.color ||
-        !formData.fechaNacimiento
+        !formData.fechaNacimiento ||
+        !formData.rut_tutor
       ) {
-        setToastMessage("Por favor completa todos los campos requeridos");
+        setToastMessage(
+          "Por favor completa todos los campos requeridos y selecciona un tutor"
+        );
         setShowToast(true);
         return;
       }
 
+      // PASO 1: Crear el paciente (SIN rut_tutor)
       const pacienteData: PacienteCreate = {
         nombre: formData.nombre,
         id_raza: parseInt(formData.raza),
@@ -154,29 +165,43 @@ export const useRegistroPaciente = () => {
         color: formData.color,
         fecha_nacimiento: formData.fechaNacimiento,
         codigo_chip: formData.codigo_chip || "",
+        esterilizado: formData.esterilizado,
       };
 
-      const resultado = await crearPaciente(pacienteData);
-      console.log("✅ Paciente registrado exitosamente:", resultado);
-      setToastMessage("Paciente registrado exitosamente");
+      console.log("📤 Datos del paciente que se enviarán:", pacienteData);
+
+      const pacienteCreado = await crearPaciente(pacienteData);
+      console.log("✅ Paciente creado exitosamente:", pacienteCreado);
+
+      // PASO 2: Asociar el tutor al paciente
+      console.log("🔗 Asociando tutor al paciente...");
+      await asociarTutorAPaciente(
+        formData.rut_tutor,
+        pacienteCreado.id_paciente
+      );
+      console.log("✅ Tutor asociado exitosamente");
+
+      setToastMessage("Paciente registrado y asociado al tutor exitosamente");
 
       // Limpiar formulario
       setFormData({
         nombre: "",
-        especie: null as any,
-        raza: null as any,
+        especie: null,
+        raza: null,
         color: "",
         sexo: "",
         fechaNacimiento: "",
         esterilizado: false,
         codigo_chip: "",
-        rut_tutor: "", // Agregar esta línea
+        rut_tutor: "",
       });
       setEspecieQuery("");
       setRazaQuery("");
     } catch (error) {
       console.error("❌ Error registrando paciente:", error);
-      setToastMessage("Error al registrar paciente");
+      setToastMessage(
+        "Error al registrar paciente. Revisa los datos e intenta de nuevo."
+      );
     }
     setShowToast(true);
   };
@@ -203,7 +228,7 @@ export const useRegistroPaciente = () => {
     handleInputChange,
     selectEspecie,
     selectRaza,
-    clearEspecie, // Agregar la nueva función
     registraPaciente,
+    clearEspecie,
   };
 };

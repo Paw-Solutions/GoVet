@@ -1,6 +1,6 @@
-const API_URL = import.meta.env.VITE_API_URL; // usa tu variable de entorno
+const API_URL = import.meta.env.VITE_API_URL;
 
-// Interfaz para crear un paciente (solo los campos necesarios)
+// Interfaz para crear un paciente (SIN rut_tutor)
 export interface PacienteCreate {
   nombre: string;
   id_raza: number;
@@ -8,20 +8,18 @@ export interface PacienteCreate {
   color: string;
   fecha_nacimiento: string;
   codigo_chip?: string;
+  esterilizado?: boolean;
 }
 
 export interface PacienteData {
   id_paciente: number;
   nombre: string;
-  fecha_nacimiento: string | null; // Formato ISO 8601: "YYYY-MM-DD"
+  fecha_nacimiento: string | null;
   color: string | null;
   esterilizado: boolean | null;
   id_raza: number | null;
-  // Información de la raza
   raza: string | null;
-  // Información de la especie
   especie: string | null;
-  // Información del tutor
   tutor: {
     nombre: string | null;
     apellido_paterno: string | null;
@@ -30,12 +28,10 @@ export interface PacienteData {
     telefono: number | null;
     email: string | null;
   } | null;
-  // Campos opcionales que podrías tener en el modelo
   sexo?: string;
   codigo_chip?: string;
 }
 
-// Agregar interfaces para la respuesta paginada
 export interface PaginatedResponse {
   pacientes: PacienteData[];
   pagination: {
@@ -50,12 +46,10 @@ export interface PaginatedResponse {
   };
 }
 
-{
-  /* Ruta para crear un nuevo paciente */
-}
+// Función para crear un paciente (paso 1)
 export async function crearPaciente(formData: PacienteCreate) {
   try {
-    console.log("Enviando datos al servidor:", formData);
+    console.log("Enviando datos del paciente al servidor:", formData);
     const response = await fetch(`${API_URL}/pacientes/`, {
       method: "POST",
       headers: {
@@ -65,14 +59,53 @@ export async function crearPaciente(formData: PacienteCreate) {
     });
 
     if (!response.ok) {
-      throw new Error(`Error en la petición: ${response.status}`);
+      const errorData = await response.text();
+      console.error("Error del servidor:", errorData);
+      throw new Error(
+        `Error en la petición: ${response.status} - ${errorData}`
+      );
     }
 
     const data = await response.json();
-    console.log("Respuesta del servidor:", data);
+    console.log("Paciente creado exitosamente:", data);
     return data;
   } catch (error) {
     console.error("Error creando paciente:", error);
+    throw error;
+  }
+}
+
+// Función para asociar un tutor a un paciente (paso 2)
+export async function asociarTutorAPaciente(
+  rutTutor: string,
+  idPaciente: number,
+  fecha: string = new Date().toISOString().split("T")[0]
+) {
+  try {
+    console.log(`Asociando tutor ${rutTutor} al paciente ${idPaciente}`);
+    const response = await fetch(
+      `${API_URL}/tutores/${rutTutor}/pacientes/${idPaciente}?fecha=${fecha}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.text();
+      console.error("Error del servidor al asociar tutor:", errorData);
+      throw new Error(
+        `Error en la petición: ${response.status} - ${errorData}`
+      );
+    }
+
+    const data = await response.json();
+    console.log("Tutor asociado exitosamente:", data);
+    return data;
+  } catch (error) {
+    console.error("Error asociando tutor al paciente:", error);
     throw error;
   }
 }
@@ -100,7 +133,6 @@ export async function obtenerPacientes() {
   }
 }
 
-// Nueva función para obtener pacientes paginados
 export async function obtenerPacientesPaginados(
   page: number = 1,
   limit: number = 50,
