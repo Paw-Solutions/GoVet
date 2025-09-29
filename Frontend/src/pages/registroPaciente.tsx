@@ -21,6 +21,7 @@ import {
   IonText,
   IonRadioGroup,
   IonRadio,
+  IonToggle, // Agregar esta línea
 } from "@ionic/react";
 import "../styles/registroPaciente.css";
 import "../styles/main.css";
@@ -171,7 +172,7 @@ const RegistroPaciente: React.FC = () => {
                     type="text"
                     labelPlacement="stacked"
                     fill="outline"
-                    placeholder="Ej: Naranja demoniaco"
+                    placeholder="Ej: Naranja"
                     value={formData.color}
                     onIonInput={handleInputChange}
                     onKeyDown={(e) => {
@@ -231,6 +232,25 @@ const RegistroPaciente: React.FC = () => {
                     fill="outline"
                     value={formData.fechaNacimiento}
                     onIonInput={handleInputChange}
+                  />
+                </IonItem>
+              </IonCol>
+            </IonRow>
+
+            {/* 5.5. Toggle de Esterilización */}
+            <IonRow>
+              <IonCol>
+                <IonItem lines="none">
+                  <IonLabel>¿Está esterilizado?</IonLabel>
+                  <IonToggle
+                    slot="end"
+                    checked={formData.esterilizado || false}
+                    onIonChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        esterilizado: e.detail.checked,
+                      }))
+                    }
                   />
                 </IonItem>
               </IonCol>

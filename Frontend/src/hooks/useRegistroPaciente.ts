@@ -10,6 +10,7 @@ export interface FormData {
   color: string;
   fechaNacimiento: string;
   codigo_chip: string;
+  esterilizado: boolean; // Agregar esta línea
 }
 
 export const useRegistroPaciente = () => {
@@ -21,6 +22,7 @@ export const useRegistroPaciente = () => {
     color: "",
     fechaNacimiento: "",
     codigo_chip: "",
+    esterilizado: false, // Agregar esta línea
   });
 
   const [especiesData, setEspeciesData] = useState<any[]>([]);
@@ -166,6 +168,7 @@ export const useRegistroPaciente = () => {
         color: "",
         fechaNacimiento: "",
         codigo_chip: "",
+        esterilizado: false, // Agregar esta línea
       });
       setEspecieQuery("");
       setRazaQuery("");
