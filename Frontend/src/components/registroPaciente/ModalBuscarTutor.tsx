@@ -20,10 +20,11 @@ import {
   IonInfiniteScroll,
   IonInfiniteScrollContent,
 } from "@ionic/react";
-import { close, checkmark, personOutline, eyeOutline } from "ionicons/icons";
+import { close, checkmark, person, eye } from "ionicons/icons";
 import { TutorData } from "../../api/tutores";
 import { obtenerTutoresPaginados } from "../verTutores/listaTutores";
 import ModalInfoTutor from "../verTutores/infoTutor";
+import "../../styles/modalBuscarTutor.css";
 
 interface Tutor {
   rut: string;
@@ -216,8 +217,12 @@ const ModalBuscarTutor: React.FC<ModalBuscarTutorProps> = ({
   }, [searchTimeout]);
 
   return (
-    <IonModal isOpen={isOpen} onDidDismiss={handleCancelar}>
-      <IonHeader>
+    <IonModal
+      isOpen={isOpen}
+      onDidDismiss={handleCancelar}
+      className="modal-buscar-tutor"
+    >
+      <IonHeader className="modal-header">
         <IonToolbar>
           <IonTitle>Buscar Tutor</IonTitle>
           <IonButtons slot="end">
@@ -233,8 +238,8 @@ const ModalBuscarTutor: React.FC<ModalBuscarTutorProps> = ({
           <IonRefresherContent></IonRefresherContent>
         </IonRefresher>
 
-        {/* Barra de búsqueda - EXACTAMENTE IGUAL a verTutores */}
-        <div style={{ padding: "16px" }}>
+        {/* Barra de búsqueda sticky */}
+        <div className="modal-search-container">
           <IonSearchbar
             value={busqueda}
             onIonInput={(e) => handleSearch(e.detail.value!)}
@@ -243,14 +248,14 @@ const ModalBuscarTutor: React.FC<ModalBuscarTutorProps> = ({
           />
         </div>
 
-        {/* Mostrar tutor seleccionado temporalmente */}
+        {/* Mostrar tutor seleccionado temporalmente - STICKY */}
         {tutorSeleccionadoTemp && (
-          <div style={{ padding: "0 16px", marginBottom: "16px" }}>
+          <div className="modal-selected-tutor">
             <IonText color="primary">
               <h3>Tutor seleccionado:</h3>
             </IonText>
-            <IonItem lines="none" color="light">
-              <IonIcon icon={personOutline} slot="start" />
+            <IonItem className="modal-selected-item" lines="none">
+              <IonIcon icon={person} slot="start" color="primary" />
               <IonLabel>
                 <h2>{`${tutorSeleccionadoTemp.nombre} ${tutorSeleccionadoTemp.apellido}`}</h2>
                 <p>RUT: {tutorSeleccionadoTemp.rut}</p>
@@ -266,23 +271,22 @@ const ModalBuscarTutor: React.FC<ModalBuscarTutorProps> = ({
           </div>
         )}
 
-        {/* Estado de carga inicial - EXACTAMENTE IGUAL a verTutores */}
+        {/* Estado de carga inicial */}
         {loading && tutores.length === 0 && (
-          <div style={{ textAlign: "center", padding: "2rem" }}>
-            <IonSpinner />
-            <IonText>
-              <p>Cargando tutores...</p>
-            </IonText>
+          <div className="modal-loading-state">
+            <IonSpinner name="crescent" color="primary" />
+            <p>Cargando tutores...</p>
           </div>
         )}
 
-        {/* Estado de error - EXACTAMENTE IGUAL a verTutores */}
+        {/* Estado de error */}
         {error && (
-          <div style={{ textAlign: "center", padding: "2rem" }}>
+          <div className="modal-error-state">
             <IonText color="danger">
               <p>{error}</p>
             </IonText>
             <IonButton
+              className="modal-retry-button"
               fill="outline"
               onClick={() =>
                 handleGetTutores(true, busqueda.trim() || undefined)
@@ -293,47 +297,53 @@ const ModalBuscarTutor: React.FC<ModalBuscarTutorProps> = ({
           </div>
         )}
 
-        {/* Lista de tutores - EXACTAMENTE IGUAL a verTutores */}
+        {/* Lista de tutores */}
         {!loading && !error && tutores.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "2rem" }}>
-            <IonText>
-              <h3>No se encontraron tutores</h3>
-              <p>
-                {busqueda
-                  ? `No hay tutores que coincidan con "${busqueda}"`
-                  : "No hay tutores registrados aún"}
-              </p>
-            </IonText>
+          <div className="modal-empty-state">
+            <h3>No se encontraron tutores</h3>
+            <p>
+              {busqueda
+                ? `No hay tutores que coincidan con "${busqueda}"`
+                : "No hay tutores registrados aún"}
+            </p>
           </div>
         ) : (
           <>
-            {/* Contador de resultados - EXACTAMENTE IGUAL a verTutores */}
-            <div style={{ textAlign: "center", padding: "1rem" }}>
-              <IonText>
-                <p>
-                  {tutores.length} tutor{tutores.length !== 1 ? "es" : ""}{" "}
-                  cargado{tutores.length !== 1 ? "s" : ""}
-                  {busqueda && ` para "${busqueda}"`}
-                  {hasMoreData && " (desliza hacia abajo para cargar más)"}
-                </p>
-              </IonText>
+            {/* Contador de resultados */}
+            <div className="modal-results-counter">
+              <p>
+                {tutores.length} tutor{tutores.length !== 1 ? "es" : ""} cargado
+                {tutores.length !== 1 ? "s" : ""}
+                {busqueda && ` para "${busqueda}"`}
+                {hasMoreData && " (desliza hacia abajo para cargar más)"}
+              </p>
             </div>
 
-            {/* Lista simple de tutores - EXACTAMENTE IGUAL a verTutores */}
-            <IonList>
+            {/* Lista simple de tutores */}
+            <IonList
+              className={`modal-tutores-list ${
+                tutorSeleccionadoTemp ? "with-selected-tutor" : ""
+              }`}
+            >
               {tutores.map((tutor, index) => (
                 <IonItem
                   key={`${tutor.rut}-${index}`}
-                  lines="full"
+                  className={`modal-tutor-item ${
+                    tutorSeleccionadoTemp?.rut === tutor.rut ? "selected" : ""
+                  }`}
+                  lines="none"
                   button
                   onClick={() => handleSeleccionarTutor(tutor)}
-                  color={
-                    tutorSeleccionadoTemp?.rut === tutor.rut
-                      ? "light"
-                      : undefined
-                  }
                 >
-                  <IonIcon icon={personOutline} slot="start" />
+                  <IonIcon
+                    icon={person}
+                    slot="start"
+                    color={
+                      tutorSeleccionadoTemp?.rut === tutor.rut
+                        ? "primary"
+                        : "medium"
+                    }
+                  />
                   <IonLabel>
                     <h2>
                       {tutor.nombre} {tutor.apellido_paterno}{" "}
@@ -352,7 +362,7 @@ const ModalBuscarTutor: React.FC<ModalBuscarTutorProps> = ({
                       }}
                       disabled={loading}
                     >
-                      <IonIcon icon={eyeOutline} />
+                      <IonIcon icon={eye} />
                     </IonButton>
                     {tutorSeleccionadoTemp?.rut === tutor.rut && (
                       <IonIcon icon={checkmark} color="primary" size="large" />
@@ -362,11 +372,12 @@ const ModalBuscarTutor: React.FC<ModalBuscarTutorProps> = ({
               ))}
             </IonList>
 
-            {/* Scroll infinito - EXACTAMENTE IGUAL a verTutores */}
+            {/* Scroll infinito */}
             <IonInfiniteScroll
               onIonInfinite={loadMoreData}
               threshold="100px"
               disabled={!hasMoreData}
+              className="modal-infinite-scroll"
             >
               <IonInfiniteScrollContent
                 loadingSpinner="bubbles"
@@ -377,7 +388,7 @@ const ModalBuscarTutor: React.FC<ModalBuscarTutorProps> = ({
         )}
       </IonContent>
 
-      <IonFooter>
+      <IonFooter className="modal-footer">
         <IonToolbar>
           <IonButtons slot="start">
             <IonButton fill="clear" onClick={handleCancelar}>
@@ -396,7 +407,7 @@ const ModalBuscarTutor: React.FC<ModalBuscarTutorProps> = ({
         </IonToolbar>
       </IonFooter>
 
-      {/* Modal con información del tutor - EXACTAMENTE IGUAL a verTutores */}
+      {/* Modal con información del tutor */}
       <ModalInfoTutor
         isOpen={showTutorInfo}
         onDismiss={handleCloseTutorInfo}

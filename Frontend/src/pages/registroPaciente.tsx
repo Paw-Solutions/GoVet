@@ -24,7 +24,7 @@ import {
   IonToggle,
   IonIcon,
 } from "@ionic/react";
-import { search, add, personOutline } from "ionicons/icons";
+import { search, add, person } from "ionicons/icons";
 import "../styles/registroPaciente.css";
 import "../styles/main.css";
 import { useRegistroPaciente } from "../hooks/useRegistroPaciente";
@@ -333,11 +333,7 @@ const RegistroPaciente: React.FC = () => {
                         margin: "4px 0",
                       }}
                     >
-                      <IonIcon
-                        icon={personOutline}
-                        slot="start"
-                        color="success"
-                      />
+                      <IonIcon icon={person} slot="start" color="success" />
                       <IonLabel>
                         <h2 style={{ fontWeight: "600" }}>
                           {`${tutorSeleccionado.nombre} ${tutorSeleccionado.apellido}`}
