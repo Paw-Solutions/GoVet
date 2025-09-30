@@ -6,7 +6,7 @@ interface ResultsCounterProps {
   count: number;
   busqueda: string;
   hasMoreData: boolean;
-  type: 'tutores' | 'pacientes';
+  type: 'tutores' | 'pacientes' | 'fichas';
 }
 
 const ResultsCounter: React.FC<ResultsCounterProps> = ({

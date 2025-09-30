@@ -9,26 +9,31 @@ import PageHeader from "../components/common/PageHeader";
 import SegmentedView from "../components/common/SegmentedView";
 import TutoresList from "../components/ver/TutoresList";
 import PacientesList from "../components/ver/PacientesList";
+import FichasList from "../components/ver/FichasList"
 import ModalsContainer from "../components/ver/ModalsContainer";
 
 const Ver: React.FC = () => {
   const [selectedSegment, setSelectedSegment] = useState("pacientes");
-  const { tutores, pacientes } = useSegmentedData(selectedSegment);
+  const { tutores, pacientes, fichas } = useSegmentedData(selectedSegment);
 
   const handleSegmentChange = (segment: string) => {
     setSelectedSegment(segment);
-    
-    if (segment === 'pacientes' && pacientes.data.length === 0 && !pacientes.loading) {
-      pacientes.loadData();
-    }
   };
   
   return (
     <IonPage>
       <PageHeader 
         title="Ver Tutores y Pacientes"
-        onRefresh={() => selectedSegment === "tutores" ? tutores.refresh() : pacientes.refresh()}
-        loading={selectedSegment === "tutores" ? tutores.loading : pacientes.loading}
+        onRefresh={() => {
+          if (selectedSegment === 'tutores') return tutores.refresh();
+          if (selectedSegment === 'pacientes') return pacientes.refresh();
+          if (selectedSegment === 'fichas') return fichas.refresh();
+        }}
+        loading={
+          selectedSegment === 'tutores' ? tutores.loading :
+          selectedSegment === 'pacientes' ? pacientes.loading :
+          fichas.loading
+        }
       />
 
       <IonContent fullscreen={true}>
@@ -67,6 +72,23 @@ const Ver: React.FC = () => {
               onRetry={pacientes.retry}
             />
           )}
+
+          {selectedSegment === "fichas" && (
+            <FichasList
+              fichas={fichas.data}
+              loading={fichas.loading}
+              error={fichas.error}
+              busqueda={fichas.busqueda}
+              hasMoreData={fichas.hasMoreData}
+              onSearch={fichas.handleSearch}
+              onRefresh={fichas.refresh}
+              onLoadMore={fichas.loadMore}
+              onViewFicha={fichas.viewFicha}
+              onEditFicha={fichas.editFicha}
+              onExportFicha={fichas.exportFicha}
+              onRetry={fichas.retry}
+            />
+          )}
         </SegmentedView>
       </IonContent>
 
@@ -79,6 +101,10 @@ const Ver: React.FC = () => {
         showPacienteInfo={pacientes.showPacienteInfo}
         selectedPaciente={pacientes.selectedPaciente}
         onClosePacienteInfo={pacientes.closePacienteInfo}
+
+        showFichaInfo={fichas.showFichaInfo}
+        selectedFicha={fichas.selectedFicha}
+        onCloseFichaInfo={fichas.closeFichaInfo}
       />
     </IonPage>
   );

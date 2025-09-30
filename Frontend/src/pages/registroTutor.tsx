@@ -65,6 +65,7 @@ const RegistroTutor: React.FC = () => {
     comuna: "",
     region: "",
     email: "",
+    observacion: "",
   });
 
   // Cargar regiones al inicializar
@@ -210,6 +211,7 @@ const RegistroTutor: React.FC = () => {
         celular: 0,
         celular2: 0,
         email: "",
+        observacion: "",
       });
 
       // Resetear selectores

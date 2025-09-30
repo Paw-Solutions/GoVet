@@ -22,7 +22,7 @@ import {
 } from "@ionic/react";
 import { close, checkmark, person, eye } from "ionicons/icons";
 import { TutorData } from "../../api/tutores";
-import { obtenerTutoresPaginados } from "../verTutores/listaTutores";
+import { obtenerTutoresPaginados } from "../../api/tutores";
 import ModalInfoTutor from "../verTutores/infoTutor";
 import "../../styles/modalBuscarTutor.css";
 

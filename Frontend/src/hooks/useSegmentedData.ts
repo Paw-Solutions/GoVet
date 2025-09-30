@@ -1,8 +1,10 @@
 import { useState, useCallback, useEffect } from 'react';
 import { TutorData } from '../api/tutores';
+import { FichaData } from '../api/fichas'
 import { PacienteData } from '../api/pacientes';
 import { obtenerTutoresPaginados } from '../api/tutores';
 import { obtenerPacientesPaginados } from '../api/pacientes';
+import { obtenerFichasPaginadas } from '../api/fichas'
 
 interface PaginatedResponseTutores {
   tutores: TutorData[];
@@ -78,6 +80,44 @@ interface PacientesActions {
   retry: () => void;
 }
 
+interface PaginatedResponseFichas {
+  fichas: FichaData[];
+  pagination: {
+    current_page: number;
+    total_pages: number;
+    total_count: number;
+    limit: number;
+    has_next: boolean;
+    has_previous: boolean;
+    next_page: number | null;
+    previous_page: number | null;
+  };
+}
+
+interface FichasState {
+  data: FichaData[];
+  loading: boolean;
+  error: string;
+  busqueda: string;
+  currentPage: number;
+  hasMoreData: boolean;
+  searchTimeout: NodeJS.Timeout | null;
+  selectedFicha: FichaData | null;
+  showFichaInfo: boolean;
+}
+
+interface FichasActions {
+  loadData: (resetList?: boolean, search?: string) => Promise<void>;
+  handleSearch: (texto: string) => void;
+  loadMore: (event: CustomEvent) => Promise<void>;
+  refresh: (event?: CustomEvent) => Promise<void>;
+  viewFicha: (ficha: FichaData) => void;
+  editFicha: (ficha: FichaData) => void;
+  exportFicha: (ficha: FichaData) => void;
+  closeFichaInfo: () => void;
+  retry: () => void;
+}
+
 export const useSegmentedData = (initialSegment: string = "tutores") => {
   // Estados para tutores
   const [tutoresState, setTutoresState] = useState<TutoresState>({
@@ -103,6 +143,19 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
     searchTimeout: null,
     selectedPaciente: null,
     showPacienteInfo: false,
+  });
+
+  // Estados para fichas
+  const [fichasState, setFichasState] = useState<FichasState>({
+    data: [],
+    loading: false,
+    error: "",
+    busqueda: "",
+    currentPage: 1,
+    hasMoreData: true,
+    searchTimeout: null,
+    selectedFicha: null,
+    showFichaInfo: false,
   });
 
   // ========== FUNCIONES PARA TUTORES ==========
@@ -281,6 +334,100 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
     loadPacientesData(true, pacientesState.busqueda.trim() || undefined);
   }, [loadPacientesData, pacientesState.busqueda]);
 
+  // FUNCIONES PARA FICHAS
+  const loadFichasData = useCallback(async (resetList: boolean = true, search?: string) => {
+    setFichasState(prev => ({ ...prev, loading: true, error: "" }));
+
+    try {
+      const page = resetList ? 1 : fichasState.currentPage + 1;
+      const data: PaginatedResponseFichas = await obtenerFichasPaginadas(page, 50, search);
+
+      setFichasState(prev => ({
+        ...prev,
+        data: resetList ? data.consultas : [...prev.data, ...data.fichas],
+        currentPage: resetList ? 1 : page,
+        hasMoreData: data.pagination.has_next,
+        loading: false,
+      }));
+      console.log("Datos obtenidos: ", data)
+    } catch (error) {
+      setFichasState(prev => ({
+        ...prev,
+        error: "Error de conexión al cargar fichas",
+        loading: false,
+      }));
+      console.error("Error loading fichas:", error);
+    }
+  }, [fichasState.currentPage]);
+  
+
+  const handleFichasSearch = useCallback((texto: string) => {
+    setFichasState(prev => {
+      if (prev.searchTimeout) {
+        clearTimeout(prev.searchTimeout);
+      }
+      
+      const timeout = setTimeout(() => {
+        loadFichasData(true, texto.trim() || undefined);
+      }, 500);
+      
+      return {
+        ...prev,
+        busqueda: texto,
+        searchTimeout: timeout,
+      };
+    });
+  }, [loadFichasData]);
+
+  const loadMoreFichas = useCallback(async (event: CustomEvent) => {
+    if (fichasState.hasMoreData && !fichasState.loading) {
+      await loadFichasData(false, fichasState.busqueda.trim() || undefined);
+    }
+    (event.target as HTMLIonInfiniteScrollElement).complete();
+  }, [fichasState.hasMoreData, fichasState.loading, fichasState.busqueda, loadFichasData]);
+
+  const refreshFichas = useCallback(async (event?: CustomEvent) => {
+    await loadFichasData(true, fichasState.busqueda.trim() || undefined);
+    if (event) {
+      event.detail.complete();
+    }
+  }, [loadFichasData, fichasState.busqueda]);
+
+  const viewFicha = useCallback((ficha: FichaData) => {
+    setFichasState(prev => ({
+      ...prev,
+      selectedFicha: ficha,
+      showFichaInfo: true,
+    }));
+  }, []);
+
+  const closeFichaInfo = useCallback(() => {
+    setFichasState(prev => ({
+      ...prev,
+      showFichaInfo: false,
+    }));
+    setTimeout(() => {
+      setFichasState(prev => ({
+        ...prev,
+        selectedFicha: null,
+      }));
+    }, 150);
+  }, []);
+
+  const editFicha = useCallback((ficha: FichaData) => {
+    console.log("Editar ficha:", ficha);
+    // Aqui va la logica d edicion k aun no se implementa ups
+  }, []);
+
+  const exportFicha = useCallback((ficha: FichaData) => {
+    console.log("Exportar ficha.");
+    // Aqui va la logica para exportar fichas
+  }, [])
+
+  const retryFichas = useCallback(() => {
+    loadFichasData(true, fichasState.busqueda.trim() || undefined);
+  }, [loadFichasData, fichasState.busqueda]);
+
   // ========== EFECTOS ==========
 
   // Cargar tutores al montar el hook
@@ -290,6 +437,8 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
       loadTutoresData();
     } else if (initialSegment === 'pacientes') {
       loadPacientesData();
+    } else if (initialSegment === 'fichas') {
+      loadFichasData();
     }
   }, [initialSegment]);
 
@@ -302,8 +451,11 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
       if (pacientesState.searchTimeout) {
         clearTimeout(pacientesState.searchTimeout);
       }
+      if (fichasState.searchTimeout) {
+        clearTimeout(fichasState.searchTimeout)
+      }
     };
-  }, [tutoresState.searchTimeout, pacientesState.searchTimeout]);
+  }, [tutoresState.searchTimeout, pacientesState.searchTimeout, fichasState.searchTimeout]);
 
   // ========== RETURN ==========
 
@@ -327,6 +479,18 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
     editPaciente,
     closePacienteInfo,
     retry: retryPacientes,
+  };
+
+  const fichasActions: FichasActions = {
+    loadData: loadFichasData,
+    handleSearch: handleFichasSearch,
+    loadMore: loadMoreFichas,
+    refresh: refreshFichas,
+    viewFicha,
+    editFicha,
+    exportFicha,
+    closeFichaInfo,
+    retry: retryFichas,
   };
 
   return {
@@ -354,7 +518,18 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
       // Acciones
       ...pacientesActions,
     },
+    fichas: {
+      data: fichasState.data,
+      loading: fichasState.loading,
+      error: fichasState.error,
+      busqueda: fichasState.busqueda,
+      hasMoreData: fichasState.hasMoreData,
+      selectedFicha: fichasState.selectedFicha,
+      showFichaInfo: fichasState.showFichaInfo,
+      // Acciones
+      ...fichasActions,
+    }
   };
 };
 
-export type { TutoresActions, PacientesActions };
+export type { TutoresActions, PacientesActions, FichasActions };

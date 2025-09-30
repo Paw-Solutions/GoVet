@@ -162,7 +162,7 @@
 }
 
 h2.tutor-nombre {
-  padding-bottom: 0.75rem;
+  padding-bottom: 0.65rem;
   font-weight: 400;
   color: #21242a;
 }
@@ -171,6 +171,11 @@ h2.paciente-nombre {
   padding-bottom: 0.75rem;
   font-weight: 400;
   color: #21242a;
+}
+
+span {
+  color: #666666;
+  font-size: 0.875rem;
 }
 
 .info-icon {

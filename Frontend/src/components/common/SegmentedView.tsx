@@ -1,6 +1,6 @@
 import React from "react";
 import { IonSegment, IonSegmentButton, IonLabel, IonIcon } from "@ionic/react";
-import { personOutline, pawOutline } from "ionicons/icons";
+import { personOutline, pawOutline, documentTextOutline } from "ionicons/icons";
 import "../../styles/SegmentedView.css";
 
 interface SegmentedViewProps {
@@ -28,6 +28,10 @@ const SegmentedView: React.FC<SegmentedViewProps> = ({
           <IonSegmentButton value="pacientes">
             <IonIcon icon={pawOutline} />
             <IonLabel>Pacientes</IonLabel>
+          </IonSegmentButton>
+          <IonSegmentButton value="fichas">
+            <IonIcon icon={documentTextOutline} />
+            <IonLabel>Fichas</IonLabel>
           </IonSegmentButton>
         </IonSegment>
       </div>

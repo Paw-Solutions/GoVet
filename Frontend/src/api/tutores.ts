@@ -15,6 +15,21 @@ export interface TutorData {
   celular: number;
   celular2: number;
   email: string;
+  observacion: string;
+}
+
+export interface PaginatedResponse {
+  tutores: TutorData[];
+  pagination: {
+    current_page: number;
+    total_pages: number;
+    total_count: number;
+    limit: number;
+    has_next: boolean;
+    has_previous: boolean;
+    next_page: number | null;
+    previous_page: number | null;
+  };
 }
 
 // Ruta para crear un nuevo tutor

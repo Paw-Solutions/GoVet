@@ -116,6 +116,27 @@ const ModalInfoTutor: React.FC<ModalInfoTutorProps> = ({ isOpen, onDismiss, tuto
                   <p>{tutor.rut}</p>
                 </IonLabel>
               </IonItem>
+
+              <IonItem>
+                <IonLabel>
+                  <h2>Comuna</h2>
+                  <p>{tutor.comuna}, {tutor.region}</p>
+                </IonLabel>
+              </IonItem>
+
+              <IonItem>
+                <IonLabel>
+                  <h2>Dirección</h2>
+                  <p>{tutor.direccion}</p>
+                </IonLabel>
+              </IonItem>
+
+              <IonItem>
+                <IonLabel>
+                  <h2>Observación</h2>
+                  <p>{tutor.observacion != "NaN" ? tutor.observacion : 'Sin observación'}</p>
+                </IonLabel>
+              </IonItem>
             </IonList>
           </IonCardContent>
         </IonCard>

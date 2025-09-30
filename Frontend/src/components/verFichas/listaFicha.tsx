@@ -5,11 +5,10 @@ import {
   IonInfiniteScrollContent,
   IonList,
   IonItem,
-  IonAvatar,
   IonLabel,
 } from '@ionic/react';
 
-const ListaPacientes = () => {
+const ListaFichas = () => {
   const [items, setItems] = useState<string[]>([]);
 
   const generateItems = () => {
@@ -45,4 +44,4 @@ const ListaPacientes = () => {
     </IonContent>
   );
 };
-export default ListaPacientes;
+export default ListaFichas;

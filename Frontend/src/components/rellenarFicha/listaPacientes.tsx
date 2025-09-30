@@ -9,8 +9,6 @@ import {
   IonLabel,
 } from '@ionic/react';
 
-const API_URL = import.meta.env.VITE_API_URL; // Asegúrate de definir tu URL de API
-
 const ListaPacientes = () => {
   const [items, setItems] = useState<string[]>([]);
 

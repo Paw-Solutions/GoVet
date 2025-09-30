@@ -99,7 +99,7 @@ const PacienteItem: React.FC<PacienteItemProps> = ({
   return (
     <IonItem lines="full" className="info-item">
       <IonAvatar slot="start">
-        <IonIcon icon={getIcon()} style={{ width: '25px', height: '25px' }} />
+        <IonIcon icon={getIcon()} style={{ width: '20px', height: '20px' }} />
       </IonAvatar>
       
       <IonLabel style={{ padding: '5px' }}>

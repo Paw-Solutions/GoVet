@@ -407,6 +407,133 @@ def obtener_consultas_por_nombre_paciente(nombre_paciente: str, db: Session = De
         raise HTTPException(status_code=404, detail="No se encontraron consultas para ese paciente")
     return db_consultas
 
+@app.get("/consultas/paginated/")
+def obtener_consultas_paginadas(
+    page: int = Query(1, ge=1),
+    limit: int = Query(50, ge=1, le=100),
+    search: Optional[str] = Query(None),
+    db: Session = Depends(get_db)
+):
+    offset = (page - 1) * limit
+    
+    # Query con joins para obtener información relacionada
+    query = db.query(
+        models.Consulta,
+        models.Paciente.nombre.label('paciente_nombre'),
+        models.Paciente.color.label('paciente_color'),
+        models.Paciente.sexo.label('paciente_sexo'),
+        models.Paciente.fecha_nacimiento.label('paciente_fecha_nacimiento'),
+        models.Paciente.codigo_chip.label('paciente_codigo_chip'),
+        models.Raza.nombre.label('raza_nombre'),
+        models.Especie.nombre_comun.label('especie_nombre'),
+        models.Tutor.nombre.label('tutor_nombre'),
+        models.Tutor.apellido_paterno.label('tutor_apellido_paterno'),
+        models.Tutor.apellido_materno.label('tutor_apellido_materno'),
+        models.Tutor.rut.label('tutor_rut'),
+        models.Tutor.telefono.label('tutor_telefono'),
+        models.Tutor.email.label('tutor_email')
+    ).join(
+        models.Paciente, models.Consulta.id_paciente == models.Paciente.id_paciente, isouter=True
+    ).join(
+        models.Raza, models.Paciente.id_raza == models.Raza.id_raza, isouter=True
+    ).join(
+        models.Especie, models.Raza.id_especie == models.Especie.id_especie, isouter=True
+    ).join(
+        models.Tutor, models.Consulta.rut == models.Tutor.rut, isouter=True
+    )
+    
+    if search:
+        search_pattern = f"%{search}%"
+        query = query.filter(
+            or_(
+                # Búsqueda en datos de la consulta
+                models.Consulta.diagnostico.ilike(search_pattern),
+                models.Consulta.motivo.ilike(search_pattern),
+                models.Consulta.observaciones.ilike(search_pattern),
+                # Búsqueda en datos del paciente
+                models.Paciente.nombre.ilike(search_pattern),
+                models.Paciente.codigo_chip.ilike(search_pattern),
+                # Búsqueda en raza y especie
+                models.Raza.nombre.ilike(search_pattern),
+                models.Especie.nombre_comun.ilike(search_pattern),
+                # Búsqueda en datos del tutor
+                models.Tutor.nombre.ilike(search_pattern),
+                models.Tutor.apellido_paterno.ilike(search_pattern),
+                models.Tutor.rut.ilike(search_pattern)
+            )
+        )
+    
+    # Contar total sin aplicar offset/limit
+    total_count = query.count()
+    
+    # Aplicar paginación y obtener resultados ordenados por fecha más reciente
+    results = query.order_by(desc(models.Consulta.fecha_consulta)).offset(offset).limit(limit).all()
+    
+    total_pages = (total_count + limit - 1) // limit
+    has_next = page < total_pages
+    has_previous = page > 1
+    
+    # Construir respuesta personalizada con información completa
+    consultas_serializadas = []
+    for result in results:
+        consulta = result[0]  # El objeto Consulta
+        
+        # Construir el diccionario con información completa
+        consulta_dict = {
+            # Información de la consulta
+            "id_consulta": consulta.id_consulta,
+            "id_paciente": consulta.id_paciente,
+            "rut": consulta.rut,
+            "diagnostico": consulta.diagnostico,
+            "estado_pelaje": consulta.estado_pelaje,
+            "peso": consulta.peso,
+            "condicion_corporal": consulta.condicion_corporal,
+            "mucosas": consulta.mucosas,
+            "dht": consulta.dht,
+            "nodulos_linfaticos": consulta.nodulos_linfaticos,
+            "auscultacion_cardiaca_toraxica": consulta.auscultacion_cardiaca_toraxica,
+            "observaciones": consulta.observaciones,
+            "fecha_consulta": consulta.fecha_consulta.isoformat() if consulta.fecha_consulta else None,
+            "motivo_consulta": consulta.motivo,  # Renombrado para mayor claridad
+            
+            # Información del paciente
+            "paciente": {
+                "id_paciente": consulta.id_paciente,
+                "nombre": result.paciente_nombre if result.paciente_nombre else None,
+                "color": result.paciente_color if result.paciente_color else None,
+                "sexo": result.paciente_sexo if result.paciente_sexo else None,
+                "fecha_nacimiento": result.paciente_fecha_nacimiento.isoformat() if result.paciente_fecha_nacimiento else None,
+                "codigo_chip": result.paciente_codigo_chip if result.paciente_codigo_chip else None,
+                "raza": result.raza_nombre if result.raza_nombre else None,
+                "especie": result.especie_nombre if result.especie_nombre else None
+            } if result.paciente_nombre else None,
+            
+            # Información del tutor
+            "tutor": {
+                "nombre": result.tutor_nombre if result.tutor_nombre else None,
+                "apellido_paterno": result.tutor_apellido_paterno if result.tutor_apellido_paterno else None,
+                "apellido_materno": result.tutor_apellido_materno if result.tutor_apellido_materno else None,
+                "rut": result.tutor_rut if result.tutor_rut else None,
+                "telefono": result.tutor_telefono if result.tutor_telefono else None,
+                "email": result.tutor_email if result.tutor_email else None
+            } if result.tutor_nombre else None
+        }
+        
+        consultas_serializadas.append(consulta_dict)
+
+    return {
+        "consultas": consultas_serializadas,  # ← Cambio de "pacientes" a "consultas"
+        "pagination": {
+            "current_page": page,
+            "total_pages": total_pages,
+            "total_count": total_count,
+            "limit": limit,
+            "has_next": has_next,
+            "has_previous": has_previous,
+            "next_page": page + 1 if has_next else None,
+            "previous_page": page - 1 if has_previous else None
+        }
+    }
 
 # HU 8: Como Veterinaria quiero ver el detalle de los pacientes, 
 # para saber su estado y cuándo es su proxima vacuna y/o cita
