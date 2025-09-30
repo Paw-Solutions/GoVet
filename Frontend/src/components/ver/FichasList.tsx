@@ -43,9 +43,6 @@ const FichasList: React.FC<FichasListProps> = ({
   onExportConsulta,
   onRetry
 }) => {
-  const safeFichas = consultas;
-  console.log("Fichas: ", consultas);
-  console.log("Hola")
 
   return (
     <>
@@ -61,7 +58,7 @@ const FichasList: React.FC<FichasListProps> = ({
           className="searchbar"
         />
 
-        <LoadingState loading={loading} itemCount={safeFichas.length} type="consultas" />
+        <LoadingState loading={loading} itemCount={consultas.length ? consultas.length : 0} type="consultas" />
 
         <ErrorState
           error={error}
@@ -100,7 +97,7 @@ const FichasList: React.FC<FichasListProps> = ({
             <InfiniteScroll
               onLoadMore={onLoadMore}
               disabled={!hasMoreData}
-              loadingText="Cargando más fichas..."
+              loadingText="Cargando más consultas..."
             />
           </>
         )}

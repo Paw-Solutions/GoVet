@@ -1,10 +1,10 @@
 import React from "react";
 import { IonItem, IonLabel, IonIcon, IonButton, IonButtons } from "@ionic/react";
 import { personOutline, pencilOutline, eyeOutline, personSharp, idCardOutline, shareOutline } from "ionicons/icons";
-import { FichaData } from "../../api/fichas";
+import { ConsultaData } from "../../api/fichas";
 
-interface FichaItemProps {
-  ficha: FichaData;
+interface COnsultaItemProps {
+  consulta: ConsultaData;
   onView: () => void;
   onEdit: () => void;
   onExport: () => void;
@@ -12,8 +12,8 @@ interface FichaItemProps {
 }
 import "../../styles/ver.css"
 
-const FichaItem: React.FC<FichaItemProps> = ({
-    ficha,
+const FichaItem: React.FC<COnsultaItemProps> = ({
+    consulta,
     onView,
     onEdit,
     onExport,
@@ -23,7 +23,7 @@ const FichaItem: React.FC<FichaItemProps> = ({
     <IonItem lines="full">
       <IonIcon icon={personSharp} slot="start" style={{ width: '20px', height: '20px' }} />
       <IonLabel>
-        <h2 className="tutor-nombre">{ficha.motivo}</h2>
+        <h2 className="tutor-nombre">{consulta?.paciente?.nombre}</h2>
       </IonLabel>
       <IonButtons>
         <IonButton fill="clear" onClick={onEdit} disabled={disabled}>

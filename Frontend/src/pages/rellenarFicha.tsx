@@ -46,26 +46,8 @@ import "../styles/rellenarFicha.css";
 import "../styles/variables.css";
 import ModalEscogerPaciente from "../components/rellenarFicha/modalEscogerPaciente";
 import { PacienteData } from "../api/pacientes"; // Importar la interfaz correcta
-
-interface FichaVeterinaria {
-  id_paciente: number;
-  rut: string;
-  tutor_nombre?: string;
-  tutor_email?: string;
-  tutor_telefono?: string;
-  // ...otros campos...
-  fecha_consulta: string;
-  motivo: string;
-  diagnostico: string;
-  observaciones: string;
-  dht: string;
-  nodulos_linfaticos: string;
-  mucosas: string;
-  peso: number;
-  auscultacion_cardiaca_toraxica: string;
-  estado_pelaje: string;
-  condicion_corporal: string;
-}
+import { TutorData } from "../api/tutores";
+import { ConsultaData, crearConsulta } from "../api/fichas";
 
 const RellenarFicha: React.FC = () => {
   const [showModalPacientes, setShowModalPacientes] = useState(false);
@@ -80,10 +62,10 @@ const RellenarFicha: React.FC = () => {
   ); // Usar PacienteData
 
   // Estado para los campos del formulario
-  const [formData, setFormData] = useState<FichaVeterinaria>({
+  const [formData, setFormData] = useState<ConsultaData>({
     id_paciente: 0,
     rut: "",
-    fecha_consulta: new Date().toISOString().split("T")[0], // Fecha automática
+    fecha_consulta: new Date().toISOString().split("T")[0],
     motivo: "",
     diagnostico: "",
     observaciones: "",
@@ -94,6 +76,30 @@ const RellenarFicha: React.FC = () => {
     auscultacion_cardiaca_toraxica: "",
     estado_pelaje: "",
     condicion_corporal: "",
+    id_consulta: 0,
+    motivo_consulta: "", // ← Agregar para compatibilidad con backend
+    
+    // Información relacionada del paciente
+    paciente: {
+      id_paciente: 0,
+      nombre: "",
+      color: "",
+      sexo: "",
+      fecha_nacimiento: "",
+      codigo_chip: "",
+      raza: "",
+      especie: "",
+    },
+    
+    // Información relacionada del tutor
+    tutor: {
+      nombre: "",
+      apellido_paterno: "",
+      apellido_materno: "",
+      rut: "",
+      telefono: "",
+      email: "",
+    },
   });
 
   const handleInputChange = (e: any) => {
@@ -119,15 +125,26 @@ const RellenarFicha: React.FC = () => {
       ...prev,
       id_paciente: paciente.id_paciente,
       rut: paciente.tutor?.rut || "", // Usar el RUT del tutor del paciente seleccionado
-      tutor_nombre: paciente.tutor
-        ? `${paciente.tutor.nombre || ""} ${
-            paciente.tutor.apellido_paterno || ""
-          } ${paciente.tutor.apellido_materno || ""}`.trim()
-        : "",
-      tutor_email: paciente.tutor?.email || "",
-      tutor_telefono: paciente.tutor?.telefono
-        ? paciente.tutor.telefono.toString()
-        : "",
+
+      tutor: {
+        nombre: paciente.tutor?.nombre || "",
+        apellido_paterno: paciente.tutor?.apellido_paterno || "",
+        apellido_materno: paciente.tutor?.apellido_materno || "",
+        rut: paciente.tutor?.rut || "",
+        telefono: paciente.tutor?.telefono?.toString() || "",
+        email: paciente.tutor?.email || "",
+      },
+
+      paciente: {
+        id_paciente: paciente.id_paciente,
+        nombre: paciente.nombre || "",
+        color: paciente.color || "",
+        sexo: paciente.sexo || "",
+        fecha_nacimiento: paciente.fecha_nacimiento || "",
+        codigo_chip: paciente.codigo_chip || "",
+        raza: paciente.raza || "",
+        especie: paciente.especie || "",
+      }
     }));
     setShowModalPacientes(false);
   };
@@ -160,6 +177,7 @@ const RellenarFicha: React.FC = () => {
     try {
       // Aquí harías la petición POST al backend
       console.log("Guardando ficha:", formData);
+      const response = await crearConsulta(formData);
       setToastMessage("Ficha veterinaria guardada exitosamente");
 
       // Limpiar formulario después de guardar
@@ -177,6 +195,30 @@ const RellenarFicha: React.FC = () => {
         auscultacion_cardiaca_toraxica: "",
         estado_pelaje: "",
         condicion_corporal: "",
+        id_consulta: 0,
+        motivo_consulta: "", // ← Agregar para compatibilidad con backend
+        
+        // Información relacionada del paciente
+        paciente: {
+          id_paciente: 0,
+          nombre: "",
+          color: "",
+          sexo: "",
+          fecha_nacimiento: "",
+          codigo_chip: "",
+          raza: "",
+          especie: "",
+        },
+        
+        // Información relacionada del tutor
+        tutor: {
+          nombre: "",
+          apellido_paterno: "",
+          apellido_materno: "",
+          rut: "",
+          telefono: "",
+          email: "",
+        },
       });
 
       setSelectedPaciente(null);

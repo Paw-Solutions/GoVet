@@ -58,6 +58,32 @@ export interface PaginatedResponse {
 // API
 const API_URL = import.meta.env.VITE_API_URL;
 
+// Ruta para crear una nueva consulta/ficha
+export async function crearConsulta(formData: ConsultaData) {
+  try {
+    console.log("Enviando datos al servidor:", formData);
+    const response = await fetch(`${API_URL}/consultas/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error en la petición: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("Respuesta del servidor:", data);
+    return data;
+  } catch (error) {
+    console.error("Error creando consulta:", error);
+    throw error;
+  }
+}
+
+
 export async function obtenerConsultasPaginadas(
   page: number = 1,
   limit: number = 50,

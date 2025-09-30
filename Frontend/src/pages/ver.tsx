@@ -83,9 +83,9 @@ const Ver: React.FC = () => {
               onSearch={consultas.handleSearch}
               onRefresh={consultas.refresh}
               onLoadMore={consultas.loadMore}
-              onViewFicha={consultas.viewConsulta}
-              onEditFicha={consultas.editConsulta}
-              onExportFicha={consultas.exportConsulta}
+              onViewConsulta={consultas.viewConsulta}
+              onEditConsulta={consultas.editConsulta}
+              onExportConsulta={consultas.exportConsulta}
               onRetry={consultas.retry}
             />
           )}
