@@ -6,7 +6,7 @@ import '../../styles/ver.css';
 interface ErrorStateProps {
   error: string;
   onRetry: () => void;
-  type: 'tutores' | 'pacientes' | 'fichas';
+  type: 'tutores' | 'pacientes' | 'consultas';
 }
 
 const ErrorState: React.FC<ErrorStateProps> = ({ error, onRetry, type }) => {

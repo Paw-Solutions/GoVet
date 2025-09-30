@@ -1,10 +1,10 @@
 import { useState, useCallback, useEffect } from 'react';
 import { TutorData } from '../api/tutores';
-import { FichaData } from '../api/fichas'
+import { ConsultaData } from '../api/fichas'
 import { PacienteData } from '../api/pacientes';
 import { obtenerTutoresPaginados } from '../api/tutores';
 import { obtenerPacientesPaginados } from '../api/pacientes';
-import { obtenerFichasPaginadas } from '../api/fichas'
+import { obtenerConsultasPaginadas } from '../api/fichas'
 
 interface PaginatedResponseTutores {
   tutores: TutorData[];
@@ -80,8 +80,8 @@ interface PacientesActions {
   retry: () => void;
 }
 
-interface PaginatedResponseFichas {
-  fichas: FichaData[];
+interface PaginatedResponseConsultas {
+  consultas: ConsultaData[];
   pagination: {
     current_page: number;
     total_pages: number;
@@ -94,27 +94,27 @@ interface PaginatedResponseFichas {
   };
 }
 
-interface FichasState {
-  data: FichaData[];
+interface ConsultasState {
+  data: ConsultaData[];
   loading: boolean;
   error: string;
   busqueda: string;
   currentPage: number;
   hasMoreData: boolean;
   searchTimeout: NodeJS.Timeout | null;
-  selectedFicha: FichaData | null;
-  showFichaInfo: boolean;
+  selectedConsulta: ConsultaData | null;
+  showConsultaInfo: boolean;
 }
 
-interface FichasActions {
+interface ConsultasActions {
   loadData: (resetList?: boolean, search?: string) => Promise<void>;
   handleSearch: (texto: string) => void;
   loadMore: (event: CustomEvent) => Promise<void>;
   refresh: (event?: CustomEvent) => Promise<void>;
-  viewFicha: (ficha: FichaData) => void;
-  editFicha: (ficha: FichaData) => void;
-  exportFicha: (ficha: FichaData) => void;
-  closeFichaInfo: () => void;
+  viewConsulta: (consulta: ConsultaData) => void;
+  editConsulta: (consulta: ConsultaData) => void;
+  exportConsulta: (consulta: ConsultaData) => void;
+  closeConsultaInfo: () => void;
   retry: () => void;
 }
 
@@ -145,8 +145,8 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
     showPacienteInfo: false,
   });
 
-  // Estados para fichas
-  const [fichasState, setFichasState] = useState<FichasState>({
+  // Estados para consultas
+  const [consultasState, setConsultasState] = useState<ConsultasState>({
     data: [],
     loading: false,
     error: "",
@@ -154,8 +154,8 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
     currentPage: 1,
     hasMoreData: true,
     searchTimeout: null,
-    selectedFicha: null,
-    showFichaInfo: false,
+    selectedConsulta: null,
+    showConsultaInfo: false,
   });
 
   // ========== FUNCIONES PARA TUTORES ==========
@@ -334,41 +334,41 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
     loadPacientesData(true, pacientesState.busqueda.trim() || undefined);
   }, [loadPacientesData, pacientesState.busqueda]);
 
-  // FUNCIONES PARA FICHAS
-  const loadFichasData = useCallback(async (resetList: boolean = true, search?: string) => {
-    setFichasState(prev => ({ ...prev, loading: true, error: "" }));
+  // FUNCIONES PARA consultaS
+  const loadConsultasData = useCallback(async (resetList: boolean = true, search?: string) => {
+    setConsultasState(prev => ({ ...prev, loading: true, error: "" }));
 
     try {
-      const page = resetList ? 1 : fichasState.currentPage + 1;
-      const data: PaginatedResponseFichas = await obtenerFichasPaginadas(page, 50, search);
+      const page = resetList ? 1 : consultasState.currentPage + 1;
+      const data: PaginatedResponseConsultas = await obtenerConsultasPaginadas(page, 50, search);
 
-      setFichasState(prev => ({
+      setConsultasState(prev => ({
         ...prev,
-        data: resetList ? data.consultas : [...prev.data, ...data.fichas],
+        data: resetList ? data.consultas : [...prev.data, ...data.consultas],
         currentPage: resetList ? 1 : page,
         hasMoreData: data.pagination.has_next,
         loading: false,
       }));
-      console.log("Datos obtenidos: ", data)
+      console.log("Datos obtenidos: ", data.consultas)
     } catch (error) {
-      setFichasState(prev => ({
+      setConsultasState(prev => ({
         ...prev,
-        error: "Error de conexión al cargar fichas",
+        error: "Error de conexión al cargar consultas",
         loading: false,
       }));
-      console.error("Error loading fichas:", error);
+      console.error("Error loading consultas:", error);
     }
-  }, [fichasState.currentPage]);
+  }, [consultasState.currentPage]);
   
 
-  const handleFichasSearch = useCallback((texto: string) => {
-    setFichasState(prev => {
+  const handleConsultasSearch = useCallback((texto: string) => {
+    setConsultasState(prev => {
       if (prev.searchTimeout) {
         clearTimeout(prev.searchTimeout);
       }
       
       const timeout = setTimeout(() => {
-        loadFichasData(true, texto.trim() || undefined);
+        loadConsultasData(true, texto.trim() || undefined);
       }, 500);
       
       return {
@@ -377,56 +377,56 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
         searchTimeout: timeout,
       };
     });
-  }, [loadFichasData]);
+  }, [loadConsultasData]);
 
-  const loadMoreFichas = useCallback(async (event: CustomEvent) => {
-    if (fichasState.hasMoreData && !fichasState.loading) {
-      await loadFichasData(false, fichasState.busqueda.trim() || undefined);
+  const loadMoreConsultas = useCallback(async (event: CustomEvent) => {
+    if (consultasState.hasMoreData && !consultasState.loading) {
+      await loadConsultasData(false, consultasState.busqueda.trim() || undefined);
     }
     (event.target as HTMLIonInfiniteScrollElement).complete();
-  }, [fichasState.hasMoreData, fichasState.loading, fichasState.busqueda, loadFichasData]);
+  }, [consultasState.hasMoreData, consultasState.loading, consultasState.busqueda, loadConsultasData]);
 
-  const refreshFichas = useCallback(async (event?: CustomEvent) => {
-    await loadFichasData(true, fichasState.busqueda.trim() || undefined);
+  const refreshConsultas = useCallback(async (event?: CustomEvent) => {
+    await loadConsultasData(true, consultasState.busqueda.trim() || undefined);
     if (event) {
       event.detail.complete();
     }
-  }, [loadFichasData, fichasState.busqueda]);
+  }, [loadConsultasData, consultasState.busqueda]);
 
-  const viewFicha = useCallback((ficha: FichaData) => {
-    setFichasState(prev => ({
+  const viewConsulta = useCallback((consulta: ConsultaData) => {
+    setConsultasState(prev => ({
       ...prev,
-      selectedFicha: ficha,
-      showFichaInfo: true,
+      selectedConsulta: consulta,
+      showConsultaInfo: true,
     }));
   }, []);
 
-  const closeFichaInfo = useCallback(() => {
-    setFichasState(prev => ({
+  const closeConsultaInfo = useCallback(() => {
+    setConsultasState(prev => ({
       ...prev,
-      showFichaInfo: false,
+      showConsultaInfo: false,
     }));
     setTimeout(() => {
-      setFichasState(prev => ({
+      setConsultasState(prev => ({
         ...prev,
-        selectedFicha: null,
+        selectedConsulta: null,
       }));
     }, 150);
   }, []);
 
-  const editFicha = useCallback((ficha: FichaData) => {
-    console.log("Editar ficha:", ficha);
+  const editConsulta = useCallback((consulta: ConsultaData) => {
+    console.log("Editar consulta:", consulta);
     // Aqui va la logica d edicion k aun no se implementa ups
   }, []);
 
-  const exportFicha = useCallback((ficha: FichaData) => {
-    console.log("Exportar ficha.");
-    // Aqui va la logica para exportar fichas
+  const exportConsulta = useCallback((consulta: ConsultaData) => {
+    console.log("Exportar consulta.");
+    // Aqui va la logica para exportar consultas
   }, [])
 
-  const retryFichas = useCallback(() => {
-    loadFichasData(true, fichasState.busqueda.trim() || undefined);
-  }, [loadFichasData, fichasState.busqueda]);
+  const retryConsultas = useCallback(() => {
+    loadConsultasData(true, consultasState.busqueda.trim() || undefined);
+  }, [loadConsultasData, consultasState.busqueda]);
 
   // ========== EFECTOS ==========
 
@@ -437,8 +437,8 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
       loadTutoresData();
     } else if (initialSegment === 'pacientes') {
       loadPacientesData();
-    } else if (initialSegment === 'fichas') {
-      loadFichasData();
+    } else if (initialSegment === 'consultas') {
+      loadConsultasData();
     }
   }, [initialSegment]);
 
@@ -451,11 +451,11 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
       if (pacientesState.searchTimeout) {
         clearTimeout(pacientesState.searchTimeout);
       }
-      if (fichasState.searchTimeout) {
-        clearTimeout(fichasState.searchTimeout)
+      if (consultasState.searchTimeout) {
+        clearTimeout(consultasState.searchTimeout)
       }
     };
-  }, [tutoresState.searchTimeout, pacientesState.searchTimeout, fichasState.searchTimeout]);
+  }, [tutoresState.searchTimeout, pacientesState.searchTimeout, consultasState.searchTimeout]);
 
   // ========== RETURN ==========
 
@@ -481,16 +481,16 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
     retry: retryPacientes,
   };
 
-  const fichasActions: FichasActions = {
-    loadData: loadFichasData,
-    handleSearch: handleFichasSearch,
-    loadMore: loadMoreFichas,
-    refresh: refreshFichas,
-    viewFicha,
-    editFicha,
-    exportFicha,
-    closeFichaInfo,
-    retry: retryFichas,
+  const consultasActions: ConsultasActions = {
+    loadData: loadConsultasData,
+    handleSearch: handleConsultasSearch,
+    loadMore: loadMoreConsultas,
+    refresh: refreshConsultas,
+    viewConsulta,
+    editConsulta,
+    exportConsulta,
+    closeConsultaInfo,
+    retry: retryConsultas,
   };
 
   return {
@@ -518,18 +518,18 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
       // Acciones
       ...pacientesActions,
     },
-    fichas: {
-      data: fichasState.data,
-      loading: fichasState.loading,
-      error: fichasState.error,
-      busqueda: fichasState.busqueda,
-      hasMoreData: fichasState.hasMoreData,
-      selectedFicha: fichasState.selectedFicha,
-      showFichaInfo: fichasState.showFichaInfo,
+    consultas: {
+      data: consultasState.data,
+      loading: consultasState.loading,
+      error: consultasState.error,
+      busqueda: consultasState.busqueda,
+      hasMoreData: consultasState.hasMoreData,
+      selectedConsulta: consultasState.selectedConsulta,
+      showConsultaInfo: consultasState.showConsultaInfo,
       // Acciones
-      ...fichasActions,
+      ...consultasActions,
     }
   };
 };
 
-export type { TutoresActions, PacientesActions, FichasActions };
+export type { TutoresActions, PacientesActions, ConsultasActions };

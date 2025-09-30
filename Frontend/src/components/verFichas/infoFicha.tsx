@@ -37,15 +37,15 @@ import {
   bodyOutline,
   pulseOutline,
 } from 'ionicons/icons';
-import { FichaData, calcularEdadPaciente } from '../../api/fichas';
+import { ConsultaData, calcularEdadPaciente } from '../../api/fichas';
 
 interface ModalInfoFichaProps {
   isOpen: boolean;
   onDismiss: () => void;
-  ficha: FichaData | null;
+  consulta: ConsultaData | null;
 }
 
-const ModalInfoFicha: React.FC<ModalInfoFichaProps> = ({ isOpen, onDismiss, ficha }) => {
+const ModalInfoFicha: React.FC<ModalInfoFichaProps> = ({ isOpen, onDismiss, consulta }) => {
   // Función segura para cerrar el modal
   const handleDismiss = () => {
     try {
@@ -100,7 +100,7 @@ const ModalInfoFicha: React.FC<ModalInfoFichaProps> = ({ isOpen, onDismiss, fich
   };
 
   // Si no hay ficha, no renderizar nada
-  if (!ficha) {
+  if (!consulta) {
     return null;
   }
 
@@ -115,7 +115,7 @@ const ModalInfoFicha: React.FC<ModalInfoFichaProps> = ({ isOpen, onDismiss, fich
         <IonToolbar>
           <IonTitle>
             <IonIcon icon={medicalOutline} style={{ marginRight: '8px' }} />
-            Ficha Médica #{ficha.id_consulta}
+            Ficha Médica #{consulta.id_consulta}
           </IonTitle>
           <IonButtons slot="end">
             <IonButton fill="clear" onClick={handleDismiss}>
@@ -142,7 +142,7 @@ const ModalInfoFicha: React.FC<ModalInfoFichaProps> = ({ isOpen, onDismiss, fich
                     <IonIcon icon={calendarOutline} slot="start" color="primary" />
                     <IonLabel>
                       <h3>Fecha de Consulta</h3>
-                      <p>{formatDate(ficha.fecha_consulta)}</p>
+                      <p>{formatDate(consulta.fecha_consulta)}</p>
                     </IonLabel>
                   </IonItem>
                 </IonCol>
@@ -151,20 +151,20 @@ const ModalInfoFicha: React.FC<ModalInfoFichaProps> = ({ isOpen, onDismiss, fich
                     <IonIcon icon={informationCircleOutline} slot="start" color="tertiary" />
                     <IonLabel>
                       <h3>ID Consulta</h3>
-                      <p>#{ficha.id_consulta}</p>
+                      <p>#{consulta.id_consulta}</p>
                     </IonLabel>
                   </IonItem>
                 </IonCol>
               </IonRow>
               
-              {ficha.motivo && (
+              {consulta.motivo && (
                 <IonRow>
                   <IonCol size="12">
                     <IonItem lines="none" className="info-item">
                       <IonIcon icon={clipboardOutline} slot="start" color="warning" />
                       <IonLabel>
                         <h3>Motivo de Consulta</h3>
-                        <p>{ficha.motivo}</p>
+                        <p>{consulta.motivo}</p>
                       </IonLabel>
                     </IonItem>
                   </IonCol>
@@ -175,7 +175,7 @@ const ModalInfoFicha: React.FC<ModalInfoFichaProps> = ({ isOpen, onDismiss, fich
         </IonCard>
 
         {/* Card 2: Información del Paciente */}
-        {ficha.paciente && (
+        {consulta.paciente && (
           <IonCard className="patient-card">
             <IonCardHeader>
               <IonCardTitle>
@@ -189,16 +189,16 @@ const ModalInfoFicha: React.FC<ModalInfoFichaProps> = ({ isOpen, onDismiss, fich
                   <IonCol size="12" sizeMd="6">
                     <IonItem lines="none" className="info-item">
                       <IonLabel>
-                        <h2>{ficha.paciente.nombre}</h2>
+                        <h2>{consulta.paciente.nombre}</h2>
                         <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
-                          {ficha.paciente.sexo && (
-                            <IonBadge color={getSexColor(ficha.paciente.sexo)}>
-                              {formatSex(ficha.paciente.sexo)}
+                          {consulta.paciente.sexo && (
+                            <IonBadge color={getSexColor(consulta.paciente.sexo)}>
+                              {formatSex(consulta.paciente.sexo)}
                             </IonBadge>
                           )}
-                          {ficha.paciente.especie && (
+                          {consulta.paciente.especie && (
                             <IonChip outline>
-                              <IonLabel>{capitalizeText(ficha.paciente.especie)}</IonLabel>
+                              <IonLabel>{capitalizeText(consulta.paciente.especie)}</IonLabel>
                             </IonChip>
                           )}
                         </div>
@@ -207,12 +207,12 @@ const ModalInfoFicha: React.FC<ModalInfoFichaProps> = ({ isOpen, onDismiss, fich
                   </IonCol>
                   
                   <IonCol size="12" sizeMd="6">
-                    {ficha.paciente.fecha_nacimiento && (
+                    {consulta.paciente.fecha_nacimiento && (
                       <IonItem lines="none" className="info-item">
                         <IonIcon icon={calendarOutline} slot="start" color="success" />
                         <IonLabel>
                           <h3>Edad</h3>
-                          <p>{calcularEdadPaciente(ficha.paciente.fecha_nacimiento)}</p>
+                          <p>{calcularEdadPaciente(consulta.paciente.fecha_nacimiento)}</p>
                         </IonLabel>
                       </IonItem>
                     )}
@@ -220,34 +220,34 @@ const ModalInfoFicha: React.FC<ModalInfoFichaProps> = ({ isOpen, onDismiss, fich
                 </IonRow>
 
                 <IonRow>
-                  {ficha.paciente.raza && (
+                  {consulta.paciente.raza && (
                     <IonCol size="12" sizeMd="4">
                       <IonItem lines="none" className="info-item">
                         <IonLabel>
                           <h3>Raza</h3>
-                          <p>{capitalizeText(ficha.paciente.raza)}</p>
-                        </IonLabel>
-                      </IonItem>
-                    </IonCol>
-                  )}
-                  
-                  {ficha.paciente.color && (
-                    <IonCol size="12" sizeMd="4">
-                      <IonItem lines="none" className="info-item">
-                        <IonLabel>
-                          <h3>Color</h3>
-                          <p>{capitalizeText(ficha.paciente.color)}</p>
+                          <p>{capitalizeText(consulta.paciente.raza)}</p>
                         </IonLabel>
                       </IonItem>
                     </IonCol>
                   )}
 
-                  {ficha.paciente.codigo_chip && (
+                  {consulta.paciente.color && (
+                    <IonCol size="12" sizeMd="4">
+                      <IonItem lines="none" className="info-item">
+                        <IonLabel>
+                          <h3>Color</h3>
+                          <p>{capitalizeText(consulta.paciente.color)}</p>
+                        </IonLabel>
+                      </IonItem>
+                    </IonCol>
+                  )}
+
+                  {consulta.paciente.codigo_chip && (
                     <IonCol size="12" sizeMd="4">
                       <IonItem lines="none" className="info-item">
                         <IonLabel>
                           <h3>Chip</h3>
-                          <p>{ficha.paciente.codigo_chip}</p>
+                          <p>{consulta.paciente.codigo_chip}</p>
                         </IonLabel>
                       </IonItem>
                     </IonCol>
@@ -259,7 +259,7 @@ const ModalInfoFicha: React.FC<ModalInfoFichaProps> = ({ isOpen, onDismiss, fich
         )}
 
         {/* Card 3: Información del Tutor */}
-        {ficha.tutor && (
+        {consulta.tutor && (
           <IonCard className="tutor-card">
             <IonCardHeader>
               <IonCardTitle>
@@ -275,7 +275,7 @@ const ModalInfoFicha: React.FC<ModalInfoFichaProps> = ({ isOpen, onDismiss, fich
                       <IonLabel>
                         <h3>Nombre Completo</h3>
                         <p>
-                          {ficha.tutor.nombre} {ficha.tutor.apellido_paterno} {ficha.tutor.apellido_materno}
+                          {consulta.tutor.nombre} {consulta.tutor.apellido_paterno} {consulta.tutor.apellido_materno}
                         </p>
                       </IonLabel>
                     </IonItem>
@@ -285,30 +285,30 @@ const ModalInfoFicha: React.FC<ModalInfoFichaProps> = ({ isOpen, onDismiss, fich
                     <IonItem lines="none" className="info-item">
                       <IonLabel>
                         <h3>RUT</h3>
-                        <p>{ficha.tutor.rut}</p>
+                        <p>{consulta.tutor.rut}</p>
                       </IonLabel>
                     </IonItem>
                   </IonCol>
                 </IonRow>
 
                 <IonRow>
-                  {ficha.tutor.telefono && (
+                  {consulta.tutor.telefono && (
                     <IonCol size="12" sizeMd="6">
                       <IonItem lines="none" className="info-item">
                         <IonLabel>
                           <h3>Teléfono</h3>
-                          <p>{ficha.tutor.telefono}</p>
+                          <p>{consulta.tutor.telefono}</p>
                         </IonLabel>
                       </IonItem>
                     </IonCol>
                   )}
 
-                  {ficha.tutor.email && (
+                  {consulta.tutor.email && (
                     <IonCol size="12" sizeMd="6">
                       <IonItem lines="none" className="info-item">
                         <IonLabel>
                           <h3>Email</h3>
-                          <p>{ficha.tutor.email}</p>
+                          <p>{consulta.tutor.email}</p>
                         </IonLabel>
                       </IonItem>
                     </IonCol>
@@ -330,37 +330,37 @@ const ModalInfoFicha: React.FC<ModalInfoFichaProps> = ({ isOpen, onDismiss, fich
           <IonCardContent>
             <IonGrid>
               <IonRow>
-                {ficha.peso && (
+                {consulta.peso && (
                   <IonCol size="12" sizeMd="4">
                     <IonItem lines="none" className="info-item">
                       <IonIcon icon={scaleOutline} slot="start" color="success" />
                       <IonLabel>
                         <h3>Peso</h3>
-                        <p>{ficha.peso} kg</p>
+                        <p>{consulta.peso} kg</p>
                       </IonLabel>
                     </IonItem>
                   </IonCol>
                 )}
 
-                {ficha.condicion_corporal && (
+                {consulta.condicion_corporal && (
                   <IonCol size="12" sizeMd="4">
                     <IonItem lines="none" className="info-item">
                       <IonIcon icon={bodyOutline} slot="start" color="warning" />
                       <IonLabel>
                         <h3>Condición Corporal</h3>
-                        <p>{capitalizeText(ficha.condicion_corporal)}</p>
+                        <p>{capitalizeText(consulta.condicion_corporal)}</p>
                       </IonLabel>
                     </IonItem>
                   </IonCol>
                 )}
 
-                {ficha.estado_pelaje && (
+                {consulta.estado_pelaje && (
                   <IonCol size="12" sizeMd="4">
                     <IonItem lines="none" className="info-item">
                       <IonIcon icon={fitnessOutline} slot="start" color="tertiary" />
                       <IonLabel>
                         <h3>Estado del Pelaje</h3>
-                        <p>{capitalizeText(ficha.estado_pelaje)}</p>
+                        <p>{capitalizeText(consulta.estado_pelaje)}</p>
                       </IonLabel>
                     </IonItem>
                   </IonCol>
@@ -368,25 +368,25 @@ const ModalInfoFicha: React.FC<ModalInfoFichaProps> = ({ isOpen, onDismiss, fich
               </IonRow>
 
               <IonRow>
-                {ficha.mucosas && (
+                {consulta.mucosas && (
                   <IonCol size="12" sizeMd="6">
                     <IonItem lines="none" className="info-item">
                       <IonIcon icon={eyeOutline} slot="start" color="danger" />
                       <IonLabel>
                         <h3>Mucosas</h3>
-                        <p>{capitalizeText(ficha.mucosas)}</p>
+                        <p>{capitalizeText(consulta.mucosas)}</p>
                       </IonLabel>
                     </IonItem>
                   </IonCol>
                 )}
 
-                {ficha.dht && (
+                {consulta.dht && (
                   <IonCol size="12" sizeMd="6">
                     <IonItem lines="none" className="info-item">
                       <IonIcon icon={pulseOutline} slot="start" color="primary" />
                       <IonLabel>
                         <h3>DHT</h3>
-                        <p>{capitalizeText(ficha.dht)}</p>
+                        <p>{capitalizeText(consulta.dht)}</p>
                       </IonLabel>
                     </IonItem>
                   </IonCol>
@@ -394,25 +394,25 @@ const ModalInfoFicha: React.FC<ModalInfoFichaProps> = ({ isOpen, onDismiss, fich
               </IonRow>
 
               <IonRow>
-                {ficha.nodulos_linfaticos && (
+                {consulta.nodulos_linfaticos && (
                   <IonCol size="12" sizeMd="6">
                     <IonItem lines="none" className="info-item">
                       <IonIcon icon={medicalOutline} slot="start" color="secondary" />
                       <IonLabel>
                         <h3>Nódulos Linfáticos</h3>
-                        <p>{capitalizeText(ficha.nodulos_linfaticos)}</p>
+                        <p>{capitalizeText(consulta.nodulos_linfaticos)}</p>
                       </IonLabel>
                     </IonItem>
                   </IonCol>
                 )}
 
-                {ficha.auscultacion_cardiaca_toraxica && (
+                {consulta.auscultacion_cardiaca_toraxica && (
                   <IonCol size="12" sizeMd="6">
                     <IonItem lines="none" className="info-item">
                       <IonIcon icon={heartOutline} slot="start" color="danger" />
                       <IonLabel>
                         <h3>Auscultación Cardíaca</h3>
-                        <p>{capitalizeText(ficha.auscultacion_cardiaca_toraxica)}</p>
+                        <p>{capitalizeText(consulta.auscultacion_cardiaca_toraxica)}</p>
                       </IonLabel>
                     </IonItem>
                   </IonCol>
@@ -431,20 +431,20 @@ const ModalInfoFicha: React.FC<ModalInfoFichaProps> = ({ isOpen, onDismiss, fich
             </IonCardTitle>
           </IonCardHeader>
           <IonCardContent>
-            {ficha.diagnostico && (
+            {consulta.diagnostico && (
               <IonItem lines="none" className="info-item diagnosis-item">
                 <IonLabel>
                   <h3>Diagnóstico</h3>
-                  <p className="diagnosis-text">{ficha.diagnostico}</p>
+                  <p className="diagnosis-text">{consulta.diagnostico}</p>
                 </IonLabel>
               </IonItem>
             )}
 
-            {ficha.observaciones && (
+            {consulta.observaciones && (
               <IonItem lines="none" className="info-item observations-item">
                 <IonLabel>
                   <h3>Observaciones</h3>
-                  <p className="observations-text">{ficha.observaciones}</p>
+                  <p className="observations-text">{consulta.observaciones}</p>
                 </IonLabel>
               </IonItem>
             )}

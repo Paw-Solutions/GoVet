@@ -29,9 +29,9 @@ const SegmentedView: React.FC<SegmentedViewProps> = ({
             <IonIcon icon={pawOutline} />
             <IonLabel>Pacientes</IonLabel>
           </IonSegmentButton>
-          <IonSegmentButton value="fichas">
+          <IonSegmentButton value="consultas">
             <IonIcon icon={documentTextOutline} />
-            <IonLabel>Fichas</IonLabel>
+            <IonLabel>Consultas</IonLabel>
           </IonSegmentButton>
         </IonSegment>
       </div>

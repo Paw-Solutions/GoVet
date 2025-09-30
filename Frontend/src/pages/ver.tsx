@@ -14,7 +14,7 @@ import ModalsContainer from "../components/ver/ModalsContainer";
 
 const Ver: React.FC = () => {
   const [selectedSegment, setSelectedSegment] = useState("pacientes");
-  const { tutores, pacientes, fichas } = useSegmentedData(selectedSegment);
+  const { tutores, pacientes, consultas } = useSegmentedData(selectedSegment);
 
   const handleSegmentChange = (segment: string) => {
     setSelectedSegment(segment);
@@ -27,12 +27,12 @@ const Ver: React.FC = () => {
         onRefresh={() => {
           if (selectedSegment === 'tutores') return tutores.refresh();
           if (selectedSegment === 'pacientes') return pacientes.refresh();
-          if (selectedSegment === 'fichas') return fichas.refresh();
+          if (selectedSegment === 'consultas') return consultas.refresh();
         }}
         loading={
           selectedSegment === 'tutores' ? tutores.loading :
           selectedSegment === 'pacientes' ? pacientes.loading :
-          fichas.loading
+          consultas.loading
         }
       />
 
@@ -73,20 +73,20 @@ const Ver: React.FC = () => {
             />
           )}
 
-          {selectedSegment === "fichas" && (
+          {selectedSegment === "consultas" && (
             <FichasList
-              fichas={fichas.data}
-              loading={fichas.loading}
-              error={fichas.error}
-              busqueda={fichas.busqueda}
-              hasMoreData={fichas.hasMoreData}
-              onSearch={fichas.handleSearch}
-              onRefresh={fichas.refresh}
-              onLoadMore={fichas.loadMore}
-              onViewFicha={fichas.viewFicha}
-              onEditFicha={fichas.editFicha}
-              onExportFicha={fichas.exportFicha}
-              onRetry={fichas.retry}
+              consultas={consultas.data}
+              loading={consultas.loading}
+              error={consultas.error}
+              busqueda={consultas.busqueda}
+              hasMoreData={consultas.hasMoreData}
+              onSearch={consultas.handleSearch}
+              onRefresh={consultas.refresh}
+              onLoadMore={consultas.loadMore}
+              onViewFicha={consultas.viewConsulta}
+              onEditFicha={consultas.editConsulta}
+              onExportFicha={consultas.exportConsulta}
+              onRetry={consultas.retry}
             />
           )}
         </SegmentedView>
@@ -102,9 +102,9 @@ const Ver: React.FC = () => {
         selectedPaciente={pacientes.selectedPaciente}
         onClosePacienteInfo={pacientes.closePacienteInfo}
 
-        showFichaInfo={fichas.showFichaInfo}
-        selectedFicha={fichas.selectedFicha}
-        onCloseFichaInfo={fichas.closeFichaInfo}
+        showConsultaInfo={consultas.showConsultaInfo}
+        selectedConsulta={consultas.selectedConsulta}
+        onCloseConsultaInfo={consultas.closeConsultaInfo}
       />
     </IonPage>
   );

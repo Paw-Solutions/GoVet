@@ -1,5 +1,5 @@
 // Ficha data interface
-export interface FichaData {
+export interface ConsultaData {
   id_paciente: number;
   rut: string;
   fecha_consulta: string;
@@ -40,7 +40,7 @@ export interface FichaData {
 }
 
 export interface PaginatedResponse {
-  fichas: FichaData[];
+  consultas: ConsultaData[];
   pagination: {
     current_page: number;
     total_pages: number;
@@ -58,7 +58,7 @@ export interface PaginatedResponse {
 // API
 const API_URL = import.meta.env.VITE_API_URL;
 
-export async function obtenerFichasPaginadas(
+export async function obtenerConsultasPaginadas(
   page: number = 1,
   limit: number = 50,
   search?: string
@@ -99,7 +99,7 @@ export async function obtenerFichasPaginadas(
  * @param id_consulta - ID de la consulta/ficha
  * @returns Promise con la ficha específica
  */
-export async function obtenerFichaPorId(id_consulta: number): Promise<FichaData> {
+export async function obtenerConsultaPorId(id_consulta: number): Promise<ConsultaData> {
   try {
     const url = `${API_URL}/consulta/${id_consulta}`;
     
@@ -114,7 +114,7 @@ export async function obtenerFichaPorId(id_consulta: number): Promise<FichaData>
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const ficha: FichaData = await response.json();
+    const ficha: ConsultaData = await response.json();
     
     return {
       ...ficha,
@@ -122,7 +122,7 @@ export async function obtenerFichaPorId(id_consulta: number): Promise<FichaData>
     };
 
   } catch (error) {
-    console.error(`Error fetching ficha ${id_consulta}:`, error);
+    console.error(`Error fetching consulta ${id_consulta}:`, error);
     throw error;
   }
 }
@@ -138,7 +138,7 @@ export async function buscarFichas(searchParams: {
   fechaDesde?: string;
   fechaHasta?: string;
   diagnostico?: string;
-}): Promise<FichaData[]> {
+}): Promise<ConsultaData[]> {
   try {
     const params = new URLSearchParams();
     
@@ -161,7 +161,7 @@ export async function buscarFichas(searchParams: {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const fichas: FichaData[] = await response.json();
+    const fichas: ConsultaData[] = await response.json();
     
     return fichas.map(ficha => ({
       ...ficha,
@@ -169,7 +169,7 @@ export async function buscarFichas(searchParams: {
     }));
 
   } catch (error) {
-    console.error('❌ Error searching fichas:', error);
+    console.error('Error searching fichas:', error);
     throw error;
   }
 }
