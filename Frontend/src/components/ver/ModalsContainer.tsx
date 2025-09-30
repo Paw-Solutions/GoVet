@@ -1,7 +1,7 @@
 import React from 'react';
 import { TutorData } from '../../api/tutores';
 import { PacienteData } from '../../api/pacientes';
-import { FichaData } from '../../api/fichas';
+import { ConsultaData } from '../../api/fichas';
 import ModalInfoTutor from '../verTutores/infoTutor';
 import ModalInfoPaciente from '../verPacientes/infoPaciente';
 import ModalInfoFicha from '../verFichas/infoFicha';
@@ -18,9 +18,9 @@ interface ModalsContainerProps {
   onClosePacienteInfo: () => void;
 
   // Props para modal de fichas
-  showFichaInfo: boolean;
-  selectedFicha: FichaData | null;
-  onCloseFichaInfo: () => void;
+  showConsultaInfo: boolean;
+  selectedConsulta: ConsultaData | null;
+  onCloseConsultaInfo: () => void;
 }
 
 const ModalsContainer: React.FC<ModalsContainerProps> = ({
@@ -35,9 +35,9 @@ const ModalsContainer: React.FC<ModalsContainerProps> = ({
   onClosePacienteInfo,
 
   // Fichas
-  showFichaInfo,
-  selectedFicha,
-  onCloseFichaInfo,
+  showConsultaInfo,
+  selectedConsulta,
+  onCloseConsultaInfo,
 }) => {
   return (
     <>
@@ -55,11 +55,11 @@ const ModalsContainer: React.FC<ModalsContainerProps> = ({
         paciente={selectedPaciente}
       />
       
-      {/* Modal de informacion de ficha*/}
+      {/* Modal de informacion de consulta*/}
       <ModalInfoFicha
-        isOpen={showFichaInfo}
-        onDismiss={onCloseFichaInfo}
-        ficha={selectedFicha}
+        isOpen={showConsultaInfo}
+        onDismiss={onCloseConsultaInfo}
+        consulta={selectedConsulta}
       />
     </>
   );

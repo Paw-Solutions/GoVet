@@ -5,7 +5,7 @@ import '../../styles/ver.css';
 interface LoadingStateProps {
   loading: boolean;
   itemCount: number;
-  type: 'tutores' | 'pacientes' | 'fichas';
+  type: 'tutores' | 'pacientes' | 'consultas';
 }
 
 const LoadingState: React.FC<LoadingStateProps> = ({ loading, itemCount, type }) => {

@@ -5,7 +5,7 @@ import '../../styles/ver.css';
 interface EmptyStateProps {
   isEmpty: boolean;
   busqueda: string;
-  type: 'tutores' | 'pacientes' | 'fichas';
+  type: 'tutores' | 'pacientes' | 'consultas';
 }
 
 const EmptyState: React.FC<EmptyStateProps> = ({ isEmpty, busqueda, type }) => {

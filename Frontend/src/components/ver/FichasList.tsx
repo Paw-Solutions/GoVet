@@ -4,7 +4,7 @@ import {
   IonRefresher,
   IonRefresherContent,
 } from "@ionic/react";
-import { FichaData } from "../../api/fichas";
+import { ConsultaData } from "../../api/fichas";
 import SearchBar from "../common/SearchBar";
 import LoadingState from "../common/LoadingState";
 import ErrorState from "../common/ErrorState";
@@ -15,7 +15,7 @@ import FichaItem from "../items_ver/FichaItem";
 import '../../styles/ver.css';
 
 interface FichasListProps {
-  fichas: FichaData[];
+  consultas: ConsultaData[];
   loading: boolean;
   error: string;
   busqueda: string;
@@ -23,14 +23,14 @@ interface FichasListProps {
   onSearch: (texto: string) => void;
   onRefresh: (event: CustomEvent) => Promise<void>;
   onLoadMore: (event: CustomEvent) => Promise<void>;
-  onViewFicha: (paciente: FichaData) => void;
-  onEditFicha: (paciente: FichaData) => void;
-  onExportFicha: (paciente: FichaData) => void;
+  onViewConsulta: (paciente: ConsultaData) => void;
+  onEditConsulta: (paciente: ConsultaData) => void;
+  onExportConsulta: (paciente: ConsultaData) => void;
   onRetry: () => void;
 }
 
 const FichasList: React.FC<FichasListProps> = ({
-  fichas = [],
+  consultas = [],
   loading,
   error,
   busqueda,
@@ -38,13 +38,13 @@ const FichasList: React.FC<FichasListProps> = ({
   onSearch,
   onRefresh,
   onLoadMore,
-  onViewFicha,
-  onEditFicha,
-  onExportFicha,
+  onViewConsulta,
+  onEditConsulta,
+  onExportConsulta,
   onRetry
 }) => {
-  const safeFichas = fichas;
-  console.log("Fichas: ", fichas);
+  const safeFichas = consultas;
+  console.log("Fichas: ", consultas);
   console.log("Hola")
 
   return (
@@ -61,37 +61,37 @@ const FichasList: React.FC<FichasListProps> = ({
           className="searchbar"
         />
 
-        <LoadingState loading={loading} itemCount={safeFichas.length} type="fichas" />
+        <LoadingState loading={loading} itemCount={safeFichas.length} type="consultas" />
 
         <ErrorState
           error={error}
           onRetry={onRetry}
-          type="fichas"
+          type="consultas"
         />
         
         <EmptyState
-          isEmpty={!loading && !error && fichas.length === 0}
+          isEmpty={!loading && !error && consultas.length === 0}
           busqueda={busqueda}
-          type="fichas"
+          type="consultas"
         />
 
-        {fichas.length > 0 && (
+        {consultas.length > 0 && (
           <>
             <ResultsCounter
-              count={fichas.length}
+              count={consultas.length}
               busqueda={busqueda}
               hasMoreData={hasMoreData}
-              type="fichas"
+              type="consultas"
             />
 
             <IonList className="info-list">
-              {fichas.map((ficha, index) => (
+              {consultas.map((consulta, index) => (
                 <FichaItem
-                  key={`${ficha.id_consulta}-${index}`}
-                  ficha={ficha}
-                  onView={() => onViewFicha(ficha)}
-                  onEdit={() => onEditFicha(ficha)}
-                  onExport={() => onExportFicha(ficha)}
+                  key={`${consulta.id_consulta}-${index}`}
+                  ficha={consulta}
+                  onView={() => onViewConsulta(consulta)}
+                  onEdit={() => onEditConsulta(consulta)}
+                  onExport={() => onExportConsulta(consulta)}
                   disabled={loading}
                 />
               ))}
