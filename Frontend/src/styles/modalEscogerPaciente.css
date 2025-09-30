@@ -1,0 +1,201 @@
+/* Contenedor principal del modal */
+.modal-escoger-paciente {
+  --ion-background-color: #f8f9fa;
+}
+
+/* Barra de búsqueda sticky */
+.modal-search-container {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: var(--ion-background-color);
+  padding: 1rem;
+  border-bottom: 1px solid var(--ion-color-light-shade);
+}
+
+.modal-search-container ion-searchbar {
+  --background: #ffffff;
+  --border-radius: 0.75rem;
+  --box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.1);
+}
+
+/* Paciente seleccionado fijo */
+.modal-selected-paciente {
+  position: fixed;
+  top: 9rem; /* Altura del header + barra de búsqueda */
+  left: 0;
+  right: 0;
+  z-index: 9;
+  background-color: var(--ion-background-color);
+  padding: 0 1rem 1rem 1rem; /* Cambiar este padding para modificar la altura */
+  border-bottom: 1px solid var(--ion-color-light-shade);
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.1);
+}
+
+.modal-selected-paciente h3 {
+  margin: 0 0 0.5rem 0;
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--ion-color-primary);
+}
+
+.modal-selected-item {
+  --background: linear-gradient(145deg, #e8f4fd, #f0f9ff);
+  --border-radius: 0.75rem;
+  --min-height: 3.75rem; /* Altura mínima del item */
+  border: 2px solid var(--ion-color-primary);
+  margin: 0;
+}
+
+/* Agregar padding-top al contenido cuando hay paciente seleccionado */
+.modal-pacientes-list.with-selected-paciente {
+  padding-top: 7.5rem; /* Espacio para el paciente seleccionado fijo */
+}
+
+/* Estados de carga, error y vacío */
+.modal-loading-state,
+.modal-error-state,
+.modal-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 3rem 1rem;
+}
+
+.modal-loading-state ion-spinner {
+  margin-bottom: 1rem;
+}
+
+.modal-error-state p {
+  margin-bottom: 1.5rem;
+}
+
+.modal-empty-state h3 {
+  color: var(--ion-color-dark);
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+/* Contador de resultados */
+.modal-results-counter {
+  text-align: center;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.modal-results-counter p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--ion-color-medium);
+}
+
+/* Lista de pacientes - NO interferir con el scroll */
+.modal-pacientes-list {
+  background: transparent;
+  padding: 0;
+}
+
+/* Items de paciente */
+.modal-paciente-item {
+  --background: #ffffff;
+  --border-radius: 0.75rem;
+  --box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.08);
+  --padding-start: 1rem;
+  --padding-end: 1rem;
+  margin: 0.5rem 1rem;
+  border: 1px solid var(--ion-color-light-shade);
+  transition: transform 0.2s ease;
+}
+
+.modal-paciente-item:hover {
+  transform: translateY(-0.0625rem);
+  --box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.12);
+}
+
+/* IMPORTANTE: Solo los elementos con clase .selected deben tener el borde azul */
+.modal-paciente-item.selected {
+  --background: linear-gradient(145deg, #e8f4fd, #f0f9ff) !important;
+  border: 2px solid var(--ion-color-primary) !important;
+}
+
+/* IMPORTANTE: Solo los h2 de elementos seleccionados deben ser azules */
+.modal-paciente-item ion-label h2 {
+  font-weight: 600;
+  color: var(--ion-color-dark);
+  margin-bottom: 0.25rem;
+  font-size: 1.1rem;
+}
+
+.modal-paciente-item.selected ion-label h2 {
+  color: var(--ion-color-primary) !important;
+}
+
+/* Etiquetas en los items */
+.modal-paciente-item ion-label h2 {
+  font-weight: 600;
+  color: var(--ion-color-dark);
+  margin-bottom: 0.25rem;
+  font-size: 1.1rem;
+}
+
+.modal-paciente-item ion-label p {
+  color: var(--ion-color-medium);
+  font-size: 0.9rem;
+  margin: 0.1rem 0;
+}
+
+.modal-paciente-item.selected ion-label h2 {
+  color: var(--ion-color-primary);
+}
+
+/* Botones en los items */
+.modal-paciente-item ion-button[fill="clear"] {
+  --color: var(--ion-color-medium);
+  --border-radius: 50%;
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+/* Footer del modal */
+.modal-footer ion-button[fill="solid"] {
+  --border-radius: 0.5rem;
+  --padding-start: 2rem;
+  --padding-end: 2rem;
+  font-weight: 600;
+}
+
+/* Header del modal */
+.modal-header ion-toolbar {
+  --background: var(--ion-color-primary);
+  --color: white;
+}
+
+.modal-header ion-title {
+  font-weight: 600;
+}
+
+.modal-header ion-button {
+  --color: white;
+}
+
+/* Responsividad */
+@media (max-width: 768px) {
+  .modal-search-container {
+    padding: 0.75rem;
+  }
+
+  .modal-selected-paciente {
+    padding: 0 0.75rem 0.75rem 0.75rem;
+    top: 8.625rem;
+  }
+
+  .modal-paciente-item {
+    margin: 0.375rem 0.75rem;
+  }
+
+  .modal-pacientes-list.with-selected-paciente {
+    padding-top: 6.875rem;
+  }
+}

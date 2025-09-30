@@ -140,17 +140,15 @@
 }
 
 ion-icon {
-    font-size: 16px;
-    min-width: 16px;
-    color: var(--ion-color-secondary);
+  font-size: 16px;
+  min-width: 16px;
+  color: var(--ion-color-secondary);
 }
 
 /* Clase adicional para espaciado mínimo cuando sea necesario */
 .compact-spacing {
   margin: 4px 0 !important;
 }
-
-
 
 .padding {
   --padding-start: 0.5rem;

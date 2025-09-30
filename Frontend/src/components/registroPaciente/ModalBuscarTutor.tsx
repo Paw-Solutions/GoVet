@@ -175,7 +175,10 @@ const ModalBuscarTutor: React.FC<ModalBuscarTutorProps> = ({
       nombre: tutorData.nombre,
       apellido:
         `${tutorData.apellido_paterno} ${tutorData.apellido_materno}`.trim(),
-      telefono: tutorData.telefono || "",
+      telefono:
+        tutorData.telefono !== undefined && tutorData.telefono !== null
+          ? String(tutorData.telefono)
+          : "",
       email: tutorData.email || "",
       direccion: tutorData.direccion || "",
       comuna: tutorData.comuna || "",

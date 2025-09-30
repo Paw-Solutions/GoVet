@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   IonModal,
   IonHeader,
@@ -7,148 +7,260 @@ import {
   IonContent,
   IonButtons,
   IonButton,
+  IonIcon,
   IonSearchbar,
   IonList,
   IonItem,
   IonLabel,
   IonSpinner,
   IonText,
-  IonIcon,
+  IonFooter,
   IonRefresher,
   IonRefresherContent,
   IonInfiniteScroll,
   IonInfiniteScrollContent,
 } from "@ionic/react";
-import {
-  pawOutline,
-  refreshOutline,
-  closeOutline,
-  checkmarkOutline,
-} from "ionicons/icons";
-import { PacienteData, PaginatedResponse } from "../../api/pacientes";
-import { obtenerPacientesPaginados } from '../../api/pacientes';
-import "../../styles/escogerPaciente.css";
-import "../../styles/main.css"
+import { close, checkmark, paw, eye } from "ionicons/icons";
+import { PacienteData } from "../../api/pacientes";
+import { obtenerPacientesPaginados } from "../verPacientes/listaPacientes";
+import ModalInfoPaciente from "../verPacientes/infoPaciente";
+import "../../styles/modalEscogerPaciente.css";
+
+interface Paciente {
+  id: number;
+  nombre: string;
+  especie: string;
+  raza: string;
+  sexo: string;
+  edad: number;
+  peso: number;
+  tutor_rut: string;
+  tutor_nombre?: string;
+}
 
 interface ModalEscogerPacienteProps {
   isOpen: boolean;
-  onDismiss: () => void;
-  onPacienteSelected: (paciente: PacienteData) => void;
+  onDidDismiss?: () => void;
+  onPacienteSelected?: (paciente: Paciente) => void;
+  pacienteSeleccionado?: Paciente | null;
+}
+
+interface PaginatedResponse {
+  pacientes: PacienteData[];
+  pagination: {
+    current_page: number;
+    total_pages: number;
+    total_count: number;
+    limit: number;
+    has_next: boolean;
+    has_previous: boolean;
+    next_page: number | null;
+    previous_page: number | null;
+  };
 }
 
 const ModalEscogerPaciente: React.FC<ModalEscogerPacienteProps> = ({
   isOpen,
-  onDismiss,
+  onDidDismiss,
   onPacienteSelected,
+  pacienteSeleccionado,
 }) => {
+  // Estados exactamente iguales a verPacientes
   const [pacientes, setPacientes] = useState<PacienteData[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [busqueda, setBusqueda] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMoreData, setHasMoreData] = useState(true);
-  const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
-  const [selectedPaciente, setSelectedPaciente] = useState<PacienteData | null>(null);
+  const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(
+    null
+  );
 
-  // Función para cargar pacientes (inicial o búsqueda)
-  const handleGetPacientes = async (resetList: boolean = true, search?: string) => {
-    setLoading(true);
-    setError("");
+  // Estados específicos del modal
+  const [pacienteSeleccionadoTemp, setPacienteSeleccionadoTemp] =
+    useState<Paciente | null>(pacienteSeleccionado || null);
 
-    try {
-      const page = resetList ? 1 : currentPage + 1;
-      const data: PaginatedResponse = await obtenerPacientesPaginados(page, 50, search);
+  // Estados para el modal de información del paciente
+  const [showPacienteInfo, setShowPacienteInfo] = useState(false);
+  const [selectedPaciente, setSelectedPaciente] = useState<PacienteData | null>(
+    null
+  );
 
-      if (resetList) {
-        setPacientes(data.pacientes);
-        setCurrentPage(1);
-      } else {
-        setPacientes(prev => [...prev, ...data.pacientes]);
-        setCurrentPage(page);
+  // Función para cargar pacientes
+  const handleGetPacientes = useCallback(
+    async (resetList: boolean = true, search?: string) => {
+      setLoading(true);
+      setError("");
+
+      try {
+        const page = resetList ? 1 : currentPage + 1;
+        const data: PaginatedResponse = await obtenerPacientesPaginados(
+          page,
+          50,
+          search
+        );
+
+        if (resetList) {
+          setPacientes(data.pacientes);
+          setCurrentPage(1);
+        } else {
+          setPacientes((prev) => [...prev, ...data.pacientes]);
+          setCurrentPage(page);
+        }
+
+        setHasMoreData(data.pagination.has_next);
+      } catch (error) {
+        setError("Error de conexión al cargar pacientes");
+        console.error("Error:", error);
+      } finally {
+        setLoading(false);
       }
-      
-      setHasMoreData(data.pagination.has_next);
-    } catch (error) {
-      setError("Error de conexión al cargar pacientes");
-      console.error("Error:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [currentPage]
+  );
 
-  // Función para manejar búsqueda con debounce
-  const handleSearch = (texto: string) => {
-    setBusqueda(texto);
-    
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    
-    const timeout = setTimeout(() => {
-      handleGetPacientes(true, texto.trim() || undefined);
-    }, 500);
-    
-    setSearchTimeout(timeout);
-  };
+  // Función para manejar búsqueda
+  const handleSearch = useCallback(
+    (texto: string) => {
+      setBusqueda(texto);
 
-  // Función para cargar más datos (scroll infinito)
-  const loadMoreData = async (event: CustomEvent) => {
-    if (hasMoreData && !loading) {
-      await handleGetPacientes(false, busqueda.trim() || undefined);
-    }
-    (event.target as HTMLIonInfiniteScrollElement).complete();
-  };
+      if (searchTimeout) {
+        clearTimeout(searchTimeout);
+      }
+
+      const timeout = setTimeout(() => {
+        handleGetPacientes(true, texto.trim() || undefined);
+      }, 500);
+
+      setSearchTimeout(timeout);
+    },
+    [searchTimeout, handleGetPacientes]
+  );
+
+  // Función para ver detalles del paciente
+  const handleViewPaciente = useCallback((paciente: PacienteData) => {
+    setSelectedPaciente(paciente);
+    setShowPacienteInfo(true);
+  }, []);
+
+  // Función para cerrar el modal de información
+  const handleClosePacienteInfo = useCallback(() => {
+    setShowPacienteInfo(false);
+    setTimeout(() => {
+      setSelectedPaciente(null);
+    }, 150);
+  }, []);
+
+  // Función para cargar más datos
+  const loadMoreData = useCallback(
+    async (event: CustomEvent) => {
+      if (hasMoreData && !loading) {
+        await handleGetPacientes(false, busqueda.trim() || undefined);
+      }
+      (event.target as HTMLIonInfiniteScrollElement).complete();
+    },
+    [hasMoreData, loading, handleGetPacientes, busqueda]
+  );
 
   // Función para manejar el refresh
-  const handleRefresh = async (event: CustomEvent) => {
-    await handleGetPacientes(true, busqueda.trim() || undefined);
-    event.detail.complete();
+  const handleRefresh = useCallback(
+    async (event: CustomEvent) => {
+      await handleGetPacientes(true, busqueda.trim() || undefined);
+      event.detail.complete();
+    },
+    [handleGetPacientes, busqueda]
+  );
+
+  // Función específica del modal para seleccionar paciente
+  const handleSeleccionarPaciente = (pacienteData: PacienteData) => {
+    const pacienteNormalizado: Paciente = {
+      id: pacienteData.id_paciente,
+      nombre: pacienteData.nombre,
+      especie: pacienteData.especie || "N/A",
+      raza: pacienteData.raza || "N/A",
+      sexo: pacienteData.sexo || "N/A",
+      edad: 0,
+      peso: 0,
+      tutor_rut: pacienteData.tutor?.rut || "N/A",
+      tutor_nombre: pacienteData.tutor
+        ? `${pacienteData.tutor.nombre || ""} ${
+            pacienteData.tutor.apellido_paterno || ""
+          }`.trim()
+        : undefined,
+    };
+
+    setPacienteSeleccionadoTemp(pacienteNormalizado);
   };
 
-  // Función para seleccionar paciente
-  const handleSelectPaciente = (paciente: PacienteData) => {
-    setSelectedPaciente(paciente);
-  };
-
-  // Función para confirmar selección
-  const handleConfirmSelection = () => {
-    if (selectedPaciente) {
-      onPacienteSelected(selectedPaciente);
-      handleCloseModal();
+  const handleCancelar = () => {
+    setPacienteSeleccionadoTemp(pacienteSeleccionado || null);
+    setBusqueda("");
+    if (onDidDismiss && typeof onDidDismiss === "function") {
+      onDidDismiss();
     }
   };
 
-  // Función para cerrar modal
-  const handleCloseModal = () => {
-    setSelectedPaciente(null);
-    setBusqueda("");
-    setPacientes([]);
-    setCurrentPage(1);
-    setHasMoreData(true);
-    onDismiss();
+  const handleConfirmarSeleccion = () => {
+    if (pacienteSeleccionadoTemp) {
+      if (onPacienteSelected && typeof onPacienteSelected === "function") {
+        onPacienteSelected(pacienteSeleccionadoTemp);
+      }
+    }
+    if (onDidDismiss && typeof onDidDismiss === "function") {
+      onDidDismiss();
+    }
   };
 
-  // Cargar pacientes cuando se abre el modal
+  const handleCerrarModal = () => {
+    setPacienteSeleccionadoTemp(pacienteSeleccionado || null);
+    setBusqueda("");
+
+    if (onDidDismiss && typeof onDidDismiss === "function") {
+      onDidDismiss();
+    }
+
+    const modal = document.querySelector(
+      "ion-modal.modal-escoger-paciente"
+    ) as any;
+    if (modal && modal.dismiss) {
+      modal.dismiss();
+    }
+  };
+
+  // Cargar pacientes al abrir el modal
   useEffect(() => {
     if (isOpen) {
       handleGetPacientes();
+      setPacienteSeleccionadoTemp(pacienteSeleccionado || null);
+      setBusqueda("");
     }
-    
+  }, [isOpen, pacienteSeleccionado]);
+
+  // Limpiar timeouts
+  useEffect(() => {
     return () => {
       if (searchTimeout) {
         clearTimeout(searchTimeout);
       }
     };
-  }, [isOpen]);
+  }, [searchTimeout]);
 
   return (
-    <IonModal isOpen={isOpen} onDidDismiss={handleCloseModal}>
-      <IonHeader>
+    <IonModal
+      isOpen={isOpen}
+      onDidDismiss={handleCancelar}
+      className="modal-escoger-paciente"
+    >
+      <IonHeader className="modal-header">
         <IonToolbar>
-          <IonTitle>Seleccionar Paciente</IonTitle>
-          <IonButtons slot="start">
-            <IonButton onClick={handleCloseModal}>
-              <IonIcon icon={closeOutline} />
+          <IonTitle>Escoger Paciente</IonTitle>
+          <IonButtons slot="end">
+            <IonButton
+              fill="clear"
+              onClick={handleCerrarModal}
+              aria-label="Cerrar modal"
+            >
+              <IonIcon icon={close} />
             </IonButton>
           </IonButtons>
         </IonToolbar>
@@ -159,134 +271,197 @@ const ModalEscogerPaciente: React.FC<ModalEscogerPacienteProps> = ({
           <IonRefresherContent></IonRefresherContent>
         </IonRefresher>
 
-        <div className="pacientes-container">
-          {/* Barra de búsqueda */}
-          <div className="search-container">
-            <IonSearchbar
-              value={busqueda}
-              onIonInput={(e) => handleSearch(e.detail.value!)}
-              placeholder="Buscar por nombre, especie, raza..."
-              showClearButton="focus"
-              className="pacientes-searchbar"
-              style={{
-                position: "fixed",
-                top: "55px",
-                zIndex: 1000,
-              }}
-            />
-          </div>
-          {/* Espacio para la barra de búsqueda fija */}
-          <div>
-            <div style={{ height: "35px" }}></div>
-          </div>
-          {/* Estado de carga inicial */}
-          {loading && pacientes.length === 0 && (
-            <div className="loading-container">
-              <IonSpinner />
-              <IonText>
-                <p>Cargando pacientes...</p>
-              </IonText>
-            </div>
-          )}
+        {/* Barra de búsqueda sticky */}
+        <div className="modal-search-container">
+          <IonSearchbar
+            value={busqueda}
+            onIonInput={(e) => handleSearch(e.detail.value!)}
+            placeholder="Buscar por nombre, especie, raza o tutor..."
+            showClearButton="focus"
+          />
+        </div>
 
-          {/* Estado de error */}
-          {error && (
-            <div className="error-container">
-              <IonText color="danger">
-                <p>{error}</p>
-              </IonText>
-              <IonButton
-                fill="outline"
-                onClick={() => handleGetPacientes(true, busqueda.trim() || undefined)}
-                className="retry-button"
-              >
-                <IonIcon icon={refreshOutline} slot="start" />
-                Reintentar
-              </IonButton>
-            </div>
-          )}
-
-          {/* Lista infinita de pacientes */}
-          {!loading && !error && pacientes.length === 0 ? (
-            <div className="no-results">
-              <IonText>
-                <h3>No se encontraron pacientes</h3>
+        {/* Mostrar paciente seleccionado temporalmente - STICKY */}
+        {pacienteSeleccionadoTemp && (
+          <div className="modal-selected-paciente">
+            <IonText color="primary">
+              <h3>Paciente seleccionado:</h3>
+            </IonText>
+            <IonItem className="modal-selected-item" lines="none">
+              <IonIcon icon={paw} slot="start" color="primary" />
+              <IonLabel>
+                <h2>{pacienteSeleccionadoTemp.nombre}</h2>
+                <p>Especie: {pacienteSeleccionadoTemp.especie}</p>
                 <p>
-                  {busqueda
-                    ? `No hay pacientes que coincidan con "${busqueda}"`
-                    : "No hay pacientes registrados aún"}
+                  Tutor:{" "}
+                  {pacienteSeleccionadoTemp.tutor_nombre ||
+                    pacienteSeleccionadoTemp.tutor_rut}
                 </p>
-              </IonText>
+              </IonLabel>
+              <IonIcon
+                icon={checkmark}
+                color="success"
+                size="large"
+                slot="end"
+              />
+            </IonItem>
+          </div>
+        )}
+
+        {/* Estado de carga inicial */}
+        {loading && pacientes.length === 0 && (
+          <div className="modal-loading-state">
+            <IonSpinner name="crescent" color="primary" />
+            <p>Cargando pacientes...</p>
+          </div>
+        )}
+
+        {/* Estado de error */}
+        {error && (
+          <div className="modal-error-state">
+            <IonText color="danger">
+              <p>{error}</p>
+            </IonText>
+            <IonButton
+              className="modal-retry-button"
+              fill="outline"
+              onClick={() =>
+                handleGetPacientes(true, busqueda.trim() || undefined)
+              }
+            >
+              Reintentar
+            </IonButton>
+          </div>
+        )}
+
+        {/* Lista de pacientes */}
+        {!loading && !error && pacientes.length === 0 ? (
+          <div className="modal-empty-state">
+            <h3>No se encontraron pacientes</h3>
+            <p>
+              {busqueda
+                ? `No hay pacientes que coincidan con "${busqueda}"`
+                : "No hay pacientes registrados aún"}
+            </p>
+          </div>
+        ) : (
+          <>
+            {/* Contador de resultados */}
+            <div className="modal-results-counter">
+              <p>
+                {pacientes.length} paciente{pacientes.length !== 1 ? "s" : ""}{" "}
+                cargado
+                {pacientes.length !== 1 ? "s" : ""}
+                {busqueda && ` para "${busqueda}"`}
+                {hasMoreData && " (desliza hacia abajo para cargar más)"}
+              </p>
             </div>
-          ) : (
-            <>
-              {/* Contador de resultados */}
-              <div className="results-counter">
-                <IonText>
-                  <p>
-                    {pacientes.length} paciente{pacientes.length !== 1 ? "s" : ""} encontrado{pacientes.length !== 1 ? "s" : ""}
-                    {busqueda && ` para "${busqueda}"`}
-                    {hasMoreData && " (desliza hacia abajo para cargar más)"}
-                  </p>
-                </IonText>
-              </div>
-              <IonButton 
-                onClick={handleConfirmSelection} 
-                disabled={!selectedPaciente}
-                color="tertiary"
-                style={{ position: 'fixed', bottom: '25px', right: '25px', zIndex: 1001}}
-              >
-                <IonIcon icon={checkmarkOutline} slot="start" />
-                Seleccionar
-              </IonButton>
-              {/* Lista simple de pacientes */}
-              <IonList className="pacientes-list">
-                {pacientes.map((paciente, index) => (
-                  <IonItem 
-                    key={`${paciente.id_paciente}-${index}`} 
-                    button 
-                    lines="full"
-                    onClick={() => handleSelectPaciente(paciente)}
-                    color={selectedPaciente?.id_paciente === paciente.id_paciente ? 'primary' : undefined}
+
+            {/* Lista simple de pacientes */}
+            <IonList
+              className={`modal-pacientes-list ${
+                pacienteSeleccionadoTemp ? "with-selected-paciente" : ""
+              }`}
+            >
+              {pacientes.map((paciente, index) => {
+                const isSelected =
+                  pacienteSeleccionadoTemp?.id === paciente.id_paciente;
+
+                return (
+                  <IonItem
+                    key={`${paciente.id_paciente}-${index}`}
+                    className={`modal-paciente-item ${
+                      isSelected ? "selected" : ""
+                    }`}
+                    lines="none"
+                    button
+                    onClick={() => handleSeleccionarPaciente(paciente)}
                   >
-                    <IonIcon 
-                      icon={pawOutline} 
-                      slot="start" 
-                      color={selectedPaciente?.id_paciente === paciente.id_paciente ? 'light' : undefined}
+                    <IonIcon
+                      icon={paw}
+                      slot="start"
+                      color={isSelected ? "primary" : "medium"}
                     />
                     <IonLabel>
                       <h2>{paciente.nombre}</h2>
-                      {paciente.especie && <p><strong>Especie:</strong> {paciente.especie}</p>}
-                      {paciente.raza && <p><strong>Raza:</strong> {paciente.raza}</p>}
-                      {paciente.color && <p><strong>Color:</strong> {paciente.color}</p>}
-                      {paciente.tutor?.nombre ? (
-                        <p><strong>Tutor:</strong> {paciente.tutor.nombre} {paciente.tutor.apellido_paterno}</p>
-                      ) : (
-                        <p><strong>Tutor:</strong> Sin tutor asignado</p>
-                      )}
+                      <p>
+                        <strong>Especie:</strong> {paciente.especie || "N/A"} |{" "}
+                        <strong>Raza:</strong> {paciente.raza || "N/A"}
+                      </p>
+                      <p>
+                        <strong>Tutor:</strong>{" "}
+                        {paciente.tutor
+                          ? `${paciente.tutor.nombre || ""} ${
+                              paciente.tutor.apellido_paterno || ""
+                            }`.trim() || paciente.tutor.rut
+                          : "N/A"}
+                      </p>
                     </IonLabel>
-                    {selectedPaciente?.id_paciente === paciente.id_paciente && (
-                      <IonIcon icon={checkmarkOutline} slot="end" color="light" />
-                    )}
+                    <IonButtons>
+                      <IonButton
+                        fill="clear"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleViewPaciente(paciente);
+                        }}
+                        disabled={loading}
+                      >
+                        <IonIcon icon={eye} />
+                      </IonButton>
+                      {isSelected && (
+                        <IonIcon
+                          icon={checkmark}
+                          color="primary"
+                          size="large"
+                        />
+                      )}
+                    </IonButtons>
                   </IonItem>
-                ))}
-              </IonList>
+                );
+              })}
+            </IonList>
 
-              {/* Scroll infinito */}
-              <IonInfiniteScroll
-                onIonInfinite={loadMoreData}
-                threshold="100px"
-                disabled={!hasMoreData}
-              >
-                <IonInfiniteScrollContent
-                  loadingSpinner="bubbles"
-                  loadingText="Cargando más pacientes..."
-                />
-              </IonInfiniteScroll>
-            </>
-          )}
-        </div>
+            {/* Scroll infinito */}
+            <IonInfiniteScroll
+              onIonInfinite={loadMoreData}
+              threshold="100px"
+              disabled={!hasMoreData}
+              className="modal-infinite-scroll"
+            >
+              <IonInfiniteScrollContent
+                loadingSpinner="bubbles"
+                loadingText="Cargando más pacientes..."
+              />
+            </IonInfiniteScroll>
+          </>
+        )}
       </IonContent>
+
+      <IonFooter className="modal-footer">
+        <IonToolbar>
+          <IonButtons slot="start">
+            <IonButton fill="clear" onClick={handleCerrarModal}>
+              Cancelar
+            </IonButton>
+          </IonButtons>
+          <IonButtons slot="end">
+            <IonButton
+              fill="solid"
+              onClick={handleConfirmarSeleccion}
+              disabled={!pacienteSeleccionadoTemp}
+            >
+              Confirmar Selección
+            </IonButton>
+          </IonButtons>
+        </IonToolbar>
+      </IonFooter>
+
+      {/* Modal con información del paciente */}
+      <ModalInfoPaciente
+        isOpen={showPacienteInfo}
+        onDismiss={handleClosePacienteInfo}
+        paciente={selectedPaciente}
+      />
     </IonModal>
   );
 };
