@@ -78,7 +78,7 @@ const RellenarFicha: React.FC = () => {
     condicion_corporal: "",
     id_consulta: 0,
     motivo_consulta: "", // ← Agregar para compatibilidad con backend
-    
+
     // Información relacionada del paciente
     paciente: {
       id_paciente: 0,
@@ -90,7 +90,7 @@ const RellenarFicha: React.FC = () => {
       raza: "",
       especie: "",
     },
-    
+
     // Información relacionada del tutor
     tutor: {
       nombre: "",
@@ -112,9 +112,10 @@ const RellenarFicha: React.FC = () => {
 
   const handleNumericChange = (e: any) => {
     const { name, value } = e.target;
+    const numValue = parseFloat(value);
     setFormData((prev) => ({
       ...prev,
-      [name]: parseFloat(value) || 0,
+      [name]: numValue < 0 ? 0 : numValue || 0,
     }));
   };
 
@@ -144,7 +145,7 @@ const RellenarFicha: React.FC = () => {
         codigo_chip: paciente.codigo_chip || "",
         raza: paciente.raza || "",
         especie: paciente.especie || "",
-      }
+      },
     }));
     setShowModalPacientes(false);
   };
@@ -197,7 +198,7 @@ const RellenarFicha: React.FC = () => {
         condicion_corporal: "",
         id_consulta: 0,
         motivo_consulta: "", // ← Agregar para compatibilidad con backend
-        
+
         // Información relacionada del paciente
         paciente: {
           id_paciente: 0,
@@ -209,7 +210,7 @@ const RellenarFicha: React.FC = () => {
           raza: "",
           especie: "",
         },
-        
+
         // Información relacionada del tutor
         tutor: {
           nombre: "",
@@ -559,6 +560,7 @@ const RellenarFicha: React.FC = () => {
                       placeholder="Ej: 25.5"
                       name="peso"
                       value={formData.peso}
+                      min={0} // ← Solo permite valores positivos
                       clearOnEdit={true}
                       onIonChange={handleNumericChange}
                     />
