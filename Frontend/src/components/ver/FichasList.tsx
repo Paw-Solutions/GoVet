@@ -85,7 +85,7 @@ const FichasList: React.FC<FichasListProps> = ({
               {consultas.map((consulta, index) => (
                 <FichaItem
                   key={`${consulta.id_consulta}-${index}`}
-                  ficha={consulta}
+                  consulta={consulta}
                   onView={() => onViewConsulta(consulta)}
                   onEdit={() => onEditConsulta(consulta)}
                   onExport={() => onExportConsulta(consulta)}
