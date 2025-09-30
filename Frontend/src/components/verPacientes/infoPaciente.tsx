@@ -34,6 +34,23 @@ interface ModalInfoPacienteProps {
 }
 
 const ModalInfoPaciente: React.FC<ModalInfoPacienteProps> = ({ isOpen, onDismiss, paciente }) => {
+  // Función para calcular edad aproximada
+  const calculateAge = (fechaNacimiento?: string) => {
+    if (!fechaNacimiento) return null;
+    
+    const birthDate = new Date(fechaNacimiento);
+    const today = new Date();
+    const diffTime = Math.abs(today.getTime() - birthDate.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays < 30) {
+      return `${diffDays} días`;
+    } else if (diffDays < 365) {
+      return `${Math.floor(diffDays / 30)} meses`;
+    } else {
+      return `${Math.floor(diffDays / 365)} años`;
+    }
+  };
   // Función segura para cerrar el modal
   const handleDismiss = () => {
     try {
@@ -87,6 +104,34 @@ const ModalInfoPaciente: React.FC<ModalInfoPacienteProps> = ({ isOpen, onDismiss
                 <IonLabel>
                   <h2>Raza</h2>
                   <p>{paciente.raza}</p>
+                </IonLabel>
+              </IonItem>
+
+              <IonItem>
+                <IonLabel>
+                  <h2>Especie</h2>
+                  <p>{paciente.especie}</p>
+                </IonLabel>
+              </IonItem>
+
+              <IonItem>
+                <IonLabel>
+                  <h2>Fecha de nacimiento</h2>
+                  <p>{paciente.fecha_nacimiento ? new Date(paciente.fecha_nacimiento).toLocaleDateString() + " (" + calculateAge(paciente.fecha_nacimiento) + ")" : "Desconocida"}</p>
+                </IonLabel>
+              </IonItem>
+
+              <IonItem>
+                <IonLabel>
+                  <h2>Sexo</h2>
+                  <p>{paciente.sexo === "H" ? "Hembra" : "Macho"}</p>
+                </IonLabel>
+              </IonItem>
+
+              <IonItem>
+                <IonLabel>
+                  <h2>{paciente.sexo === "H" ? "¿Esterilizada?" : "¿Esterilizado?"}</h2>
+                  <p>{paciente.esterilizado ? "Sí" : "No"}</p>
                 </IonLabel>
               </IonItem>
 

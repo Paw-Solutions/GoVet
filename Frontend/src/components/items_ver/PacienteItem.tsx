@@ -20,6 +20,7 @@ import {
   personSharp,
 } from 'ionicons/icons';
 import { PacienteData } from '../../api/pacientes';
+import "../../styles/ver.css"
 
 interface PacienteItemProps {
   paciente: PacienteData;
@@ -27,7 +28,6 @@ interface PacienteItemProps {
   onEdit: () => void;
   disabled?: boolean;
   showTutor?: boolean;
-  compact?: boolean;
 }
 
 const PacienteItem: React.FC<PacienteItemProps> = ({
@@ -36,7 +36,6 @@ const PacienteItem: React.FC<PacienteItemProps> = ({
   onEdit,
   disabled = false,
   showTutor = true,
-  compact = false,
 }) => {
   // Función para obtener el color del badge según el sexo
   const getSexColor = (sexo?: string) => {
@@ -81,24 +80,6 @@ const PacienteItem: React.FC<PacienteItemProps> = ({
     }
   };
 
-  // Función para obtener color del avatar basado en la especie
-  const getAvatarColor = () => {
-    if (!paciente.especie) return 'medium';
-    
-    const especies: { [key: string]: string } = {
-      'perro': 'warning',
-      'gato': 'tertiary',
-      'conejo': 'success',
-      'hamster': 'primary',
-      'erizo': 'secondary',
-      'tortuga': 'tertiary',
-      'cuy': 'quaternary',
-      'otra': 'dark',
-    };
-    
-    return especies[paciente.especie.toLowerCase()] || 'medium';
-  };
-
   const getIcon = () => {
     if (!paciente.especie) return pawOutline;
     
@@ -115,31 +96,10 @@ const PacienteItem: React.FC<PacienteItemProps> = ({
     return especies[paciente.especie.toLowerCase()] || pawOutline;
   };
 
-  if (compact) {
-    return (
-      <IonItem button lines="full" disabled={disabled}>
-        <IonAvatar slot="start" className={`avatar-${getAvatarColor()}`}>
-            <IonIcon icon={pawOutline} color={getAvatarColor()} size='large'/>
-        </IonAvatar>
-        
-        <IonLabel>
-          <h3>{paciente.nombre}</h3>
-          <p>{paciente.especie} • {paciente.raza}</p>
-        </IonLabel>
-        
-        <IonButtons slot="end">
-          <IonButton fill="clear" onClick={onView} disabled={disabled}>
-            <IonIcon icon={eyeOutline} slot="icon-only" />
-          </IonButton>
-        </IonButtons>
-      </IonItem>
-    );
-  }
-
   return (
     <IonItem lines="full" className="info-item">
-      <IonAvatar slot="start" className={`avatar-${getAvatarColor()}`}>
-        <IonIcon icon={getIcon()} size='default'/>
+      <IonAvatar slot="start">
+        <IonIcon icon={getIcon()} style={{ width: '25px', height: '25px' }} />
       </IonAvatar>
       
       <IonLabel style={{ padding: '5px' }}>
@@ -148,45 +108,55 @@ const PacienteItem: React.FC<PacienteItemProps> = ({
           {paciente.nombre}
           {paciente.sexo && (
             <span style={{ marginLeft: '8px'}}>
-              <IonIcon icon={getSexIcon(paciente.sexo)} />
+              (
+              <IonIcon icon={getSexIcon(paciente.sexo)} className='pacientes-icon' />
+              )
             </span>
           )}
         </h2>
 
         {/* Información básica */}
         {paciente.raza && (
-          <div className="info-item">
-              <div>
+          <div>
+              <h2>
+                <p>
                   <IonIcon src="/raza.svg" className='pacientes-icon'/>
-                  <span style={{marginLeft: '8px'}}>{paciente.raza} {paciente.fecha_nacimiento && (
+                  <span style={{marginLeft: '8px'}}>: {paciente.raza === "DPC (Doméstico de pelo corto o DSH)" ? "DPC" : paciente.raza === "DPL (Doméstico de pelo Largo o DLH)" ? "DPL" : paciente.raza === "DPG (Doméstico de pelo largo o DFL)" ? "DPG" : paciente.raza} {paciente.fecha_nacimiento && (
                     <IonText style={{ marginLeft: '3px'}}>
                       ({calculateAge(paciente.fecha_nacimiento)})
                     </IonText>
-                  )}</span>
-              </div>
+                  )}
+                  </span>
+                </p>
+              </h2>
           </div>
               )}
         {paciente.color && (
-        <div className="info-item">
-            <IonIcon src="/color.svg" className='pacientes-icon'/>
-            <span style={{marginLeft: '8px'}}>{paciente.color}</span>
+        <div>
+          <h2>
+            <p>
+              <IonIcon src="/color.svg" className='pacientes-icon'/>
+              <span style={{marginLeft: '8px'}}>: {paciente.color}</span>
+            </p>
+          </h2>
         </div>
         )}
 
         {/* Información del tutor */}
         {showTutor && (
-          <div className="info-item">
-            <IonIcon className='pacientes-icon' icon={personOutline} />
-            {paciente.tutor?.nombre ? (
-                <span>
-                  : {paciente.tutor.nombre} {paciente.tutor.apellido_paterno}
-                </span>
-            ) : (
-              <IonText className="tutor-name">
-                <IonIcon icon={personOutline} className='pacientes-icon' />
-                <span style={{ marginLeft: '8px' }}>Sin tutor asignado</span>
-              </IonText>
-            )}
+          <div>
+            <h2>
+              <p>
+                <IonIcon className='pacientes-icon' icon={personOutline} />
+                {paciente.tutor?.nombre ? (
+                    <span style={{marginLeft: '8px'}}>
+                      : {paciente.tutor.nombre} {paciente.tutor.apellido_paterno}
+                    </span>
+                ) : (
+                    <span style={{ marginLeft: '8px'}}>: Sin tutor asignado</span>
+                )}
+              </p>
+            </h2>
           </div>
         )}
       </IonLabel>

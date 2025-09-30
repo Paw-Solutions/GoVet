@@ -161,13 +161,16 @@
   border-bottom: 2px solid var(--ion-color-primary);
 }
 
-.tutor-name {
-  color: var(--ion-color-primary) !important;
-  font-weight: 600;
-  font-size: 1.1rem;
-  display: flex;
-  align-items: center;
-  margin: 0;
+h2.tutor-nombre {
+  padding-bottom: 0.75rem;
+  font-weight: 400;
+  color: #21242a;
+}
+
+h2.paciente-nombre {
+  padding-bottom: 0.75rem;
+  font-weight: 400;
+  color: #21242a;
 }
 
 .info-icon {
@@ -176,7 +179,10 @@
 }
 
 ion-icon.pacientes-icon {
-  font-size: 1.1rem;
+  vertical-align: middle;
+  font-size: 1rem;
+  position: relative;
+  top: -2px; /* Ajusta este valor según necesites: -3px, -1px, 0px, 1px, 2px */
 }
 
 .info-card-content {
@@ -186,8 +192,9 @@ ion-icon.pacientes-icon {
 
 .info-item {
   align-items: center;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.2rem;
   padding: 0.25rem 0;
+  color: #4a05437e;
 }
 
 .info-item:last-child {
