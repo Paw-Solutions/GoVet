@@ -41,8 +41,8 @@ interface Paciente {
 interface ModalEscogerPacienteProps {
   isOpen: boolean;
   onDidDismiss?: () => void;
-  onPacienteSelected?: (paciente: Paciente) => void;
-  pacienteSeleccionado?: Paciente | null;
+  onPacienteSelected?: (paciente: PacienteData) => void; // <-- Cambia aquí
+  pacienteSeleccionado?: PacienteData | null; // <-- Cambia aquí
 }
 
 interface PaginatedResponse {
@@ -78,7 +78,7 @@ const ModalEscogerPaciente: React.FC<ModalEscogerPacienteProps> = ({
 
   // Estados específicos del modal
   const [pacienteSeleccionadoTemp, setPacienteSeleccionadoTemp] =
-    useState<Paciente | null>(pacienteSeleccionado || null);
+    useState<PacienteData | null>(pacienteSeleccionado || null);
 
   // Estados para el modal de información del paciente
   const [showPacienteInfo, setShowPacienteInfo] = useState(false);
@@ -173,23 +173,7 @@ const ModalEscogerPaciente: React.FC<ModalEscogerPacienteProps> = ({
 
   // Función específica del modal para seleccionar paciente
   const handleSeleccionarPaciente = (pacienteData: PacienteData) => {
-    const pacienteNormalizado: Paciente = {
-      id: pacienteData.id_paciente,
-      nombre: pacienteData.nombre,
-      especie: pacienteData.especie || "N/A",
-      raza: pacienteData.raza || "N/A",
-      sexo: pacienteData.sexo || "N/A",
-      edad: 0,
-      peso: 0,
-      tutor_rut: pacienteData.tutor?.rut || "N/A",
-      tutor_nombre: pacienteData.tutor
-        ? `${pacienteData.tutor.nombre || ""} ${
-            pacienteData.tutor.apellido_paterno || ""
-          }`.trim()
-        : undefined,
-    };
-
-    setPacienteSeleccionadoTemp(pacienteNormalizado);
+    setPacienteSeleccionadoTemp(pacienteData);
   };
 
   const handleCancelar = () => {
@@ -203,7 +187,7 @@ const ModalEscogerPaciente: React.FC<ModalEscogerPacienteProps> = ({
   const handleConfirmarSeleccion = () => {
     if (pacienteSeleccionadoTemp) {
       if (onPacienteSelected && typeof onPacienteSelected === "function") {
-        onPacienteSelected(pacienteSeleccionadoTemp);
+        onPacienteSelected(pacienteSeleccionadoTemp); // <-- Retorna el objeto completo
       }
     }
     if (onDidDismiss && typeof onDidDismiss === "function") {

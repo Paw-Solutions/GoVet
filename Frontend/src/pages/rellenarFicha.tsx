@@ -40,16 +40,20 @@ import {
   calendarOutline,
   fishOutline,
   informationOutline,
-  informationCircleOutline
+  informationCircleOutline,
 } from "ionicons/icons";
 import "../styles/rellenarFicha.css";
 import "../styles/variables.css";
-import ModalEscogerPaciente from '../components/rellenarFicha/modalEscogerPaciente';
-import { PacienteData } from '../api/pacientes'; // Importar la interfaz correcta
+import ModalEscogerPaciente from "../components/rellenarFicha/modalEscogerPaciente";
+import { PacienteData } from "../api/pacientes"; // Importar la interfaz correcta
 
 interface FichaVeterinaria {
   id_paciente: number;
   rut: string;
+  tutor_nombre?: string;
+  tutor_email?: string;
+  tutor_telefono?: string;
+  // ...otros campos...
   fecha_consulta: string;
   motivo: string;
   diagnostico: string;
@@ -65,17 +69,21 @@ interface FichaVeterinaria {
 
 const RellenarFicha: React.FC = () => {
   const [showModalPacientes, setShowModalPacientes] = useState(false);
-  const [currentStep, setCurrentStep] = useState<'general' | 'fisico' | 'clinico'>('general');
+  const [currentStep, setCurrentStep] = useState<
+    "general" | "fisico" | "clinico"
+  >("general");
   const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState('');
+  const [toastMessage, setToastMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedPaciente, setSelectedPaciente] = useState<PacienteData | null>(null); // Usar PacienteData
+  const [selectedPaciente, setSelectedPaciente] = useState<PacienteData | null>(
+    null
+  ); // Usar PacienteData
 
   // Estado para los campos del formulario
   const [formData, setFormData] = useState<FichaVeterinaria>({
     id_paciente: 0,
     rut: "",
-    fecha_consulta: new Date().toISOString().split('T')[0], // Fecha automática
+    fecha_consulta: new Date().toISOString().split("T")[0], // Fecha automática
     motivo: "",
     diagnostico: "",
     observaciones: "",
@@ -107,32 +115,41 @@ const RellenarFicha: React.FC = () => {
   // Función corregida para manejar la selección del paciente desde el modal
   const handlePacienteSelected = (paciente: PacienteData) => {
     setSelectedPaciente(paciente);
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       id_paciente: paciente.id_paciente,
-      rut: paciente.tutor?.rut || "" // Usar el RUT del tutor del paciente seleccionado
+      rut: paciente.tutor?.rut || "", // Usar el RUT del tutor del paciente seleccionado
+      tutor_nombre: paciente.tutor
+        ? `${paciente.tutor.nombre || ""} ${
+            paciente.tutor.apellido_paterno || ""
+          } ${paciente.tutor.apellido_materno || ""}`.trim()
+        : "",
+      tutor_email: paciente.tutor?.email || "",
+      tutor_telefono: paciente.tutor?.telefono
+        ? paciente.tutor.telefono.toString()
+        : "",
     }));
     setShowModalPacientes(false);
   };
 
   const navegarSiguiente = () => {
-    if (currentStep === 'general') {
-      setCurrentStep('fisico');
-    } else if (currentStep === 'fisico') {
-      setCurrentStep('clinico');
+    if (currentStep === "general") {
+      setCurrentStep("fisico");
+    } else if (currentStep === "fisico") {
+      setCurrentStep("clinico");
     }
   };
 
   const navegarAnterior = () => {
-    if (currentStep === 'clinico') {
-      setCurrentStep('fisico');
-    } else if (currentStep === 'fisico') {
-      setCurrentStep('general');
+    if (currentStep === "clinico") {
+      setCurrentStep("fisico");
+    } else if (currentStep === "fisico") {
+      setCurrentStep("general");
     }
   };
 
   const puedeAvanzar = () => {
-    if (currentStep === 'general') {
+    if (currentStep === "general") {
       return selectedPaciente && formData.motivo.trim();
     }
     return true;
@@ -144,12 +161,12 @@ const RellenarFicha: React.FC = () => {
       // Aquí harías la petición POST al backend
       console.log("Guardando ficha:", formData);
       setToastMessage("Ficha veterinaria guardada exitosamente");
-      
+
       // Limpiar formulario después de guardar
       setFormData({
         id_paciente: 0,
         rut: "",
-        fecha_consulta: new Date().toISOString().split('T')[0],
+        fecha_consulta: new Date().toISOString().split("T")[0],
         motivo: "",
         diagnostico: "",
         observaciones: "",
@@ -161,9 +178,9 @@ const RellenarFicha: React.FC = () => {
         estado_pelaje: "",
         condicion_corporal: "",
       });
-      
+
       setSelectedPaciente(null);
-      setCurrentStep('general');
+      setCurrentStep("general");
     } catch (error) {
       console.error("Error al guardar ficha:", error);
       setToastMessage("Error al guardar la ficha");
@@ -175,19 +192,27 @@ const RellenarFicha: React.FC = () => {
 
   const getStepNumber = () => {
     switch (currentStep) {
-      case 'general': return 1;
-      case 'fisico': return 2;
-      case 'clinico': return 3;
-      default: return 1;
+      case "general":
+        return 1;
+      case "fisico":
+        return 2;
+      case "clinico":
+        return 3;
+      default:
+        return 1;
     }
   };
 
   const getStepTitle = () => {
     switch (currentStep) {
-      case 'general': return 'Información General';
-      case 'fisico': return 'Examen Físico';
-      case 'clinico': return 'Examen Clínico';
-      default: return 'Información General';
+      case "general":
+        return "Información General";
+      case "fisico":
+        return "Examen Físico";
+      case "clinico":
+        return "Examen Clínico";
+      default:
+        return "Información General";
     }
   };
 
@@ -211,222 +236,137 @@ const RellenarFicha: React.FC = () => {
 
         {/* Indicador de progreso */}
         <IonItem>
-            <div>
-                <IonText>
-                    <h3>{getStepTitle()}</h3>
-                    <p color="medium">Paso {getStepNumber()} de 3</p>
-                </IonText>
-            </div>
+          <div>
+            <IonText>
+              <h3>{getStepTitle()}</h3>
+              <p color="medium">Paso {getStepNumber()} de 3</p>
+            </IonText>
+          </div>
         </IonItem>
 
         {/* Paso 1: Información General */}
-        {currentStep === 'general' && (
-            <IonGrid>
+        {currentStep === "general" && (
+          <IonGrid>
             <IonRow>
-                <IonCol>
-                    <IonItem className="padding">
-                        <IonTextarea
-                        label="Motivo de la Consulta"
-                        labelPlacement="stacked"
-                        fill="outline"
-                        placeholder="Describa el motivo de la consulta"
-                        rows={4}
-                        name="motivo"
-                        value={formData.motivo}
-                        onIonChange={handleInputChange}
-                        />
-                    </IonItem>
-                </IonCol>
+              <IonCol>
+                <IonItem className="padding">
+                  <IonTextarea
+                    label="Motivo de la Consulta"
+                    labelPlacement="stacked"
+                    fill="outline"
+                    placeholder="Describa el motivo de la consulta"
+                    rows={4}
+                    name="motivo"
+                    value={formData.motivo}
+                    onIonChange={handleInputChange}
+                  />
+                </IonItem>
+              </IonCol>
             </IonRow>
 
-
             <IonRow>
-                <IonCol className="ficha-general-container">
-                    <IonButton 
-                        expand="block" 
-                        fill="outline" 
-                        onClick={() => setShowModalPacientes(true)}
-                    >
-                        {selectedPaciente ? 'Cambiar Paciente' : 'Seleccionar Paciente'}
-                    </IonButton>
-                </IonCol>
+              <IonCol className="ficha-general-container">
+                <IonButton
+                  expand="block"
+                  fill="outline"
+                  onClick={() => setShowModalPacientes(true)}
+                >
+                  {selectedPaciente
+                    ? "Cambiar Paciente"
+                    : "Seleccionar Paciente"}
+                </IonButton>
+              </IonCol>
             </IonRow>
 
             {/* Información del paciente seleccionado */}
             <IonRow>
-            <IonCol className="form-element-spacing">
-            {selectedPaciente ? (
-                    <IonCard>
-                    <IonCardContent>
-                        <IonText>
-                        <div style={{ 
-                            display: 'flex', 
-                            flexDirection: 'column', 
-                            gap: '8px' 
-                        }}>
-                            {/* Nombre del paciente */}
-                            <div style={{ 
-                            display: 'flex', 
-                            alignItems: 'center', 
-                            gap: '8px' 
-                            }}>
-                            <IonIcon 
-                                icon={pawOutline} 
-                            />
-                            <span>
-                                <strong>
-                                {selectedPaciente.nombre}
-                                </strong>
-                            </span>
-                            </div>
-
-                            {/*Especie del paciente */}
-                            <div style={{ 
-                            display: 'flex', 
-                            alignItems: 'center', 
-                            gap: '8px' 
-                            }}>
-                            <IonIcon 
-                                icon={informationCircleOutline} 
-                            />
-                            <span>
-                                <strong>Especie: </strong> {selectedPaciente.especie}
-                            </span>
-                            </div>
-
-                            {/* Raza del paciente */} 
-                            <div style={{ 
-                            display: 'flex', 
-                            alignItems: 'center', 
-                            gap: '8px' 
-                            }}>
-                            <IonIcon 
-                                icon={informationCircleOutline} 
-                            />
-                            <span>
-                                <strong>Raza: </strong> {selectedPaciente.raza}
-                            </span>
-                            </div>
-                            {/* Sexo del paciente */} 
-                            <div style={{ 
-                            display: 'flex', 
-                            alignItems: 'center', 
-                            gap: '8px' 
-                            }}>
-                            <IonIcon 
-                                icon={informationCircleOutline} 
-                            />
-                            <span>
-                                <strong>Sexo: </strong> {selectedPaciente.sexo ? (selectedPaciente.sexo === "M" ? "Macho" : "Hembra") : 'No especificado'}
-                            </span>
-                            </div>
-                            {/* Edad del paciente */}
-                            {selectedPaciente.fecha_nacimiento && (
-                            <div style={{ 
-                                display: 'flex', 
-                                alignItems: 'center', 
-                                gap: '8px' 
-                            }}>
-                                <IonIcon 
-                                icon={calendarOutline} 
-                            />
-                            <span>
-                                <strong>Fecha de Nacimiento:</strong> {new Date(selectedPaciente.fecha_nacimiento).toLocaleDateString()}
-                            </span>
-                            </div>
-                            )}
-                        </div>
-                        </IonText>
-                    </IonCardContent>
-                    </IonCard>
-            ) : (
-                <IonCard>
-                    <IonCardContent style={{ 
-                              display: 'flex', 
-                              alignItems: 'center', 
-                              gap: '8px' 
-                            }}>
-                    <IonIcon icon={pawOutline} style={{ marginRight: "8px" }} />
-                        <IonText>
-                            No se ha seleccionado ningún paciente.
-                        </IonText>
-                    </IonCardContent>
-                </IonCard>
-            )}
-            </IonCol>
-            </IonRow>
-
-            {/* Información del tutor (solo si hay paciente seleccionado) */}
-            <IonRow>
-            <IonCol className="form-element-spacing">
-                {selectedPaciente && selectedPaciente.tutor ? (
-                <div>
+              <IonCol className="form-element-spacing">
+                {selectedPaciente ? (
                   <IonCard>
                     <IonCardContent>
                       <IonText>
-                        <div style={{ 
-                          display: 'flex', 
-                          flexDirection: 'column', 
-                          gap: '8px' 
-                        }}>
-                          {/* Nombre del tutor */}
-                          <div style={{ 
-                            display: 'flex', 
-                            alignItems: 'center', 
-                            gap: '8px' 
-                          }}>
-                            <IonIcon 
-                              icon={personOutline} 
-                            />
+                        <div
+                          style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "8px",
+                          }}
+                        >
+                          {/* Nombre del paciente */}
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "8px",
+                            }}
+                          >
+                            <IonIcon icon={pawOutline} />
                             <span>
-                              <strong>
-                                {selectedPaciente.tutor.nombre} {selectedPaciente.tutor.apellido_paterno} {selectedPaciente.tutor.apellido_materno}
-                              </strong>
+                              <strong>{selectedPaciente.nombre}</strong>
                             </span>
                           </div>
 
-                          {/* RUT del tutor */}
-                          <div style={{ 
-                            display: 'flex', 
-                            alignItems: 'center', 
-                            gap: '8px' 
-                          }}>
-                            <IonIcon 
-                              icon={idCardOutline} 
-                            />
+                          {/*Especie del paciente */}
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "8px",
+                            }}
+                          >
+                            <IonIcon icon={informationCircleOutline} />
                             <span>
-                              <strong>RUT:</strong> {selectedPaciente.tutor.rut}
+                              <strong>Especie: </strong>{" "}
+                              {selectedPaciente.especie}
                             </span>
                           </div>
 
-                          {/* Teléfono (condicional) */}
-                          {selectedPaciente.tutor.telefono && (
-                            <div style={{ 
-                              display: 'flex', 
-                              alignItems: 'center', 
-                              gap: '8px' 
-                            }}>
-                              <IonIcon 
-                                icon={callOutline} 
-                              />
+                          {/* Raza del paciente */}
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "8px",
+                            }}
+                          >
+                            <IonIcon icon={informationCircleOutline} />
+                            <span>
+                              <strong>Raza: </strong> {selectedPaciente.raza}
+                            </span>
+                          </div>
+                          {/* Sexo del paciente */}
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "8px",
+                            }}
+                          >
+                            <IonIcon icon={informationCircleOutline} />
+                            <span>
+                              <strong>Sexo: </strong>{" "}
+                              {selectedPaciente.sexo
+                                ? selectedPaciente.sexo === "M"
+                                  ? "Macho"
+                                  : "Hembra"
+                                : "No especificado"}
+                            </span>
+                          </div>
+                          {/* Edad del paciente */}
+                          {selectedPaciente.fecha_nacimiento && (
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "8px",
+                              }}
+                            >
+                              <IonIcon icon={calendarOutline} />
                               <span>
-                                <strong>Teléfono:</strong> {selectedPaciente.tutor.telefono}
-                              </span>
-                            </div>
-                          )}
-
-                          {/* Email (condicional) */}
-                          {selectedPaciente.tutor.email && (
-                            <div style={{ 
-                              display: 'flex', 
-                              alignItems: 'center', 
-                              gap: '8px' 
-                            }}>
-                              <IonIcon 
-                                icon={mailOutline} 
-                              />
-                              <span>
-                                <strong>Email:</strong> {selectedPaciente.tutor.email}
+                                <strong>Fecha de Nacimiento:</strong>{" "}
+                                {new Date(
+                                  selectedPaciente.fecha_nacimiento
+                                ).toLocaleDateString()}
                               </span>
                             </div>
                           )}
@@ -434,201 +374,321 @@ const RellenarFicha: React.FC = () => {
                       </IonText>
                     </IonCardContent>
                   </IonCard>
-                </div>
-                
                 ) : (
-                <IonCard>
-                    <IonCardContent style={{ 
-                              display: 'flex', 
-                              alignItems: 'center', 
-                              gap: '8px' 
-                            }}>
-                    <IonIcon icon={personOutline} style={{ marginRight: "8px" }} />
-                        <IonText>
-                            No se ha seleccionado ningún paciente.
-                        </IonText>
+                  <IonCard>
+                    <IonCardContent
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                      }}
+                    >
+                      <IonIcon
+                        icon={pawOutline}
+                        style={{ marginRight: "8px" }}
+                      />
+                      <IonText>No se ha seleccionado ningún paciente.</IonText>
                     </IonCardContent>
-                </IonCard>
+                  </IonCard>
                 )}
-            </IonCol>
+              </IonCol>
             </IonRow>
-            </IonGrid>
-            
+
+            {/* Información del tutor (solo si hay paciente seleccionado) */}
+            <IonRow>
+              <IonCol className="form-element-spacing">
+                {selectedPaciente && selectedPaciente.tutor ? (
+                  <div>
+                    <IonCard>
+                      <IonCardContent>
+                        <IonText>
+                          <div
+                            style={{
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: "8px",
+                            }}
+                          >
+                            {/* Nombre del tutor */}
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "8px",
+                              }}
+                            >
+                              <IonIcon icon={personOutline} />
+                              <span>
+                                <strong>
+                                  {selectedPaciente.tutor.nombre}{" "}
+                                  {selectedPaciente.tutor.apellido_paterno}{" "}
+                                  {selectedPaciente.tutor.apellido_materno}
+                                </strong>
+                              </span>
+                            </div>
+
+                            {/* RUT del tutor */}
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "8px",
+                              }}
+                            >
+                              <IonIcon icon={idCardOutline} />
+                              <span>
+                                <strong>RUT:</strong>{" "}
+                                {selectedPaciente.tutor.rut}
+                              </span>
+                            </div>
+
+                            {/* Teléfono (condicional) */}
+                            {selectedPaciente.tutor.telefono && (
+                              <div
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "8px",
+                                }}
+                              >
+                                <IonIcon icon={callOutline} />
+                                <span>
+                                  <strong>Teléfono:</strong>{" "}
+                                  {selectedPaciente.tutor.telefono}
+                                </span>
+                              </div>
+                            )}
+
+                            {/* Email (condicional) */}
+                            {selectedPaciente.tutor.email && (
+                              <div
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "8px",
+                                }}
+                              >
+                                <IonIcon icon={mailOutline} />
+                                <span>
+                                  <strong>Email:</strong>{" "}
+                                  {selectedPaciente.tutor.email}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </IonText>
+                      </IonCardContent>
+                    </IonCard>
+                  </div>
+                ) : (
+                  <IonCard>
+                    <IonCardContent
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                      }}
+                    >
+                      <IonIcon
+                        icon={personOutline}
+                        style={{ marginRight: "8px" }}
+                      />
+                      <IonText>No se ha seleccionado ningún paciente.</IonText>
+                    </IonCardContent>
+                  </IonCard>
+                )}
+              </IonCol>
+            </IonRow>
+          </IonGrid>
         )}
 
         {/* Paso 2: Examen Físico */}
-        {currentStep === 'fisico' && (
-        <IonList>
-        <IonGrid>
-            <IonRow>
-            <IonCol size="12" size-md="6">
-                <IonItem>
-                <IonInput
-                    label="Peso (kg)"
-                    type="number"
-                    labelPlacement="stacked"
-                    fill="outline"
-                    placeholder="Ej: 25.5"
-                    name="peso"
-                    value={formData.peso}
-                    clearOnEdit={true}
-                    onIonChange={handleNumericChange}
-                />
-                </IonItem>
-            </IonCol>
-            <IonCol size="12" size-md="6">
-                <IonItem>
-                <IonSelect
-                    label="Condición Corporal"
-                    labelPlacement="stacked"
-                    fill="outline"
-                    placeholder="Seleccione condición"
-                    name="condicion_corporal"
-                    value={formData.condicion_corporal}
-                    onIonChange={handleInputChange}
-                >
-                    <IonSelectOption value="muy_delgado">Muy Delgado</IonSelectOption>
-                    <IonSelectOption value="delgado">Delgado</IonSelectOption>
-                    <IonSelectOption value="ideal">Ideal</IonSelectOption>
-                    <IonSelectOption value="sobrepeso">Sobrepeso</IonSelectOption>
-                    <IonSelectOption value="obeso">Obeso</IonSelectOption>
-                </IonSelect>
-                </IonItem>
-            </IonCol>
-            </IonRow>
-            <IonRow>
-            <IonCol size="12" size-md="6">
-                <IonItem>
-                <IonSelect
-                    label="Estado del Pelaje"
-                    labelPlacement="stacked"
-                    fill="outline"
-                    placeholder="Seleccione estado"
-                    name="estado_pelaje"
-                    value={formData.estado_pelaje}
-                    onIonChange={handleInputChange}
-                >
-                    <IonSelectOption value="excelente">Excelente</IonSelectOption>
-                    <IonSelectOption value="bueno">Bueno</IonSelectOption>
-                    <IonSelectOption value="regular">Regular</IonSelectOption>
-                    <IonSelectOption value="malo">Malo</IonSelectOption>
-                    <IonSelectOption value="muy_malo">Muy Malo</IonSelectOption>
-                </IonSelect>
-                </IonItem>
-            </IonCol>
-            <IonCol size="12" size-md="6">
-                <IonItem>
-                <IonSelect
-                    label="Mucosas"
-                    labelPlacement="stacked"
-                    fill="outline"
-                    placeholder="Seleccione estado"
-                    name="mucosas"
-                    value={formData.mucosas}
-                    onIonChange={handleInputChange}
-                >
-                    <IonSelectOption value="rosadas">Rosadas (Normal)</IonSelectOption>
-                    <IonSelectOption value="palidas">Pálidas</IonSelectOption>
-                    <IonSelectOption value="cianoticas">Cianóticas</IonSelectOption>
-                    <IonSelectOption value="ictericas">Ictéricas</IonSelectOption>
-                </IonSelect>
-                </IonItem>
-            </IonCol>
-            </IonRow>
-            <IonRow>
-            <IonCol size="12">
-                <IonItem>
-                <IonTextarea
-                    label="Nódulos Linfáticos"
-                    labelPlacement="stacked"
-                    fill="outline"
-                    placeholder="Describa el estado de los nódulos linfáticos"
-                    rows={3}
-                    name="nodulos_linfaticos"
-                    value={formData.nodulos_linfaticos}
-                    onIonChange={handleInputChange}
-                />
-                </IonItem>
-            </IonCol>
-            </IonRow>
-        </IonGrid>
-        </IonList>
+        {currentStep === "fisico" && (
+          <IonList>
+            <IonGrid>
+              <IonRow>
+                <IonCol size="12" size-md="6">
+                  <IonItem>
+                    <IonInput
+                      label="Peso (kg)"
+                      type="number"
+                      labelPlacement="stacked"
+                      fill="outline"
+                      placeholder="Ej: 25.5"
+                      name="peso"
+                      value={formData.peso}
+                      clearOnEdit={true}
+                      onIonChange={handleNumericChange}
+                    />
+                  </IonItem>
+                </IonCol>
+                <IonCol size="12" size-md="6">
+                  <IonItem>
+                    <IonSelect
+                      label="Condición Corporal"
+                      labelPlacement="stacked"
+                      fill="outline"
+                      placeholder="Seleccione condición"
+                      name="condicion_corporal"
+                      value={formData.condicion_corporal}
+                      onIonChange={handleInputChange}
+                    >
+                      <IonSelectOption value="muy_delgado">
+                        Muy Delgado
+                      </IonSelectOption>
+                      <IonSelectOption value="delgado">Delgado</IonSelectOption>
+                      <IonSelectOption value="ideal">Ideal</IonSelectOption>
+                      <IonSelectOption value="sobrepeso">
+                        Sobrepeso
+                      </IonSelectOption>
+                      <IonSelectOption value="obeso">Obeso</IonSelectOption>
+                    </IonSelect>
+                  </IonItem>
+                </IonCol>
+              </IonRow>
+              <IonRow>
+                <IonCol size="12" size-md="6">
+                  <IonItem>
+                    <IonSelect
+                      label="Estado del Pelaje"
+                      labelPlacement="stacked"
+                      fill="outline"
+                      placeholder="Seleccione estado"
+                      name="estado_pelaje"
+                      value={formData.estado_pelaje}
+                      onIonChange={handleInputChange}
+                    >
+                      <IonSelectOption value="excelente">
+                        Excelente
+                      </IonSelectOption>
+                      <IonSelectOption value="bueno">Bueno</IonSelectOption>
+                      <IonSelectOption value="regular">Regular</IonSelectOption>
+                      <IonSelectOption value="malo">Malo</IonSelectOption>
+                      <IonSelectOption value="muy_malo">
+                        Muy Malo
+                      </IonSelectOption>
+                    </IonSelect>
+                  </IonItem>
+                </IonCol>
+                <IonCol size="12" size-md="6">
+                  <IonItem>
+                    <IonSelect
+                      label="Mucosas"
+                      labelPlacement="stacked"
+                      fill="outline"
+                      placeholder="Seleccione estado"
+                      name="mucosas"
+                      value={formData.mucosas}
+                      onIonChange={handleInputChange}
+                    >
+                      <IonSelectOption value="rosadas">
+                        Rosadas (Normal)
+                      </IonSelectOption>
+                      <IonSelectOption value="palidas">Pálidas</IonSelectOption>
+                      <IonSelectOption value="cianoticas">
+                        Cianóticas
+                      </IonSelectOption>
+                      <IonSelectOption value="ictericas">
+                        Ictéricas
+                      </IonSelectOption>
+                    </IonSelect>
+                  </IonItem>
+                </IonCol>
+              </IonRow>
+              <IonRow>
+                <IonCol size="12">
+                  <IonItem>
+                    <IonTextarea
+                      label="Nódulos Linfáticos"
+                      labelPlacement="stacked"
+                      fill="outline"
+                      placeholder="Describa el estado de los nódulos linfáticos"
+                      rows={3}
+                      name="nodulos_linfaticos"
+                      value={formData.nodulos_linfaticos}
+                      onIonChange={handleInputChange}
+                    />
+                  </IonItem>
+                </IonCol>
+              </IonRow>
+            </IonGrid>
+          </IonList>
         )}
 
         {/* Paso 3: Examen Clínico */}
-        {currentStep === 'clinico' && (
-        <IonList>
-        <IonGrid>
-            <IonRow>
-            <IonCol size="12">
-                <IonItem>
-                <IonTextarea
-                    label="DHT (Deshidratación, Hidratación, Temperatura)"
-                    labelPlacement="stacked"
-                    fill="outline"
-                    placeholder="Describa el estado de DHT"
-                    rows={3}
-                    name="dht"
-                    value={formData.dht}
-                    onIonChange={handleInputChange}
-                />
-                </IonItem>
-            </IonCol>
-            </IonRow>
-            <IonRow>
-            <IonCol size="12">
-                <IonItem>
-                <IonTextarea
-                    label="Auscultación Cardíaca y Torácica"
-                    labelPlacement="stacked"
-                    fill="outline"
-                    placeholder="Describa los hallazgos de auscultación"
-                    rows={3}
-                    name="auscultacion_cardiaca_toraxica"
-                    value={formData.auscultacion_cardiaca_toraxica}
-                    onIonChange={handleInputChange}
-                />
-                </IonItem>
-            </IonCol>
-            </IonRow>
-            <IonRow>
-            <IonCol size="12">
-                <IonItem>
-                <IonTextarea
-                    label="Diagnóstico"
-                    labelPlacement="stacked"
-                    fill="outline"
-                    placeholder="Ingrese el diagnóstico"
-                    rows={4}
-                    name="diagnostico"
-                    value={formData.diagnostico}
-                    onIonChange={handleInputChange}
-                />
-                </IonItem>
-            </IonCol>
-            </IonRow>
-            <IonRow>
-            <IonCol size="12">
-                <IonItem>
-                <IonTextarea
-                    label="Observaciones"
-                    labelPlacement="stacked"
-                    fill="outline"
-                    placeholder="Observaciones adicionales"
-                    rows={4}
-                    name="observaciones"
-                    value={formData.observaciones}
-                    onIonChange={handleInputChange}
-                />
-                </IonItem>
-            </IonCol>
-            </IonRow>
-        </IonGrid>
-        </IonList>
+        {currentStep === "clinico" && (
+          <IonList>
+            <IonGrid>
+              <IonRow>
+                <IonCol size="12">
+                  <IonItem>
+                    <IonTextarea
+                      label="DHT (Deshidratación, Hidratación, Temperatura)"
+                      labelPlacement="stacked"
+                      fill="outline"
+                      placeholder="Describa el estado de DHT"
+                      rows={3}
+                      name="dht"
+                      value={formData.dht}
+                      onIonChange={handleInputChange}
+                    />
+                  </IonItem>
+                </IonCol>
+              </IonRow>
+              <IonRow>
+                <IonCol size="12">
+                  <IonItem>
+                    <IonTextarea
+                      label="Auscultación Cardíaca y Torácica"
+                      labelPlacement="stacked"
+                      fill="outline"
+                      placeholder="Describa los hallazgos de auscultación"
+                      rows={3}
+                      name="auscultacion_cardiaca_toraxica"
+                      value={formData.auscultacion_cardiaca_toraxica}
+                      onIonChange={handleInputChange}
+                    />
+                  </IonItem>
+                </IonCol>
+              </IonRow>
+              <IonRow>
+                <IonCol size="12">
+                  <IonItem>
+                    <IonTextarea
+                      label="Diagnóstico"
+                      labelPlacement="stacked"
+                      fill="outline"
+                      placeholder="Ingrese el diagnóstico"
+                      rows={4}
+                      name="diagnostico"
+                      value={formData.diagnostico}
+                      onIonChange={handleInputChange}
+                    />
+                  </IonItem>
+                </IonCol>
+              </IonRow>
+              <IonRow>
+                <IonCol size="12">
+                  <IonItem>
+                    <IonTextarea
+                      label="Observaciones"
+                      labelPlacement="stacked"
+                      fill="outline"
+                      placeholder="Observaciones adicionales"
+                      rows={4}
+                      name="observaciones"
+                      value={formData.observaciones}
+                      onIonChange={handleInputChange}
+                    />
+                  </IonItem>
+                </IonCol>
+              </IonRow>
+            </IonGrid>
+          </IonList>
         )}
 
         {/* Espaciado para el footer */}
-        <div style={{ height: '80px' }}></div>
+        <div style={{ height: "80px" }}></div>
       </IonContent>
 
       {/* Footer con botones de navegación */}
@@ -636,7 +696,7 @@ const RellenarFicha: React.FC = () => {
         <IonToolbar>
           <IonGrid>
             <IonRow className="ion-align-items-center">
-              {currentStep === 'general' ? (
+              {currentStep === "general" ? (
                 <>
                   <IonCol size="6" className="ion-text-start">
                     <IonText color="medium">
@@ -644,8 +704,8 @@ const RellenarFicha: React.FC = () => {
                     </IonText>
                   </IonCol>
                   <IonCol size="6" className="ion-text-end">
-                    <IonButton 
-                      fill="solid" 
+                    <IonButton
+                      fill="solid"
                       onClick={navegarSiguiente}
                       disabled={!puedeAvanzar()}
                     >
@@ -654,7 +714,7 @@ const RellenarFicha: React.FC = () => {
                     </IonButton>
                   </IonCol>
                 </>
-              ) : currentStep === 'fisico' ? (
+              ) : currentStep === "fisico" ? (
                 <>
                   <IonCol size="4" className="ion-text-start">
                     <IonButton fill="outline" onClick={navegarAnterior}>
@@ -695,7 +755,7 @@ const RellenarFicha: React.FC = () => {
                       disabled={isLoading}
                     >
                       <IonIcon icon={saveOutline} slot="start" />
-                      {isLoading ? 'Guardando...' : 'Guardar'}
+                      {isLoading ? "Guardando..." : "Guardar"}
                     </IonButton>
                   </IonCol>
                 </>
@@ -708,7 +768,7 @@ const RellenarFicha: React.FC = () => {
       {/* Modal para escoger paciente */}
       <ModalEscogerPaciente
         isOpen={showModalPacientes}
-        onDismiss={() => setShowModalPacientes(false)}
+        onDidDismiss={() => setShowModalPacientes(false)}
         onPacienteSelected={handlePacienteSelected} // Función corregida
       />
 
