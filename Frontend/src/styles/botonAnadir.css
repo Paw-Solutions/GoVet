@@ -8,6 +8,7 @@
   --box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.2);
   transition: all 0.3s ease;
   position: relative;
+  color: #fff !important;
 }
 
 .boton-anadir:hover {
@@ -106,12 +107,14 @@ ion-popover::part(content) {
   display: flex !important;
   align-items: center !important;
   justify-content: flex-start !important;
+  color: #fff !important;
 }
 
 .opcion-menu span {
   flex: 1;
   text-align: left;
   margin-left: 0;
+  color: #fff !important;
 }
 
 .opcion-menu:hover {
