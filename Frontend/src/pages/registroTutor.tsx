@@ -179,11 +179,37 @@ const RegistroTutor: React.FC = () => {
     }));
   };
 
+  // Expresión regular para validar correos electrónicos
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/i;
+
   // Función para registrar tutor
   const handleSubmit = async (e: React.FormEvent) => {
-    console.log("Formulario enviado:", formData);
     e.preventDefault();
     setIsLoading(true);
+
+    // Validación de campos obligatorios
+    if (
+      !formData.nombre.trim() ||
+      !formData.apellido_paterno.trim() ||
+      !formData.rut.trim() ||
+      !formData.email.trim() ||
+      !formData.telefono ||
+      !selectedRegion ||
+      !selectedComuna
+    ) {
+      setToastMessage("Complete todos los campos obligatorios");
+      setShowToast(true);
+      setIsLoading(false);
+      return;
+    }
+
+    // Validación de correo
+    if (!emailRegex.test(formData.email)) {
+      setToastMessage("Ingrese un correo válido");
+      setShowToast(true);
+      setIsLoading(false);
+      return;
+    }
 
     try {
       // Actualizar formData con región y comuna seleccionadas (nombres formateados)
