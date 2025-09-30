@@ -22,7 +22,7 @@ import {
 } from "@ionic/react";
 import { close, checkmark, paw, eye } from "ionicons/icons";
 import { PacienteData } from "../../api/pacientes";
-import { obtenerPacientesPaginados } from "../verPacientes/listaPacientes";
+import { obtenerPacientesPaginados } from "../../api/pacientes";
 import ModalInfoPaciente from "../verPacientes/infoPaciente";
 import "../../styles/modalEscogerPaciente.css";
 
@@ -278,8 +278,8 @@ const ModalEscogerPaciente: React.FC<ModalEscogerPacienteProps> = ({
                 <p>Especie: {pacienteSeleccionadoTemp.especie}</p>
                 <p>
                   Tutor:{" "}
-                  {pacienteSeleccionadoTemp.tutor_nombre ||
-                    pacienteSeleccionadoTemp.tutor_rut}
+                  {pacienteSeleccionadoTemp.tutor.nombre ||
+                    pacienteSeleccionadoTemp.tutor.rut}
                 </p>
               </IonLabel>
               <IonIcon
@@ -349,7 +349,7 @@ const ModalEscogerPaciente: React.FC<ModalEscogerPacienteProps> = ({
             >
               {pacientes.map((paciente, index) => {
                 const isSelected =
-                  pacienteSeleccionadoTemp?.id === paciente.id_paciente;
+                  pacienteSeleccionadoTemp?.id_paciente === paciente.id_paciente;
 
                 return (
                   <IonItem
