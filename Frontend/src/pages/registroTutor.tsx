@@ -285,7 +285,7 @@ const RegistroTutor: React.FC = () => {
                     onIonChange={handleInputChange}
                   >
                     <div slot="label">
-                      Apellido Paterno <IonText color="danger">(*)</IonText>
+                      Primer Apellido <IonText color="danger">(*)</IonText>
                     </div>
                   </IonInput>
                 </IonItem>
@@ -294,7 +294,7 @@ const RegistroTutor: React.FC = () => {
                 <IonItem lines="none" className="apellido-materno">
                   <IonInput
                     className="apellido-materno"
-                    label="Apellido Materno"
+                    label="Segundo Apellido"
                     type="text"
                     labelPlacement="stacked"
                     fill="outline"

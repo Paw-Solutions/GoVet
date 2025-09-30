@@ -210,4 +210,7 @@ ion-row.button-row {
   display: flex;
   justify-content: flex-end;
   padding: 1rem;
+  border: none;
+  background: transparent;
+  box-shadow: none;
 }

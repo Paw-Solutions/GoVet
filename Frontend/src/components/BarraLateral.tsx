@@ -7,7 +7,7 @@ import {
   IonLabel,
   IonMenuToggle,
 } from "@ionic/react";
-import { home, eye, add, calendar, menu } from "ionicons/icons";
+import { home, eye, search, calendar, menu } from "ionicons/icons";
 import { useHistory } from "react-router-dom";
 import "../styles/BarraLateral.css";
 
@@ -58,10 +58,7 @@ const BarraLateral: React.FC = () => {
             <IonIcon icon={home} />
           </IonItem>
           <IonItem button lines="none" onClick={navegarAVer}>
-            <IonIcon icon={eye} />
-          </IonItem>
-          <IonItem button lines="none" onClick={navegarARegistroTutor}>
-            <IonIcon icon={add} />
+            <IonIcon icon={search} />
           </IonItem>
           <IonItem button lines="none">
             <IonIcon icon={calendar} />
