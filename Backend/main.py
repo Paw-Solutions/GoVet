@@ -279,6 +279,39 @@ def obtener_pacientes_paginados(
         }
     }
 
+# HU 5: Como veterinaria quiero poder modificar la información de una mascota registrada, para tratar con casos donde se necesite corregir alguna información hasta cambiar de dueño.
+
+# Ruta PUT para actualizar la información de un paciente
+@app.put("/pacientes/{id_paciente}", response_model=PacienteResponse)
+def actualizar_paciente(id_paciente: int, paciente: PacienteCreate, db: Session = Depends(get_db)):
+    db_paciente = db.query(models.Paciente).filter(models.Paciente.id_paciente == id_paciente).first()
+    if not db_paciente:
+        raise HTTPException(status_code=404, detail="Paciente no encontrado")
+    for key, value in paciente.dict().items():
+        setattr(db_paciente, key, value)
+    db.commit()
+    db.refresh(db_paciente)
+    return db_paciente
+
+# Ruta PUT para actualizar el tutor de un paciente
+@app.put("/pacientes/{id_paciente}/tutor/{rut_tutor}", response_model=PacienteResponse)
+def actualizar_tutor_paciente(id_paciente: int, rut_tutor: str, db: Session = Depends(get_db)):
+    db_paciente = db.query(models.Paciente).filter(models.Paciente.id_paciente == id_paciente).first()
+    db_tutor = db.query(models.Tutor).filter(models.Tutor.rut == rut_tutor).first()
+    if not db_paciente:
+        raise HTTPException(status_code=404, detail="Paciente no encontrado")
+    if not db_tutor:
+        raise HTTPException(status_code=404, detail="Tutor no encontrado")
+    # Actualizar la asociación en la tabla TutorPaciente
+    db_tutor_paciente = db.query(models.TutorPaciente).filter(models.TutorPaciente.id_paciente == id_paciente).first()
+    if db_tutor_paciente:
+        db_tutor_paciente.rut = rut_tutor
+    else:
+        db_tutor_paciente = models.TutorPaciente(rut=rut_tutor, id_paciente=id_paciente, fecha=date.today())
+        db.add(db_tutor_paciente)
+    db.commit()
+    return db_paciente
+
 """ RUTAS PARA ASOCIAR TUTORES Y PACIENTES """
 # Ruta POST para asociar un tutor a un paciente (tutor_paciente)
 @app.post("/tutores/{rut_tutor}/pacientes/{id_paciente}", response_model=TutorPacienteResponse)
