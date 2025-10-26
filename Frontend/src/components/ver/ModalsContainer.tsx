@@ -5,6 +5,10 @@ import { ConsultaData } from '../../api/fichas';
 import ModalInfoTutor from '../verTutores/infoTutor';
 import ModalInfoPaciente from '../verPacientes/infoPaciente';
 import ModalInfoFicha from '../verFichas/infoFicha';
+import ModalEditarPaciente from '../editar/editarPaciente';
+import ModalEditarTutor from '../editar/editarTutor';
+
+
 
 interface ModalsContainerProps {
   // Props para modal de tutores
@@ -21,6 +25,14 @@ interface ModalsContainerProps {
   showConsultaInfo: boolean;
   selectedConsulta: ConsultaData | null;
   onCloseConsultaInfo: () => void;
+
+  // Props para modal edicion tutores 
+  showTutorEdit?: boolean;
+  onCloseTutorEdit?: () => void;
+
+  // Props para modal edicion pacientes
+  showPacienteEdit?: boolean;
+  onClosePacienteEdit?: () => void;
 }
 
 const ModalsContainer: React.FC<ModalsContainerProps> = ({
@@ -38,6 +50,14 @@ const ModalsContainer: React.FC<ModalsContainerProps> = ({
   showConsultaInfo,
   selectedConsulta,
   onCloseConsultaInfo,
+
+  // Editar tutores
+  showTutorEdit,
+  onCloseTutorEdit,
+
+  // Editar pacientes
+  showPacienteEdit,
+  onClosePacienteEdit,
 }) => {
   return (
     <>
@@ -61,6 +81,22 @@ const ModalsContainer: React.FC<ModalsContainerProps> = ({
         onDismiss={onCloseConsultaInfo}
         consulta={selectedConsulta}
       />
+
+      {/* Modal de edicion de tutor*/}
+      <ModalEditarTutor
+        isOpen={!!showTutorEdit}
+        onDismiss={onCloseTutorEdit ?? (() => {})}
+        tutor={selectedTutor}
+      />
+
+      {/* Modal de edicion de paciente*/}
+      <ModalEditarPaciente
+        isOpen={!!showPacienteEdit}
+        onDismiss={onClosePacienteEdit ?? (() => {})}
+        paciente={selectedPaciente}
+      />
+
+
     </>
   );
 };

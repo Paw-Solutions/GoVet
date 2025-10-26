@@ -93,18 +93,24 @@ const Ver: React.FC = () => {
       </IonContent>
 
       <ModalsContainer
-        // Tutores
+        // Ver tutores
         showTutorInfo={tutores.showTutorInfo}
         selectedTutor={tutores.selectedTutor}
         onCloseTutorInfo={tutores.closeTutorInfo}
-        // Pacientes
+        // Ver pacientes
         showPacienteInfo={pacientes.showPacienteInfo}
         selectedPaciente={pacientes.selectedPaciente}
         onClosePacienteInfo={pacientes.closePacienteInfo}
-
+        // Ver fichas
         showConsultaInfo={consultas.showConsultaInfo}
         selectedConsulta={consultas.selectedConsulta}
         onCloseConsultaInfo={consultas.closeConsultaInfo}
+        // Editar tutores
+        showTutorEdit={tutores.showTutorEdit}
+        onCloseTutorEdit={tutores.closeTutorEdit}
+        // Editar pacientes
+        showPacienteEdit={pacientes.showPacienteEdit}
+        onClosePacienteEdit={pacientes.closePacienteEdit}
       />
     </IonPage>
   );

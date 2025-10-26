@@ -44,6 +44,7 @@ interface TutoresState {
   searchTimeout: NodeJS.Timeout | null;
   selectedTutor: TutorData | null;
   showTutorInfo: boolean;
+  showTutorEdit: boolean;
 }
 
 interface PacientesState {
@@ -56,6 +57,7 @@ interface PacientesState {
   searchTimeout: NodeJS.Timeout | null;
   selectedPaciente: PacienteData | null;
   showPacienteInfo: boolean;
+  showPacienteEdit: boolean;
 }
 
 interface TutoresActions {
@@ -66,6 +68,7 @@ interface TutoresActions {
   viewTutor: (tutor: TutorData) => void;
   editTutor: (tutor: TutorData) => void;
   closeTutorInfo: () => void;
+  closeTutorEdit: () => void;
   retry: () => void;
 }
 
@@ -77,6 +80,7 @@ interface PacientesActions {
   viewPaciente: (paciente: PacienteData) => void;
   editPaciente: (paciente: PacienteData) => void;
   closePacienteInfo: () => void;
+  closePacienteEdit: () => void;
   retry: () => void;
 }
 
@@ -130,6 +134,7 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
     searchTimeout: null,
     selectedTutor: null,
     showTutorInfo: false,
+    showTutorEdit: false,
   });
 
   // Estados para pacientes
@@ -143,6 +148,7 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
     searchTimeout: null,
     selectedPaciente: null,
     showPacienteInfo: false,
+    showPacienteEdit: false,
   });
 
   // Estados para consultas
@@ -238,8 +244,25 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
   }, []);
 
   const editTutor = useCallback((tutor: TutorData) => {
-    console.log("Editar tutor:", tutor);
-    // Aquí puedes implementar la lógica de edición
+    setTutoresState(prev => ({
+      ...prev,
+      selectedTutor: tutor,
+      showTutorInfo: false,
+      showTutorEdit: true,
+    }));
+  }, []);
+
+  const closeTutorEdit = useCallback(() => {
+    setTutoresState(prev => ({ 
+      ...prev, 
+      showTutorEdit: false 
+    }));
+    setTimeout(() => {
+      setTutoresState(prev => ({ 
+        ...prev, 
+        selectedTutor: null 
+      })); 
+    }, 150);
   }, []);
 
   const retryTutores = useCallback(() => {
@@ -327,7 +350,25 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
 
   const editPaciente = useCallback((paciente: PacienteData) => {
     console.log("Editar paciente:", paciente);
-    // Aquí puedes implementar la lógica de edición
+    setPacientesState(prev => ({
+      ...prev,
+      selectedPaciente: paciente,
+      showPacienteInfo: false,
+      showPacienteEdit: true,
+    }));
+  }, []);
+
+  const closePacienteEdit = useCallback(() => {
+  setPacientesState(prev => ({ 
+    ...prev, 
+    showPacienteEdit: false 
+    }));
+    setTimeout(() => {
+      setPacientesState(prev => ({ 
+        ...prev, 
+        selectedPaciente: null 
+      })); 
+    }, 150);
   }, []);
 
   const retryPacientes = useCallback(() => {
@@ -467,6 +508,7 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
     viewTutor,
     editTutor,
     closeTutorInfo,
+    closeTutorEdit,
     retry: retryTutores,
   };
 
@@ -478,6 +520,7 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
     viewPaciente,
     editPaciente,
     closePacienteInfo,
+    closePacienteEdit,
     retry: retryPacientes,
   };
 
@@ -503,6 +546,7 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
       hasMoreData: tutoresState.hasMoreData,
       selectedTutor: tutoresState.selectedTutor,
       showTutorInfo: tutoresState.showTutorInfo,
+      showTutorEdit: tutoresState.showTutorEdit,
       // Acciones
       ...tutoresActions,
     },
@@ -515,6 +559,7 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
       hasMoreData: pacientesState.hasMoreData,
       selectedPaciente: pacientesState.selectedPaciente,
       showPacienteInfo: pacientesState.showPacienteInfo,
+      showPacienteEdit: pacientesState.showPacienteEdit,
       // Acciones
       ...pacientesActions,
     },
