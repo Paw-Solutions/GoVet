@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   IonPage,
   IonContent,
@@ -19,6 +19,18 @@ const Ver: React.FC = () => {
   const handleSegmentChange = (segment: string) => {
     setSelectedSegment(segment);
   };
+
+  useEffect(() => {
+  const handler = () => {
+    pacientes.refresh();
+    tutores.refresh();
+  };
+
+  window.addEventListener("pacientes:updated", handler as EventListener);
+  return () => {
+    window.removeEventListener("pacientes:updated", handler as EventListener);
+  };
+}, [pacientes]);
   
   return (
     <IonPage>
