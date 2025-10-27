@@ -10,7 +10,7 @@ import {
   IonLabel,
   IonInput,
 } from "@ionic/react";
-import { TutorData } from "../../api/tutores";
+import { TutorData, actualizarTutor, type TutorCreate } from "../../api/tutores";
 
 interface ModalEditarTutorProps {
   isOpen: boolean;
@@ -37,6 +37,9 @@ const ModalEditarTutor: React.FC<ModalEditarTutorProps> = ({
   const [email, setEmail] = useState("");
   const [observacion, setObservacion] = useState("");
 
+  const [saving, setSaving] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
   useEffect(() => {
     if (tutor) {
       setNombre(tutor.nombre ?? "");
@@ -46,54 +49,60 @@ const ModalEditarTutor: React.FC<ModalEditarTutorProps> = ({
       setDireccion(tutor.direccion ?? "");
       setComuna(tutor.comuna ?? "");
       setRegion(tutor.region ?? "");
-      setTelefono(
-        tutor.telefono !== undefined && tutor.telefono !== null
-          ? String(tutor.telefono)
-          : ""
-      );
-      setTelefono2(
-        tutor.telefono2 !== undefined && tutor.telefono2 !== null
-          ? String(tutor.telefono2)
-          : ""
-      );
-      setCelular(
-        tutor.celular !== undefined && tutor.celular !== null
-          ? String(tutor.celular)
-          : ""
-      );
-      setCelular2(
-        tutor.celular2 !== undefined && tutor.celular2 !== null
-          ? String(tutor.celular2)
-          : ""
-      );
+      setTelefono(tutor.telefono != null ? String(tutor.telefono) : "");
+      setTelefono2(tutor.telefono2 != null ? String(tutor.telefono2) : "");
+      setCelular(tutor.celular != null ? String(tutor.celular) : "");
+      setCelular2(tutor.celular2 != null ? String(tutor.celular2) : "");
       setEmail(tutor.email ?? "");
       setObservacion(tutor.observacion ?? "");
+      setErrorMsg(null);
+      setSaving(false);
     }
-  }, [tutor]);
+  }, [tutor, isOpen]);
 
-  const handleGuardar = () => {
+  const toNumberOrNull = (v: string) => {
+    const t = v.trim();
+    if (!t) return null;
+    const n = Number(t);
+    return Number.isNaN(n) ? null : n;
+  };
+
+  const handleGuardar = async () => {
     if (!tutor) return;
 
-    const actualizado: TutorData = {
-      ...tutor,
-      nombre,
-      apellido_paterno: apellidoPaterno,
-      apellido_materno: apellidoMaterno,
-      rut,
-      direccion,
-      comuna,
-      region,
-      // Convertimos strings a números cuando corresponda.
-      telefono: telefono ? Number(telefono) : (undefined as unknown as number),
-      telefono2: telefono2 ? Number(telefono2) : (undefined as unknown as number),
-      celular: celular ? Number(celular) : (undefined as unknown as number),
-      celular2: celular2 ? Number(celular2) : (undefined as unknown as number),
-      email,
-      observacion,
-    };
+    try {
+      setSaving(true);
+      setErrorMsg(null);
 
-    onDismiss();
+      const rutActual = tutor.rut || "";
+
+      const payload: TutorCreate = {
+        nombre: nombre.trim(),
+        apellido_paterno: apellidoPaterno.trim(),
+        apellido_materno: apellidoMaterno.trim(),
+        rut: rut,
+        direccion: direccion.trim(),
+        comuna: comuna.trim(),
+        region: region.trim(),
+        telefono: toNumberOrNull(telefono) ?? undefined,
+        telefono2: toNumberOrNull(telefono2) ?? undefined,
+        celular: toNumberOrNull(celular) ?? undefined,
+        celular2: toNumberOrNull(celular2) ?? undefined,
+        email: email.trim() || undefined,
+        observacion: observacion.trim() || undefined,
+      };
+
+      await actualizarTutor(rutActual, payload);
+
+      window.dispatchEvent(new CustomEvent("tutores:updated"));
+      onDismiss();
+    } catch (err: any) {
+      setErrorMsg(err?.message || "No fue posible guardar los cambios.");
+    } finally {
+      setSaving(false);
+    }
   };
+
 
   return (
     <IonModal isOpen={isOpen} onDidDismiss={onDismiss}>
@@ -104,6 +113,11 @@ const ModalEditarTutor: React.FC<ModalEditarTutorProps> = ({
       </IonHeader>
 
       <IonContent className="ion-padding">
+        <IonItem>
+          <IonLabel position="stacked">RUT (no editable)</IonLabel>
+          <IonInput value={rut} readonly />
+        </IonItem>
+
         <IonItem>
           <IonLabel position="stacked">Nombre</IonLabel>
           <IonInput
@@ -128,15 +142,6 @@ const ModalEditarTutor: React.FC<ModalEditarTutorProps> = ({
             value={apellidoMaterno}
             placeholder="Apellido materno"
             onIonInput={(e) => setApellidoMaterno(e.detail.value ?? "")}
-          />
-        </IonItem>
-
-        <IonItem>
-          <IonLabel position="stacked">RUT</IonLabel>
-          <IonInput
-            value={rut}
-            placeholder="12.345.678-9"
-            onIonInput={(e) => setRut(e.detail.value ?? "")}
           />
         </IonItem>
 
@@ -226,9 +231,17 @@ const ModalEditarTutor: React.FC<ModalEditarTutorProps> = ({
           />
         </IonItem>
 
+        {errorMsg && (
+          <div style={{ color: "var(--ion-color-danger)", marginTop: 8 }}>
+            {errorMsg}
+          </div>
+        )}
+
         <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
-          <IonButton onClick={handleGuardar}>Guardar</IonButton>
-          <IonButton fill="clear" onClick={onDismiss}>
+          <IonButton onClick={handleGuardar} disabled={saving || !tutor}>
+            {saving ? "Guardando..." : "Guardar"}
+          </IonButton>
+          <IonButton fill="clear" onClick={onDismiss} disabled={saving}>
             Cancelar
           </IonButton>
         </div>

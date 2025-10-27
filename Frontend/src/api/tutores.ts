@@ -2,6 +2,22 @@
 
 const API_URL = import.meta.env.VITE_API_URL; // usa tu variable de entorno
 
+export interface TutorCreate {
+  nombre: string;
+  apellido_materno: string;
+  apellido_paterno: string;
+  rut: string;
+  direccion: string;
+  telefono?: number | null;
+  telefono2?: number | null;
+  comuna: string;
+  region: string;
+  celular?: number | null;
+  celular2?: number | null;
+  email?: string;
+  observacion?: string;
+}
+
 export interface TutorData {
   nombre: string;
   apellido_materno: string;
@@ -115,5 +131,28 @@ export async function obtenerTutoresPaginados(
   } catch (error) {
     console.error("Error obteniendo tutores paginados:", error);
     throw error;
+  }
+}
+
+{/* Actualizar informacion tutor */}
+export async function actualizarTutor(
+  rutActual: string,
+  payload: TutorCreate
+): Promise<TutorData> {
+  const API_URL = import.meta.env.VITE_API_URL;
+  try {
+    const response = await fetch(`${API_URL}/tutores/${encodeURIComponent(rutActual)}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => "");
+      throw new Error(`Error ${response.status} al actualizar tutor: ${errorText}`);
+    }
+    return (await response.json()) as TutorData;
+  } catch (err) {
+    console.error("actualizarTutor error:", err);
+    throw err;
   }
 }

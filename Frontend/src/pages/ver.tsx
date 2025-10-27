@@ -21,16 +21,26 @@ const Ver: React.FC = () => {
   };
 
   useEffect(() => {
-  const handler = () => {
-    pacientes.refresh();
-    tutores.refresh();
-  };
+    const handler = () => {
+      pacientes.refresh();
+      tutores.refresh();
+    };
 
-  window.addEventListener("pacientes:updated", handler as EventListener);
-  return () => {
-    window.removeEventListener("pacientes:updated", handler as EventListener);
-  };
-}, [pacientes]);
+    window.addEventListener("pacientes:updated", handler as EventListener);
+    return () => {
+      window.removeEventListener("pacientes:updated", handler as EventListener);
+    };
+  }, [pacientes]);
+
+  useEffect(() => {
+    const handler = () => {
+      tutores.refresh();
+    };
+    window.addEventListener("tutores:updated", handler as EventListener);
+    return () => {
+      window.removeEventListener("tutores:updated", handler as EventListener);
+    };
+  }, [tutores]);
   
   return (
     <IonPage>
