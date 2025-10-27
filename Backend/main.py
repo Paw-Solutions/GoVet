@@ -313,6 +313,32 @@ def actualizar_tutor_paciente(id_paciente: int, rut_tutor: str, db: Session = De
     return db_paciente
 
 """ RUTAS PARA ASOCIAR TUTORES Y PACIENTES """
+# Ruta PUT para editar la asociación tutor_paciente
+@app.put("/tutores/{rut_tutor}/pacientes/{id_paciente}", response_model=TutorPacienteResponse)
+def editar_asociacion_tutor_paciente(rut_tutor: str, id_paciente: int, fecha: date, db: Session = Depends(get_db)):
+    db_tutor_paciente = db.query(models.TutorPaciente).filter(
+        models.TutorPaciente.rut == rut_tutor,
+        models.TutorPaciente.id_paciente == id_paciente
+    ).first()
+    if not db_tutor_paciente:
+        raise HTTPException(status_code=404, detail="Asociación tutor-paciente no encontrada")
+    db_tutor_paciente.fecha = fecha
+    db.commit()
+    db.refresh(db_tutor_paciente)
+    return db_tutor_paciente
+
+# ruta put para editar la informacion de un tutor
+@app.put("/tutores/{rut}", response_model=TutorResponse)
+def editar_tutor(rut: str, tutor: TutorCreate, db: Session = Depends(get_db)):
+    db_tutor = db.query(models.Tutor).filter(models.Tutor.rut == rut).first()
+    if not db_tutor:
+        raise HTTPException(status_code=404, detail="Tutor no encontrado")
+    for key, value in tutor.dict().items():
+        setattr(db_tutor, key, value)
+    db.commit()
+    db.refresh(db_tutor)
+    return db_tutor
+
 # Ruta POST para asociar un tutor a un paciente (tutor_paciente)
 @app.post("/tutores/{rut_tutor}/pacientes/{id_paciente}", response_model=TutorPacienteResponse)
 def asociar_tutor_a_paciente(rut_tutor: str, id_paciente: int, fecha: date, db: Session = Depends(get_db)):
