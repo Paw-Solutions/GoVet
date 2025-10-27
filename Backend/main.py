@@ -129,6 +129,14 @@ def obtener_tutores_paginados(
         }
     }
 
+# Ruta para ver todas las mascotas de un tutor
+@app.get("/tutores/{rut}/pacientes/", response_model=List[PacienteResponse])
+def obtener_mascotas_de_tutor(rut: str, db: Session = Depends(get_db)):
+    db_tutor = db.query(models.Tutor).filter(models.Tutor.rut == rut).first()
+    if not db_tutor:
+        raise HTTPException(status_code=404, detail="Tutor no encontrado")
+    return db.query(models.Paciente).join(models.TutorPaciente).filter(models.TutorPaciente.rut == rut).all()
+
 # HU 3: Como Veterinaria, quiero poder almacenar el paciente por su nombre y raza para indentificarlos y buscarlos facilmente
 """ RUTAS PARA PACIENTES (mascotas) """
 # Ruta POST para añadir un paciente
