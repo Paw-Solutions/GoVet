@@ -169,6 +169,66 @@ export async function obtenerPacientesPaginados(
   }
 }
 
+{/* Actualizar relacion paciente tutor */}
+export async function actualizarTutorDePaciente(
+  idPaciente: number,
+  rutTutor: string
+): Promise<PacienteData> {
+  const API_URL = import.meta.env.VITE_API_URL;
+  try {
+    const url = `${API_URL}/pacientes/${encodeURIComponent(
+      idPaciente
+    )}/tutor/${encodeURIComponent(rutTutor)}`;
+
+    const response = await fetch(url, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => "");
+      throw new Error(
+        `Error ${response.status} al actualizar tutor del paciente: ${errorText}`
+      );
+    }
+
+    const data = (await response.json()) as PacienteData;
+    return data;
+  } catch (err) {
+    console.error("actualizarTutorDePaciente error:", err);
+    throw err;
+  }
+}
+
+{/* Actualizar informacion paciente */}
+export async function actualizarPaciente(
+  idPaciente: number,
+  payload: PacienteCreate
+): Promise<PacienteData> {
+  try {
+    const response = await fetch(`${API_URL}/pacientes/${idPaciente}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => "");
+      throw new Error(
+        `Error ${response.status} al actualizar paciente: ${errorText}`
+      );
+    }
+
+    const data = (await response.json()) as PacienteData;
+    return data;
+  } catch (err) {
+    console.error("actualizarPaciente error:", err);
+    throw err;
+  }
+}
+
 const handlePacienteSelected = (paciente: PacienteData) => {
   setSelectedPaciente(paciente);
   setFormData((prev) => ({
