@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import {
   IonModal,
   IonHeader,
@@ -7,10 +7,26 @@ import {
   IonContent,
   IonButton,
   IonItem,
-  IonLabel,
   IonInput,
+  IonGrid,
+  IonRow,
+  IonCol,
+  IonText,
+  IonSpinner,
 } from "@ionic/react";
-import { TutorData, actualizarTutor, type TutorCreate } from "../../api/tutores";
+import {
+  TutorData,
+  actualizarTutor,
+  type TutorCreate,
+} from "../../api/tutores";
+import InputRut, { InputRutHandle } from "../registroTutor/inputRut";
+import InputTelefono, {
+  InputTelefonoHandle,
+} from "../registroTutor/inputTelefono";
+import { SelectorRegion } from "../registroTutor/SelectorRegion";
+import { SelectorComuna } from "../registroTutor/SelectorComuna";
+import { obtenerRegiones } from "../../api/regiones";
+import { formatRegionName, formatComunaName } from "../../utils/formatters";
 
 interface ModalEditarTutorProps {
   isOpen: boolean;
@@ -23,42 +39,146 @@ const ModalEditarTutor: React.FC<ModalEditarTutorProps> = ({
   onDismiss,
   tutor,
 }) => {
+  // Estados básicos del formulario
   const [nombre, setNombre] = useState("");
   const [apellidoPaterno, setApellidoPaterno] = useState("");
   const [apellidoMaterno, setApellidoMaterno] = useState("");
   const [rut, setRut] = useState("");
   const [direccion, setDireccion] = useState("");
-  const [comuna, setComuna] = useState("");
-  const [region, setRegion] = useState("");
-  const [telefono, setTelefono] = useState("");
   const [telefono2, setTelefono2] = useState("");
   const [celular, setCelular] = useState("");
   const [celular2, setCelular2] = useState("");
   const [email, setEmail] = useState("");
   const [observacion, setObservacion] = useState("");
 
+  // Estados para regiones y comunas
+  const [regiones, setRegiones] = useState<any[]>([]);
+  const [loadingRegiones, setLoadingRegiones] = useState(false);
+  const [regionQuery, setRegionQuery] = useState("");
+  const [showRegionList, setShowRegionList] = useState(false);
+  const [selectedRegion, setSelectedRegion] = useState<any>(null);
+  const [comunaQuery, setComunaQuery] = useState("");
+  const [showComunaList, setShowComunaList] = useState(false);
+  const [selectedComuna, setSelectedComuna] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+
+  // Estados de control
   const [saving, setSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [telefonoValue, setTelefonoValue] = useState("");
 
+  // Referencias
+  const inputRutRef = useRef<InputRutHandle>(null);
+  const inputTelefonoRef = useRef<InputTelefonoHandle>(null);
+
+  // Cargar regiones al montar
   useEffect(() => {
-    if (tutor) {
+    const fetchRegiones = async () => {
+      try {
+        setLoadingRegiones(true);
+        const data = await obtenerRegiones();
+        setRegiones(data);
+      } catch (error) {
+        console.error("Error cargando regiones:", error);
+      } finally {
+        setLoadingRegiones(false);
+      }
+    };
+
+    fetchRegiones();
+  }, []);
+
+  // Cargar datos del tutor cuando se abre el modal
+  useEffect(() => {
+    if (tutor && isOpen) {
+      // Datos básicos
       setNombre(tutor.nombre ?? "");
       setApellidoPaterno(tutor.apellido_paterno ?? "");
       setApellidoMaterno(tutor.apellido_materno ?? "");
       setRut(tutor.rut ?? "");
       setDireccion(tutor.direccion ?? "");
-      setComuna(tutor.comuna ?? "");
-      setRegion(tutor.region ?? "");
-      setTelefono(tutor.telefono != null ? String(tutor.telefono) : "");
       setTelefono2(tutor.telefono2 != null ? String(tutor.telefono2) : "");
       setCelular(tutor.celular != null ? String(tutor.celular) : "");
       setCelular2(tutor.celular2 != null ? String(tutor.celular2) : "");
       setEmail(tutor.email ?? "");
       setObservacion(tutor.observacion ?? "");
+
+      // Teléfono principal - guardar el valor sin formato
+      const telefonoStr = tutor.telefono != null ? String(tutor.telefono) : "";
+      setTelefonoValue(telefonoStr);
+
+      // Región
+      if (tutor.region) {
+        setRegionQuery(tutor.region);
+        const regionEncontrada = regiones.find(
+          (r) => formatRegionName(r) === tutor.region || r.name === tutor.region
+        );
+        setSelectedRegion(regionEncontrada || null);
+      }
+
+      // Comuna
+      if (tutor.comuna) {
+        setComunaQuery(tutor.comuna);
+        setSelectedComuna({ id: tutor.comuna, name: tutor.comuna });
+      }
+
       setErrorMsg(null);
       setSaving(false);
     }
-  }, [tutor, isOpen]);
+  }, [tutor, isOpen, regiones]);
+
+  // Filtros para regiones y comunas
+  const filteredRegiones = useMemo(() => {
+    return regiones.filter((region) => {
+      if (!regionQuery.trim()) return true;
+      const formattedName = formatRegionName(region);
+      return (
+        formattedName.toLowerCase().includes(regionQuery.toLowerCase()) ||
+        region.name.toLowerCase().includes(regionQuery.toLowerCase())
+      );
+    });
+  }, [regiones, regionQuery]);
+
+  const filteredComunas = useMemo(() => {
+    if (!selectedRegion) return [];
+    const region = regiones.find((r) => r.id === selectedRegion.id);
+    if (!region || !region.communes) return [];
+
+    return region.communes.filter((comuna: any) => {
+      if (!comunaQuery.trim()) return true;
+      const formattedName = formatComunaName(comuna.name);
+      return (
+        formattedName.toLowerCase().includes(comunaQuery.toLowerCase()) ||
+        comuna.name.toLowerCase().includes(comunaQuery.toLowerCase())
+      );
+    });
+  }, [regiones, selectedRegion, comunaQuery]);
+
+  // Handlers
+  const selectRegion = (id: string, name: string, fullRegion: any) => {
+    setSelectedRegion(fullRegion);
+    setRegionQuery(name);
+    setShowRegionList(false);
+    setSelectedComuna(null);
+    setComunaQuery("");
+    setShowComunaList(false);
+  };
+
+  const selectComuna = (id: string, name: string) => {
+    setSelectedComuna({ id, name });
+    setComunaQuery(name);
+    setShowComunaList(false);
+  };
+
+  const handlePhoneChange = (phone: string) => {
+    setTelefonoValue(phone);
+  };
+
+  const handleRutChange = (rutValue: string) => {
+    setRut(rutValue);
+  };
 
   const toNumberOrNull = (v: string) => {
     const t = v.trim();
@@ -82,9 +202,11 @@ const ModalEditarTutor: React.FC<ModalEditarTutorProps> = ({
         apellido_materno: apellidoMaterno.trim(),
         rut: rut,
         direccion: direccion.trim(),
-        comuna: comuna.trim(),
-        region: region.trim(),
-        telefono: toNumberOrNull(telefono) ?? undefined,
+        comuna: selectedComuna ? selectedComuna.name : comunaQuery.trim(),
+        region: selectedRegion
+          ? formatRegionName(selectedRegion)
+          : regionQuery.trim(),
+        telefono: toNumberOrNull(telefonoValue) ?? undefined,
         telefono2: toNumberOrNull(telefono2) ?? undefined,
         celular: toNumberOrNull(celular) ?? undefined,
         celular2: toNumberOrNull(celular2) ?? undefined,
@@ -103,7 +225,6 @@ const ModalEditarTutor: React.FC<ModalEditarTutorProps> = ({
     }
   };
 
-
   return (
     <IonModal isOpen={isOpen} onDidDismiss={onDismiss}>
       <IonHeader>
@@ -113,123 +234,227 @@ const ModalEditarTutor: React.FC<ModalEditarTutorProps> = ({
       </IonHeader>
 
       <IonContent className="ion-padding">
-        <IonItem>
-          <IonLabel position="stacked">RUT (no editable)</IonLabel>
-          <IonInput value={rut} readonly />
-        </IonItem>
+        <IonGrid>
+          {/* RUT (readonly) */}
+          <IonRow>
+            <IonCol>
+              <IonItem lines="none">
+                <IonInput
+                  labelPlacement="stacked"
+                  fill="outline"
+                  value={rut}
+                  readonly
+                >
+                  <div slot="label">
+                    RUT (no editable) <IonText color="danger">(*)</IonText>
+                  </div>
+                </IonInput>
+              </IonItem>
+            </IonCol>
+          </IonRow>
 
-        <IonItem>
-          <IonLabel position="stacked">Nombre</IonLabel>
-          <IonInput
-            value={nombre}
-            placeholder="Nombre"
-            onIonInput={(e) => setNombre(e.detail.value ?? "")}
-          />
-        </IonItem>
+          {/* Nombre */}
+          <IonRow>
+            <IonCol>
+              <IonItem lines="none">
+                <IonInput
+                  type="text"
+                  labelPlacement="stacked"
+                  fill="outline"
+                  placeholder="Daniela"
+                  value={nombre}
+                  onIonInput={(e) => setNombre(e.detail.value ?? "")}
+                >
+                  <div slot="label">
+                    Nombre <IonText color="danger">(*)</IonText>
+                  </div>
+                </IonInput>
+              </IonItem>
+            </IonCol>
+          </IonRow>
 
-        <IonItem>
-          <IonLabel position="stacked">Apellido paterno</IonLabel>
-          <IonInput
-            value={apellidoPaterno}
-            placeholder="Apellido paterno"
-            onIonInput={(e) => setApellidoPaterno(e.detail.value ?? "")}
-          />
-        </IonItem>
+          {/* Apellidos */}
+          <IonRow className="apellidos">
+            <IonCol>
+              <IonItem lines="none">
+                <IonInput
+                  type="text"
+                  labelPlacement="stacked"
+                  fill="outline"
+                  placeholder="Huenuman"
+                  value={apellidoPaterno}
+                  onIonInput={(e) => setApellidoPaterno(e.detail.value ?? "")}
+                >
+                  <div slot="label">
+                    Primer Apellido <IonText color="danger">(*)</IonText>
+                  </div>
+                </IonInput>
+              </IonItem>
+            </IonCol>
+            <IonCol>
+              <IonItem lines="none">
+                <IonInput
+                  label="Segundo Apellido"
+                  type="text"
+                  labelPlacement="stacked"
+                  fill="outline"
+                  placeholder="Oliva"
+                  value={apellidoMaterno}
+                  onIonInput={(e) => setApellidoMaterno(e.detail.value ?? "")}
+                />
+              </IonItem>
+            </IonCol>
+          </IonRow>
 
-        <IonItem>
-          <IonLabel position="stacked">Apellido materno</IonLabel>
-          <IonInput
-            value={apellidoMaterno}
-            placeholder="Apellido materno"
-            onIonInput={(e) => setApellidoMaterno(e.detail.value ?? "")}
-          />
-        </IonItem>
+          {/* Dirección */}
+          <IonRow>
+            <IonCol>
+              <IonItem lines="none">
+                <IonInput
+                  type="text"
+                  labelPlacement="stacked"
+                  fill="outline"
+                  placeholder="Calle Falsa 123"
+                  value={direccion}
+                  onIonInput={(e) => setDireccion(e.detail.value ?? "")}
+                >
+                  <div slot="label">
+                    Dirección <IonText color="danger">(*)</IonText>
+                  </div>
+                </IonInput>
+              </IonItem>
+            </IonCol>
+          </IonRow>
 
-        <IonItem>
-          <IonLabel position="stacked">Dirección</IonLabel>
-          <IonInput
-            value={direccion}
-            placeholder="Dirección"
-            onIonInput={(e) => setDireccion(e.detail.value ?? "")}
-          />
-        </IonItem>
+          {/* Teléfono Principal con InputTelefono */}
+          <IonRow>
+            <IonCol>
+              <InputTelefono
+                onPhoneChange={handlePhoneChange}
+                ref={inputTelefonoRef}
+              />
+            </IonCol>
+          </IonRow>
 
-        <IonItem>
-          <IonLabel position="stacked">Comuna</IonLabel>
-          <IonInput
-            value={comuna}
-            placeholder="Comuna"
-            onIonInput={(e) => setComuna(e.detail.value ?? "")}
-          />
-        </IonItem>
+          {/* Teléfono 2 */}
+          <IonRow>
+            <IonCol>
+              <IonItem lines="none">
+                <IonInput
+                  type="tel"
+                  labelPlacement="stacked"
+                  fill="outline"
+                  placeholder="Contacto 2"
+                  label="Teléfono 2"
+                  value={telefono2}
+                  onIonInput={(e) => setTelefono2(e.detail.value ?? "")}
+                />
+              </IonItem>
+            </IonCol>
+          </IonRow>
 
-        <IonItem>
-          <IonLabel position="stacked">Región</IonLabel>
-          <IonInput
-            value={region}
-            placeholder="Región"
-            onIonInput={(e) => setRegion(e.detail.value ?? "")}
-          />
-        </IonItem>
+          {/* Celular */}
+          <IonRow>
+            <IonCol>
+              <IonItem lines="none">
+                <IonInput
+                  type="tel"
+                  labelPlacement="stacked"
+                  fill="outline"
+                  placeholder="Celular"
+                  label="Celular"
+                  value={celular}
+                  onIonInput={(e) => setCelular(e.detail.value ?? "")}
+                />
+              </IonItem>
+            </IonCol>
+          </IonRow>
 
-        <IonItem>
-          <IonLabel position="stacked">Teléfono</IonLabel>
-          <IonInput
-            type="tel"
-            value={telefono}
-            placeholder="Fijo o contacto 1"
-            onIonInput={(e) => setTelefono(e.detail.value ?? "")}
-          />
-        </IonItem>
+          {/* Celular 2 */}
+          <IonRow>
+            <IonCol>
+              <IonItem lines="none">
+                <IonInput
+                  type="tel"
+                  labelPlacement="stacked"
+                  fill="outline"
+                  placeholder="Celular alternativo"
+                  label="Celular 2"
+                  value={celular2}
+                  onIonInput={(e) => setCelular2(e.detail.value ?? "")}
+                />
+              </IonItem>
+            </IonCol>
+          </IonRow>
 
-        <IonItem>
-          <IonLabel position="stacked">Teléfono 2</IonLabel>
-          <IonInput
-            type="tel"
-            value={telefono2}
-            placeholder="Contacto 2"
-            onIonInput={(e) => setTelefono2(e.detail.value ?? "")}
-          />
-        </IonItem>
+          {/* Selector Región */}
+          <IonRow>
+            <IonCol>
+              <SelectorRegion
+                regionQuery={regionQuery}
+                setRegionQuery={setRegionQuery}
+                showRegionList={showRegionList}
+                setShowRegionList={setShowRegionList}
+                filteredRegiones={filteredRegiones}
+                loadingRegiones={loadingRegiones}
+                selectRegion={selectRegion}
+              />
+            </IonCol>
+          </IonRow>
 
-        <IonItem>
-          <IonLabel position="stacked">Celular</IonLabel>
-          <IonInput
-            type="tel"
-            value={celular}
-            placeholder="Celular"
-            onIonInput={(e) => setCelular(e.detail.value ?? "")}
-          />
-        </IonItem>
+          {/* Selector Comuna */}
+          <IonRow>
+            <IonCol>
+              <SelectorComuna
+                comunaQuery={comunaQuery}
+                setComunaQuery={setComunaQuery}
+                showComunaList={showComunaList}
+                setShowComunaList={setShowComunaList}
+                filteredComunas={filteredComunas}
+                loadingComunas={false}
+                selectComuna={selectComuna}
+                regionSeleccionada={!!selectedRegion}
+              />
+            </IonCol>
+          </IonRow>
 
-        <IonItem>
-          <IonLabel position="stacked">Celular 2</IonLabel>
-          <IonInput
-            type="tel"
-            value={celular2}
-            placeholder="Celular alternativo"
-            onIonInput={(e) => setCelular2(e.detail.value ?? "")}
-          />
-        </IonItem>
+          {/* Email */}
+          <IonRow>
+            <IonCol>
+              <IonItem lines="none">
+                <IonInput
+                  type="email"
+                  labelPlacement="stacked"
+                  fill="outline"
+                  placeholder="govet@paw-solutions.com"
+                  value={email}
+                  onIonInput={(e) => setEmail(e.detail.value ?? "")}
+                >
+                  <div slot="label">
+                    Email <IonText color="danger">(*)</IonText>
+                  </div>
+                </IonInput>
+              </IonItem>
+            </IonCol>
+          </IonRow>
 
-        <IonItem>
-          <IonLabel position="stacked">Email</IonLabel>
-          <IonInput
-            type="email"
-            value={email}
-            placeholder="correo@dominio.com"
-            onIonInput={(e) => setEmail(e.detail.value ?? "")}
-          />
-        </IonItem>
-
-        <IonItem>
-          <IonLabel position="stacked">Observación</IonLabel>
-          <IonInput
-            value={observacion}
-            placeholder="Notas u observaciones"
-            onIonInput={(e) => setObservacion(e.detail.value ?? "")}
-          />
-        </IonItem>
+          {/* Observación */}
+          <IonRow>
+            <IonCol>
+              <IonItem lines="none">
+                <IonInput
+                  type="text"
+                  labelPlacement="stacked"
+                  fill="outline"
+                  label="Observación"
+                  placeholder="Notas u observaciones"
+                  value={observacion}
+                  onIonInput={(e) => setObservacion(e.detail.value ?? "")}
+                />
+              </IonItem>
+            </IonCol>
+          </IonRow>
+        </IonGrid>
 
         {errorMsg && (
           <div style={{ color: "var(--ion-color-danger)", marginTop: 8 }}>
