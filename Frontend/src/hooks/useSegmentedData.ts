@@ -1,10 +1,10 @@
-import { useState, useCallback, useEffect } from 'react';
-import { TutorData } from '../api/tutores';
-import { ConsultaData } from '../api/fichas'
-import { PacienteData } from '../api/pacientes';
-import { obtenerTutoresPaginados } from '../api/tutores';
-import { obtenerPacientesPaginados } from '../api/pacientes';
-import { obtenerConsultasPaginadas } from '../api/fichas'
+import { useState, useCallback, useEffect } from "react";
+import { TutorData } from "../api/tutores";
+import { ConsultaData } from "../api/fichas";
+import { PacienteData } from "../api/pacientes";
+import { obtenerTutoresPaginados } from "../api/tutores";
+import { obtenerPacientesPaginados } from "../api/pacientes";
+import { obtenerConsultasPaginadas } from "../api/fichas";
 
 interface PaginatedResponseTutores {
   tutores: TutorData[];
@@ -82,6 +82,8 @@ interface PacientesActions {
   closePacienteInfo: () => void;
   closePacienteEdit: () => void;
   retry: () => void;
+  viewTutorFromPaciente: (tutorData: TutorData) => void;
+  viewConsultaFromPaciente: (consultaData: ConsultaData) => void;
 }
 
 interface PaginatedResponseConsultas {
@@ -108,10 +110,15 @@ interface ConsultasState {
   searchTimeout: NodeJS.Timeout | null;
   selectedConsulta: ConsultaData | null;
   showConsultaInfo: boolean;
+  sortOrder: "desc" | "asc";
 }
 
 interface ConsultasActions {
-  loadData: (resetList?: boolean, search?: string) => Promise<void>;
+  loadData: (
+    resetList?: boolean,
+    search?: string,
+    sortOrder?: "desc" | "asc"
+  ) => Promise<void>;
   handleSearch: (texto: string) => void;
   loadMore: (event: CustomEvent) => Promise<void>;
   refresh: (event?: CustomEvent) => Promise<void>;
@@ -120,6 +127,7 @@ interface ConsultasActions {
   exportConsulta: (consulta: ConsultaData) => void;
   closeConsultaInfo: () => void;
   retry: () => void;
+  handleSortOrderChange: (newOrder: "desc" | "asc") => void;
 }
 
 export const useSegmentedData = (initialSegment: string = "tutores") => {
@@ -162,68 +170,90 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
     searchTimeout: null,
     selectedConsulta: null,
     showConsultaInfo: false,
+    sortOrder: "desc",
   });
 
   // ========== FUNCIONES PARA TUTORES ==========
 
-  const loadTutoresData = useCallback(async (resetList: boolean = true, search?: string) => {
-    setTutoresState(prev => ({ ...prev, loading: true, error: "" }));
+  const loadTutoresData = useCallback(
+    async (resetList: boolean = true, search?: string) => {
+      setTutoresState((prev) => ({ ...prev, loading: true, error: "" }));
 
-    try {
-      const page = resetList ? 1 : tutoresState.currentPage + 1;
-      const data: PaginatedResponseTutores = await obtenerTutoresPaginados(page, 50, search);
-      
-      setTutoresState(prev => ({
-        ...prev,
-        data: resetList ? data.tutores : [...prev.data, ...data.tutores],
-        currentPage: resetList ? 1 : page,
-        hasMoreData: data.pagination.has_next,
-        loading: false,
-      }));
-    } catch (error) {
-      setTutoresState(prev => ({
-        ...prev,
-        error: "Error de conexión al cargar tutores",
-        loading: false,
-      }));
-      console.error("Error loading tutores:", error);
-    }
-  }, [tutoresState.currentPage]);
+      try {
+        const page = resetList ? 1 : tutoresState.currentPage + 1;
+        const data: PaginatedResponseTutores = await obtenerTutoresPaginados(
+          page,
+          50,
+          search
+        );
 
-  const handleTutoresSearch = useCallback((texto: string) => {
-    setTutoresState(prev => {
-      if (prev.searchTimeout) {
-        clearTimeout(prev.searchTimeout);
+        setTutoresState((prev) => ({
+          ...prev,
+          data: resetList ? data.tutores : [...prev.data, ...data.tutores],
+          currentPage: resetList ? 1 : page,
+          hasMoreData: data.pagination.has_next,
+          loading: false,
+        }));
+      } catch (error) {
+        setTutoresState((prev) => ({
+          ...prev,
+          error: "Error de conexión al cargar tutores",
+          loading: false,
+        }));
+        console.error("Error loading tutores:", error);
       }
-      
-      const timeout = setTimeout(() => {
-        loadTutoresData(true, texto.trim() || undefined);
-      }, 500);
-      
-      return {
-        ...prev,
-        busqueda: texto,
-        searchTimeout: timeout,
-      };
-    });
-  }, [loadTutoresData]);
+    },
+    [tutoresState.currentPage]
+  );
 
-  const loadMoreTutores = useCallback(async (event: CustomEvent) => {
-    if (tutoresState.hasMoreData && !tutoresState.loading) {
-      await loadTutoresData(false, tutoresState.busqueda.trim() || undefined);
-    }
-    (event.target as HTMLIonInfiniteScrollElement).complete();
-  }, [tutoresState.hasMoreData, tutoresState.loading, tutoresState.busqueda, loadTutoresData]);
+  const handleTutoresSearch = useCallback(
+    (texto: string) => {
+      setTutoresState((prev) => {
+        if (prev.searchTimeout) {
+          clearTimeout(prev.searchTimeout);
+        }
 
-  const refreshTutores = useCallback(async (event?: CustomEvent) => {
-    await loadTutoresData(true, tutoresState.busqueda.trim() || undefined);
-    if (event) {
-      event.detail.complete();
-    }
-  }, [loadTutoresData, tutoresState.busqueda]);
+        const timeout = setTimeout(() => {
+          loadTutoresData(true, texto.trim() || undefined);
+        }, 500);
+
+        return {
+          ...prev,
+          busqueda: texto,
+          searchTimeout: timeout,
+        };
+      });
+    },
+    [loadTutoresData]
+  );
+
+  const loadMoreTutores = useCallback(
+    async (event: CustomEvent) => {
+      if (tutoresState.hasMoreData && !tutoresState.loading) {
+        await loadTutoresData(false, tutoresState.busqueda.trim() || undefined);
+      }
+      (event.target as HTMLIonInfiniteScrollElement).complete();
+    },
+    [
+      tutoresState.hasMoreData,
+      tutoresState.loading,
+      tutoresState.busqueda,
+      loadTutoresData,
+    ]
+  );
+
+  const refreshTutores = useCallback(
+    async (event?: CustomEvent) => {
+      await loadTutoresData(true, tutoresState.busqueda.trim() || undefined);
+      if (event) {
+        event.detail.complete();
+      }
+    },
+    [loadTutoresData, tutoresState.busqueda]
+  );
 
   const viewTutor = useCallback((tutor: TutorData) => {
-    setTutoresState(prev => ({
+    setTutoresState((prev) => ({
       ...prev,
       selectedTutor: tutor,
       showTutorInfo: true,
@@ -231,12 +261,12 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
   }, []);
 
   const closeTutorInfo = useCallback(() => {
-    setTutoresState(prev => ({
+    setTutoresState((prev) => ({
       ...prev,
       showTutorInfo: false,
     }));
     setTimeout(() => {
-      setTutoresState(prev => ({
+      setTutoresState((prev) => ({
         ...prev,
         selectedTutor: null,
       }));
@@ -244,7 +274,7 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
   }, []);
 
   const editTutor = useCallback((tutor: TutorData) => {
-    setTutoresState(prev => ({
+    setTutoresState((prev) => ({
       ...prev,
       selectedTutor: tutor,
       showTutorInfo: false,
@@ -253,15 +283,15 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
   }, []);
 
   const closeTutorEdit = useCallback(() => {
-    setTutoresState(prev => ({ 
-      ...prev, 
-      showTutorEdit: false 
+    setTutoresState((prev) => ({
+      ...prev,
+      showTutorEdit: false,
     }));
     setTimeout(() => {
-      setTutoresState(prev => ({ 
-        ...prev, 
-        selectedTutor: null 
-      })); 
+      setTutoresState((prev) => ({
+        ...prev,
+        selectedTutor: null,
+      }));
     }, 150);
   }, []);
 
@@ -271,64 +301,88 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
 
   // ========== FUNCIONES PARA PACIENTES ==========
 
-  const loadPacientesData = useCallback(async (resetList: boolean = true, search?: string) => {
-    setPacientesState(prev => ({ ...prev, loading: true, error: "" }));
+  const loadPacientesData = useCallback(
+    async (resetList: boolean = true, search?: string) => {
+      setPacientesState((prev) => ({ ...prev, loading: true, error: "" }));
 
-    try {
-      const page = resetList ? 1 : pacientesState.currentPage + 1;
-      const data: PaginatedResponsePacientes = await obtenerPacientesPaginados(page, 50, search);
-      
-      setPacientesState(prev => ({
-        ...prev,
-        data: resetList ? data.pacientes : [...prev.data, ...data.pacientes],
-        currentPage: resetList ? 1 : page,
-        hasMoreData: data.pagination.has_next,
-        loading: false,
-      }));
-    } catch (error) {
-      setPacientesState(prev => ({
-        ...prev,
-        error: "Error de conexión al cargar pacientes",
-        loading: false,
-      }));
-      console.error("Error loading pacientes:", error);
-    }
-  }, [pacientesState.currentPage]);
+      try {
+        const page = resetList ? 1 : pacientesState.currentPage + 1;
+        const data: PaginatedResponsePacientes =
+          await obtenerPacientesPaginados(page, 50, search);
 
-  const handlePacientesSearch = useCallback((texto: string) => {
-    setPacientesState(prev => {
-      if (prev.searchTimeout) {
-        clearTimeout(prev.searchTimeout);
+        setPacientesState((prev) => ({
+          ...prev,
+          data: resetList ? data.pacientes : [...prev.data, ...data.pacientes],
+          currentPage: resetList ? 1 : page,
+          hasMoreData: data.pagination.has_next,
+          loading: false,
+        }));
+      } catch (error) {
+        setPacientesState((prev) => ({
+          ...prev,
+          error: "Error de conexión al cargar pacientes",
+          loading: false,
+        }));
+        console.error("Error loading pacientes:", error);
       }
-      
-      const timeout = setTimeout(() => {
-        loadPacientesData(true, texto.trim() || undefined);
-      }, 500);
-      
-      return {
-        ...prev,
-        busqueda: texto,
-        searchTimeout: timeout,
-      };
-    });
-  }, [loadPacientesData]);
+    },
+    [pacientesState.currentPage]
+  );
 
-  const loadMorePacientes = useCallback(async (event: CustomEvent) => {
-    if (pacientesState.hasMoreData && !pacientesState.loading) {
-      await loadPacientesData(false, pacientesState.busqueda.trim() || undefined);
-    }
-    (event.target as HTMLIonInfiniteScrollElement).complete();
-  }, [pacientesState.hasMoreData, pacientesState.loading, pacientesState.busqueda, loadPacientesData]);
+  const handlePacientesSearch = useCallback(
+    (texto: string) => {
+      setPacientesState((prev) => {
+        if (prev.searchTimeout) {
+          clearTimeout(prev.searchTimeout);
+        }
 
-  const refreshPacientes = useCallback(async (event?: CustomEvent) => {
-    await loadPacientesData(true, pacientesState.busqueda.trim() || undefined);
-    if (event) {
-      event.detail.complete();
-    }
-  }, [loadPacientesData, pacientesState.busqueda]);
+        const timeout = setTimeout(() => {
+          loadPacientesData(true, texto.trim() || undefined);
+        }, 500);
+
+        return {
+          ...prev,
+          busqueda: texto,
+          searchTimeout: timeout,
+        };
+      });
+    },
+    [loadPacientesData]
+  );
+
+  const loadMorePacientes = useCallback(
+    async (event: CustomEvent) => {
+      if (pacientesState.hasMoreData && !pacientesState.loading) {
+        await loadPacientesData(
+          false,
+          pacientesState.busqueda.trim() || undefined
+        );
+      }
+      (event.target as HTMLIonInfiniteScrollElement).complete();
+    },
+    [
+      pacientesState.hasMoreData,
+      pacientesState.loading,
+      pacientesState.busqueda,
+      loadPacientesData,
+    ]
+  );
+
+  const refreshPacientes = useCallback(
+    async (event?: CustomEvent) => {
+      await loadPacientesData(
+        true,
+        pacientesState.busqueda.trim() || undefined
+      );
+      if (event) {
+        event.detail.complete();
+      }
+    },
+    [loadPacientesData, pacientesState.busqueda]
+  );
 
   const viewPaciente = useCallback((paciente: PacienteData) => {
-    setPacientesState(prev => ({
+    setPacientesState((prev) => ({
       ...prev,
       selectedPaciente: paciente,
       showPacienteInfo: true,
@@ -336,12 +390,12 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
   }, []);
 
   const closePacienteInfo = useCallback(() => {
-    setPacientesState(prev => ({
+    setPacientesState((prev) => ({
       ...prev,
       showPacienteInfo: false,
     }));
     setTimeout(() => {
-      setPacientesState(prev => ({
+      setPacientesState((prev) => ({
         ...prev,
         selectedPaciente: null,
       }));
@@ -350,7 +404,7 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
 
   const editPaciente = useCallback((paciente: PacienteData) => {
     console.log("Editar paciente:", paciente);
-    setPacientesState(prev => ({
+    setPacientesState((prev) => ({
       ...prev,
       selectedPaciente: paciente,
       showPacienteInfo: false,
@@ -359,16 +413,52 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
   }, []);
 
   const closePacienteEdit = useCallback(() => {
-  setPacientesState(prev => ({ 
-    ...prev, 
-    showPacienteEdit: false 
+    setPacientesState((prev) => ({
+      ...prev,
+      showPacienteEdit: false,
     }));
     setTimeout(() => {
-      setPacientesState(prev => ({ 
-        ...prev, 
-        selectedPaciente: null 
-      })); 
+      setPacientesState((prev) => ({
+        ...prev,
+        selectedPaciente: null,
+      }));
     }, 150);
+  }, []);
+
+  // Función para ver tutor desde el modal de paciente
+  const viewTutorFromPaciente = useCallback((tutorData: TutorData) => {
+    // 1. Cerrar modal de paciente inmediatamente
+    setPacientesState((prev) => ({
+      ...prev,
+      showPacienteInfo: false,
+    }));
+
+    // 2. Abrir modal de tutor con un pequeño delay
+    setTimeout(() => {
+      setTutoresState((prev) => ({
+        ...prev,
+        selectedTutor: tutorData,
+        showTutorInfo: true,
+      }));
+    }, 200);
+  }, []); // Sin dependencias - solo manipula estado
+
+  // Función para ver consulta desde el modal de paciente
+  const viewConsultaFromPaciente = useCallback((consultaData: ConsultaData) => {
+    // 1. Cerrar modal de paciente
+    setPacientesState((prev) => ({
+      ...prev,
+      showPacienteInfo: false,
+    }));
+
+    // 2. Abrir modal de consulta
+    setTimeout(() => {
+      setConsultasState((prev) => ({
+        ...prev,
+        selectedConsulta: consultaData,
+        showConsultaInfo: true,
+      }));
+    }, 200);
   }, []);
 
   const retryPacientes = useCallback(() => {
@@ -376,66 +466,95 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
   }, [loadPacientesData, pacientesState.busqueda]);
 
   // FUNCIONES PARA consultaS
-  const loadConsultasData = useCallback(async (resetList: boolean = true, search?: string) => {
-    setConsultasState(prev => ({ ...prev, loading: true, error: "" }));
+  const loadConsultasData = useCallback(
+    async (
+      resetList: boolean = true,
+      search?: string,
+      sortOrder?: "desc" | "asc"
+    ) => {
+      setConsultasState((prev) => ({ ...prev, loading: true, error: "" }));
 
-    try {
-      const page = resetList ? 1 : consultasState.currentPage + 1;
-      const data: PaginatedResponseConsultas = await obtenerConsultasPaginadas(page, 50, search);
+      try {
+        const page = resetList ? 1 : consultasState.currentPage + 1;
+        const order = sortOrder || consultasState.sortOrder;
+        const data: PaginatedResponseConsultas =
+          await obtenerConsultasPaginadas(page, 50, search, order);
 
-      setConsultasState(prev => ({
-        ...prev,
-        data: resetList ? data.consultas : [...prev.data, ...data.consultas],
-        currentPage: resetList ? 1 : page,
-        hasMoreData: data.pagination.has_next,
-        loading: false,
-      }));
-      console.log("Datos obtenidos: ", data.consultas)
-    } catch (error) {
-      setConsultasState(prev => ({
-        ...prev,
-        error: "Error de conexión al cargar consultas",
-        loading: false,
-      }));
-      console.error("Error loading consultas:", error);
-    }
-  }, [consultasState.currentPage]);
-  
-
-  const handleConsultasSearch = useCallback((texto: string) => {
-    setConsultasState(prev => {
-      if (prev.searchTimeout) {
-        clearTimeout(prev.searchTimeout);
+        setConsultasState((prev) => ({
+          ...prev,
+          data: resetList ? data.consultas : [...prev.data, ...data.consultas],
+          currentPage: resetList ? 1 : page,
+          hasMoreData: data.pagination.has_next,
+          loading: false,
+          sortOrder: order,
+        }));
+        console.log("Datos obtenidos: ", data.consultas);
+      } catch (error) {
+        setConsultasState((prev) => ({
+          ...prev,
+          error: "Error de conexión al cargar consultas",
+          loading: false,
+        }));
+        console.error("Error loading consultas:", error);
       }
-      
-      const timeout = setTimeout(() => {
-        loadConsultasData(true, texto.trim() || undefined);
-      }, 500);
-      
-      return {
-        ...prev,
-        busqueda: texto,
-        searchTimeout: timeout,
-      };
-    });
-  }, [loadConsultasData]);
+    },
+    [consultasState.currentPage, consultasState.sortOrder]
+  );
 
-  const loadMoreConsultas = useCallback(async (event: CustomEvent) => {
-    if (consultasState.hasMoreData && !consultasState.loading) {
-      await loadConsultasData(false, consultasState.busqueda.trim() || undefined);
-    }
-    (event.target as HTMLIonInfiniteScrollElement).complete();
-  }, [consultasState.hasMoreData, consultasState.loading, consultasState.busqueda, loadConsultasData]);
+  const handleConsultasSearch = useCallback(
+    (texto: string) => {
+      setConsultasState((prev) => {
+        if (prev.searchTimeout) {
+          clearTimeout(prev.searchTimeout);
+        }
 
-  const refreshConsultas = useCallback(async (event?: CustomEvent) => {
-    await loadConsultasData(true, consultasState.busqueda.trim() || undefined);
-    if (event) {
-      event.detail.complete();
-    }
-  }, [loadConsultasData, consultasState.busqueda]);
+        const timeout = setTimeout(() => {
+          loadConsultasData(true, texto.trim() || undefined);
+        }, 500);
+
+        return {
+          ...prev,
+          busqueda: texto,
+          searchTimeout: timeout,
+        };
+      });
+    },
+    [loadConsultasData]
+  );
+
+  const loadMoreConsultas = useCallback(
+    async (event: CustomEvent) => {
+      if (consultasState.hasMoreData && !consultasState.loading) {
+        await loadConsultasData(
+          false,
+          consultasState.busqueda.trim() || undefined
+        );
+      }
+      (event.target as HTMLIonInfiniteScrollElement).complete();
+    },
+    [
+      consultasState.hasMoreData,
+      consultasState.loading,
+      consultasState.busqueda,
+      loadConsultasData,
+    ]
+  );
+
+  const refreshConsultas = useCallback(
+    async (event?: CustomEvent) => {
+      await loadConsultasData(
+        true,
+        consultasState.busqueda.trim() || undefined
+      );
+      if (event) {
+        event.detail.complete();
+      }
+    },
+    [loadConsultasData, consultasState.busqueda]
+  );
 
   const viewConsulta = useCallback((consulta: ConsultaData) => {
-    setConsultasState(prev => ({
+    setConsultasState((prev) => ({
       ...prev,
       selectedConsulta: consulta,
       showConsultaInfo: true,
@@ -443,17 +562,32 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
   }, []);
 
   const closeConsultaInfo = useCallback(() => {
-    setConsultasState(prev => ({
+    setConsultasState((prev) => ({
       ...prev,
       showConsultaInfo: false,
     }));
     setTimeout(() => {
-      setConsultasState(prev => ({
+      setConsultasState((prev) => ({
         ...prev,
         selectedConsulta: null,
       }));
     }, 150);
   }, []);
+
+  const handleSortOrderChange = useCallback(
+    (newOrder: "desc" | "asc") => {
+      setConsultasState((prev) => ({
+        ...prev,
+        sortOrder: newOrder,
+      }));
+      loadConsultasData(
+        true,
+        consultasState.busqueda.trim() || undefined,
+        newOrder
+      );
+    },
+    [loadConsultasData, consultasState.busqueda]
+  );
 
   const editConsulta = useCallback((consulta: ConsultaData) => {
     console.log("Editar consulta:", consulta);
@@ -463,7 +597,7 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
   const exportConsulta = useCallback((consulta: ConsultaData) => {
     console.log("Exportar consulta.");
     // Aqui va la logica para exportar consultas
-  }, [])
+  }, []);
 
   const retryConsultas = useCallback(() => {
     loadConsultasData(true, consultasState.busqueda.trim() || undefined);
@@ -474,11 +608,11 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
   // Cargar tutores al montar el hook
   useEffect(() => {
     // Solo cargar el segmento inicial
-    if (initialSegment === 'tutores') {
+    if (initialSegment === "tutores") {
       loadTutoresData();
-    } else if (initialSegment === 'pacientes') {
+    } else if (initialSegment === "pacientes") {
       loadPacientesData();
-    } else if (initialSegment === 'consultas') {
+    } else if (initialSegment === "consultas") {
       loadConsultasData();
     }
   }, [initialSegment]);
@@ -493,10 +627,14 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
         clearTimeout(pacientesState.searchTimeout);
       }
       if (consultasState.searchTimeout) {
-        clearTimeout(consultasState.searchTimeout)
+        clearTimeout(consultasState.searchTimeout);
       }
     };
-  }, [tutoresState.searchTimeout, pacientesState.searchTimeout, consultasState.searchTimeout]);
+  }, [
+    tutoresState.searchTimeout,
+    pacientesState.searchTimeout,
+    consultasState.searchTimeout,
+  ]);
 
   // ========== RETURN ==========
 
@@ -522,6 +660,8 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
     closePacienteInfo,
     closePacienteEdit,
     retry: retryPacientes,
+    viewTutorFromPaciente,
+    viewConsultaFromPaciente,
   };
 
   const consultasActions: ConsultasActions = {
@@ -534,6 +674,7 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
     exportConsulta,
     closeConsultaInfo,
     retry: retryConsultas,
+    handleSortOrderChange,
   };
 
   return {
@@ -571,9 +712,10 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
       hasMoreData: consultasState.hasMoreData,
       selectedConsulta: consultasState.selectedConsulta,
       showConsultaInfo: consultasState.showConsultaInfo,
+      sortOrder: consultasState.sortOrder,
       // Acciones
       ...consultasActions,
-    }
+    },
   };
 };
 

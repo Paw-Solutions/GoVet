@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from "react";
 import {
   IonModal,
   IonHeader,
@@ -16,7 +16,7 @@ import {
   IonCardContent,
   IonCardHeader,
   IonCardTitle,
-} from '@ionic/react';
+} from "@ionic/react";
 import {
   closeOutline,
   personOutline,
@@ -24,25 +24,38 @@ import {
   mailOutline,
   locationOutline,
   pawOutline,
-} from 'ionicons/icons';
-import { PacienteData } from '../../api/pacientes';
+  documentTextOutline,
+} from "ionicons/icons";
+import { PacienteData } from "../../api/pacientes";
+import { TutorData } from "../../api/tutores";
+import HistorialConsultas from "./HistorialConsultas";
 
 interface ModalInfoPacienteProps {
   isOpen: boolean;
   onDismiss: () => void;
   paciente: PacienteData | null;
+  onViewTutor?: (tutorData: TutorData) => void;
+  onViewConsulta?: (consulta: any) => void;
 }
 
-const ModalInfoPaciente: React.FC<ModalInfoPacienteProps> = ({ isOpen, onDismiss, paciente }) => {
+const ModalInfoPaciente: React.FC<ModalInfoPacienteProps> = ({
+  isOpen,
+  onDismiss,
+  paciente,
+  onViewTutor,
+  onViewConsulta,
+}) => {
+  const [showHistorial, setShowHistorial] = useState(false);
+
   // Función para calcular edad aproximada
   const calculateAge = (fechaNacimiento?: string) => {
     if (!fechaNacimiento) return null;
-    
+
     const birthDate = new Date(fechaNacimiento);
     const today = new Date();
     const diffTime = Math.abs(today.getTime() - birthDate.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
+
     if (diffDays < 30) {
       return `${diffDays} días`;
     } else if (diffDays < 365) {
@@ -51,12 +64,43 @@ const ModalInfoPaciente: React.FC<ModalInfoPacienteProps> = ({ isOpen, onDismiss
       return `${Math.floor(diffDays / 365)} años`;
     }
   };
+
+  // Función para navegar al perfil del tutor
+  const handleViewTutor = () => {
+    if (paciente?.tutor && onViewTutor) {
+      // Convertir el tutor parcial del paciente a TutorData completo
+      const tutorCompleto: TutorData = {
+        nombre: paciente.tutor.nombre ?? "",
+        apellido_paterno: paciente.tutor.apellido_paterno ?? "",
+        apellido_materno: paciente.tutor.apellido_materno ?? "",
+        rut: paciente.tutor.rut ?? "",
+        telefono: paciente.tutor.telefono ?? 0,
+        email: paciente.tutor.email ?? "",
+        // Campos que no vienen en paciente.tutor pero son requeridos en TutorData
+        direccion: "",
+        telefono2: 0,
+        comuna: "",
+        region: "",
+        celular: 0,
+        celular2: 0,
+        observacion: "",
+      };
+      onViewTutor(tutorCompleto);
+    }
+  };
+
+  // Función para abrir el historial de consultas
+  const handleViewHistorial = () => {
+    console.log("🔍 Abriendo historial de consultas para paciente:", paciente);
+    setShowHistorial(true);
+  };
+
   // Función segura para cerrar el modal
   const handleDismiss = () => {
     try {
       onDismiss();
     } catch (error) {
-      console.error('Error closing modal:', error);
+      console.error("Error closing modal:", error);
     }
   };
 
@@ -66,8 +110,8 @@ const ModalInfoPaciente: React.FC<ModalInfoPacienteProps> = ({ isOpen, onDismiss
   }
 
   return (
-    <IonModal 
-      isOpen={isOpen} 
+    <IonModal
+      isOpen={isOpen}
       onDidDismiss={handleDismiss}
       backdropDismiss={true}
     >
@@ -87,7 +131,7 @@ const ModalInfoPaciente: React.FC<ModalInfoPacienteProps> = ({ isOpen, onDismiss
         <IonCard>
           <IonCardHeader>
             <IonCardTitle>
-              <IonIcon icon={pawOutline} style={{ marginRight: '8px' }} />
+              <IonIcon icon={pawOutline} style={{ marginRight: "8px" }} />
               Información Personal
             </IonCardTitle>
           </IonCardHeader>
@@ -99,7 +143,7 @@ const ModalInfoPaciente: React.FC<ModalInfoPacienteProps> = ({ isOpen, onDismiss
                   <p>{paciente.nombre}</p>
                 </IonLabel>
               </IonItem>
-              
+
               <IonItem>
                 <IonLabel>
                   <h2>Raza</h2>
@@ -117,7 +161,16 @@ const ModalInfoPaciente: React.FC<ModalInfoPacienteProps> = ({ isOpen, onDismiss
               <IonItem>
                 <IonLabel>
                   <h2>Fecha de nacimiento</h2>
-                  <p>{paciente.fecha_nacimiento ? new Date(paciente.fecha_nacimiento).toLocaleDateString() + " (" + calculateAge(paciente.fecha_nacimiento) + ")" : "Desconocida"}</p>
+                  <p>
+                    {paciente.fecha_nacimiento
+                      ? new Date(
+                          paciente.fecha_nacimiento
+                        ).toLocaleDateString() +
+                        " (" +
+                        calculateAge(paciente.fecha_nacimiento) +
+                        ")"
+                      : "Desconocida"}
+                  </p>
                 </IonLabel>
               </IonItem>
 
@@ -130,7 +183,11 @@ const ModalInfoPaciente: React.FC<ModalInfoPacienteProps> = ({ isOpen, onDismiss
 
               <IonItem>
                 <IonLabel>
-                  <h2>{paciente.sexo === "H" ? "¿Esterilizada?" : "¿Esterilizado?"}</h2>
+                  <h2>
+                    {paciente.sexo === "H"
+                      ? "¿Esterilizada?"
+                      : "¿Esterilizado?"}
+                  </h2>
                   <p>{paciente.esterilizado ? "Sí" : "No"}</p>
                 </IonLabel>
               </IonItem>
@@ -145,13 +202,141 @@ const ModalInfoPaciente: React.FC<ModalInfoPacienteProps> = ({ isOpen, onDismiss
           </IonCardContent>
         </IonCard>
 
+        {/* Información del Tutor */}
+        {paciente?.tutor && (
+          <IonCard>
+            <IonCardHeader>
+              <IonCardTitle>
+                <IonIcon icon={personOutline} style={{ marginRight: "8px" }} />
+                Información del Tutor
+              </IonCardTitle>
+            </IonCardHeader>
+            <IonCardContent>
+              <IonList>
+                {/* Nombre del tutor - CLICKEABLE */}
+                <IonItem
+                  button
+                  onClick={handleViewTutor}
+                  detail={onViewTutor ? true : false}
+                  disabled={!onViewTutor}
+                  style={{ cursor: onViewTutor ? "pointer" : "default" }}
+                >
+                  <IonLabel>
+                    <h2>Tutor</h2>
+                    <p
+                      style={{
+                        color: onViewTutor
+                          ? "var(--ion-color-primary)"
+                          : "inherit",
+                        fontWeight: "500",
+                      }}
+                    >
+                      {paciente.tutor.nombre} {paciente.tutor.apellido_paterno}{" "}
+                      {paciente.tutor.apellido_materno || ""}
+                    </p>
+                    {onViewTutor && (
+                      <IonText color="medium" style={{ fontSize: "0.85em" }}>
+                        <p>Toca para ver perfil completo</p>
+                      </IonText>
+                    )}
+                  </IonLabel>
+                </IonItem>
+
+                {/* RUT */}
+                <IonItem>
+                  <IonLabel>
+                    <h2>RUT</h2>
+                    <p>{paciente.tutor.rut}</p>
+                  </IonLabel>
+                </IonItem>
+
+                {/* Teléfono */}
+                {paciente.tutor.telefono && (
+                  <IonItem>
+                    <IonLabel>
+                      <h2>Teléfono</h2>
+                      <p>{paciente.tutor.telefono}</p>
+                    </IonLabel>
+                    <IonButton
+                      fill="clear"
+                      size="small"
+                      color="secondary"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        window.open(
+                          `tel:${paciente.tutor!.telefono}`,
+                          "_system"
+                        );
+                      }}
+                    >
+                      <IonIcon icon={callOutline} slot="start" />
+                      Llamar
+                    </IonButton>
+                  </IonItem>
+                )}
+
+                {/* Email */}
+                {paciente.tutor.email && paciente.tutor.email !== "NaN" && (
+                  <IonItem>
+                    <IonLabel>
+                      <h2>Email</h2>
+                      <p>{paciente.tutor.email}</p>
+                    </IonLabel>
+                    <IonButton
+                      fill="clear"
+                      size="small"
+                      color="secondary"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        window.open(
+                          `mailto:${paciente.tutor!.email}`,
+                          "_system"
+                        );
+                      }}
+                    >
+                      <IonIcon icon={mailOutline} slot="start" />
+                      Enviar
+                    </IonButton>
+                  </IonItem>
+                )}
+              </IonList>
+            </IonCardContent>
+          </IonCard>
+        )}
+
+        {/* Botón para ver historial de consultas */}
+        <div style={{ padding: "16px" }}>
+          <IonButton
+            expand="block"
+            fill="solid"
+            color="secondary"
+            onClick={handleViewHistorial}
+          >
+            <IonIcon icon={documentTextOutline} slot="start" />
+            Ver Historial de Consultas
+          </IonButton>
+        </div>
+
         {/* Botón de cierre adicional */}
-        <div style={{ padding: '20px', textAlign: 'center' }}>
+        <div style={{ padding: "20px", textAlign: "center" }}>
           <IonButton expand="block" fill="outline" onClick={handleDismiss}>
             Cerrar
           </IonButton>
         </div>
       </IonContent>
+
+      {/* Modal de historial de consultas */}
+      <HistorialConsultas
+        isOpen={showHistorial}
+        onDismiss={() => setShowHistorial(false)}
+        paciente={paciente}
+        onViewConsulta={(consulta) => {
+          setShowHistorial(false);
+          if (onViewConsulta) {
+            onViewConsulta(consulta);
+          }
+        }}
+      />
     </IonModal>
   );
 };

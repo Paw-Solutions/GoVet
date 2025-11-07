@@ -1,21 +1,19 @@
-import React from 'react';
-import { TutorData } from '../../api/tutores';
-import { PacienteData } from '../../api/pacientes';
-import { ConsultaData } from '../../api/fichas';
-import ModalInfoTutor from '../verTutores/infoTutor';
-import ModalInfoPaciente from '../verPacientes/infoPaciente';
-import ModalInfoFicha from '../verFichas/infoFicha';
-import ModalEditarPaciente from '../editar/editarPaciente';
-import ModalEditarTutor from '../editar/editarTutor';
-
-
+import React from "react";
+import { TutorData } from "../../api/tutores";
+import { PacienteData } from "../../api/pacientes";
+import { ConsultaData } from "../../api/fichas";
+import ModalInfoTutor from "../verTutores/infoTutor";
+import ModalInfoPaciente from "../verPacientes/infoPaciente";
+import ModalInfoFicha from "../verFichas/infoFicha";
+import ModalEditarPaciente from "../editar/editarPaciente";
+import ModalEditarTutor from "../editar/editarTutor";
 
 interface ModalsContainerProps {
   // Props para modal de tutores
   showTutorInfo: boolean;
   selectedTutor: TutorData | null;
   onCloseTutorInfo: () => void;
-  
+
   // Props para modal de pacientes
   showPacienteInfo: boolean;
   selectedPaciente: PacienteData | null;
@@ -26,13 +24,17 @@ interface ModalsContainerProps {
   selectedConsulta: ConsultaData | null;
   onCloseConsultaInfo: () => void;
 
-  // Props para modal edicion tutores 
+  // Props para modal edicion tutores
   showTutorEdit?: boolean;
   onCloseTutorEdit?: () => void;
 
   // Props para modal edicion pacientes
   showPacienteEdit?: boolean;
   onClosePacienteEdit?: () => void;
+
+  // Navegación entre modales
+  onViewTutorFromPaciente?: (tutorData: TutorData) => void;
+  onViewConsultaFromPaciente?: (consulta: ConsultaData) => void;
 }
 
 const ModalsContainer: React.FC<ModalsContainerProps> = ({
@@ -40,7 +42,7 @@ const ModalsContainer: React.FC<ModalsContainerProps> = ({
   showTutorInfo,
   selectedTutor,
   onCloseTutorInfo,
-  
+
   // Pacientes
   showPacienteInfo,
   selectedPaciente,
@@ -58,6 +60,10 @@ const ModalsContainer: React.FC<ModalsContainerProps> = ({
   // Editar pacientes
   showPacienteEdit,
   onClosePacienteEdit,
+
+  // Navegación entre modales
+  onViewTutorFromPaciente,
+  onViewConsultaFromPaciente,
 }) => {
   return (
     <>
@@ -73,8 +79,10 @@ const ModalsContainer: React.FC<ModalsContainerProps> = ({
         isOpen={showPacienteInfo}
         onDismiss={onClosePacienteInfo}
         paciente={selectedPaciente}
+        onViewTutor={onViewTutorFromPaciente}
+        onViewConsulta={onViewConsultaFromPaciente}
       />
-      
+
       {/* Modal de informacion de consulta*/}
       <ModalInfoFicha
         isOpen={showConsultaInfo}
@@ -95,8 +103,6 @@ const ModalsContainer: React.FC<ModalsContainerProps> = ({
         onDismiss={onClosePacienteEdit ?? (() => {})}
         paciente={selectedPaciente}
       />
-
-
     </>
   );
 };

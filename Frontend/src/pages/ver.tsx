@@ -1,15 +1,12 @@
 import React, { useState, useEffect } from "react";
-import {
-  IonPage,
-  IonContent,
-} from "@ionic/react";
+import { IonPage, IonContent } from "@ionic/react";
 import "../styles/main.css";
 import { useSegmentedData } from "../hooks/useSegmentedData";
 import PageHeader from "../components/common/PageHeader";
 import SegmentedView from "../components/common/SegmentedView";
 import TutoresList from "../components/ver/TutoresList";
 import PacientesList from "../components/ver/PacientesList";
-import FichasList from "../components/ver/FichasList"
+import FichasList from "../components/ver/FichasList";
 import ModalsContainer from "../components/ver/ModalsContainer";
 
 const Ver: React.FC = () => {
@@ -41,20 +38,22 @@ const Ver: React.FC = () => {
       window.removeEventListener("tutores:updated", handler as EventListener);
     };
   }, [tutores]);
-  
+
   return (
     <IonPage>
-      <PageHeader 
+      <PageHeader
         title="Ver Tutores y Pacientes"
         onRefresh={() => {
-          if (selectedSegment === 'tutores') return tutores.refresh();
-          if (selectedSegment === 'pacientes') return pacientes.refresh();
-          if (selectedSegment === 'consultas') return consultas.refresh();
+          if (selectedSegment === "tutores") return tutores.refresh();
+          if (selectedSegment === "pacientes") return pacientes.refresh();
+          if (selectedSegment === "consultas") return consultas.refresh();
         }}
         loading={
-          selectedSegment === 'tutores' ? tutores.loading :
-          selectedSegment === 'pacientes' ? pacientes.loading :
-          consultas.loading
+          selectedSegment === "tutores"
+            ? tutores.loading
+            : selectedSegment === "pacientes"
+            ? pacientes.loading
+            : consultas.loading
         }
       />
 
@@ -64,7 +63,7 @@ const Ver: React.FC = () => {
           onSegmentChange={handleSegmentChange}
         >
           {selectedSegment === "tutores" && (
-            <TutoresList 
+            <TutoresList
               tutores={tutores.data}
               loading={tutores.loading}
               error={tutores.error}
@@ -78,9 +77,9 @@ const Ver: React.FC = () => {
               onRetry={tutores.retry}
             />
           )}
-          
+
           {selectedSegment === "pacientes" && (
-            <PacientesList 
+            <PacientesList
               pacientes={pacientes.data}
               loading={pacientes.loading}
               error={pacientes.error}
@@ -102,7 +101,9 @@ const Ver: React.FC = () => {
               error={consultas.error}
               busqueda={consultas.busqueda}
               hasMoreData={consultas.hasMoreData}
+              sortOrder={consultas.sortOrder}
               onSearch={consultas.handleSearch}
+              onSortOrderChange={consultas.handleSortOrderChange}
               onRefresh={consultas.refresh}
               onLoadMore={consultas.loadMore}
               onViewConsulta={consultas.viewConsulta}
@@ -133,6 +134,9 @@ const Ver: React.FC = () => {
         // Editar pacientes
         showPacienteEdit={pacientes.showPacienteEdit}
         onClosePacienteEdit={pacientes.closePacienteEdit}
+        // Navegación entre modales
+        onViewTutorFromPaciente={pacientes.viewTutorFromPaciente}
+        onViewConsultaFromPaciente={pacientes.viewConsultaFromPaciente}
       />
     </IonPage>
   );

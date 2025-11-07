@@ -466,6 +466,24 @@ def obtener_todas_las_consultas(db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="No se encontraron consultas")
     return db_consultas
 
+# Ruta GET para obtener consultas por ID de paciente
+@app.get("/consultas/paciente/id/{id_paciente}", response_model=List[ConsultaResponse])
+def obtener_consultas_por_id_paciente(id_paciente: int, db: Session = Depends(get_db)):
+    # Verificar que el paciente existe
+    db_paciente = db.query(models.Paciente).filter(models.Paciente.id_paciente == id_paciente).first()
+    if not db_paciente:
+        raise HTTPException(status_code=404, detail="Paciente no encontrado")
+    
+    # Obtener todas las consultas del paciente ordenadas por fecha más reciente
+    db_consultas = db.query(models.Consulta).filter(
+        models.Consulta.id_paciente == id_paciente
+    ).order_by(desc(models.Consulta.fecha_consulta)).all()
+    
+    if not db_consultas:
+        raise HTTPException(status_code=404, detail="No se encontraron consultas para ese paciente")
+    
+    return db_consultas
+
 # Ruta GET para obtener consultas por nombre de paciente
 @app.get("/consultas/paciente/{nombre_paciente}", response_model=List[ConsultaResponse])
 def obtener_consultas_por_nombre_paciente(nombre_paciente: str, db: Session = Depends(get_db)):
@@ -479,6 +497,7 @@ def obtener_consultas_paginadas(
     page: int = Query(1, ge=1),
     limit: int = Query(50, ge=1, le=100),
     search: Optional[str] = Query(None),
+    sort_order: str = Query("desc", regex="^(asc|desc)$"),
     db: Session = Depends(get_db)
 ):
     offset = (page - 1) * limit
@@ -533,8 +552,14 @@ def obtener_consultas_paginadas(
     # Contar total sin aplicar offset/limit
     total_count = query.count()
     
-    # Aplicar paginación y obtener resultados ordenados por fecha más reciente
-    results = query.order_by(desc(models.Consulta.fecha_consulta)).offset(offset).limit(limit).all()
+    # Aplicar ordenamiento según el parámetro sort_order
+    if sort_order == "asc":
+        query = query.order_by(models.Consulta.fecha_consulta.asc())
+    else:  # desc por defecto
+        query = query.order_by(desc(models.Consulta.fecha_consulta))
+    
+    # Aplicar paginación y obtener resultados
+    results = query.offset(offset).limit(limit).all()
     
     total_pages = (total_count + limit - 1) // limit
     has_next = page < total_pages

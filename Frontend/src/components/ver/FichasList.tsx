@@ -1,18 +1,15 @@
 import React from "react";
-import {
-  IonList,
-  IonRefresher,
-  IonRefresherContent,
-} from "@ionic/react";
+import { IonList, IonRefresher, IonRefresherContent } from "@ionic/react";
 import { ConsultaData } from "../../api/fichas";
 import SearchBar from "../common/SearchBar";
+import SortDropdown from "../common/SortDropdown";
 import LoadingState from "../common/LoadingState";
 import ErrorState from "../common/ErrorState";
 import EmptyState from "../common/EmptyState";
 import ResultsCounter from "../ver/ResultsCounter";
 import InfiniteScroll from "../common/InfiniteScroll";
 import FichaItem from "../items_ver/FichaItem";
-import '../../styles/ver.css';
+import "../../styles/ver.css";
 
 interface FichasListProps {
   consultas: ConsultaData[];
@@ -20,7 +17,9 @@ interface FichasListProps {
   error: string;
   busqueda: string;
   hasMoreData: boolean;
+  sortOrder: "desc" | "asc";
   onSearch: (texto: string) => void;
+  onSortOrderChange: (order: "desc" | "asc") => void;
   onRefresh: (event: CustomEvent) => Promise<void>;
   onLoadMore: (event: CustomEvent) => Promise<void>;
   onViewConsulta: (paciente: ConsultaData) => void;
@@ -35,15 +34,16 @@ const FichasList: React.FC<FichasListProps> = ({
   error,
   busqueda,
   hasMoreData,
+  sortOrder,
   onSearch,
+  onSortOrderChange,
   onRefresh,
   onLoadMore,
   onViewConsulta,
   onEditConsulta,
   onExportConsulta,
-  onRetry
+  onRetry,
 }) => {
-
   return (
     <>
       <IonRefresher slot="fixed" onIonRefresh={onRefresh}>
@@ -58,14 +58,16 @@ const FichasList: React.FC<FichasListProps> = ({
           className="searchbar"
         />
 
-        <LoadingState loading={loading} itemCount={consultas.length ? consultas.length : 0} type="consultas" />
+        <SortDropdown value={sortOrder} onChange={onSortOrderChange} />
 
-        <ErrorState
-          error={error}
-          onRetry={onRetry}
+        <LoadingState
+          loading={loading}
+          itemCount={consultas.length ? consultas.length : 0}
           type="consultas"
         />
-        
+
+        <ErrorState error={error} onRetry={onRetry} type="consultas" />
+
         <EmptyState
           isEmpty={!loading && !error && consultas.length === 0}
           busqueda={busqueda}
@@ -106,4 +108,4 @@ const FichasList: React.FC<FichasListProps> = ({
   );
 };
 
-export default FichasList;  
+export default FichasList;

@@ -379,3 +379,14 @@ ion-icon.pacientes-icon {
 .info-container::part(scroll) {
   scroll-behavior: smooth;
 }
+
+/* Estilos para el dropdown de ordenamiento */
+.sort-dropdown-container {
+  margin: 8px 16px;
+  --background: var(--ion-color-light);
+  border-radius: 8px;
+}
+
+.sort-select {
+  max-width: 100%;
+}

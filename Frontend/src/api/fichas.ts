@@ -15,7 +15,7 @@ export interface ConsultaData {
   condicion_corporal: string;
   id_consulta: number;
   motivo_consulta?: string; // ← Agregar para compatibilidad con backend
-  
+
   // Información relacionada del paciente
   paciente?: {
     id_paciente: number;
@@ -27,7 +27,7 @@ export interface ConsultaData {
     raza?: string;
     especie?: string;
   };
-  
+
   // Información relacionada del tutor
   tutor?: {
     nombre: string;
@@ -52,8 +52,6 @@ export interface PaginatedResponse {
     previous_page: number | null;
   };
 }
-
-
 
 // API
 const API_URL = import.meta.env.VITE_API_URL;
@@ -83,16 +81,17 @@ export async function crearConsulta(formData: ConsultaData) {
   }
 }
 
-
 export async function obtenerConsultasPaginadas(
   page: number = 1,
   limit: number = 50,
-  search?: string
+  search?: string,
+  sortOrder: "desc" | "asc" = "desc"
 ): Promise<PaginatedResponse> {
   try {
     const params = new URLSearchParams({
       page: page.toString(),
       limit: limit.toString(),
+      sort_order: sortOrder,
     });
 
     if (search) {
@@ -125,14 +124,16 @@ export async function obtenerConsultasPaginadas(
  * @param id_consulta - ID de la consulta/ficha
  * @returns Promise con la ficha específica
  */
-export async function obtenerConsultaPorId(id_consulta: number): Promise<ConsultaData> {
+export async function obtenerConsultaPorId(
+  id_consulta: number
+): Promise<ConsultaData> {
   try {
     const url = `${API_URL}/consulta/${id_consulta}`;
-    
+
     const response = await fetch(url, {
-      method: 'GET',
+      method: "GET",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     });
 
@@ -141,12 +142,11 @@ export async function obtenerConsultaPorId(id_consulta: number): Promise<Consult
     }
 
     const ficha: ConsultaData = await response.json();
-    
+
     return {
       ...ficha,
-      motivo: ficha.motivo_consulta || ficha.motivo || ''
+      motivo: ficha.motivo_consulta || ficha.motivo || "",
     };
-
   } catch (error) {
     console.error(`Error fetching consulta ${id_consulta}:`, error);
     throw error;
@@ -167,7 +167,7 @@ export async function buscarFichas(searchParams: {
 }): Promise<ConsultaData[]> {
   try {
     const params = new URLSearchParams();
-    
+
     Object.entries(searchParams).forEach(([key, value]) => {
       if (value && value.trim()) {
         params.append(key, value.trim());
@@ -175,11 +175,11 @@ export async function buscarFichas(searchParams: {
     });
 
     const url = `${API_URL}/consultas/search/?${params.toString()}`;
-    
+
     const response = await fetch(url, {
-      method: 'GET',
+      method: "GET",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     });
 
@@ -188,14 +188,13 @@ export async function buscarFichas(searchParams: {
     }
 
     const fichas: ConsultaData[] = await response.json();
-    
-    return fichas.map(ficha => ({
-      ...ficha,
-      motivo: ficha.motivo_consulta || ficha.motivo || ''
-    }));
 
+    return fichas.map((ficha) => ({
+      ...ficha,
+      motivo: ficha.motivo_consulta || ficha.motivo || "",
+    }));
   } catch (error) {
-    console.error('Error searching fichas:', error);
+    console.error("Error searching fichas:", error);
     throw error;
   }
 }
@@ -206,10 +205,10 @@ export async function buscarFichas(searchParams: {
  * @returns String de fecha en formato ISO
  */
 export function formatDateForAPI(date: Date | string): string {
-  if (typeof date === 'string') {
-    return new Date(date).toISOString().split('T')[0];
+  if (typeof date === "string") {
+    return new Date(date).toISOString().split("T")[0];
   }
-  return date.toISOString().split('T')[0];
+  return date.toISOString().split("T")[0];
 }
 
 /**
@@ -218,13 +217,13 @@ export function formatDateForAPI(date: Date | string): string {
  * @returns String con la edad calculada
  */
 export function calcularEdadPaciente(fechaNacimiento?: string): string {
-  if (!fechaNacimiento) return 'Edad desconocida';
-  
+  if (!fechaNacimiento) return "Edad desconocida";
+
   const birthDate = new Date(fechaNacimiento);
   const today = new Date();
   const diffTime = Math.abs(today.getTime() - birthDate.getTime());
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  
+
   if (diffDays < 30) {
     return `${diffDays} días`;
   } else if (diffDays < 365) {
@@ -234,3 +233,32 @@ export function calcularEdadPaciente(fechaNacimiento?: string): string {
   }
 }
 
+/**
+ * Obtiene todas las consultas de un paciente específico
+ * @param idPaciente - ID del paciente
+ * @returns Array de consultas del paciente
+ */
+export async function obtenerConsultasPorPaciente(
+  idPaciente: number
+): Promise<ConsultaData[]> {
+  try {
+    const response = await fetch(
+      `${API_URL}/consultas/paciente/${idPaciente}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Error en la petición: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error obteniendo consultas del paciente:", error);
+    throw error;
+  }
+}
