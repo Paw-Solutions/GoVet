@@ -34,6 +34,11 @@ const BarraLateral: React.FC = () => {
     cerrarMenu();
   };
 
+  const navegarACalendario = () => {
+    history.push("/calendario");
+    cerrarMenu();
+  };
+
   const cerrarMenu = () => {
     const menu = document.querySelector("ion-menu");
     if (menu) {
@@ -60,7 +65,7 @@ const BarraLateral: React.FC = () => {
           <IonItem button lines="none" onClick={navegarAVer}>
             <IonIcon icon={search} />
           </IonItem>
-          <IonItem button lines="none">
+          <IonItem button lines="none" onClick={navegarACalendario}>
             <IonIcon icon={calendar} />
           </IonItem>
         </IonList>

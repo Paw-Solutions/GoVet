@@ -6,6 +6,7 @@ import Home from "./pages/home";
 import RegistroTutor from "./pages/registroTutor";
 import RegistroPaciente from "./pages/registroPaciente";
 import VerTutores from "./pages/ver";
+import Calendario from "./pages/calendario";
 /* Core CSS required for Ionic components to work properly */
 import "@ionic/react/css/core.css";
 
@@ -57,8 +58,9 @@ const App: React.FC = () => (
           component={RegistroPaciente}
         ></Route>
         <Route exact path="/rellenar-ficha" component={RellenarFicha}></Route>
+        <Route exact path="/calendario" component={Calendario}></Route>
         <Route exact path="/test" component={ModalEscogerPaciente}></Route>
-      </IonRouterOutlet>  
+      </IonRouterOutlet>
     </IonReactRouter>
   </IonApp>
 );
