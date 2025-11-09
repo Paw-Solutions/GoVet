@@ -1,0 +1,63 @@
+services:
+  db:
+    image: postgres:15
+    container_name: grupo7_db_prod
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "5007:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./Dbase/generador_schema.sql:/docker-entrypoint-initdb.d/generador_schema.sql
+    networks:
+      - red_taller_software
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  backend:  
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    container_name: grupo7_backend_prod  
+    restart: always
+    env_file:
+      - .env
+    expose:
+      - "4007"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - red_taller_software
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USER=${POSTGRES_USER}
+      - DB_PASSWORD=${POSTGRES_PASSWORD}
+      - DB_NAME=${POSTGRES_DB}
+
+  frontend:  
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile.prod
+    container_name: grupo7_frontend_prod  
+    restart: always
+    ports:
+      - "3007:3007"
+    depends_on:
+      - backend
+    networks:
+      - red_taller_software
+
+volumes:
+  db_data:
+
+
+networks:
+  red_taller_software:
+    external: true

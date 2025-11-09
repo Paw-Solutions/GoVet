@@ -166,7 +166,10 @@ const ModalEditarPaciente: React.FC<ModalEditarPacienteProps> = ({
           comuna: "",
           region: "",
         });
-      }
+      } else {
+          // Limpiar tutor si el nuevo paciente no tiene uno
+          setTutorSeleccionado(null);
+        }
 
       setErrorMsg(null);
       setSaving(false);

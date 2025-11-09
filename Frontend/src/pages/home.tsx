@@ -40,7 +40,7 @@ import "../styles/home.css";
 
 const Home: React.FC = () => {
   const history = useHistory();
-  const API_URL = import.meta.env.VITE_API_URL; // usa tu variable de entorno
+  const API_URL = import.meta.env.VITE_API_URL || '/api'; // usa tu variable de entorno
 
   // Estado para los últimos tutores
   const [ultimosTutores, setUltimosTutores] = useState<any[]>([]);

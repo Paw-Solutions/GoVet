@@ -1,6 +1,6 @@
 // src/api/tutoresApi.ts
 
-const API_URL = import.meta.env.VITE_API_URL; // usa tu variable de entorno
+const API_URL = import.meta.env.VITE_API_URL || '/api'; // usa tu variable de entorno
 
 export interface TutorCreate {
   nombre: string;
@@ -139,7 +139,7 @@ export async function actualizarTutor(
   rutActual: string,
   payload: TutorCreate
 ): Promise<TutorData> {
-  const API_URL = import.meta.env.VITE_API_URL;
+  const API_URL = import.meta.env.VITE_API_URL || '/api';
   try {
     const response = await fetch(`${API_URL}/tutores/${encodeURIComponent(rutActual)}`, {
       method: "PUT",

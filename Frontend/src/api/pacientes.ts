@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 // Interfaz para crear un paciente (SIN rut_tutor)
 export interface PacienteCreate {
@@ -174,7 +174,7 @@ export async function actualizarTutorDePaciente(
   idPaciente: number,
   rutTutor: string
 ): Promise<PacienteData> {
-  const API_URL = import.meta.env.VITE_API_URL;
+  const API_URL = import.meta.env.VITE_API_URL || '/api';
   try {
     const url = `${API_URL}/pacientes/${encodeURIComponent(
       idPaciente

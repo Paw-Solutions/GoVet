@@ -54,7 +54,7 @@ export interface PaginatedResponse {
 }
 
 // API
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 // Ruta para crear una nueva consulta/ficha
 export async function crearConsulta(formData: ConsultaData) {

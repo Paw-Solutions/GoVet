@@ -1,6 +1,6 @@
 // src/api/especies.ts
 
-const API_URL = import.meta.env.VITE_API_URL; // usa tu variable de entorno
+const API_URL = import.meta.env.VITE_API_URL || '/api'; // usa tu variable de entorno
 
 export async function obtenerEspecies() {
   try {
