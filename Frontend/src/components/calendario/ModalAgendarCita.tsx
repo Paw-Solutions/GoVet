@@ -265,8 +265,8 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
   const renderPaso3 = () => (
     <div className="paso-content">
       <div className="paso-header">
-        <h3>Fecha y Hora</h3>
-        <p>Selecciona cuándo será la cita</p>
+        <h3>Fecha, Hora y Motivo</h3>
+        <p>Selecciona cuándo será la cita y su motivo</p>
       </div>
 
       <IonDatetime
@@ -276,17 +276,8 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
         locale="es-CL"
         min={new Date().toISOString()}
       />
-    </div>
-  );
 
-  const renderPaso4 = () => (
-    <div className="paso-content">
-      <div className="paso-header">
-        <h3>Detalles de la Cita</h3>
-        <p>Información adicional</p>
-      </div>
-
-      <IonItem>
+      <IonItem className="mt-3">
         <IonLabel position="stacked">
           Motivo de la cita <span className="required">*</span>
         </IonLabel>
@@ -296,9 +287,18 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
           placeholder="Ej: Vacunación, Control, Revisión..."
         />
       </IonItem>
+    </div>
+  );
+
+  const renderPaso4 = () => (
+    <div className="paso-content">
+      <div className="paso-header">
+        <h3>Notas y Resumen</h3>
+        <p>Información adicional y confirmación</p>
+      </div>
 
       <IonItem>
-        <IonLabel position="stacked">Notas adicionales</IonLabel>
+        <IonLabel position="stacked">Notas adicionales (opcional)</IonLabel>
         <IonTextarea
           value={notas}
           onIonInput={(e) => setNotas(e.detail.value || "")}
