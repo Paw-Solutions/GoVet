@@ -34,7 +34,6 @@ import {
 import { useHistory } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import BotonAnadir from "../components/BotonAnadir";
-import ListaTutores from "../components/verTutores/listaTutores";
 
 import "../styles/home.css";
 

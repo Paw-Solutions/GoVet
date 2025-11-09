@@ -278,8 +278,9 @@ const ModalEscogerPaciente: React.FC<ModalEscogerPacienteProps> = ({
                 <p>Especie: {pacienteSeleccionadoTemp.especie}</p>
                 <p>
                   Tutor:{" "}
-                  {pacienteSeleccionadoTemp.tutor.nombre ||
-                    pacienteSeleccionadoTemp.tutor.rut}
+                  {pacienteSeleccionadoTemp.tutor
+                    ? pacienteSeleccionadoTemp.tutor.nombre || pacienteSeleccionadoTemp.tutor.rut
+                    : "N/A"}
                 </p>
               </IonLabel>
               <IonIcon
