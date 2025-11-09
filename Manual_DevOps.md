@@ -30,7 +30,7 @@ Componentes (Compose):
   - Volumen de datos: db_data
   - Script de inicialización: Dbase/generador_schema.sql
 - backend: FastAPI + Uvicorn (puerto 4007 interno)
-- frontend: Vite (dev server) sirviendo la SPA y proxificando “/api” hacia backend
+- frontend: Vite (dev server) sirviendo la SPA y proxificando “/api” hacia backend para despliege de desarrollo. Nginx para despliegue de produccion
 
 Red y puertos:
 - Compose publica:
@@ -38,9 +38,6 @@ Red y puertos:
   - Backend: 4007
   - DB: 5007→5432 
 - En el servidor del curso, govet.inf.uach.cl apunta a la app 
-
-Nota proxy de desarrollo:
-- En el Sprint 1 usamos el proxy de Vite para “/api” en desarrollo/staging del servidor para facilitar despliegue de desarrollo, se espera tener mecanismos de despliege de produccion para el sprint 2 o 3
 
 ---
 
@@ -87,8 +84,8 @@ scp -r /ruta/GoVet usuario@ip_servidor:~
 
 3) Construir e iniciar:
 ```
-docker compose build
-docker compose up -d
+Dev:  docker compose -f docker-compose.yml up --build
+Prod: docker compose -f docker-compose.prod.yml up --build
 ```
 
 4) Validar contenedores:
@@ -106,12 +103,13 @@ Cada vez que corten una versión/tag o hagan pull de cambios aprobados:
 ```
 git pull origin main
 # o checkout del tag que van a presentar
-# git fetch --tags && git checkout v0.1.0
+# git fetch --tags && git checkout <version>
 ```
 
 2) Recrear servicios:
 ```
-docker compose up --build -d
+dev:  docker compose -f docker-compose.yml up up --build -d
+prod: docker compose -f docker-compose.prod.yml up up --build -d
 ```
 
 3) Verificar:
@@ -122,7 +120,7 @@ docker compose up --build -d
 
 ## 6) Operación diaria
 
-- Iniciar: `docker compose up -d`
+- Iniciar: `docker compose -f docker-compose.prod.yml up up --build -d`
 - Detener: `docker compose down`
 - Reiniciar un servicio (ej. backend): `docker compose restart backend`
 - Ver estado: `docker compose ps`
@@ -199,7 +197,7 @@ docker compose up --build -d
 ```
 
 Rollback:
-- Checkout del tag anterior (v0.X.(Y-1)) y `docker compose up --build -d`
+- Checkout del tag anterior (v0.X.(Y-1)) y `docker compose up -f docker-compose.prod.yml --build -d`
 - Si hubo cambios de esquema no compatibles, restaurar backup previo a la actualización.
 
 ---
