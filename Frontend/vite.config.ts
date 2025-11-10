@@ -9,7 +9,9 @@ export default defineConfig({
   plugins: [
     react(),
     legacy(),
-    VitePWA({ registerType: 'autoUpdate' })
+    VitePWA({ registerType: 'autoUpdate', devOptions: {
+        enabled: false 
+      } })
   ],
   server: {
     host: '0.0.0.0',

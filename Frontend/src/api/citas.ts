@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL || '/api';
+const API_URL = import.meta.env.VITE_API_URL || "/api";
 
 export interface CitaPaciente {
   id_paciente: number;
@@ -11,7 +11,7 @@ export interface Cita {
   fecha_hora: string;
   motivo: string;
   notas?: string;
-  estado: "programada" | "completada" | "cancelada";
+  estado: "programada" | "confirmada" | "completada" | "cancelada";
   created_at: string;
   tutor_nombre?: string;
   tutor_apellido_paterno?: string;
@@ -34,7 +34,7 @@ export interface CitaUpdate {
   motivo?: string;
   notas?: string;
   pacientes_ids?: number[];
-  estado?: "programada" | "completada" | "cancelada";
+  estado?: "programada" | "confirmada" | "completada" | "cancelada";
 }
 
 export interface CitasPaginadasResponse {
@@ -272,6 +272,32 @@ export const obtenerCitasPorPaciente = async (
 
   const citas = citasStorage.filter((c) =>
     c.pacientes.some((p) => p.id_paciente === id)
+  );
+
+  return {
+    citas,
+    count: citas.length,
+  };
+};
+
+// Obtener citas pendientes de un paciente (programadas + confirmadas)
+export const obtenerCitasPendientesPorPaciente = async (
+  id: number
+): Promise<CitasPorFechaResponse> => {
+  await delay(300);
+
+  const ahora = new Date();
+  const citas = citasStorage.filter((c) => {
+    const tienePaciente = c.pacientes.some((p) => p.id_paciente === id);
+    const esPendiente = c.estado === "programada" || c.estado === "confirmada";
+    const esFutura = new Date(c.fecha_hora) >= ahora;
+    return tienePaciente && esPendiente && esFutura;
+  });
+
+  // Ordenar por fecha más cercana primero
+  citas.sort(
+    (a, b) =>
+      new Date(a.fecha_hora).getTime() - new Date(b.fecha_hora).getTime()
   );
 
   return {
