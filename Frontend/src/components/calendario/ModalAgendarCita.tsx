@@ -127,6 +127,13 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
       fecha.setDate(fecha.getDate() - 7);
       return fecha;
     }
+    if (tipo === "minutos") {
+      // prueba
+      fecha.setMinutes(fecha.getMinutes() - 145);
+      // si la fecha resultante ya pasó, devolver ahora para envío inmediato
+      if (fecha < new Date()) return new Date();
+      return fecha;
+    }
     // 'ahora' o cualquier otro caso
     return new Date();
   };
@@ -384,9 +391,10 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
             value={notificacion}
             onIonChange={(e) => setNotificacion(e.detail.value as string)}
           >
-            <IonSelectOption value="diaAnterior">Día Anterior</IonSelectOption>
-            <IonSelectOption value="semanaAntes">Una semana Antes</IonSelectOption>
+            <IonSelectOption value="diaAnterior">Día anterior</IonSelectOption>
+            <IonSelectOption value="semanaAntes">Una semana antes</IonSelectOption>
             <IonSelectOption value="ahora">Ahora (test)</IonSelectOption>
+            <IonSelectOption value="minutos">2h 40min antes (test)</IonSelectOption>
           </IonSelect>
         </IonItem>
       </IonList>
@@ -436,6 +444,8 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
             ? "Día anterior"
             : notificacion === "semanaAntes"
             ? "Una semana antes"
+            : notificacion === "minutos"
+            ? "2h 45min antes (test)"
             : notificacion === "ahora"
             ? "Ahora (test)"
             : "-"}
