@@ -18,6 +18,7 @@ import {
 } from "ionicons/icons";
 import { obtenerCitasPorRango, type Cita } from "../../api/citas";
 import ModalDetalleCita from "./ModalDetalleCita";
+import { CalendarEvent, getEventsWeek } from "../../api/calendario";
 
 interface VistaSemanaProps {
   fecha: Date;
@@ -27,6 +28,7 @@ interface VistaSemanaProps {
 const VistaSemana: React.FC<VistaSemanaProps> = ({ fecha, onCambiarFecha }) => {
   const [citas, setCitas] = useState<Cita[]>([]);
   const [loading, setLoading] = useState(true);
+  const [evento, setEvento] = useState<CalendarEvent[]>([]);
   const [citaSeleccionada, setCitaSeleccionada] = useState<Cita | null>(null);
   const [mostrarDetalle, setMostrarDetalle] = useState(false);
 
@@ -48,8 +50,20 @@ const VistaSemana: React.FC<VistaSemanaProps> = ({ fecha, onCambiarFecha }) => {
   const finSemana = obtenerFinSemana(inicioSemana);
 
   useEffect(() => {
-    cargarCitas();
-  }, [fecha]);
+    const fetchEvents = async () => {
+      try {
+        const fechaStr = fecha.toISOString().split("T")[0];
+        const data = await getEventsWeek(fechaStr);
+        setEvento(data);
+      } catch (error) {
+        console.error("Error al obtener eventos:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, []);
 
   const cargarCitas = async () => {
     setLoading(true);

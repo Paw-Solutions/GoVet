@@ -6,6 +6,8 @@ try:
 except Exception:
     AsyncIOScheduler = None
     APSCHEDULER_AVAILABLE = False
+from datetime import datetime, timedelta, timezone, date
+import datetime
 from sqlalchemy import create_engine, between, or_, func, desc
 from sqlalchemy.orm import Session, sessionmaker
 from schemas import (
@@ -16,7 +18,8 @@ from schemas import (
     TutorPacienteBase,
     TratamientoBase, TratamientoCreate, TratamientoResponse,
     consultaTratamientoBase, consultaTratamientoCreate, consultaTratamientoResponse,
-    ConsultaBase, ConsultaCreate, ConsultaResponse, EmailSchema
+    ConsultaBase, ConsultaCreate, ConsultaResponse, EmailSchema,
+    EventCreate
 )
 from fastapi import FastAPI, Depends, HTTPException, Query
 from pydantic import BaseModel
@@ -30,10 +33,20 @@ import os
 from prefix_middleware import StripAPIPrefixMiddleware
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType 
 from starlette.responses import JSONResponse
+from google.auth.transport.requests import Request
+from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
+from google_auth_oauthlib.flow import Flow
+
+
 # Cargar variables de entorno desde el archivo .env
 load_dotenv()
 
 app = FastAPI()
+SCOPES = ["https://www.googleapis.com/auth/calendar"]
+CLIENT_SECRETS_FILE = "credentials.json"
 
 app.add_middleware(StripAPIPrefixMiddleware)
 
@@ -60,7 +73,159 @@ def get_db():
 
 db_dependency = Annotated[Session, Depends(get_db)]
 
+# HU1: HU 1: Como Veterinaria quiero ver el calendario con los horarios de atención disponibles, para organizarme con la agenda de horas
+def get_credentials():
+    creds = None
+    if os.path.exists("token.json"):
+        creds = Credentials.from_authorized_user_file("token.json", SCOPES)
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+        else:
+            flow = InstalledAppFlow.from_client_secrets_file("credentials.json", SCOPES)
+            creds = flow.run_local_server(port=4007)
+        with open("token.json", "w") as token:
+            token.write(creds.to_json())
+    return creds
 
+@app.get("/events")
+def list_events():
+    """Obtiene los próximos 10 eventos."""
+    creds = get_credentials()
+    try:
+        service = build("calendar", "v3", credentials=creds)
+        now = datetime.datetime.utcnow().isoformat() + "Z"
+        events_result = (
+            service.events()
+            .list(
+                calendarId="primary",
+                timeMin=now,
+                maxResults=10,
+                singleEvents=True,
+                orderBy="startTime",
+            )
+            .execute()
+        )
+        print({"events": events_result.get("items", [])})
+        return {"events": events_result.get("items", [])}
+    except HttpError as error:
+        raise HTTPException(status_code=500, detail=str(error))
+
+@app.get("/events/day")
+def get_events_day():
+    """Obtiene los eventos del día actual."""
+    creds = get_credentials()
+    try:
+        service = build("calendar", "v3", credentials=creds)
+
+        now = datetime.datetime.now(datetime.timezone.utc)
+        start_of_day = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        end_of_day = start_of_day + datetime.timedelta(days=1)
+
+        events_result = (
+            service.events()
+            .list(
+                calendarId="primary",
+                timeMin=start_of_day.isoformat(),
+                timeMax=end_of_day.isoformat(),
+                singleEvents=True,
+                orderBy="startTime",
+            )
+            .execute()
+        )
+
+        return {"events": events_result.get("items", [])}
+
+    except HttpError as error:
+        raise HTTPException(status_code=500, detail=str(error))
+    
+@app.get("/events/week")
+def get_events_week():
+    """Obtiene los eventos de la semana actual."""
+    creds = get_credentials()
+    try:
+        service = build("calendar", "v3", credentials=creds)
+
+        now = datetime.datetime.now(datetime.timezone.utc)
+        start_of_week = (now - datetime.timedelta(days=now.weekday())).replace(
+            hour=0, minute=0, second=0, microsecond=0
+        )
+        end_of_week = start_of_week + datetime.timedelta(days=7)
+
+        events_result = (
+            service.events()
+            .list(
+                calendarId="primary",
+                timeMin=start_of_week.isoformat(),
+                timeMax=end_of_week.isoformat(),
+                singleEvents=True,
+                orderBy="startTime",
+            )
+            .execute()
+        )
+
+        return {"events": events_result.get("items", [])}
+
+    except HttpError as error:
+        raise HTTPException(status_code=500, detail=str(error))
+
+@app.get("/events/month")
+def get_events_month():
+    """Obtiene los eventos del mes actual."""
+    creds = get_credentials()
+    try:
+        service = build("calendar", "v3", credentials=creds)
+
+        now = datetime.datetime.now(datetime.timezone.utc)
+        start_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        if start_of_month.month == 12:
+            next_month = start_of_month.replace(year=start_of_month.year + 1, month=1)
+        else:
+            next_month = start_of_month.replace(month=start_of_month.month + 1)
+
+        events_result = (
+            service.events()
+            .list(
+                calendarId="primary",
+                timeMin=start_of_month.isoformat(),
+                timeMax=next_month.isoformat(),
+                singleEvents=True,
+                orderBy="startTime",
+            )
+            .execute()
+        )
+
+        return {"events": events_result.get("items", [])}
+
+    except HttpError as error:
+        raise HTTPException(status_code=500, detail=str(error))
+    
+@app.post("/events")
+def create_event(event: EventCreate):
+    """Crea un nuevo evento en el calendario."""
+    creds = get_credentials()
+    try:
+        service = build("calendar", "v3", credentials=creds)
+        event_body = {
+            "summary": event.summary,
+            "description": event.description,
+            "location": event.location,
+            "start": {"dateTime": event.start, "timeZone": "America/Santiago"},
+            "end": {"dateTime": event.end, "timeZone": "America/Santiago"},
+            "reminders": {
+                "useDefault": False,
+                "overrides": [
+                    {"method": "email", "minutes": 24 * 60},
+                    {"method": "popup", "minutes": 60},
+                ],
+            },
+            "attendees": event.attendees if event.attendees else [],
+        }
+        print(event_body)
+        created_event = service.events().insert(calendarId="primary", body=event_body).execute()
+        return {"message": "Evento creado exitosamente", "event": created_event}
+    except HttpError as error:
+        raise HTTPException(status_code=500, detail=str(error))
 
 # HU 4: Como Veterinaria, quiero poder almacenar al tutor con su RUT y nombre, para poder tener su información para consultas futuras
 """ RUTAS PARA TUTORES (dueños de mascotas) """

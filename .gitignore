@@ -16,7 +16,8 @@ venv/
 .env/
 
 *.bck
-
+credentials.json
+token.json
 # Python cache files
 __pycache__/
 *.py[cod]

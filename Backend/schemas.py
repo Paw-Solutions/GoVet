@@ -18,6 +18,18 @@ class PacienteBase(BaseModel):
     class Config: 
         from_attributes = True
 
+class EventCreate(BaseModel):
+    summary: str
+    location: Optional[str] = None
+    description: str | None = None
+    start: str  # ISO datetime format
+    end: str    # ISO datetime format
+    reminders: Optional[dict] = None
+    attendees: Optional[list] = None
+
+    class Config:
+        from_attributes = True 
+
 class PacienteCreate(PacienteBase):
     pass # Hereda todos los atributos de PacienteBase
 

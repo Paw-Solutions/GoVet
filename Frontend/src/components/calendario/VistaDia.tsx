@@ -16,6 +16,7 @@ import {
   personOutline,
 } from "ionicons/icons";
 import { obtenerCitasPorFecha, type Cita } from "../../api/citas";
+import { CalendarEvent, getEventsDay } from "../../api/calendario";
 import ModalDetalleCita from "./ModalDetalleCita";
 
 interface VistaDiaProps {
@@ -25,13 +26,26 @@ interface VistaDiaProps {
 
 const VistaDia: React.FC<VistaDiaProps> = ({ fecha, onCambiarFecha }) => {
   const [citas, setCitas] = useState<Cita[]>([]);
+  const [evento, setEvento] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [citaSeleccionada, setCitaSeleccionada] = useState<Cita | null>(null);
   const [mostrarDetalle, setMostrarDetalle] = useState(false);
 
   useEffect(() => {
-    cargarCitas();
-  }, [fecha]);
+    const fetchEvents = async () => {
+      try {
+        const fechaStr = fecha.toISOString().split("T")[0];
+        const data = await getEventsDay(fechaStr);
+        setEvento(data);
+      } catch (error) {
+        console.error("Error al obtener eventos:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, []);
 
   const cargarCitas = async () => {
     setLoading(true);
