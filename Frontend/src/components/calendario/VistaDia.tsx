@@ -25,38 +25,26 @@ interface VistaDiaProps {
 }
 
 const VistaDia: React.FC<VistaDiaProps> = ({ fecha, onCambiarFecha }) => {
-  const [citas, setCitas] = useState<Cita[]>([]);
-  const [evento, setEvento] = useState<CalendarEvent[]>([]);
+  const [eventos, setEventos] = useState<CalendarEvent[]>([]);
+  const [eventoSeleccionado, setEventoSeleccionado] = useState<CalendarEvent | null>(null);
+
   const [loading, setLoading] = useState(true);
-  const [citaSeleccionada, setCitaSeleccionada] = useState<Cita | null>(null);
   const [mostrarDetalle, setMostrarDetalle] = useState(false);
 
   useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        const fechaStr = fecha.toISOString().split("T")[0];
-        const data = await getEventsDay(fechaStr);
-        setEvento(data);
-      } catch (error) {
-        console.error("Error al obtener eventos:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchEvents();
-  }, []);
-
-  const cargarCitas = async () => {
+  }, [fecha]);
+  
+  const fetchEvents = async () => {
     setLoading(true);
     try {
-      const fechaStr = fecha.toISOString().split("T")[0];
-      const response = await obtenerCitasPorFecha(fechaStr);
-      setCitas(
-        response.citas.sort((a, b) => a.fecha_hora.localeCompare(b.fecha_hora))
-      );
+      const fechaISO = new Date(fecha).toISOString();
+      console.log(fechaISO);
+      const eventosDelDia = await getEventsDay(fechaISO);
+      setEventos(eventosDelDia);
+      console.log("Eventos del día obtenidos:", eventosDelDia);
     } catch (error) {
-      console.error("Error al cargar citas:", error);
+      console.error("Error al obtener eventos del día:", error);
     } finally {
       setLoading(false);
     }
@@ -84,24 +72,9 @@ const VistaDia: React.FC<VistaDiaProps> = ({ fecha, onCambiarFecha }) => {
     });
   };
 
-  const handleCitaClick = (cita: Cita) => {
-    setCitaSeleccionada(cita);
+  const handleCitaClick = (evento: CalendarEvent) => {
+    setEventoSeleccionado(evento);
     setMostrarDetalle(true);
-  };
-
-  const getColorEstado = (estado: string) => {
-    switch (estado) {
-      case "programada":
-        return "primary";
-      case "confirmada":
-        return "success";
-      case "cancelada":
-        return "danger";
-      case "completada":
-        return "medium";
-      default:
-        return "medium";
-    }
   };
 
   return (
@@ -115,7 +88,7 @@ const VistaDia: React.FC<VistaDiaProps> = ({ fecha, onCambiarFecha }) => {
         <div className="dia-titulo">
           <h2>{formatearFecha()}</h2>
           <p className="dia-contador">
-            {citas.length} {citas.length === 1 ? "cita" : "citas"}
+            {eventos.length} {eventos.length === 1 ? "cita" : "citas"}
           </p>
         </div>
 
@@ -142,25 +115,25 @@ const VistaDia: React.FC<VistaDiaProps> = ({ fecha, onCambiarFecha }) => {
             <IonSpinner />
             <p>Cargando citas...</p>
           </div>
-        ) : citas.length === 0 ? (
+        ) : eventos.length === 0 ? (
           <div className="dia-vacio">
             <IonIcon icon={pawOutline} className="icono-vacio" />
             <p>No hay citas programadas para este día</p>
           </div>
         ) : (
           <div className="citas-lista">
-            {citas.map((cita) => (
+            {eventos.map((evento) => (
               <IonCard
-                key={cita.id_cita}
+                key={evento.summary}
                 className="cita-card"
                 button
-                onClick={() => handleCitaClick(cita)}
+                onClick={() => handleCitaClick(evento)}
               >
                 <IonCardContent>
                   <div className="cita-hora">
                     <IonIcon icon={timeOutline} />
                     <span className="hora-texto">
-                      {formatearHora(cita.fecha_hora)}
+                      {formatearHora(evento.start.dateTime)}
                     </span>
                   </div>
 
@@ -168,31 +141,21 @@ const VistaDia: React.FC<VistaDiaProps> = ({ fecha, onCambiarFecha }) => {
                     <div className="cita-tutor">
                       <IonIcon icon={personOutline} />
                       <span>
-                        {cita.tutor_nombre} {cita.tutor_apellido_paterno}
+                        {evento.summary}
                       </span>
                     </div>
 
                     <div className="cita-pacientes">
                       <IonIcon icon={pawOutline} />
                       <span>
-                        {cita.pacientes.map((p) => p.nombre).join(", ")}
+                        Ubicación: {evento.location || "No hay ubicación especificada"}
                       </span>
                     </div>
 
                     <div className="cita-motivo">
-                      <strong>Motivo:</strong> {cita.motivo}
+                      <strong>Descripción:</strong> {evento.description}
                     </div>
-
-                    {cita.notas && (
-                      <div className="cita-notas">
-                        <strong>Notas:</strong> {cita.notas}
-                      </div>
-                    )}
                   </div>
-
-                  <IonChip color={getColorEstado(cita.estado)}>
-                    <IonLabel className="capitalize">{cita.estado}</IonLabel>
-                  </IonChip>
                 </IonCardContent>
               </IonCard>
             ))}
@@ -201,18 +164,18 @@ const VistaDia: React.FC<VistaDiaProps> = ({ fecha, onCambiarFecha }) => {
       </div>
 
       {/* Modal de detalle */}
-      {citaSeleccionada && (
+      {eventoSeleccionado && (
         <ModalDetalleCita
           isOpen={mostrarDetalle}
           onClose={() => {
             setMostrarDetalle(false);
             // Esperar a que el modal se cierre antes de limpiar
             setTimeout(() => {
-              setCitaSeleccionada(null);
+              setEventoSeleccionado(null);
             }, 300);
           }}
-          cita={citaSeleccionada}
-          onCitaActualizada={cargarCitas}
+          evento={eventoSeleccionado}
+          onEventoActualizado={fetchEvents}
         />
       )}
     </div>

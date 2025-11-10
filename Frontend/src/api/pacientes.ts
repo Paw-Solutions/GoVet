@@ -228,13 +228,3 @@ export async function actualizarPaciente(
     throw err;
   }
 }
-
-const handlePacienteSelected = (paciente: PacienteData) => {
-  setSelectedPaciente(paciente);
-  setFormData((prev) => ({
-    ...prev,
-    id_paciente: paciente.id_paciente,
-    rut: paciente.tutor?.rut || "", // Usar el RUT del tutor del paciente seleccionado
-  }));
-  setShowModalPacientes(false);
-};

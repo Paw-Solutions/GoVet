@@ -1,4 +1,14 @@
 export interface CalendarEvent {
+  id: string;                          // ID único del evento
+  summary: string;                     // Título del evento
+  location?: string;                   // Dirección o lugar
+  description?: string;                // Descripción del evento
+  start: { dateTime: string; timeZone: string };
+  end: { dateTime: string; timeZone: string };
+  attendees?: Attendee[];              // Lista de asistentes
+}
+
+export interface CalendarEventCreate {
   summary: string;                     // Título del evento
   location?: string;                   // Dirección o lugar
   description?: string;                // Descripción del evento
@@ -10,17 +20,6 @@ export interface CalendarEvent {
 export interface Attendee {
   email: string;                       // Correo del asistente
 }
-
-export interface ReminderOverride {
-  method: 'email' | 'popup' | string;  // Método de recordatorio
-  minutes: number;                     // Minutos antes del evento
-}
-
-export interface Reminders {
-  useDefault: boolean;                 // Si usa los recordatorios por defecto del calendario
-  overrides?: ReminderOverride[];      // Lista de recordatorios personalizados
-}
-
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
 
@@ -34,6 +33,7 @@ export async function getEventsDay(date: string): Promise<CalendarEvent[]> {
   if (!response.ok) {
     throw new Error("Error al obtener eventos del día");
   }
+  console.log("Get day events response:", response);
   
   const data = await response.json();
   return data.events;
@@ -49,7 +49,7 @@ export async function getEventsWeek(startDate: string): Promise<CalendarEvent[]>
   if (!response.ok) {
     throw new Error("Error al obtener eventos de la semana");
   }
-  
+  console.log("Get week events response:", response);
   const data = await response.json();
   return data.events;
 }
@@ -60,13 +60,25 @@ export async function getEventsMonth(year: number, month: number): Promise<Calen
     method: "GET",
     headers: { "Content-Type": "application/json" },
   });
-  
+  console.log("Get month events response:", response);
   if (!response.ok) {
     throw new Error("Error al obtener eventos del mes");
   }
   
   const data = await response.json();
   return data.events;
+}
+
+export async function deteleEvent(eventId: string): Promise<void> {
+  const response = await fetch(`${API_URL}/events/${eventId}`, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+  });
+  console.log("Delete response:", response);
+  
+  if (!response.ok) {
+    throw new Error("Error al eliminar evento");
+  }
 }
 
 // Crear evento

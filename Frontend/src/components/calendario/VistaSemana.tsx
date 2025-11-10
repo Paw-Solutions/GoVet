@@ -29,6 +29,7 @@ const VistaSemana: React.FC<VistaSemanaProps> = ({ fecha, onCambiarFecha }) => {
   const [citas, setCitas] = useState<Cita[]>([]);
   const [loading, setLoading] = useState(true);
   const [evento, setEvento] = useState<CalendarEvent[]>([]);
+  const [eventos, setEventos] = useState<CalendarEvent[]>([]);
   const [citaSeleccionada, setCitaSeleccionada] = useState<Cita | null>(null);
   const [mostrarDetalle, setMostrarDetalle] = useState(false);
 

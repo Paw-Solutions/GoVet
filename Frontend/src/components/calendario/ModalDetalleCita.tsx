@@ -9,109 +9,93 @@ import {
   IonContent,
   IonItem,
   IonLabel,
-  IonChip,
   IonIcon,
   IonAlert,
   useIonToast,
 } from "@ionic/react";
 import {
   closeOutline,
-  createOutline,
   trashOutline,
-  personOutline,
-  pawOutline,
   timeOutline,
   calendarOutline,
-  callOutline,
-  mailOutline,
   documentTextOutline,
 } from "ionicons/icons";
-import { eliminarCita, type Cita } from "../../api/citas";
-import ModalEditarCita from "./ModalEditarCita";
+import { deteleEvent } from "../../api/calendario";
+import { CalendarEvent } from "../../api/calendario";
 
 interface ModalDetalleCitaProps {
   isOpen: boolean;
   onClose: () => void;
-  cita: Cita;
-  onCitaActualizada: () => void;
+  evento: CalendarEvent;
+  onEventoActualizado: () => void;
 }
 
 const ModalDetalleCita: React.FC<ModalDetalleCitaProps> = ({
   isOpen,
   onClose,
-  cita,
-  onCitaActualizada,
+  evento,
+  onEventoActualizado,
 }) => {
   const [present] = useIonToast();
   const [mostrarAlertaEliminar, setMostrarAlertaEliminar] = useState(false);
-  const [mostrarModalEditar, setMostrarModalEditar] = useState(false);
 
   const formatearFechaHora = () => {
-    if (!cita || !cita.fecha_hora) {
+    if (!evento || !evento.start.dateTime) {
       return { fecha: "", hora: "" };
     }
-    const fecha = new Date(cita.fecha_hora);
+    const fechaInicio = new Date(evento.start.dateTime);
+    const fechaFin = new Date(evento.end.dateTime);
+
     return {
-      fecha: fecha.toLocaleDateString("es-CL", {
+      fecha: fechaInicio.toLocaleDateString("es-CL", {
         weekday: "long",
         year: "numeric",
         month: "long",
         day: "numeric",
       }),
-      hora: fecha.toLocaleTimeString("es-CL", {
+      horaInicio: fechaInicio.toLocaleTimeString("es-CL", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      horaFin: fechaFin.toLocaleTimeString("es-CL", {
         hour: "2-digit",
         minute: "2-digit",
       }),
     };
   };
 
-  const getColorEstado = (estado: string) => {
-    switch (estado) {
-      case "programada":
-        return "primary";
-      case "confirmada":
-        return "success";
-      case "cancelada":
-        return "danger";
-      case "completada":
-        return "medium";
-      default:
-        return "medium";
-    }
-  };
-
   const handleEliminar = async () => {
-    if (!cita || !cita.id_cita) return;
+    if (!evento || !evento.id) return;
 
     try {
-      await eliminarCita(cita.id_cita);
+      await deteleEvent(evento.id);
 
       present({
-        message: "Cita eliminada exitosamente",
+        message: "Evento eliminado exitosamente",
         duration: 3000,
         color: "success",
       });
 
-      onCitaActualizada();
+      onEventoActualizado();
       onClose();
     } catch (error) {
-      console.error("Error al eliminar cita:", error);
+      console.error("Error al eliminar evento:", error);
       present({
-        message: "Error al eliminar la cita",
+        message: "Error al eliminar el evento",
         duration: 3000,
         color: "danger",
       });
     }
   };
 
-  const { fecha, hora } = formatearFechaHora();
+  const { fecha, horaInicio, horaFin } = formatearFechaHora();
 
   return (
     <>
       <IonModal isOpen={isOpen} onDidDismiss={onClose}>
         <IonHeader>
           <IonToolbar>
-            <IonTitle>Detalle de Cita</IonTitle>
+            <IonTitle>Detalle del Evento</IonTitle>
             <IonButtons slot="end">
               <IonButton onClick={onClose}>
                 <IonIcon icon={closeOutline} />
@@ -121,14 +105,9 @@ const ModalDetalleCita: React.FC<ModalDetalleCitaProps> = ({
         </IonHeader>
 
         <IonContent className="ion-padding">
-          {/* Estado */}
-          <div className="detalle-estado">
-            <IonChip
-              color={getColorEstado(cita.estado)}
-              className="estado-chip"
-            >
-              <IonLabel className="capitalize">{cita.estado}</IonLabel>
-            </IonChip>
+          {/* Título del evento */}
+          <div className="detalle-section">
+            <h2>{evento.summary}</h2>
           </div>
 
           {/* Fecha y hora */}
@@ -144,111 +123,61 @@ const ModalDetalleCita: React.FC<ModalDetalleCitaProps> = ({
                 </div>
                 <div className="detalle-hora">
                   <IonIcon icon={timeOutline} />
-                  <span>{hora}</span>
+                  <span>
+                    {horaInicio} - {horaFin}
+                  </span>
                 </div>
               </IonLabel>
             </IonItem>
           </div>
 
-          {/* Información del tutor */}
-          <div className="detalle-section">
-            <h3>
-              <IonIcon icon={personOutline} /> Tutor Responsable
-            </h3>
-            <IonItem lines="none">
-              <IonLabel>
-                <h2>
-                  {cita.tutor_nombre} {cita.tutor_apellido_paterno}{" "}
-                  {cita.tutor_apellido_materno}
-                </h2>
-                <p>
-                  <strong>RUT:</strong> {cita.rut_tutor}
-                </p>
-                {cita.tutor_telefono && (
-                  <p className="detalle-contacto">
-                    <IonIcon icon={callOutline} />
-                    <a href={`tel:${cita.tutor_telefono}`}>
-                      {cita.tutor_telefono}
-                    </a>
-                  </p>
-                )}
-                {cita.tutor_email && (
-                  <p className="detalle-contacto">
-                    <IonIcon icon={mailOutline} />
-                    <a href={`mailto:${cita.tutor_email}`}>
-                      {cita.tutor_email}
-                    </a>
-                  </p>
-                )}
-              </IonLabel>
-            </IonItem>
-          </div>
-
-          {/* Pacientes */}
-          <div className="detalle-section">
-            <h3>
-              <IonIcon icon={pawOutline} /> Pacientes
-            </h3>
-            {cita.pacientes.map((paciente) => (
-              <IonItem key={paciente.id_paciente} lines="none">
-                <IonIcon icon={pawOutline} slot="start" />
-                <IonLabel>
-                  <h2>{paciente.nombre}</h2>
-                  <p>ID: {paciente.id_paciente}</p>
-                </IonLabel>
-              </IonItem>
-            ))}
-          </div>
-
-          {/* Motivo */}
-          <div className="detalle-section">
-            <h3>
-              <IonIcon icon={documentTextOutline} /> Motivo de la Cita
-            </h3>
-            <IonItem lines="none">
-              <IonLabel className="ion-text-wrap">
-                <p>{cita.motivo}</p>
-              </IonLabel>
-            </IonItem>
-          </div>
-
-          {/* Notas */}
-          {cita.notas && (
+          {/* Ubicación */}
+          {evento.location && (
             <div className="detalle-section">
-              <h3>Notas Adicionales</h3>
+              <h3>Ubicación</h3>
               <IonItem lines="none">
                 <IonLabel className="ion-text-wrap">
-                  <p>{cita.notas}</p>
+                  <p>{evento.location}</p>
                 </IonLabel>
               </IonItem>
             </div>
           )}
 
-          {/* Fecha de creación */}
+          {/* Descripción */}
+          {evento.description && (
+            <div className="detalle-section">
+              <h3>
+                <IonIcon icon={documentTextOutline} /> Descripción
+              </h3>
+              <IonItem lines="none">
+                <IonLabel className="ion-text-wrap">
+                  <p>{evento.description}</p>
+                </IonLabel>
+              </IonItem>
+            </div>
+          )}
+
+          {/* Asistentes */}
+          {evento.attendees && evento.attendees.length > 0 && (
+            <div className="detalle-section">
+              <h3>Asistentes</h3>
+              {evento.attendees.map((asistente, index) => (
+                <IonItem key={index} lines="none">
+                  <IonLabel>
+                    <p>{asistente.email}</p>
+                  </IonLabel>
+                </IonItem>
+              ))}
+            </div>
+          )}
+
+          {/* Zona horaria */}
           <div className="detalle-footer">
-            <p className="texto-small">
-              Creada el{" "}
-              {new Date(cita.created_at).toLocaleDateString("es-CL", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </p>
+            <p className="texto-small">Zona horaria: {evento.start.timeZone}</p>
           </div>
 
           {/* Botones de acción */}
           <div className="detalle-acciones">
-            <IonButton
-              expand="block"
-              fill="outline"
-              onClick={() => setMostrarModalEditar(true)}
-            >
-              <IonIcon icon={createOutline} slot="start" />
-              Editar Cita
-            </IonButton>
-
             <IonButton
               expand="block"
               color="danger"
@@ -256,7 +185,7 @@ const ModalDetalleCita: React.FC<ModalDetalleCitaProps> = ({
               onClick={() => setMostrarAlertaEliminar(true)}
             >
               <IonIcon icon={trashOutline} slot="start" />
-              Eliminar Cita
+              Eliminar Evento
             </IonButton>
           </div>
         </IonContent>
@@ -266,8 +195,8 @@ const ModalDetalleCita: React.FC<ModalDetalleCitaProps> = ({
       <IonAlert
         isOpen={mostrarAlertaEliminar}
         onDidDismiss={() => setMostrarAlertaEliminar(false)}
-        header="Eliminar Cita"
-        message="¿Estás seguro de que deseas eliminar esta cita? Esta acción no se puede deshacer."
+        header="Eliminar Evento"
+        message="¿Estás seguro de que deseas eliminar este evento? Esta acción no se puede deshacer."
         buttons={[
           {
             text: "Cancelar",
@@ -280,19 +209,6 @@ const ModalDetalleCita: React.FC<ModalDetalleCitaProps> = ({
           },
         ]}
       />
-
-      {/* Modal de edición */}
-      {mostrarModalEditar && (
-        <ModalEditarCita
-          isOpen={mostrarModalEditar}
-          onClose={() => setMostrarModalEditar(false)}
-          cita={cita}
-          onCitaActualizada={() => {
-            onCitaActualizada();
-            setMostrarModalEditar(false);
-          }}
-        />
-      )}
     </>
   );
 };
