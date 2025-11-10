@@ -29,6 +29,7 @@ import {
 import { PacienteData } from "../../api/pacientes";
 import { TutorData } from "../../api/tutores";
 import HistorialConsultas from "./HistorialConsultas";
+import PendientesPaciente from "./PendientesPaciente";
 
 interface ModalInfoPacienteProps {
   isOpen: boolean;
@@ -302,6 +303,21 @@ const ModalInfoPaciente: React.FC<ModalInfoPacienteProps> = ({
               </IonList>
             </IonCardContent>
           </IonCard>
+        )}
+
+        {/* Widget de Citas y Vacunas Pendientes */}
+        {paciente && (
+          <PendientesPaciente
+            idPaciente={paciente.id_paciente}
+            onVerDetalleCita={(cita) => {
+              // TODO: Implementar modal de detalle de cita
+              console.log("Ver detalle de cita:", cita);
+            }}
+            onVerDetalleVacuna={(vacuna) => {
+              // TODO: Implementar modal de detalle de vacuna
+              console.log("Ver detalle de vacuna:", vacuna);
+            }}
+          />
         )}
 
         {/* Botón para ver historial de consultas */}
