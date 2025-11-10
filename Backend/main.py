@@ -7,7 +7,6 @@ except Exception:
     AsyncIOScheduler = None
     APSCHEDULER_AVAILABLE = False
 from datetime import datetime, timedelta, timezone, date
-import datetime
 from sqlalchemy import create_engine, between, or_, func, desc
 from sqlalchemy.orm import Session, sessionmaker
 from schemas import (
@@ -30,14 +29,18 @@ from typing import List, Annotated, Optional
 from database import engine, SessionLocal
 from dotenv import load_dotenv
 import os
+import json
 from prefix_middleware import StripAPIPrefixMiddleware
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType 
 from starlette.responses import JSONResponse
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
+
+from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+
+from google_auth_oauthlib.flow import InstalledAppFlow
 from google_auth_oauthlib.flow import Flow
 
 
@@ -45,8 +48,12 @@ from google_auth_oauthlib.flow import Flow
 load_dotenv()
 
 app = FastAPI()
-SCOPES = ["https://www.googleapis.com/auth/calendar"]
-CLIENT_SECRETS_FILE = "credentials.json"
+#SCOPES = ["https://www.googleapis.com/auth/calendar"]
+#CLIENT_SECRETS_FILE = "credentials.json"
+
+# Configuración de Google Calendar
+SCOPES = ['https://www.googleapis.com/auth/calendar']
+CALENDAR_ID = os.getenv("GOOGLE_CALENDAR_ID")
 
 app.add_middleware(StripAPIPrefixMiddleware)
 
@@ -74,6 +81,205 @@ def get_db():
 db_dependency = Annotated[Session, Depends(get_db)]
 
 # HU1: HU 1: Como Veterinaria quiero ver el calendario con los horarios de atención disponibles, para organizarme con la agenda de horas
+
+def get_calendar_service():
+    """
+    Crea y retorna el servicio de Google Calendar usando Service Account.
+    No requiere interacción del usuario.
+    """
+    try:
+        # Obtener credenciales desde variable de entorno
+        service_account_info = json.loads(os.getenv("GOOGLE_SERVICE_ACCOUNT_KEY"))
+        
+        # Crear credenciales
+        credentials = service_account.Credentials.from_service_account_info(
+            service_account_info,
+            scopes=SCOPES
+        )
+        
+        # Crear servicio
+        service = build('calendar', 'v3', credentials=credentials)
+        return service
+    
+    except Exception as e:
+        print(f"Error al crear servicio de calendario: {e}")
+        raise HTTPException(status_code=500, detail="Error de configuración del calendario")
+    
+@app.get("/events")
+def list_events(max_results: int = 10):
+    """Obtiene los próximos N eventos."""
+    try:
+        service = get_calendar_service()
+        now = datetime.now(timezone.utc).isoformat()
+        
+        events_result = service.events().list(
+            calendarId=CALENDAR_ID,
+            timeMin=now,
+            maxResults=max_results,
+            singleEvents=True,
+            orderBy='startTime'
+        ).execute()
+        
+        return {"events": events_result.get('items', [])}
+    
+    except HttpError as error:
+        raise HTTPException(status_code=500, detail=str(error))
+
+
+@app.get("/events/day")
+def get_events_day(date: str):
+    """
+    Obtiene eventos de un día específico.
+    
+    Args:
+        date: Fecha en formato YYYY-MM-DD (ej: 2025-11-10)
+    """
+    try:
+        service = get_calendar_service()
+        
+        # Parsear fecha
+        target_date = datetime.fromisoformat(date)
+        
+        # Inicio del día (00:00:00)
+        start_of_day = target_date.replace(
+            hour=0, minute=0, second=0, microsecond=0,
+            tzinfo=timezone.utc
+        )
+        
+        # Fin del día (23:59:59)
+        end_of_day = start_of_day + timedelta(days=1) - timedelta(seconds=1)
+        
+        events_result = service.events().list(
+            calendarId=CALENDAR_ID,
+            timeMin=start_of_day.isoformat(),
+            timeMax=end_of_day.isoformat(),
+            singleEvents=True,
+            orderBy='startTime'
+        ).execute()
+        
+        return {"events": events_result.get('items', [])}
+    
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Formato de fecha inválido. Use YYYY-MM-DD")
+    except HttpError as error:
+        raise HTTPException(status_code=500, detail=str(error))
+
+
+@app.get("/events/week")
+def get_events_week(start_date: str):
+    """
+    Obtiene eventos de una semana (7 días) desde la fecha indicada.
+    
+    Args:
+        start_date: Fecha de inicio en formato YYYY-MM-DD
+    """
+    try:
+        service = get_calendar_service()
+        
+        # Parsear fecha
+        target_date = datetime.fromisoformat(start_date)
+        
+        # Inicio de la semana
+        start_of_week = target_date.replace(
+            hour=0, minute=0, second=0, microsecond=0,
+            tzinfo=timezone.utc
+        )
+        
+        # Fin de la semana (7 días después)
+        end_of_week = start_of_week + timedelta(days=7)
+        
+        events_result = service.events().list(
+            calendarId=CALENDAR_ID,
+            timeMin=start_of_week.isoformat(),
+            timeMax=end_of_week.isoformat(),
+            singleEvents=True,
+            orderBy='startTime'
+        ).execute()
+        
+        return {"events": events_result.get('items', [])}
+    
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Formato de fecha inválido")
+    except HttpError as error:
+        raise HTTPException(status_code=500, detail=str(error))
+
+
+@app.get("/events/month")
+def get_events_month(year: int, month: int):
+    """
+    Obtiene eventos de un mes específico.
+    
+    Args:
+        year: Año (ej: 2025)
+        month: Mes (1-12)
+    """
+    try:
+        service = get_calendar_service()
+        
+        # Primer día del mes
+        start_of_month = datetime(year, month, 1, tzinfo=timezone.utc)
+        
+        # Primer día del siguiente mes
+        if month == 12:
+            end_of_month = datetime(year + 1, 1, 1, tzinfo=timezone.utc)
+        else:
+            end_of_month = datetime(year, month + 1, 1, tzinfo=timezone.utc)
+        
+        events_result = service.events().list(
+            calendarId=CALENDAR_ID,
+            timeMin=start_of_month.isoformat(),
+            timeMax=end_of_month.isoformat(),
+            singleEvents=True,
+            orderBy='startTime'
+        ).execute()
+        
+        return {"events": events_result.get('items', [])}
+    
+    except HttpError as error:
+        raise HTTPException(status_code=500, detail=str(error))
+
+
+@app.post("/events")
+def create_event(event: EventCreate):
+    """Crea un nuevo evento en el calendario."""
+    try:
+        service = get_calendar_service()
+        
+        event_body = {
+            'summary': event.summary,
+            'description': event.description,
+            'location': event.location,
+            'start': {
+                'dateTime': event.start,
+                'timeZone': 'America/Santiago',
+            },
+            'end': {
+                'dateTime': event.end,
+                'timeZone': 'America/Santiago',
+            },
+            'reminders': {
+                'useDefault': False,
+                'overrides': [
+                    {'method': 'email', 'minutes': 24 * 60},
+                    {'method': 'popup', 'minutes': 60},
+                ],
+            },
+            'attendees': event.attendees if event.attendees else [],
+        }
+        
+        created_event = service.events().insert(
+            calendarId=CALENDAR_ID,
+            body=event_body
+        ).execute()
+        
+        return {
+            "message": "Evento creado exitosamente",
+            "event": created_event
+        }
+    
+    except HttpError as error:
+        raise HTTPException(status_code=500, detail=str(error))
+"""
 def get_credentials():
     creds = None
     if os.path.exists("token.json"):
@@ -90,7 +296,7 @@ def get_credentials():
 
 @app.get("/events")
 def list_events():
-    """Obtiene los próximos 10 eventos."""
+    ""Obtiene los próximos 10 eventos.""
     creds = get_credentials()
     try:
         service = build("calendar", "v3", credentials=creds)
@@ -113,7 +319,7 @@ def list_events():
 
 @app.get("/events/day")
 def get_events_day():
-    """Obtiene los eventos del día actual."""
+    ""Obtiene los eventos del día actual.""
     creds = get_credentials()
     try:
         service = build("calendar", "v3", credentials=creds)
@@ -141,7 +347,7 @@ def get_events_day():
     
 @app.get("/events/week")
 def get_events_week():
-    """Obtiene los eventos de la semana actual."""
+    ""Obtiene los eventos de la semana actual.""
     creds = get_credentials()
     try:
         service = build("calendar", "v3", credentials=creds)
@@ -171,7 +377,7 @@ def get_events_week():
 
 @app.get("/events/month")
 def get_events_month():
-    """Obtiene los eventos del mes actual."""
+    ""Obtiene los eventos del mes actual.""
     creds = get_credentials()
     try:
         service = build("calendar", "v3", credentials=creds)
@@ -202,7 +408,7 @@ def get_events_month():
     
 @app.post("/events")
 def create_event(event: EventCreate):
-    """Crea un nuevo evento en el calendario."""
+    ""Crea un nuevo evento en el calendario.""
     creds = get_credentials()
     try:
         service = build("calendar", "v3", credentials=creds)
@@ -226,7 +432,7 @@ def create_event(event: EventCreate):
         return {"message": "Evento creado exitosamente", "event": created_event}
     except HttpError as error:
         raise HTTPException(status_code=500, detail=str(error))
-
+"""
 # HU 4: Como Veterinaria, quiero poder almacenar al tutor con su RUT y nombre, para poder tener su información para consultas futuras
 """ RUTAS PARA TUTORES (dueños de mascotas) """
 # Ruta POST para añadir un dueño

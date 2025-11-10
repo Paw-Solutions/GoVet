@@ -3,6 +3,9 @@ import psycopg2
 import os
 from datetime import date
 
+# EJECUTAR CON:
+# docker exec -it govet-backend-1 python /app/rellenar_bd/script_meter_datos_prueba.py
+
 # Conectar PostgreSQL
 conn = psycopg2.connect(
     host=os.getenv("DB_HOST", "localhost"),         # valor por defecto localhost
@@ -31,7 +34,7 @@ cur.execute("""
     INSERT INTO govet.paciente (id_paciente, nombre, color, sexo, esterilizado, fecha_nacimiento, id_raza, codigo_chip)
     VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
     ON CONFLICT DO NOTHING;
-""", (100000, "Paciente de prueba", "Blanco", "M", False, "2024-02-01", 1, ""))
+""", (100000, "Juan", "Blanco", "M", False, "2024-02-01", 1, ""))
 
 # Relacion paciente y tutor Juan
 cur.execute("""

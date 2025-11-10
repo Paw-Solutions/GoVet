@@ -15,13 +15,11 @@ services:
       context: ./Backend
       dockerfile: Dockerfile
     env_file:
-      - .env
+      - ./Backend/.env
     ports:
       - "4007:4007"
     volumes:
       - ./Backend:/app
-      - ./Backend/token.json:/app/token.json
-      - ./Backend/credentials.json:/app/credentials.json
     depends_on:
       - db
 

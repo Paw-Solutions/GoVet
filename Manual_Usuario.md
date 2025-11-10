@@ -87,7 +87,7 @@ La busqueda de pacientes se pueden hacer por su nombre, su tutor *(por nombre)*,
 
 En cada uno de los pacientes encontrados van a existir 2 opciones, uno para editar la informacion de este *(el lapiz)* y uno para ver la informacion de este de manera mas detallada *(el ojo)*.
 
-La edicion del paciente no se encuentra actualmente implementado, pero sera implementado en una version mas adelante.
+En la edicion se pueden modificar todo tipo de datos, como el nombre, chip, y si esta esterilizado, he incluso cambiar el dueño del paciente
 
 ### Busqueda de tutores.
 
@@ -95,7 +95,7 @@ La busqueda de tutores se puede realizar por su nombre, su rut y su correo.
 
 En cada uno de los Tutores encontrados van a existir 2 opciones, uno para editar la informacion de este *(el lapiz)* y uno para ver la informacion de este de manera mas detallada *(el ojo)*.
 
-La edicion del tutor no se encuentra actualmente implementado, pero sera implementado en una version mas adelante.
+En la edicion se pueden modificar datos como los celulares, direcciones, y correos
 
 ### Busqueda de fichas.
 
