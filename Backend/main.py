@@ -9,7 +9,7 @@ from schemas import (
     TutorPacienteBase,
     TratamientoBase, TratamientoCreate, TratamientoResponse,
     consultaTratamientoBase, consultaTratamientoCreate, consultaTratamientoResponse,
-    ConsultaBase, ConsultaCreate, ConsultaResponse
+    ConsultaBase, ConsultaCreate, ConsultaResponse, EmailSchema
 )
 from fastapi import FastAPI, Depends, HTTPException, Query
 from pydantic import BaseModel
@@ -21,7 +21,8 @@ from database import engine, SessionLocal
 from dotenv import load_dotenv
 import os
 from prefix_middleware import StripAPIPrefixMiddleware
-
+from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType 
+from starlette.responses import JSONResponse
 # Cargar variables de entorno desde el archivo .env
 load_dotenv()
 
@@ -679,3 +680,34 @@ def obtener_consultas_tratamiento_por_nombre_paciente(nombre_paciente: str, db: 
     if not db_consultas_tratamiento:
         raise HTTPException(status_code=404, detail="No se encontraron tratamientos para ese paciente")
     return db_consultas_tratamiento
+
+
+""" RUTA PARA ENVIAR EMAILS A TUTORES """
+conf = ConnectionConfig (
+    MAIL_USERNAME = os.getenv("USER"),
+    MAIL_PASSWORD = os.getenv("PASSWORD"),
+    MAIL_FROM = os.getenv("USER_EMAIL"),
+    MAIL_PORT = int(os.getenv("PORT")),
+    MAIL_SERVER = os.getenv("SERVER"),
+    MAIL_FROM_NAME=os.getenv("MAIL_FROM_NAME"),
+    MAIL_STARTTLS = True,
+    MAIL_SSL_TLS = False,
+    USE_CREDENTIALS = True,
+    VALIDATE_CERTS = True
+)
+# HU 14: Cómo dueño quiero recibir alertas programadas por correo para recordar cada consulta.
+@app.post("/email")
+async def envia(email: EmailSchema) -> JSONResponse:
+    html = f"""<p>{email.cuerpo}</p>"""
+
+    message = MessageSchema(
+        subject="Notificación",
+        recipients=[email.email],
+        body=html,
+        subtype=MessageType.html
+    )
+
+    fm = FastMail(conf)
+    await fm.send_message(message)
+    return JSONResponse(status_code=200, content={"message": "La notificación fue enviada correctamente"})
+

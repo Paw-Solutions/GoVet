@@ -27,6 +27,7 @@ import {
   pawOutline,
 } from "ionicons/icons";
 import { crearCita, type CitaCreate } from "../../api/citas";
+import { enviarNotificacion } from "../../api/notificacion";
 
 interface ModalAgendarCitaProps {
   isOpen: boolean;
@@ -49,6 +50,7 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
   const [rutTutor, setRutTutor] = useState("");
   const [tutorEncontrado, setTutorEncontrado] = useState(false);
   const [nombreTutor, setNombreTutor] = useState("");
+  const [emailTutor, setEmailTutor] = useState("");
 
   const [pacientesSeleccionados, setPacientesSeleccionados] = useState<
     number[]
@@ -69,6 +71,7 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
     setRutTutor("");
     setTutorEncontrado(false);
     setNombreTutor("");
+    setEmailTutor("");
     setPacientesSeleccionados([]);
     setFechaHora(new Date().toISOString());
     setMotivo("");
@@ -85,6 +88,8 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
     if (rutTutor.trim()) {
       setTutorEncontrado(true);
       setNombreTutor("Juan Pérez González");
+      // Mock: asignar email del tutor encontrado
+      setEmailTutor("daniela.huenuman@alumnos.uach.cl"); // Para probar el recibo de correos
       present({
         message: "Tutor encontrado",
         duration: 2000,
@@ -162,6 +167,37 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
         icon: checkmarkOutline,
       });
 
+      try {
+        if (emailTutor) {
+          const cuerpo = `
+            <p>Hola ${nombreTutor || ""},</p>
+            <p>Tu cita ha sido agendada.</p>
+            <p>Motivo: ${motivo || "(Sin especificar)"}</p>
+          `;
+
+          await enviarNotificacion({
+            email: emailTutor,
+            asunto: "Confirmación de cita - GoVet",
+            cuerpo,
+          });
+
+          present({
+            message: "Correo de confirmación enviado",
+            duration: 2200,
+            color: "success",
+          });
+        } else {
+          console.log("No hay email de tutor; se omite el envío de notificación.");
+        }
+      } catch (emailError) {
+        console.error("Error enviando notificación:", emailError);
+        present({
+          message: "Cita creada, pero falló el envío del correo",
+          duration: 4000,
+          color: "warning",
+        });
+      }
+
       onCitaCreada();
       handleClose();
     } catch (error) {
@@ -204,12 +240,18 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
             <IonIcon icon={checkmarkOutline} />
             <IonLabel>Tutor: {nombreTutor}</IonLabel>
           </IonChip>
+          {emailTutor && (
+            <div className="tutor-email" style={{ marginTop: 8 }}>
+              <IonNote>{emailTutor}</IonNote>
+            </div>
+          )}
           <IonButton
             fill="clear"
             size="small"
             onClick={() => {
               setTutorEncontrado(false);
               setNombreTutor("");
+              setEmailTutor("");
             }}
           >
             Cambiar tutor
@@ -312,6 +354,7 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
         <h4>Resumen</h4>
         <div className="resumen-item">
           <strong>Tutor:</strong> {nombreTutor}
+          {emailTutor ? ` (${emailTutor})` : ""}
         </div>
         <div className="resumen-item">
           <strong>Pacientes:</strong>{" "}

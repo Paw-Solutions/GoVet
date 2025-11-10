@@ -1,5 +1,5 @@
 from typing import Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from datetime import date
 
 """ Esquema de datos para la entidad Paciente (Mascota) """
@@ -177,3 +177,8 @@ class ConsultaResponse(ConsultaBase):
 
     class Config:
         from_attributes = True
+
+""" Esquema de datos para el envío de correos electrónicos """
+class EmailSchema(BaseModel):
+    email: EmailStr
+    cuerpo: str
