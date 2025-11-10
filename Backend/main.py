@@ -166,12 +166,13 @@ def get_events_day(date: str):
 
 
 @app.get("/events/week")
-def get_events_week(start_date: str):
+def get_events_week(start_date: str, end_date: str):
     """
     Obtiene eventos de una semana (7 días) desde la fecha indicada.
     
     Args:
         start_date: Fecha de inicio en formato YYYY-MM-DD
+        end_date: Fecha de fin en formato YYYY-MM-DD
     """
     try:
         service = get_calendar_service()
@@ -184,9 +185,11 @@ def get_events_week(start_date: str):
             hour=0, minute=0, second=0, microsecond=0,
             tzinfo=timezone.utc
         )
-        
-        # Fin de la semana (7 días después)
-        end_of_week = start_of_week + timedelta(days=7)
+        # Fin de la semana
+        end_of_week = datetime.fromisoformat(end_date).replace(
+            hour=23, minute=59, second=59, microsecond=999999,
+            tzinfo=timezone.utc
+        )
         
         events_result = service.events().list(
             calendarId=CALENDAR_ID,

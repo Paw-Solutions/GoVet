@@ -24,7 +24,6 @@ class EventCreate(BaseModel):
     description: str | None = None
     start: str  # ISO datetime format
     end: str    # ISO datetime format
-    reminders: Optional[dict] = None
     attendees: Optional[list] = None
 
     class Config:

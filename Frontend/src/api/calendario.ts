@@ -40,8 +40,8 @@ export async function getEventsDay(date: string): Promise<CalendarEvent[]> {
 }
 
 // Eventos de la semana
-export async function getEventsWeek(startDate: string): Promise<CalendarEvent[]> {
-  const response = await fetch(`${API_URL}/events/week?start_date=${startDate}`, {
+export async function getEventsWeek(startDate: string, endDate: string): Promise<CalendarEvent[]> {
+  const response = await fetch(`${API_URL}/events/week?start_date=${startDate}&end_date=${endDate}`, {
     method: "GET",
     headers: { "Content-Type": "application/json" },
   });

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   IonButton,
   IonIcon,
@@ -26,11 +26,9 @@ interface VistaSemanaProps {
 }
 
 const VistaSemana: React.FC<VistaSemanaProps> = ({ fecha, onCambiarFecha }) => {
-  const [citas, setCitas] = useState<Cita[]>([]);
   const [loading, setLoading] = useState(true);
-  const [evento, setEvento] = useState<CalendarEvent[]>([]);
+  const [eventoSeleccionado, setEventoSeleccionado] = useState<CalendarEvent | null>(null);
   const [eventos, setEventos] = useState<CalendarEvent[]>([]);
-  const [citaSeleccionada, setCitaSeleccionada] = useState<Cita | null>(null);
   const [mostrarDetalle, setMostrarDetalle] = useState(false);
 
   // Obtener inicio y fin de la semana
@@ -46,37 +44,26 @@ const VistaSemana: React.FC<VistaSemanaProps> = ({ fecha, onCambiarFecha }) => {
     fin.setDate(inicio.getDate() + 6);
     return fin;
   };
-
-  const inicioSemana = obtenerInicioSemana(fecha);
-  const finSemana = obtenerFinSemana(inicioSemana);
+    // Usar useMemo para evitar recalcular las fechas en cada render
+  const { inicioSemana, finSemana } = useMemo(() => {
+  const inicio = obtenerInicioSemana(fecha);
+  const fin = obtenerFinSemana(inicio);
+  return { inicioSemana: inicio, finSemana: fin };
+}, [fecha]);
 
   useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        const fechaStr = fecha.toISOString().split("T")[0];
-        const data = await getEventsWeek(fechaStr);
-        setEvento(data);
-      } catch (error) {
-        console.error("Error al obtener eventos:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchEvents();
-  }, []);
-
-  const cargarCitas = async () => {
-    setLoading(true);
+  }, [fecha]);
+  
+  const fetchEvents = async () => {
     try {
-      const inicioStr = inicioSemana.toISOString().split("T")[0];
-      const finStr = finSemana.toISOString().split("T")[0];
-      const response = await obtenerCitasPorRango(inicioStr, finStr);
-      setCitas(
-        response.citas.sort((a, b) => a.fecha_hora.localeCompare(b.fecha_hora))
+      const data = await getEventsWeek(inicioSemana.toISOString().split("T")[0], finSemana.toISOString().split("T")[0]);
+      setEventos(
+        data.sort((a, b) => a.start.dateTime.localeCompare(b.start.dateTime))
       );
+      console.log("Eventos de la semana obtenidos:", data);
     } catch (error) {
-      console.error("Error al cargar citas:", error);
+      console.error("Error al obtener eventos:", error);
     } finally {
       setLoading(false);
     }
@@ -101,12 +88,15 @@ const VistaSemana: React.FC<VistaSemanaProps> = ({ fecha, onCambiarFecha }) => {
 
   const diasSemana = generarDiasSemana();
 
-  // Obtener citas de un día específico
   const obtenerCitasDelDia = (dia: Date) => {
     const diaStr = dia.toISOString().split("T")[0];
-    return citas.filter((cita) => {
-      const citaFecha = cita.fecha_hora.split("T")[0];
-      return citaFecha === diaStr;
+    return eventos.filter((evento) => {
+      // Validar que el evento tenga la estructura correcta
+      if (!evento || !evento.start || !evento.start.dateTime) {
+        return false;
+      }
+      const eventoFecha = evento.start.dateTime.split("T")[0];
+      return eventoFecha === diaStr;
     });
   };
 
@@ -139,8 +129,8 @@ const VistaSemana: React.FC<VistaSemanaProps> = ({ fecha, onCambiarFecha }) => {
     );
   };
 
-  const handleCitaClick = (cita: Cita) => {
-    setCitaSeleccionada(cita);
+  const handleEventoClick = (evento: CalendarEvent) => {
+    setEventoSeleccionado(evento);
     setMostrarDetalle(true);
   };
 
@@ -170,7 +160,7 @@ const VistaSemana: React.FC<VistaSemanaProps> = ({ fecha, onCambiarFecha }) => {
         <div className="semana-titulo">
           <h2>{formatearRangoSemana()}</h2>
           <p className="semana-contador">
-            {citas.length} {citas.length === 1 ? "cita" : "citas"}
+            {eventos.length} {eventos.length === 1 ? "evento" : "eventos"}
           </p>
         </div>
 
@@ -218,26 +208,26 @@ const VistaSemana: React.FC<VistaSemanaProps> = ({ fecha, onCambiarFecha }) => {
           {/* Lista de citas de la semana */}
           <div className="citas-lista-container">
             <h3 className="lista-titulo">Citas de la semana</h3>
-            {citas.length === 0 ? (
+            {eventos.length === 0 ? (
               <div className="semana-vacio">
                 <IonIcon icon={pawOutline} className="icono-vacio" />
                 <p>No hay citas programadas para esta semana</p>
               </div>
             ) : (
               <div className="citas-lista">
-                {citas.map((cita) => (
+                {eventos.map((evento) => (
                   <IonCard
-                    key={cita.id_cita}
+                    key={evento.id}
                     className="cita-card"
                     button
-                    onClick={() => handleCitaClick(cita)}
+                    onClick={() => handleEventoClick(evento)}
                   >
                     <IonCardContent>
                       <div className="cita-fecha-hora">
                         <div className="cita-fecha">
                           <IonIcon icon={calendarOutline} />
                           <span>
-                            {new Date(cita.fecha_hora).toLocaleDateString(
+                            {new Date(evento.start.dateTime).toLocaleDateString(
                               "es-CL",
                               {
                                 weekday: "short",
@@ -250,7 +240,7 @@ const VistaSemana: React.FC<VistaSemanaProps> = ({ fecha, onCambiarFecha }) => {
                         <div className="cita-hora">
                           <IonIcon icon={timeOutline} />
                           <span className="hora-texto">
-                            {formatearHora(cita.fecha_hora)}
+                            {formatearHora(evento.start.dateTime)}
                           </span>
                         </div>
                       </div>
@@ -259,27 +249,15 @@ const VistaSemana: React.FC<VistaSemanaProps> = ({ fecha, onCambiarFecha }) => {
                         <div className="cita-tutor">
                           <IonIcon icon={personOutline} />
                           <span>
-                            {cita.tutor_nombre} {cita.tutor_apellido_paterno}
-                          </span>
-                        </div>
-
-                        <div className="cita-pacientes">
-                          <IonIcon icon={pawOutline} />
-                          <span>
-                            {cita.pacientes.map((p) => p.nombre).join(", ")}
+                            {evento.summary}
                           </span>
                         </div>
 
                         <div className="cita-motivo">
-                          <strong>Motivo:</strong> {cita.motivo}
+                          <strong>Descripción:</strong> {evento.description}
                         </div>
                       </div>
 
-                      <IonChip color={getColorEstado(cita.estado)}>
-                        <IonLabel className="capitalize">
-                          {cita.estado}
-                        </IonLabel>
-                      </IonChip>
                     </IonCardContent>
                   </IonCard>
                 ))}
@@ -290,18 +268,18 @@ const VistaSemana: React.FC<VistaSemanaProps> = ({ fecha, onCambiarFecha }) => {
       )}
 
       {/* Modal de detalle */}
-      {citaSeleccionada && (
+      {eventoSeleccionado && (
         <ModalDetalleCita
           isOpen={mostrarDetalle}
           onClose={() => {
             setMostrarDetalle(false);
             // Esperar a que el modal se cierre antes de limpiar
             setTimeout(() => {
-              setCitaSeleccionada(null);
+              setEventoSeleccionado(null);
             }, 300);
           }}
-          cita={citaSeleccionada}
-          onCitaActualizada={cargarCitas}
+          evento={eventoSeleccionado}
+          onEventoActualizado={fetchEvents}
         />
       )}
     </div>
