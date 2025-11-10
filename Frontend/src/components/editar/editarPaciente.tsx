@@ -16,6 +16,7 @@ import {
   IonRadioGroup,
   IonRadio,
   IonLabel,
+  IonToast,
 } from "@ionic/react";
 import {
   PacienteData,
@@ -78,7 +79,9 @@ const ModalEditarPaciente: React.FC<ModalEditarPacienteProps> = ({
 
   // Estados de control
   const [saving, setSaving] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastColor, setToastColor] = useState<"success" | "danger">("success");
 
   // Cargar especies al montar
   useEffect(() => {
@@ -171,7 +174,6 @@ const ModalEditarPaciente: React.FC<ModalEditarPacienteProps> = ({
           setTutorSeleccionado(null);
         }
 
-      setErrorMsg(null);
       setSaving(false);
     }
   }, [paciente, isOpen, especiesData]);
@@ -232,15 +234,22 @@ const ModalEditarPaciente: React.FC<ModalEditarPacienteProps> = ({
 
     try {
       setSaving(true);
-      setErrorMsg(null);
 
       // Validaciones
       if (!razaSeleccionada?.id_raza) {
-        throw new Error("Debe seleccionar una raza válida");
+        setToastMessage("Debe seleccionar una raza válida");
+        setToastColor("danger");
+        setShowToast(true);
+        setSaving(false);
+        return;
       }
 
       if (!tutorSeleccionado?.rut) {
-        throw new Error("Debe seleccionar un tutor");
+        setToastMessage("Debe seleccionar un tutor");
+        setToastColor("danger");
+        setShowToast(true);
+        setSaving(false);
+        return;
       }
 
       // Normalizar datos
@@ -267,13 +276,22 @@ const ModalEditarPaciente: React.FC<ModalEditarPacienteProps> = ({
         await actualizarTutorDePaciente(paciente.id_paciente, rutNuevo);
       }
 
-      // 3) Refrescar la lista
+      // 3) Mostrar mensaje de éxito
+      setToastMessage("Paciente actualizado exitosamente");
+      setToastColor("success");
+      setShowToast(true);
+
+      // 4) Refrescar la lista
       window.dispatchEvent(new CustomEvent("pacientes:updated"));
 
-      // 4) Cerrar modal
-      onDismiss();
+      // 5) Cerrar modal
+      setTimeout(() => {
+        onDismiss();
+      }, 1500);
     } catch (err: any) {
-      setErrorMsg(err?.message || "No fue posible guardar los cambios.");
+      setToastMessage(err?.message || "No fue posible guardar los cambios");
+      setToastColor("danger");
+      setShowToast(true);
     } finally {
       setSaving(false);
     }
@@ -502,12 +520,6 @@ const ModalEditarPaciente: React.FC<ModalEditarPacienteProps> = ({
           )}
         </IonGrid>
 
-        {errorMsg && (
-          <div style={{ color: "var(--ion-color-danger)", marginTop: 8 }}>
-            {errorMsg}
-          </div>
-        )}
-
         <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
           <IonButton onClick={handleGuardar} disabled={saving || !paciente}>
             {saving ? "Guardando..." : "Guardar"}
@@ -517,6 +529,16 @@ const ModalEditarPaciente: React.FC<ModalEditarPacienteProps> = ({
           </IonButton>
         </div>
       </IonContent>
+
+      {/* Toast para mensajes de éxito y error */}
+      <IonToast
+        isOpen={showToast}
+        onDidDismiss={() => setShowToast(false)}
+        message={toastMessage}
+        duration={3000}
+        position="bottom"
+        color={toastColor}
+      />
 
       {/* Modal para buscar tutor */}
       <ModalBuscarTutor

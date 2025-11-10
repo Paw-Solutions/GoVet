@@ -12,7 +12,7 @@ import {
   IonRow,
   IonCol,
   IonText,
-  IonSpinner,
+  IonToast,
 } from "@ionic/react";
 import {
   TutorData,
@@ -64,9 +64,11 @@ const ModalEditarTutor: React.FC<ModalEditarTutorProps> = ({
     name: string;
   } | null>(null);
 
-  // Estados de control
+  // Estados de control - ACTUALIZADOS para usar IonToast
   const [saving, setSaving] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastColor, setToastColor] = useState<"success" | "danger">("success");
   const [telefonoValue, setTelefonoValue] = useState("");
 
   // Referencias
@@ -124,7 +126,6 @@ const ModalEditarTutor: React.FC<ModalEditarTutorProps> = ({
         setSelectedComuna({ id: tutor.comuna, name: tutor.comuna });
       }
 
-      setErrorMsg(null);
       setSaving(false);
     }
   }, [tutor, isOpen, regiones]);
@@ -192,7 +193,6 @@ const ModalEditarTutor: React.FC<ModalEditarTutorProps> = ({
 
     try {
       setSaving(true);
-      setErrorMsg(null);
 
       const rutActual = tutor.rut || "";
 
@@ -216,10 +216,21 @@ const ModalEditarTutor: React.FC<ModalEditarTutorProps> = ({
 
       await actualizarTutor(rutActual, payload);
 
+      // Mostrar mensaje de éxito
+      setToastMessage("Tutor actualizado exitosamente");
+      setToastColor("success");
+      setShowToast(true);
+
       window.dispatchEvent(new CustomEvent("tutores:updated"));
-      onDismiss();
+
+      // Cerrar modal después de mostrar el toast
+      setTimeout(() => {
+        onDismiss();
+      }, 1500);
     } catch (err: any) {
-      setErrorMsg(err?.message || "No fue posible guardar los cambios.");
+      setToastMessage(err?.message || "No fue posible guardar los cambios");
+      setToastColor("danger");
+      setShowToast(true);
     } finally {
       setSaving(false);
     }
@@ -456,12 +467,6 @@ const ModalEditarTutor: React.FC<ModalEditarTutorProps> = ({
           </IonRow>
         </IonGrid>
 
-        {errorMsg && (
-          <div style={{ color: "var(--ion-color-danger)", marginTop: 8 }}>
-            {errorMsg}
-          </div>
-        )}
-
         <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
           <IonButton onClick={handleGuardar} disabled={saving || !tutor}>
             {saving ? "Guardando..." : "Guardar"}
@@ -471,6 +476,16 @@ const ModalEditarTutor: React.FC<ModalEditarTutorProps> = ({
           </IonButton>
         </div>
       </IonContent>
+
+      {/* Toast para mensajes de éxito y error */}
+      <IonToast
+        isOpen={showToast}
+        onDidDismiss={() => setShowToast(false)}
+        message={toastMessage}
+        duration={3000}
+        position="bottom"
+        color={toastColor}
+      />
     </IonModal>
   );
 };

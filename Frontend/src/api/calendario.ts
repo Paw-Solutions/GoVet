@@ -2,8 +2,8 @@ export interface CalendarEvent {
   summary: string;                     // Título del evento
   location?: string;                   // Dirección o lugar
   description?: string;                // Descripción del evento
-  start: string;
-  end: string;
+  start: { dateTime: string; timeZone: string };
+  end: { dateTime: string; timeZone: string };
   attendees?: Attendee[];              // Lista de asistentes
 }
 
@@ -22,60 +22,64 @@ export interface Reminders {
 }
 
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL || '/api';
 
-export async function getEventsDay(day: string): Promise<CalendarEvent[]> {
-  const response = await fetch(`${API_URL}/events/dia?day=${day}`, {
+// Eventos del día
+export async function getEventsDay(date: string): Promise<CalendarEvent[]> {
+  const response = await fetch(`${API_URL}/events/day?date=${date}`, {
     method: "GET",
     headers: { "Content-Type": "application/json" },
   });
-  console.log("Obteniendo eventos..")
+  
   if (!response.ok) {
-    throw new Error("Error al obtener eventos");
+    throw new Error("Error al obtener eventos del día");
   }
+  
   const data = await response.json();
-  console.log(data.events);
   return data.events;
 }
 
-export async function getEventsWeek(start_day: string): Promise<CalendarEvent[]> {
-  const response = await fetch(`${API_URL}/events/semana?start_day=${start_day}`, {
+// Eventos de la semana
+export async function getEventsWeek(startDate: string): Promise<CalendarEvent[]> {
+  const response = await fetch(`${API_URL}/events/week?start_date=${startDate}`, {
     method: "GET",
     headers: { "Content-Type": "application/json" },
   });
-  console.log("Obteniendo eventos de la semana..")
+  
   if (!response.ok) {
     throw new Error("Error al obtener eventos de la semana");
   }
+  
   const data = await response.json();
-  console.log(data.events);
   return data.events;
 }
 
-async function getEventsMonth(month: string): Promise<CalendarEvent[]> {
-  const response = await fetch(`${API_URL}/events/mes?month=${month}`, {
+// Eventos del mes
+export async function getEventsMonth(year: number, month: number): Promise<CalendarEvent[]> {
+  const response = await fetch(`${API_URL}/events/month?year=${year}&month=${month}`, {
     method: "GET",
     headers: { "Content-Type": "application/json" },
   });
-  console.log("Obteniendo eventos del mes..")
+  
   if (!response.ok) {
     throw new Error("Error al obtener eventos del mes");
   }
+  
   const data = await response.json();
-  console.log(data.events);
   return data.events;
 }
 
-async function createEvent(event: CalendarEvent): Promise<CalendarEvent> {
+// Crear evento
+export async function createEvent(event: CalendarEvent): Promise<CalendarEvent> {
   const response = await fetch(`${API_URL}/events`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(event),
   });
-  console.log("Creando evento..")
+  
   if (!response.ok) {
-    throw new Error("Error creando el evento");
+    throw new Error("Error al crear evento");
   }
-
+  
   return await response.json();
 }
