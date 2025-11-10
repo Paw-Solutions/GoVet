@@ -1,4 +1,11 @@
-from datetime import date
+import asyncio
+from datetime import date, datetime
+try:
+    from apscheduler.schedulers.asyncio import AsyncIOScheduler
+    APSCHEDULER_AVAILABLE = True
+except Exception:
+    AsyncIOScheduler = None
+    APSCHEDULER_AVAILABLE = False
 from sqlalchemy import create_engine, between, or_, func, desc
 from sqlalchemy.orm import Session, sessionmaker
 from schemas import (
@@ -695,19 +702,87 @@ conf = ConnectionConfig (
     USE_CREDENTIALS = True,
     VALIDATE_CERTS = True
 )
-# HU 14: Cómo dueño quiero recibir alertas programadas por correo para recordar cada consulta.
-@app.post("/email")
-async def envia(email: EmailSchema) -> JSONResponse:
-    html = f"""<p>{email.cuerpo}</p>"""
+# Scheduler (APScheduler) - usar AsyncIOScheduler para integrarlo con FastAPI/uvicorn
+if APSCHEDULER_AVAILABLE:
+    scheduler = AsyncIOScheduler(timezone="UTC")
 
+
+    @app.on_event("startup")
+    async def start_scheduler():
+        # arrancar el scheduler en el arranque de la app
+        scheduler.start()
+
+
+    @app.on_event("shutdown")
+    async def shutdown_scheduler():
+        # apagar el scheduler en el cierre de la app
+        scheduler.shutdown(wait=False)
+else:
+    scheduler = None
+    # Fallback simple: programar tareas usando asyncio.create_task + sleep
+    async def _delayed_send(run_date: datetime, email: 'EmailSchema') -> None:
+        try:
+            now = datetime.utcnow()
+            # if run_date is timezone-aware, convert to UTC naive for comparison
+            if run_date.tzinfo is not None:
+                run_date_utc = run_date.astimezone(tz=None).replace(tzinfo=None)
+            else:
+                run_date_utc = run_date
+            delay = (run_date_utc - now).total_seconds()
+            if delay > 0:
+                await asyncio.sleep(delay)
+            await envia(email)
+        except Exception as e:
+            # Log exception but don't crash
+            import logging
+            logging.exception("Error en delayed send: %s", e)
+
+    def schedule_via_asyncio(run_date: datetime, email: 'EmailSchema') -> None:
+        # crea una tarea en background que esperará y luego enviará
+        asyncio.create_task(_delayed_send(run_date, email))
+
+
+async def envia(email: EmailSchema) -> None:
+    """Envía el email usando FastMail (async)."""
+    html = f"<p>{email.cuerpo}</p>"
     message = MessageSchema(
-        subject="Notificación",
+        subject=getattr(email, "asunto", "Notificación"),
         recipients=[email.email],
         body=html,
-        subtype=MessageType.html
+        subtype=MessageType.html,
     )
-
     fm = FastMail(conf)
     await fm.send_message(message)
-    return JSONResponse(status_code=200, content={"message": "La notificación fue enviada correctamente"})
+
+
+# HU 14: Cómo dueño quiero recibir alertas programadas por correo para recordar cada consulta.
+@app.post("/email/{fecha_envio}")
+async def programar_envio(email: EmailSchema, fecha_envio: datetime):
+    """Programa el envío de un correo en la fecha indicada.
+
+    Si APScheduler está disponible, se usa `scheduler.add_job`. Si no, se usa
+    un fallback que crea una tarea asyncio que duerme hasta la fecha y luego
+    llama a `envia`.
+    """
+    if APSCHEDULER_AVAILABLE and scheduler is not None:
+        scheduler.add_job(envia, 'date', run_date=fecha_envio, args=[email])
+    else:
+        # usar fallback sin dependencia externa
+        schedule_via_asyncio(fecha_envio, email)
+
+    return JSONResponse(status_code=200, content={"message": "La notificación fue programada correctamente"})
+
+# async def envia(email: EmailSchema) -> JSONResponse:
+#     html = f"""<p>{email.cuerpo}</p>"""
+
+#     message = MessageSchema(
+#         subject="Notificación",
+#         recipients=[email.email],
+#         body=html,
+#         subtype=MessageType.html
+#     )
+
+#     fm = FastMail(conf)
+#     await fm.send_message(message)
+#     return JSONResponse(status_code=200, content={"message": "La notificación fue enviada correctamente"})
 

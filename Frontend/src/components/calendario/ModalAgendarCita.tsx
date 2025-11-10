@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   IonModal,
   IonHeader,
@@ -19,6 +19,7 @@ import {
   IonNote,
   IonSpinner,
   useIonToast,
+  IonList,
 } from "@ionic/react";
 import {
   closeOutline,
@@ -65,6 +66,8 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
   const [fechaHora, setFechaHora] = useState(fechaInicial.toISOString());
   const [motivo, setMotivo] = useState("");
   const [notas, setNotas] = useState("");
+  const [notificacion, setNotificacion] = useState<string>("diaAnterior");
+  const [fechaNotificacion, setFechaNotificacion] = useState<Date | null>(null);
 
   const resetForm = () => {
     setPaso(1);
@@ -112,6 +115,36 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
     }
   };
 
+  // Pure helper: devuelve la fecha de envío según tipo y la fecha de la cita
+  const calcularFechaNotificacion = (tipo: string, fechaHoraIso: string) => {
+    if (!fechaHoraIso) return new Date();
+    const fecha = new Date(fechaHoraIso);
+    if (tipo === "diaAnterior") {
+      fecha.setDate(fecha.getDate() - 1);
+      return fecha;
+    }
+    if (tipo === "semanaAntes") {
+      fecha.setDate(fecha.getDate() - 7);
+      return fecha;
+    }
+    // 'ahora' o cualquier otro caso
+    return new Date();
+  };
+
+  // Si cambia la fecha o la notificación, se actualiza el estado fechaNotificacion
+  const handleNotificacion = useCallback(() => {
+    if (!fechaHora) return;
+    const fecha = calcularFechaNotificacion(notificacion, fechaHora);
+    setFechaNotificacion(fecha);
+  }, [notificacion, fechaHora]);
+
+  // Ejecutar la función cuando cambie la selección de notificación o la fecha/hora
+  useEffect(() => {
+    handleNotificacion();
+  }, [handleNotificacion]);
+
+
+  
   const handleSiguiente = () => {
     if (paso === 1 && !tutorEncontrado) {
       present({
@@ -169,17 +202,29 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
 
       try {
         if (emailTutor) {
+          console.log("Enviando notificación al email:", emailTutor);
+
           const cuerpo = `
             <p>Hola ${nombreTutor || ""},</p>
             <p>Tu cita ha sido agendada.</p>
             <p>Motivo: ${motivo || "(Sin especificar)"}</p>
           `;
 
-          await enviarNotificacion({
-            email: emailTutor,
-            asunto: "Confirmación de cita - GoVet",
-            cuerpo,
-          });
+          // calcular fecha de envío localmente (no confiar en setState que es asíncrono)
+          const fechaEnvioDate = calcularFechaNotificacion(notificacion, fechaHora);
+          const fechaEnvioIso = fechaEnvioDate.toISOString();
+
+          // actualizar el estado para mostrar en el resumen si se necesita
+          setFechaNotificacion(fechaEnvioDate);
+
+          await enviarNotificacion(
+            {
+              email: emailTutor,
+              asunto: "Confirmación de cita - GoVet",
+              cuerpo,
+            },
+            fechaEnvioIso
+          );
 
           present({
             message: "Correo de confirmación enviado",
@@ -329,6 +374,22 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
           placeholder="Ej: Vacunación, Control, Revisión..."
         />
       </IonItem>
+
+      <IonList>
+        <IonItem>
+          <IonLabel position="stacked">Seleccionar cuando notificar al tutor</IonLabel>
+          <IonSelect
+            aria-label="notificacion"
+            placeholder="El tutor será notificado en.."
+            value={notificacion}
+            onIonChange={(e) => setNotificacion(e.detail.value as string)}
+          >
+            <IonSelectOption value="diaAnterior">Día Anterior</IonSelectOption>
+            <IonSelectOption value="semanaAntes">Una semana Antes</IonSelectOption>
+            <IonSelectOption value="ahora">Ahora (test)</IonSelectOption>
+          </IonSelect>
+        </IonItem>
+      </IonList>
     </div>
   );
 
@@ -368,6 +429,16 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
         </div>
         <div className="resumen-item">
           <strong>Motivo:</strong> {motivo || "(Sin especificar)"}
+        </div>
+        <div className="resumen-item">
+          <strong>Notificación:</strong>{" "}
+          {notificacion === "diaAnterior"
+            ? "Día anterior"
+            : notificacion === "semanaAntes"
+            ? "Una semana antes"
+            : notificacion === "ahora"
+            ? "Ahora (test)"
+            : "-"}
         </div>
       </div>
     </div>
