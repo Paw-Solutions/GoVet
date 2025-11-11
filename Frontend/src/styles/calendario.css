@@ -651,6 +651,43 @@
   text-align: center;
 }
 
+.tutor-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 8px 0;
+  font-size: 0.9rem;
+}
+
+.tutores-resultados {
+  margin-top: 16px;
+  max-height: 400px;
+  overflow-y: auto;
+  border-radius: 8px;
+  border: 1px solid var(--ion-color-light);
+}
+
+.tutores-resultados ion-item {
+  --padding-start: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.tutores-resultados ion-item:hover {
+  --background: var(--ion-color-light);
+}
+
+.tutores-resultados ion-label h3 {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.tutores-resultados ion-label p {
+  font-size: 0.85rem;
+  color: var(--ion-color-medium);
+  margin: 2px 0;
+}
+
 .pacientes-lista {
   margin: 16px 0;
 }
@@ -835,4 +872,60 @@
     flex-direction: column;
     gap: 8px;
   }
+}
+
+/* ============================================
+   TIME RANGE PICKER
+   ============================================ */
+
+.time-range-picker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(12px, 3vw, 20px);
+  margin: 16px auto;
+  padding: 0;
+  max-width: 400px;
+}
+
+.time-range-picker ion-datetime {
+  flex: 1;
+  --padding-start: 12px;
+  --padding-end: 12px;
+}
+
+.time-range-picker .time-button {
+  flex: 0 1 auto;
+  min-width: 100px;
+  max-width: 140px;
+  font-size: clamp(1.1rem, 3.5vw, 1.3rem);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  --padding-start: clamp(16px, 4vw, 24px);
+  --padding-end: clamp(16px, 4vw, 24px);
+  --padding-top: 14px;
+  --padding-bottom: 14px;
+}
+
+.range-arrow {
+  font-weight: bold;
+  color: var(--ion-color-primary);
+  font-size: clamp(1.2rem, 4vw, 1.5rem);
+  flex-shrink: 0;
+  margin: 0 clamp(4px, 1vw, 8px);
+}
+
+/* Modal pequeño para el time picker */
+.time-picker-modal {
+  --height: auto;
+  --border-radius: 16px 16px 0 0;
+}
+
+.time-picker-modal ion-content {
+  --background: var(--ion-background-color);
+}
+
+.time-picker-modal ion-datetime {
+  margin: 0 auto;
+  display: block;
 }

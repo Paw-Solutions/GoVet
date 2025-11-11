@@ -56,112 +56,41 @@ export interface CitasPorFechaResponse {
   count: number;
 }
 
-// ============================================
-// DATOS MOCK PARA DEMOSTRACIÓN
-// ============================================
-// Estos son datos de ejemplo para mostrar la interfaz
-// Cuando se integre con Google Calendar, se reemplazará esta lógica
-
-const citasMock: Cita[] = [
-  {
-    id_cita: 1,
-    rut_tutor: "12345678-9",
-    fecha_hora: "2025-11-08T10:00:00",
-    motivo: "Vacunación anual",
-    notas: "Revisar cartilla de vacunación",
-    estado: "programada",
-    created_at: "2025-11-07T15:30:00",
-    tutor_nombre: "Juan",
-    tutor_apellido_paterno: "Pérez",
-    tutor_apellido_materno: "González",
-    tutor_telefono: 987654321,
-    tutor_email: "juan@example.com",
-    pacientes: [
-      { id_paciente: 1, nombre: "Firulais" },
-      { id_paciente: 2, nombre: "Michi" },
-    ],
-  },
-  {
-    id_cita: 2,
-    rut_tutor: "98765432-1",
-    fecha_hora: "2025-11-08T14:30:00",
-    motivo: "Control general",
-    notas: "Paciente nuevo",
-    estado: "programada",
-    created_at: "2025-11-07T16:00:00",
-    tutor_nombre: "María",
-    tutor_apellido_paterno: "López",
-    tutor_apellido_materno: "Silva",
-    tutor_telefono: 912345678,
-    tutor_email: "maria@example.com",
-    pacientes: [{ id_paciente: 3, nombre: "Luna" }],
-  },
-  {
-    id_cita: 3,
-    rut_tutor: "11111111-1",
-    fecha_hora: "2025-11-10T09:00:00",
-    motivo: "Revisión post-operatoria",
-    notas: "Revisar herida quirúrgica",
-    estado: "programada",
-    created_at: "2025-11-07T14:00:00",
-    tutor_nombre: "Pedro",
-    tutor_apellido_paterno: "Ramírez",
-    tutor_apellido_materno: "Torres",
-    tutor_telefono: 956789012,
-    tutor_email: "pedro@example.com",
-    pacientes: [{ id_paciente: 4, nombre: "Max" }],
-  },
-];
-
-let citasStorage = [...citasMock];
-let nextId = 4;
-
-// Simular delay de red
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 // Crear una cita
 export const crearCita = async (cita: CitaCreate): Promise<Cita> => {
-  await delay(500); // Simular latencia de red
+  const response = await fetch(`${API_URL}/citas`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(cita),
+  });
 
-  const nuevaCita: Cita = {
-    id_cita: nextId++,
-    rut_tutor: cita.rut_tutor,
-    fecha_hora: cita.fecha_hora,
-    motivo: cita.motivo,
-    notas: cita.notas,
-    estado: "programada",
-    created_at: new Date().toISOString(),
-    tutor_nombre: "Tutor",
-    tutor_apellido_paterno: "Demo",
-    tutor_apellido_materno: "Mock",
-    tutor_telefono: 999999999,
-    tutor_email: "demo@example.com",
-    pacientes: cita.pacientes_ids.map((id) => ({
-      id_paciente: id,
-      nombre: `Paciente ${id}`,
-    })),
-  };
+  if (!response.ok) {
+    throw new Error("Error al crear la cita");
+  }
 
-  citasStorage.push(nuevaCita);
-  return nuevaCita;
+  return await response.json();
 };
 
 // Obtener una cita por ID
 export const obtenerCita = async (id: number): Promise<Cita> => {
-  await delay(300);
+  const response = await fetch(`${API_URL}/citas/${id}`);
 
-  const cita = citasStorage.find((c) => c.id_cita === id);
-  if (!cita) {
+  if (!response.ok) {
     throw new Error("Cita no encontrada");
   }
 
-  return cita;
+  return await response.json();
 };
 
 // Obtener todas las citas
 export const obtenerTodasLasCitas = async (): Promise<Cita[]> => {
-  await delay(300);
-  return [...citasStorage];
+  const response = await fetch(`${API_URL}/citas`);
+
+  if (!response.ok) {
+    throw new Error("Error al obtener citas");
+  }
+
+  return await response.json();
 };
 
 // Obtener citas con paginación
@@ -171,62 +100,34 @@ export const obtenerCitasPaginadas = async (
   search?: string,
   estado?: string
 ): Promise<CitasPaginadasResponse> => {
-  await delay(400);
+  const params = new URLSearchParams({
+    page: page.toString(),
+    limit: limit.toString(),
+  });
 
-  let citas = [...citasStorage];
+  if (search) params.append("search", search);
+  if (estado) params.append("estado", estado);
 
-  if (search) {
-    citas = citas.filter(
-      (c) =>
-        c.tutor_nombre?.toLowerCase().includes(search.toLowerCase()) ||
-        c.tutor_apellido_paterno
-          ?.toLowerCase()
-          .includes(search.toLowerCase()) ||
-        c.rut_tutor.includes(search)
-    );
+  const response = await fetch(`${API_URL}/citas?${params}`);
+
+  if (!response.ok) {
+    throw new Error("Error al obtener citas paginadas");
   }
 
-  if (estado) {
-    citas = citas.filter((c) => c.estado === estado);
-  }
-
-  const total_count = citas.length;
-  const total_pages = Math.ceil(total_count / limit);
-  const start = (page - 1) * limit;
-  const end = start + limit;
-  const citasPaginadas = citas.slice(start, end);
-
-  return {
-    citas: citasPaginadas,
-    pagination: {
-      current_page: page,
-      total_pages,
-      total_count,
-      limit,
-      has_next: page < total_pages,
-      has_previous: page > 1,
-      next_page: page < total_pages ? page + 1 : null,
-      previous_page: page > 1 ? page - 1 : null,
-    },
-  };
+  return await response.json();
 };
 
 // Obtener citas por fecha específica
 export const obtenerCitasPorFecha = async (
   fecha: string
 ): Promise<CitasPorFechaResponse> => {
-  await delay(300);
+  const response = await fetch(`${API_URL}/citas/fecha/${fecha}`);
 
-  const fechaBusqueda = fecha.split("T")[0];
-  const citas = citasStorage.filter((c) => {
-    const fechaCita = c.fecha_hora.split("T")[0];
-    return fechaCita === fechaBusqueda;
-  });
+  if (!response.ok) {
+    throw new Error("Error al obtener citas por fecha");
+  }
 
-  return {
-    citas,
-    count: citas.length,
-  };
+  return await response.json();
 };
 
 // Obtener citas en un rango de fechas
@@ -234,76 +135,54 @@ export const obtenerCitasPorRango = async (
   fecha_inicio: string,
   fecha_fin: string
 ): Promise<CitasPorFechaResponse> => {
-  await delay(400);
+  const response = await fetch(
+    `${API_URL}/citas/rango?fecha_inicio=${fecha_inicio}&fecha_fin=${fecha_fin}`
+  );
 
-  const inicio = new Date(fecha_inicio);
-  const fin = new Date(fecha_fin);
+  if (!response.ok) {
+    throw new Error("Error al obtener citas por rango");
+  }
 
-  const citas = citasStorage.filter((c) => {
-    const fechaCita = new Date(c.fecha_hora);
-    return fechaCita >= inicio && fechaCita <= fin;
-  });
-
-  return {
-    citas,
-    count: citas.length,
-  };
+  return await response.json();
 };
 
 // Obtener citas de un tutor
 export const obtenerCitasPorTutor = async (
   rut: string
 ): Promise<CitasPorFechaResponse> => {
-  await delay(300);
+  const response = await fetch(`${API_URL}/citas/tutor/${rut}`);
 
-  const citas = citasStorage.filter((c) => c.rut_tutor === rut);
+  if (!response.ok) {
+    throw new Error("Error al obtener citas del tutor");
+  }
 
-  return {
-    citas,
-    count: citas.length,
-  };
+  return await response.json();
 };
 
 // Obtener citas de un paciente
 export const obtenerCitasPorPaciente = async (
   id: number
 ): Promise<CitasPorFechaResponse> => {
-  await delay(300);
+  const response = await fetch(`${API_URL}/citas/paciente/${id}`);
 
-  const citas = citasStorage.filter((c) =>
-    c.pacientes.some((p) => p.id_paciente === id)
-  );
+  if (!response.ok) {
+    throw new Error("Error al obtener citas del paciente");
+  }
 
-  return {
-    citas,
-    count: citas.length,
-  };
+  return await response.json();
 };
 
 // Obtener citas pendientes de un paciente (programadas + confirmadas)
 export const obtenerCitasPendientesPorPaciente = async (
   id: number
 ): Promise<CitasPorFechaResponse> => {
-  await delay(300);
+  const response = await fetch(`${API_URL}/citas/paciente/${id}/pendientes`);
 
-  const ahora = new Date();
-  const citas = citasStorage.filter((c) => {
-    const tienePaciente = c.pacientes.some((p) => p.id_paciente === id);
-    const esPendiente = c.estado === "programada" || c.estado === "confirmada";
-    const esFutura = new Date(c.fecha_hora) >= ahora;
-    return tienePaciente && esPendiente && esFutura;
-  });
+  if (!response.ok) {
+    throw new Error("Error al obtener citas pendientes");
+  }
 
-  // Ordenar por fecha más cercana primero
-  citas.sort(
-    (a, b) =>
-      new Date(a.fecha_hora).getTime() - new Date(b.fecha_hora).getTime()
-  );
-
-  return {
-    citas,
-    count: citas.length,
-  };
+  return await response.json();
 };
 
 // Editar una cita
@@ -311,40 +190,26 @@ export const editarCita = async (
   id: number,
   cita: CitaUpdate
 ): Promise<Cita> => {
-  await delay(500);
+  const response = await fetch(`${API_URL}/citas/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(cita),
+  });
 
-  const index = citasStorage.findIndex((c) => c.id_cita === id);
-  if (index === -1) {
-    throw new Error("Cita no encontrada");
+  if (!response.ok) {
+    throw new Error("Error al editar la cita");
   }
 
-  const citaActual = citasStorage[index];
-  const citaActualizada: Cita = {
-    ...citaActual,
-    fecha_hora: cita.fecha_hora ?? citaActual.fecha_hora,
-    motivo: cita.motivo ?? citaActual.motivo,
-    notas: cita.notas !== undefined ? cita.notas : citaActual.notas,
-    estado: cita.estado ?? citaActual.estado,
-    pacientes: cita.pacientes_ids
-      ? cita.pacientes_ids.map((pid) => ({
-          id_paciente: pid,
-          nombre: `Paciente ${pid}`,
-        }))
-      : citaActual.pacientes,
-  };
-
-  citasStorage[index] = citaActualizada;
-  return citaActualizada;
+  return await response.json();
 };
 
 // Eliminar/cancelar una cita
 export const eliminarCita = async (id: number): Promise<void> => {
-  await delay(300);
+  const response = await fetch(`${API_URL}/citas/${id}`, {
+    method: "DELETE",
+  });
 
-  const index = citasStorage.findIndex((c) => c.id_cita === id);
-  if (index === -1) {
-    throw new Error("Cita no encontrada");
+  if (!response.ok) {
+    throw new Error("Error al eliminar la cita");
   }
-
-  citasStorage.splice(index, 1);
 };

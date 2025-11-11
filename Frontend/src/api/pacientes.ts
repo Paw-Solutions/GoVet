@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL || '/api';
+const API_URL = import.meta.env.VITE_API_URL || "/api";
 
 // Interfaz para crear un paciente (SIN rut_tutor)
 export interface PacienteCreate {
@@ -169,12 +169,47 @@ export async function obtenerPacientesPaginados(
   }
 }
 
-{/* Actualizar relacion paciente tutor */}
+// Función para obtener pacientes de un tutor específico
+export async function obtenerPacientesPorTutor(
+  rutTutor: string
+): Promise<PacienteData[]> {
+  try {
+    console.log(`Obteniendo pacientes del tutor ${rutTutor}...`);
+    const response = await fetch(
+      `${API_URL}/pacientes/tutor/${encodeURIComponent(rutTutor)}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        // No hay pacientes para este tutor, retornar array vacío
+        return [];
+      }
+      throw new Error(`Error en la petición: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("Pacientes del tutor obtenidos:", data);
+    return data;
+  } catch (error) {
+    console.error("Error obteniendo pacientes del tutor:", error);
+    throw error;
+  }
+}
+
+{
+  /* Actualizar relacion paciente tutor */
+}
 export async function actualizarTutorDePaciente(
   idPaciente: number,
   rutTutor: string
 ): Promise<PacienteData> {
-  const API_URL = import.meta.env.VITE_API_URL || '/api';
+  const API_URL = import.meta.env.VITE_API_URL || "/api";
   try {
     const url = `${API_URL}/pacientes/${encodeURIComponent(
       idPaciente
@@ -202,7 +237,9 @@ export async function actualizarTutorDePaciente(
   }
 }
 
-{/* Actualizar informacion paciente */}
+{
+  /* Actualizar informacion paciente */
+}
 export async function actualizarPaciente(
   idPaciente: number,
   payload: PacienteCreate

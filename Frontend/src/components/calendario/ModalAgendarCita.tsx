@@ -20,6 +20,7 @@ import {
   IonSpinner,
   useIonToast,
   IonList,
+  IonPopover,
 } from "@ionic/react";
 import {
   closeOutline,
@@ -28,7 +29,13 @@ import {
   pawOutline,
 } from "ionicons/icons";
 import { crearCita, type CitaCreate } from "../../api/citas";
+import { createEvent, type CalendarEventCreate } from "../../api/calendario";
 import { enviarNotificacion } from "../../api/notificacion";
+import { obtenerTutoresPaginados, type TutorData } from "../../api/tutores";
+import {
+  obtenerPacientesPorTutor,
+  type PacienteData,
+} from "../../api/pacientes";
 
 interface ModalAgendarCitaProps {
   isOpen: boolean;
@@ -47,37 +54,51 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
   const [paso, setPaso] = useState(1);
   const [loading, setLoading] = useState(false);
 
-  // Datos del formulario
-  const [rutTutor, setRutTutor] = useState("");
-  const [tutorEncontrado, setTutorEncontrado] = useState(false);
-  const [nombreTutor, setNombreTutor] = useState("");
-  const [emailTutor, setEmailTutor] = useState("");
+  // Datos del formulario - Paso 1: Buscar Tutor
+  const [busquedaTutor, setBusquedaTutor] = useState("");
+  const [tutoresEncontrados, setTutoresEncontrados] = useState<TutorData[]>([]);
+  const [buscandoTutores, setBuscandoTutores] = useState(false);
+  const [tutorSeleccionado, setTutorSeleccionado] = useState<TutorData | null>(
+    null
+  );
 
+  // Datos del formulario - Paso 2: Seleccionar Pacientes
   const [pacientesSeleccionados, setPacientesSeleccionados] = useState<
     number[]
   >([]);
-  const [pacientesDisponibles] = useState([
-    { id_paciente: 1, nombre: "Firulais", especie: "Perro" },
-    { id_paciente: 2, nombre: "Michi", especie: "Gato" },
-    { id_paciente: 3, nombre: "Luna", especie: "Gato" },
-    { id_paciente: 4, nombre: "Max", especie: "Perro" },
-  ]); // Mock data
+  const [pacientesDisponibles, setPacientesDisponibles] = useState<
+    PacienteData[]
+  >([]);
+  const [cargandoPacientes, setCargandoPacientes] = useState(false);
 
+  // Datos del formulario - Paso 3: Fecha y Hora
   const [fechaHora, setFechaHora] = useState(fechaInicial.toISOString());
+  const [fechaHoraTermino, setFechaHoraTermino] = useState(
+    fechaInicial.toISOString()
+  );
+  const [ubicacion, setUbicacion] = useState("");
+  const [errorDuracion, setErrorDuracion] = useState(false);
+
+  // Datos del formulario - Paso 4: Motivo, Descripción y Notas
   const [motivo, setMotivo] = useState("");
+  const [descripcion, setDescripcion] = useState("");
   const [notas, setNotas] = useState("");
   const [notificacion, setNotificacion] = useState<string>("diaAnterior");
   const [fechaNotificacion, setFechaNotificacion] = useState<Date | null>(null);
 
   const resetForm = () => {
     setPaso(1);
-    setRutTutor("");
-    setTutorEncontrado(false);
-    setNombreTutor("");
-    setEmailTutor("");
+    setBusquedaTutor("");
+    setTutoresEncontrados([]);
+    setTutorSeleccionado(null);
     setPacientesSeleccionados([]);
-    setFechaHora(new Date().toISOString());
+    setPacientesDisponibles([]);
+    const fechaDefault = new Date();
+    setFechaHora(fechaDefault.toISOString());
+    setFechaHoraTermino(fechaDefault.toISOString());
+    setUbicacion("");
     setMotivo("");
+    setDescripcion("");
     setNotas("");
   };
 
@@ -86,24 +107,63 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
     onClose();
   };
 
-  const buscarTutor = () => {
-    // Mock: Simular búsqueda de tutor
-    if (rutTutor.trim()) {
-      setTutorEncontrado(true);
-      setNombreTutor("Juan Pérez González");
-      // Mock: asignar email del tutor encontrado
-      setEmailTutor("daniela.huenuman@alumnos.uach.cl"); // Para probar el recibo de correos
+  // Función para buscar tutores
+  const buscarTutores = async (textoBusqueda: string) => {
+    setBusquedaTutor(textoBusqueda);
+
+    if (!textoBusqueda.trim()) {
+      setTutoresEncontrados([]);
+      return;
+    }
+
+    setBuscandoTutores(true);
+    try {
+      const response = await obtenerTutoresPaginados(1, 20, textoBusqueda);
+      setTutoresEncontrados(response.tutores);
+    } catch (error) {
+      console.error("Error buscando tutores:", error);
       present({
-        message: "Tutor encontrado",
+        message: "Error al buscar tutores",
         duration: 2000,
-        color: "success",
+        color: "danger",
       });
-    } else {
+    } finally {
+      setBuscandoTutores(false);
+    }
+  };
+
+  const seleccionarTutor = (tutor: TutorData) => {
+    setTutorSeleccionado(tutor);
+    setTutoresEncontrados([]);
+    setBusquedaTutor("");
+    // Cargar pacientes del tutor seleccionado
+    cargarPacientesDeTutor(tutor.rut);
+  };
+
+  // Función para cargar pacientes de un tutor
+  const cargarPacientesDeTutor = async (rutTutor: string) => {
+    setCargandoPacientes(true);
+    try {
+      const pacientes = await obtenerPacientesPorTutor(rutTutor);
+      setPacientesDisponibles(pacientes);
+
+      if (pacientes.length === 0) {
+        present({
+          message: "Este tutor no tiene pacientes registrados",
+          duration: 3000,
+          color: "warning",
+        });
+      }
+    } catch (error) {
+      console.error("Error cargando pacientes:", error);
       present({
-        message: "Ingresa un RUT válido",
+        message: "Error al cargar los pacientes del tutor",
         duration: 2000,
-        color: "warning",
+        color: "danger",
       });
+      setPacientesDisponibles([]);
+    } finally {
+      setCargandoPacientes(false);
     }
   };
 
@@ -150,12 +210,31 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
     handleNotificacion();
   }, [handleNotificacion]);
 
+  // Validar duración de la cita (mínimo 30 minutos)
+  useEffect(() => {
+    if (fechaHora && fechaHoraTermino) {
+      const inicio = new Date(fechaHora);
+      const termino = new Date(fechaHoraTermino);
+      const diferenciaMinutos = (termino.getTime() - inicio.getTime()) / 60000;
+      setErrorDuracion(diferenciaMinutos < 30);
+    }
+  }, [fechaHora, fechaHoraTermino]);
 
-  
+  // Handler para cambio de fecha/hora de inicio
+  const handleCambioInicio = (value: string | null | undefined) => {
+    if (value) {
+      setFechaHora(value);
+      // Auto-ajustar hora de término a inicio + 30 minutos
+      const nuevaFechaInicio = new Date(value);
+      nuevaFechaInicio.setMinutes(nuevaFechaInicio.getMinutes() + 30);
+      setFechaHoraTermino(nuevaFechaInicio.toISOString());
+    }
+  };
+
   const handleSiguiente = () => {
-    if (paso === 1 && !tutorEncontrado) {
+    if (paso === 1 && !tutorSeleccionado) {
       present({
-        message: "Debes buscar un tutor primero",
+        message: "Debes seleccionar un tutor primero",
         duration: 2000,
         color: "warning",
       });
@@ -163,21 +242,46 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
     }
 
     if (paso === 2 && pacientesSeleccionados.length === 0) {
-      present({
-        message: "Selecciona al menos un paciente",
-        duration: 2000,
-        color: "warning",
-      });
+      if (pacientesDisponibles.length === 0) {
+        present({
+          message: "El tutor no tiene pacientes registrados",
+          duration: 3000,
+          color: "warning",
+        });
+      } else {
+        present({
+          message: "Selecciona al menos un paciente",
+          duration: 2000,
+          color: "warning",
+        });
+      }
       return;
     }
 
-    if (paso === 3 && !motivo.trim()) {
-      present({
-        message: "Ingresa el motivo de la cita",
-        duration: 2000,
-        color: "warning",
-      });
-      return;
+    if (paso === 3) {
+      // Validar que la hora de término sea después de la hora de inicio
+      const inicio = new Date(fechaHora);
+      const termino = new Date(fechaHoraTermino);
+
+      if (termino <= inicio) {
+        present({
+          message: "La hora de término debe ser después de la hora de inicio",
+          duration: 2000,
+          color: "warning",
+        });
+        return;
+      }
+    }
+
+    if (paso === 4) {
+      if (!motivo.trim()) {
+        present({
+          message: "Ingresa el motivo de la cita",
+          duration: 2000,
+          color: "warning",
+        });
+        return;
+      }
     }
 
     setPaso(paso + 1);
@@ -190,8 +294,49 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
   const handleCrearCita = async () => {
     setLoading(true);
     try {
+      // Usar las fechas ISO completas directamente
+      const fechaInicio = new Date(fechaHora);
+      const fechaTermino = new Date(fechaHoraTermino);
+
+      // Obtener nombres de los pacientes seleccionados
+      const nombresPacientes = pacientesDisponibles
+        .filter((p) => pacientesSeleccionados.includes(p.id_paciente))
+        .map((p) => p.nombre)
+        .join(", ");
+
+      // Construir el evento para Google Calendar
+      const nuevoEvento: CalendarEventCreate = {
+        summary: `${motivo} - ${nombresPacientes}`,
+        location: ubicacion || undefined,
+        description: descripcion
+          ? `${descripcion}\n\nPacientes: ${nombresPacientes}\nTutor: ${
+              tutorSeleccionado!.nombre
+            } ${tutorSeleccionado!.apellido_paterno}${
+              notas ? "\n\nNotas: " + notas : ""
+            }`
+          : `Pacientes: ${nombresPacientes}\nTutor: ${
+              tutorSeleccionado!.nombre
+            } ${tutorSeleccionado!.apellido_paterno}${
+              notas ? "\n\nNotas: " + notas : ""
+            }`,
+        start: {
+          dateTime: fechaInicio.toISOString(),
+          timeZone: "America/Santiago",
+        },
+        end: {
+          dateTime: fechaTermino.toISOString(),
+          timeZone: "America/Santiago",
+        },
+        attendees: tutorSeleccionado?.email
+          ? [{ email: tutorSeleccionado.email }]
+          : undefined,
+      };
+
+      await createEvent(nuevoEvento);
+
+      // También crear en el sistema de citas local
       const nuevaCita: CitaCreate = {
-        rut_tutor: rutTutor,
+        rut_tutor: tutorSeleccionado!.rut,
         fecha_hora: fechaHora,
         motivo: motivo,
         notas: notas || undefined,
@@ -208,17 +353,24 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
       });
 
       try {
-        if (emailTutor) {
-          console.log("Enviando notificación al email:", emailTutor);
+        if (tutorSeleccionado?.email) {
+          console.log(
+            "Enviando notificación al email:",
+            tutorSeleccionado.email
+          );
 
+          const nombreCompleto = `${tutorSeleccionado.nombre} ${tutorSeleccionado.apellido_paterno}`;
           const cuerpo = `
-            <p>Hola ${nombreTutor || ""},</p>
+            <p>Hola ${nombreCompleto},</p>
             <p>Tu cita ha sido agendada.</p>
             <p>Motivo: ${motivo || "(Sin especificar)"}</p>
           `;
 
           // calcular fecha de envío localmente (no confiar en setState que es asíncrono)
-          const fechaEnvioDate = calcularFechaNotificacion(notificacion, fechaHora);
+          const fechaEnvioDate = calcularFechaNotificacion(
+            notificacion,
+            fechaHora
+          );
           const fechaEnvioIso = fechaEnvioDate.toISOString();
 
           // actualizar el estado para mostrar en el resumen si se necesita
@@ -226,7 +378,7 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
 
           await enviarNotificacion(
             {
-              email: emailTutor,
+              email: tutorSeleccionado.email,
               asunto: "Confirmación de cita - GoVet",
               cuerpo,
             },
@@ -239,7 +391,9 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
             color: "success",
           });
         } else {
-          console.log("No hay email de tutor; se omite el envío de notificación.");
+          console.log(
+            "No hay email de tutor; se omite el envío de notificación."
+          );
         }
       } catch (emailError) {
         console.error("Error enviando notificación:", emailError);
@@ -269,41 +423,79 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
       <div className="paso-header">
         <IonIcon icon={personOutline} className="paso-icon" />
         <h3>Buscar Tutor</h3>
-        <p>Ingresa el RUT del tutor responsable</p>
+        <p>Busca por nombre, RUT o email del tutor</p>
       </div>
 
-      <IonItem>
-        <IonLabel position="stacked">RUT del Tutor</IonLabel>
-        <IonInput
-          value={rutTutor}
-          onIonInput={(e) => setRutTutor(e.detail.value || "")}
-          placeholder="12345678-9"
-          disabled={tutorEncontrado}
-        />
-      </IonItem>
+      {!tutorSeleccionado ? (
+        <>
+          <IonItem>
+            <IonLabel position="stacked">Buscar Tutor</IonLabel>
+            <IonInput
+              value={busquedaTutor}
+              onIonInput={(e) => buscarTutores(e.detail.value || "")}
+              placeholder="Nombre, RUT o email..."
+              debounce={500}
+            />
+          </IonItem>
 
-      {!tutorEncontrado ? (
-        <IonButton expand="block" onClick={buscarTutor} className="mt-4">
-          Buscar Tutor
-        </IonButton>
+          {buscandoTutores && (
+            <div className="ion-text-center ion-padding">
+              <IonSpinner />
+            </div>
+          )}
+
+          {tutoresEncontrados.length > 0 && (
+            <IonList className="tutores-resultados">
+              {tutoresEncontrados.map((tutor, index) => (
+                <IonItem
+                  key={`${tutor.rut}-${index}`}
+                  button
+                  onClick={() => seleccionarTutor(tutor)}
+                >
+                  <IonIcon icon={personOutline} slot="start" />
+                  <IonLabel>
+                    <h3>
+                      {tutor.nombre} {tutor.apellido_paterno}{" "}
+                      {tutor.apellido_materno}
+                    </h3>
+                    <p>RUT: {tutor.rut}</p>
+                    {tutor.email && <p>Email: {tutor.email}</p>}
+                  </IonLabel>
+                </IonItem>
+              ))}
+            </IonList>
+          )}
+
+          {busquedaTutor &&
+            !buscandoTutores &&
+            tutoresEncontrados.length === 0 && (
+              <IonNote className="ion-padding">
+                No se encontraron tutores con "{busquedaTutor}"
+              </IonNote>
+            )}
+        </>
       ) : (
         <div className="tutor-encontrado">
           <IonChip color="success">
             <IonIcon icon={checkmarkOutline} />
-            <IonLabel>Tutor: {nombreTutor}</IonLabel>
+            <IonLabel>
+              Tutor: {tutorSeleccionado.nombre}{" "}
+              {tutorSeleccionado.apellido_paterno}
+            </IonLabel>
           </IonChip>
-          {emailTutor && (
-            <div className="tutor-email" style={{ marginTop: 8 }}>
-              <IonNote>{emailTutor}</IonNote>
-            </div>
-          )}
+          <div className="tutor-info">
+            <IonNote>RUT: {tutorSeleccionado.rut}</IonNote>
+            {tutorSeleccionado.email && (
+              <IonNote>Email: {tutorSeleccionado.email}</IonNote>
+            )}
+          </div>
           <IonButton
             fill="clear"
             size="small"
             onClick={() => {
-              setTutorEncontrado(false);
-              setNombreTutor("");
-              setEmailTutor("");
+              setTutorSeleccionado(null);
+              setPacientesDisponibles([]);
+              setPacientesSeleccionados([]);
             }}
           >
             Cambiar tutor
@@ -321,29 +513,54 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
         <p>Elige los pacientes para la cita</p>
       </div>
 
-      <div className="pacientes-lista">
-        {pacientesDisponibles.map((paciente) => (
-          <IonItem
-            key={paciente.id_paciente}
-            button
-            onClick={() => togglePaciente(paciente.id_paciente)}
-            className={
-              pacientesSeleccionados.includes(paciente.id_paciente)
-                ? "paciente-seleccionado"
-                : ""
-            }
-          >
-            <IonIcon icon={pawOutline} slot="start" />
-            <IonLabel>
-              <h3>{paciente.nombre}</h3>
-              <p>{paciente.especie}</p>
-            </IonLabel>
-            {pacientesSeleccionados.includes(paciente.id_paciente) && (
-              <IonIcon icon={checkmarkOutline} slot="end" color="success" />
-            )}
-          </IonItem>
-        ))}
-      </div>
+      {tutorSeleccionado && (
+        <IonNote className="ion-padding">
+          Pacientes de: {tutorSeleccionado.nombre}{" "}
+          {tutorSeleccionado.apellido_paterno}
+        </IonNote>
+      )}
+
+      {cargandoPacientes ? (
+        <div className="ion-text-center ion-padding">
+          <IonSpinner />
+          <p>Cargando pacientes...</p>
+        </div>
+      ) : pacientesDisponibles.length === 0 ? (
+        <div className="ion-text-center ion-padding">
+          <IonNote>
+            Este tutor no tiene pacientes registrados. Por favor, registra un
+            paciente primero.
+          </IonNote>
+        </div>
+      ) : (
+        <div className="pacientes-lista">
+          {pacientesDisponibles.map((paciente) => (
+            <IonItem
+              key={paciente.id_paciente}
+              button
+              onClick={() => togglePaciente(paciente.id_paciente)}
+              className={
+                pacientesSeleccionados.includes(paciente.id_paciente)
+                  ? "paciente-seleccionado"
+                  : ""
+              }
+            >
+              <IonIcon icon={pawOutline} slot="start" />
+              <IonLabel>
+                <h3>{paciente.nombre}</h3>
+                <p>
+                  {paciente.especie || "Especie no especificada"}
+                  {paciente.raza && ` - ${paciente.raza}`}
+                </p>
+                {paciente.sexo && <p>Sexo: {paciente.sexo}</p>}
+              </IonLabel>
+              {pacientesSeleccionados.includes(paciente.id_paciente) && (
+                <IonIcon icon={checkmarkOutline} slot="end" color="success" />
+              )}
+            </IonItem>
+          ))}
+        </div>
+      )}
 
       {pacientesSeleccionados.length > 0 && (
         <IonNote className="mt-3">
@@ -356,103 +573,261 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
     </div>
   );
 
-  const renderPaso3 = () => (
-    <div className="paso-content">
-      <div className="paso-header">
-        <h3>Fecha, Hora y Motivo</h3>
-        <p>Selecciona cuándo será la cita y su motivo</p>
-      </div>
+  const renderPaso3 = () => {
+    // Calcular mínimo para hora de término (inicio + 30 minutos)
+    const minTerminoTimeOnly = () => {
+      const minFecha = new Date(fechaHora);
+      minFecha.setMinutes(minFecha.getMinutes() + 30);
+      return minFecha.toISOString();
+    };
 
-      <IonDatetime
-        value={fechaHora}
-        onIonChange={(e) => setFechaHora(e.detail.value as string)}
-        presentation="date-time"
-        locale="es-CL"
-        min={new Date().toISOString()}
-      />
+    // Formatear hora para mostrar en el botón
+    const formatearHora = (isoString: string) => {
+      const fecha = new Date(isoString);
+      return fecha.toLocaleTimeString("es-CL", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      });
+    };
 
-      <IonItem className="mt-3">
-        <IonLabel position="stacked">
-          Motivo de la cita <span className="required">*</span>
-        </IonLabel>
-        <IonInput
-          value={motivo}
-          onIonInput={(e) => setMotivo(e.detail.value || "")}
-          placeholder="Ej: Vacunación, Control, Revisión..."
-        />
-      </IonItem>
+    return (
+      <div className="paso-content">
+        <div className="paso-header">
+          <h3>Fecha y Hora de la Cita</h3>
+          <p>Define cuándo comienza y termina la cita</p>
+        </div>
 
-      <IonList>
         <IonItem>
-          <IonLabel position="stacked">Seleccionar cuando notificar al tutor</IonLabel>
-          <IonSelect
-            aria-label="notificacion"
-            placeholder="El tutor será notificado en.."
-            value={notificacion}
-            onIonChange={(e) => setNotificacion(e.detail.value as string)}
-          >
-            <IonSelectOption value="diaAnterior">Día anterior</IonSelectOption>
-            <IonSelectOption value="semanaAntes">Una semana antes</IonSelectOption>
-            <IonSelectOption value="ahora">Ahora (test)</IonSelectOption>
-            <IonSelectOption value="minutos">2h 40min antes (test)</IonSelectOption>
-          </IonSelect>
+          <IonLabel position="stacked">
+            Fecha de la cita <span className="required">*</span>
+          </IonLabel>
+          <IonDatetime
+            value={fechaHora}
+            onIonChange={(e) => handleCambioInicio(e.detail.value as string)}
+            presentation="date"
+            locale="es-CL"
+            min={new Date().toISOString()}
+          />
         </IonItem>
-      </IonList>
-    </div>
-  );
 
-  const renderPaso4 = () => (
-    <div className="paso-content">
-      <div className="paso-header">
-        <h3>Notas y Resumen</h3>
-        <p>Información adicional y confirmación</p>
+        <IonItem>
+          <IonLabel position="stacked">
+            Horario de la cita <span className="required">*</span>
+          </IonLabel>
+          <div className="time-range-picker">
+            <IonButton
+              id="popover-time-inicio"
+              expand="block"
+              fill="outline"
+              className="time-button"
+            >
+              {formatearHora(fechaHora)}
+            </IonButton>
+
+            <IonPopover
+              trigger="popover-time-inicio"
+              dismissOnSelect={false}
+              size="auto"
+            >
+              <IonDatetime
+                presentation="time"
+                value={fechaHora}
+                onIonChange={(e) => {
+                  handleCambioInicio(e.detail.value as string);
+                }}
+                hourCycle="h23"
+                locale="es-CL"
+                showDefaultButtons={true}
+              />
+            </IonPopover>
+
+            <span className="range-arrow">→</span>
+
+            <IonButton
+              id="popover-time-termino"
+              expand="block"
+              fill="outline"
+              className="time-button"
+            >
+              {formatearHora(fechaHoraTermino)}
+            </IonButton>
+
+            <IonPopover
+              trigger="popover-time-termino"
+              dismissOnSelect={false}
+              size="auto"
+            >
+              <IonDatetime
+                presentation="time"
+                value={fechaHoraTermino}
+                onIonChange={(e) => {
+                  setFechaHoraTermino(e.detail.value as string);
+                }}
+                hourCycle="h23"
+                min={minTerminoTimeOnly()}
+                locale="es-CL"
+                showDefaultButtons={true}
+              />
+            </IonPopover>
+          </div>
+          {errorDuracion && (
+            <IonNote color="danger">
+              La cita debe durar al menos 30 minutos
+            </IonNote>
+          )}
+        </IonItem>
+
+        <IonItem className="mt-3">
+          <IonLabel position="stacked">Ubicación (opcional)</IonLabel>
+          <IonInput
+            value={ubicacion}
+            onIonInput={(e) => setUbicacion(e.detail.value || "")}
+            placeholder="Ej: Consultorio 1, Sala de vacunación..."
+          />
+        </IonItem>
       </div>
+    );
+  };
 
-      <IonItem>
-        <IonLabel position="stacked">Notas adicionales (opcional)</IonLabel>
-        <IonTextarea
-          value={notas}
-          onIonInput={(e) => setNotas(e.detail.value || "")}
-          placeholder="Información adicional sobre la cita..."
-          rows={4}
-        />
-      </IonItem>
+  const renderPaso4 = () => {
+    // Calcular fecha y horas formateadas
+    const fechaInicio = new Date(fechaHora);
+    const fechaTermino = new Date(fechaHoraTermino);
 
-      {/* Resumen */}
-      <div className="resumen-cita">
-        <h4>Resumen</h4>
-        <div className="resumen-item">
-          <strong>Tutor:</strong> {nombreTutor}
-          {emailTutor ? ` (${emailTutor})` : ""}
+    const fechaFormateada = fechaInicio.toLocaleDateString("es-CL", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+
+    const horaInicioFormateada = fechaInicio.toLocaleTimeString("es-CL", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    const horaTerminoFormateada = fechaTermino.toLocaleTimeString("es-CL", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    return (
+      <div className="paso-content">
+        <div className="paso-header">
+          <h3>Detalles y Confirmación</h3>
+          <p>Completa la información de la cita</p>
         </div>
-        <div className="resumen-item">
-          <strong>Pacientes:</strong>{" "}
-          {pacientesDisponibles
-            .filter((p) => pacientesSeleccionados.includes(p.id_paciente))
-            .map((p) => p.nombre)
-            .join(", ")}
-        </div>
-        <div className="resumen-item">
-          <strong>Fecha:</strong> {new Date(fechaHora).toLocaleString("es-CL")}
-        </div>
-        <div className="resumen-item">
-          <strong>Motivo:</strong> {motivo || "(Sin especificar)"}
-        </div>
-        <div className="resumen-item">
-          <strong>Notificación:</strong>{" "}
-          {notificacion === "diaAnterior"
-            ? "Día anterior"
-            : notificacion === "semanaAntes"
-            ? "Una semana antes"
-            : notificacion === "minutos"
-            ? "2h 45min antes (test)"
-            : notificacion === "ahora"
-            ? "Ahora (test)"
-            : "-"}
+
+        <IonItem>
+          <IonLabel position="stacked">
+            Motivo de la cita <span className="required">*</span>
+          </IonLabel>
+          <IonInput
+            value={motivo}
+            onIonInput={(e) => setMotivo(e.detail.value || "")}
+            placeholder="Ej: Vacunación, Control, Revisión..."
+          />
+        </IonItem>
+
+        <IonItem>
+          <IonLabel position="stacked">Descripción (opcional)</IonLabel>
+          <IonTextarea
+            value={descripcion}
+            onIonInput={(e) => setDescripcion(e.detail.value || "")}
+            placeholder="Detalles adicionales sobre la cita..."
+            rows={3}
+          />
+        </IonItem>
+
+        <IonList className="mt-3">
+          <IonItem>
+            <IonLabel position="stacked">¿Cuándo notificar al tutor?</IonLabel>
+            <IonSelect
+              aria-label="notificacion"
+              placeholder="Selecciona cuándo notificar..."
+              value={notificacion}
+              onIonChange={(e) => setNotificacion(e.detail.value as string)}
+            >
+              <IonSelectOption value="diaAnterior">
+                Día anterior
+              </IonSelectOption>
+              <IonSelectOption value="semanaAntes">
+                Una semana antes
+              </IonSelectOption>
+              <IonSelectOption value="ahora">Ahora (test)</IonSelectOption>
+              <IonSelectOption value="minutos">
+                2h 40min antes (test)
+              </IonSelectOption>
+            </IonSelect>
+          </IonItem>
+        </IonList>
+
+        <IonItem className="mt-3">
+          <IonLabel position="stacked">Notas adicionales (opcional)</IonLabel>
+          <IonTextarea
+            value={notas}
+            onIonInput={(e) => setNotas(e.detail.value || "")}
+            placeholder="Información adicional sobre la cita..."
+            rows={3}
+          />
+        </IonItem>
+
+        {/* Resumen */}
+        <div className="resumen-cita">
+          <h4>Resumen de la Cita</h4>
+          <div className="resumen-item">
+            <strong>Tutor:</strong>{" "}
+            {tutorSeleccionado
+              ? `${tutorSeleccionado.nombre} ${tutorSeleccionado.apellido_paterno} ${tutorSeleccionado.apellido_materno}`
+              : "-"}
+            {tutorSeleccionado?.email && ` (${tutorSeleccionado.email})`}
+          </div>
+          <div className="resumen-item">
+            <strong>Pacientes:</strong>{" "}
+            {pacientesDisponibles
+              .filter((p) => pacientesSeleccionados.includes(p.id_paciente))
+              .map((p) => p.nombre)
+              .join(", ") || "-"}
+          </div>
+          <div className="resumen-item">
+            <strong>Fecha:</strong> {fechaFormateada}
+          </div>
+          <div className="resumen-item">
+            <strong>Hora de inicio:</strong> {horaInicioFormateada}
+          </div>
+          <div className="resumen-item">
+            <strong>Hora de término:</strong> {horaTerminoFormateada}
+          </div>
+          {ubicacion && (
+            <div className="resumen-item">
+              <strong>Ubicación:</strong> {ubicacion}
+            </div>
+          )}
+          <div className="resumen-item">
+            <strong>Motivo:</strong> {motivo || "(Por completar)"}
+          </div>
+          {descripcion && (
+            <div className="resumen-item">
+              <strong>Descripción:</strong> {descripcion}
+            </div>
+          )}
+          <div className="resumen-item">
+            <strong>Notificación:</strong>{" "}
+            {notificacion === "diaAnterior"
+              ? "Día anterior"
+              : notificacion === "semanaAntes"
+              ? "Una semana antes"
+              : notificacion === "minutos"
+              ? "2h 40min antes (test)"
+              : notificacion === "ahora"
+              ? "Ahora (test)"
+              : "-"}
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <IonModal isOpen={isOpen} onDidDismiss={handleClose}>
