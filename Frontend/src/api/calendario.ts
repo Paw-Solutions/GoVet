@@ -81,7 +81,7 @@ export async function getEventsMonth(
   return data.events;
 }
 
-export async function deteleEvent(eventId: string): Promise<void> {
+export async function deleteEvent(eventId: string): Promise<void> {
   const response = await fetch(`${API_URL}/events/${eventId}`, {
     method: "DELETE",
     headers: { "Content-Type": "application/json" },

@@ -23,7 +23,7 @@ import {
   personOutline,
   pawOutline,
 } from "ionicons/icons";
-import { deteleEvent } from "../../api/calendario";
+import { deleteEvent } from "../../api/calendario";
 import { CalendarEvent } from "../../api/calendario";
 
 interface ModalDetalleCitaProps {
@@ -71,7 +71,7 @@ const ModalDetalleCita: React.FC<ModalDetalleCitaProps> = ({
     if (!evento || !evento.id) return;
 
     try {
-      await deteleEvent(evento.id);
+      await deleteEvent(evento.id);
 
       present({
         message: "Evento eliminado exitosamente",

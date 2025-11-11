@@ -296,160 +296,47 @@ def create_event(event: EventCreate):
     
     except HttpError as error:
         raise HTTPException(status_code=500, detail=str(error))
-"""
-def get_credentials():
-    creds = None
-    if os.path.exists("token.json"):
-        creds = Credentials.from_authorized_user_file("token.json", SCOPES)
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file("credentials.json", SCOPES)
-            creds = flow.run_local_server(port=4007)
-        with open("token.json", "w") as token:
-            token.write(creds.to_json())
-    return creds
-
-@app.get("/events")
-def list_events():
-    ""Obtiene los próximos 10 eventos.""
-    creds = get_credentials()
-    try:
-        service = build("calendar", "v3", credentials=creds)
-        now = datetime.datetime.utcnow().isoformat() + "Z"
-        events_result = (
-            service.events()
-            .list(
-                calendarId="primary",
-                timeMin=now,
-                maxResults=10,
-                singleEvents=True,
-                orderBy="startTime",
-            )
-            .execute()
-        )
-        print({"events": events_result.get("items", [])})
-        return {"events": events_result.get("items", [])}
-    except HttpError as error:
-        raise HTTPException(status_code=500, detail=str(error))
-
-@app.get("/events/day")
-def get_events_day():
-    ""Obtiene los eventos del día actual.""
-    creds = get_credentials()
-    try:
-        service = build("calendar", "v3", credentials=creds)
-
-        now = datetime.datetime.now(datetime.timezone.utc)
-        start_of_day = now.replace(hour=0, minute=0, second=0, microsecond=0)
-        end_of_day = start_of_day + datetime.timedelta(days=1)
-
-        events_result = (
-            service.events()
-            .list(
-                calendarId="primary",
-                timeMin=start_of_day.isoformat(),
-                timeMax=end_of_day.isoformat(),
-                singleEvents=True,
-                orderBy="startTime",
-            )
-            .execute()
-        )
-
-        return {"events": events_result.get("items", [])}
-
-    except HttpError as error:
-        raise HTTPException(status_code=500, detail=str(error))
     
-@app.get("/events/week")
-def get_events_week():
-    ""Obtiene los eventos de la semana actual.""
-    creds = get_credentials()
-    try:
-        service = build("calendar", "v3", credentials=creds)
-
-        now = datetime.datetime.now(datetime.timezone.utc)
-        start_of_week = (now - datetime.timedelta(days=now.weekday())).replace(
-            hour=0, minute=0, second=0, microsecond=0
-        )
-        end_of_week = start_of_week + datetime.timedelta(days=7)
-
-        events_result = (
-            service.events()
-            .list(
-                calendarId="primary",
-                timeMin=start_of_week.isoformat(),
-                timeMax=end_of_week.isoformat(),
-                singleEvents=True,
-                orderBy="startTime",
-            )
-            .execute()
-        )
-
-        return {"events": events_result.get("items", [])}
-
-    except HttpError as error:
-        raise HTTPException(status_code=500, detail=str(error))
-
-@app.get("/events/month")
-def get_events_month():
-    ""Obtiene los eventos del mes actual.""
-    creds = get_credentials()
-    try:
-        service = build("calendar", "v3", credentials=creds)
-
-        now = datetime.datetime.now(datetime.timezone.utc)
-        start_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-        if start_of_month.month == 12:
-            next_month = start_of_month.replace(year=start_of_month.year + 1, month=1)
-        else:
-            next_month = start_of_month.replace(month=start_of_month.month + 1)
-
-        events_result = (
-            service.events()
-            .list(
-                calendarId="primary",
-                timeMin=start_of_month.isoformat(),
-                timeMax=next_month.isoformat(),
-                singleEvents=True,
-                orderBy="startTime",
-            )
-            .execute()
-        )
-
-        return {"events": events_result.get("items", [])}
-
-    except HttpError as error:
-        raise HTTPException(status_code=500, detail=str(error))
+@app.delete("/events/{event_id}")
+def delete_event(event_id: str):
+    """
+    Elimina un evento del calendario de Google.
     
-@app.post("/events")
-def create_event(event: EventCreate):
-    ""Crea un nuevo evento en el calendario.""
-    creds = get_credentials()
+    Args:
+        event_id: ID del evento de Google Calendar
+    """
     try:
-        service = build("calendar", "v3", credentials=creds)
-        event_body = {
-            "summary": event.summary,
-            "description": event.description,
-            "location": event.location,
-            "start": {"dateTime": event.start, "timeZone": "America/Santiago"},
-            "end": {"dateTime": event.end, "timeZone": "America/Santiago"},
-            "reminders": {
-                "useDefault": False,
-                "overrides": [
-                    {"method": "email", "minutes": 24 * 60},
-                    {"method": "popup", "minutes": 60},
-                ],
-            },
-            "attendees": event.attendees if event.attendees else [],
+        service = get_calendar_service()
+        
+        # Eliminar el evento
+        service.events().delete(
+            calendarId=CALENDAR_ID,
+            eventId=event_id
+        ).execute()
+        
+        return {
+            "message": "Evento eliminado exitosamente",
+            "event_id": event_id
         }
-        print(event_body)
-        created_event = service.events().insert(calendarId="primary", body=event_body).execute()
-        return {"message": "Evento creado exitosamente", "event": created_event}
+    
     except HttpError as error:
-        raise HTTPException(status_code=500, detail=str(error))
-"""
+        # Si el evento no existe, Google retorna 404
+        if error.resp.status == 410 or error.resp.status == 404:
+            raise HTTPException(
+                status_code=404,
+                detail="Evento no encontrado o ya fue eliminado"
+            )
+        
+        print(f"Error al eliminar evento: {error}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error al eliminar evento: {str(error)}"
+        )
+    
+    except Exception as e:
+        print(f"Error inesperado: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 # HU 4: Como Veterinaria, quiero poder almacenar al tutor con su RUT y nombre, para poder tener su información para consultas futuras
 """ RUTAS PARA TUTORES (dueños de mascotas) """
 # Ruta POST para añadir un dueño
