@@ -16,7 +16,6 @@ import {
   timeOutline,
   calendarOutline,
 } from "ionicons/icons";
-import { obtenerCitasPorRango, type Cita } from "../../api/citas";
 import ModalDetalleCita from "./ModalDetalleCita";
 import { CalendarEvent, getEventsWeek } from "../../api/calendario";
 
@@ -27,7 +26,8 @@ interface VistaSemanaProps {
 
 const VistaSemana: React.FC<VistaSemanaProps> = ({ fecha, onCambiarFecha }) => {
   const [loading, setLoading] = useState(true);
-  const [eventoSeleccionado, setEventoSeleccionado] = useState<CalendarEvent | null>(null);
+  const [eventoSeleccionado, setEventoSeleccionado] =
+    useState<CalendarEvent | null>(null);
   const [eventos, setEventos] = useState<CalendarEvent[]>([]);
   const [mostrarDetalle, setMostrarDetalle] = useState(false);
 
@@ -44,30 +44,43 @@ const VistaSemana: React.FC<VistaSemanaProps> = ({ fecha, onCambiarFecha }) => {
     fin.setDate(inicio.getDate() + 6);
     return fin;
   };
-    // Usar useMemo para evitar recalcular las fechas en cada render
+  // Usar useMemo para evitar recalcular las fechas en cada render
   const { inicioSemana, finSemana } = useMemo(() => {
-  const inicio = obtenerInicioSemana(fecha);
-  const fin = obtenerFinSemana(inicio);
-  return { inicioSemana: inicio, finSemana: fin };
-}, [fecha]);
-
-  useEffect(() => {
-    fetchEvents();
+    const inicio = obtenerInicioSemana(fecha);
+    const fin = obtenerFinSemana(inicio);
+    return { inicioSemana: inicio, finSemana: fin };
   }, [fecha]);
-  
+
   const fetchEvents = async () => {
+    setLoading(true);
     try {
-      const data = await getEventsWeek(inicioSemana.toISOString().split("T")[0], finSemana.toISOString().split("T")[0]);
+      const startDate = inicioSemana.toISOString().split("T")[0];
+      const endDate = finSemana.toISOString().split("T")[0];
+      console.log("Cargando eventos de la semana:", startDate, "a", endDate);
+      const data = await getEventsWeek(startDate, endDate);
+      console.log("Eventos de la semana recibidos:", data);
+
+      // Filtrar eventos que tengan la estructura correcta antes de ordenar
+      const eventosValidos = data.filter((evento) => evento?.start?.dateTime);
+
+      console.log("Eventos válidos:", eventosValidos);
+
       setEventos(
-        data.sort((a, b) => a.start.dateTime.localeCompare(b.start.dateTime))
+        eventosValidos.sort((a, b) =>
+          a.start.dateTime.localeCompare(b.start.dateTime)
+        )
       );
-      console.log("Eventos de la semana obtenidos:", data);
     } catch (error) {
       console.error("Error al obtener eventos:", error);
+      setEventos([]);
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchEvents();
+  }, [fecha, inicioSemana, finSemana]);
 
   const cambiarSemana = (semanas: number) => {
     const nuevaFecha = new Date(fecha);
@@ -132,21 +145,6 @@ const VistaSemana: React.FC<VistaSemanaProps> = ({ fecha, onCambiarFecha }) => {
   const handleEventoClick = (evento: CalendarEvent) => {
     setEventoSeleccionado(evento);
     setMostrarDetalle(true);
-  };
-
-  const getColorEstado = (estado: string) => {
-    switch (estado) {
-      case "programada":
-        return "primary";
-      case "confirmada":
-        return "success";
-      case "cancelada":
-        return "danger";
-      case "completada":
-        return "medium";
-      default:
-        return "medium";
-    }
   };
 
   return (
@@ -215,52 +213,57 @@ const VistaSemana: React.FC<VistaSemanaProps> = ({ fecha, onCambiarFecha }) => {
               </div>
             ) : (
               <div className="citas-lista">
-                {eventos.map((evento) => (
-                  <IonCard
-                    key={evento.id}
-                    className="cita-card"
-                    button
-                    onClick={() => handleEventoClick(evento)}
-                  >
-                    <IonCardContent>
-                      <div className="cita-fecha-hora">
-                        <div className="cita-fecha">
-                          <IonIcon icon={calendarOutline} />
-                          <span>
-                            {new Date(evento.start.dateTime).toLocaleDateString(
-                              "es-CL",
-                              {
+                {eventos.map((evento) => {
+                  // Validar que el evento tenga los datos mínimos necesarios
+                  if (!evento?.start?.dateTime || !evento?.id) {
+                    return null;
+                  }
+
+                  return (
+                    <IonCard
+                      key={evento.id}
+                      className="cita-card"
+                      button
+                      onClick={() => handleEventoClick(evento)}
+                    >
+                      <IonCardContent>
+                        <div className="cita-fecha-hora">
+                          <div className="cita-fecha">
+                            <IonIcon icon={calendarOutline} />
+                            <span>
+                              {new Date(
+                                evento.start.dateTime
+                              ).toLocaleDateString("es-CL", {
                                 weekday: "short",
                                 day: "numeric",
                                 month: "short",
-                              }
-                            )}
-                          </span>
-                        </div>
-                        <div className="cita-hora">
-                          <IonIcon icon={timeOutline} />
-                          <span className="hora-texto">
-                            {formatearHora(evento.start.dateTime)}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="cita-info">
-                        <div className="cita-tutor">
-                          <IonIcon icon={personOutline} />
-                          <span>
-                            {evento.summary}
-                          </span>
+                              })}
+                            </span>
+                          </div>
+                          <div className="cita-hora">
+                            <IonIcon icon={timeOutline} />
+                            <span className="hora-texto">
+                              {formatearHora(evento.start.dateTime)}
+                            </span>
+                          </div>
                         </div>
 
-                        <div className="cita-motivo">
-                          <strong>Descripción:</strong> {evento.description}
-                        </div>
-                      </div>
+                        <div className="cita-info">
+                          <div className="cita-tutor">
+                            <IonIcon icon={personOutline} />
+                            <span>{evento.summary || "Sin título"}</span>
+                          </div>
 
-                    </IonCardContent>
-                  </IonCard>
-                ))}
+                          {evento.description && (
+                            <div className="cita-motivo">
+                              <strong>Descripción:</strong> {evento.description}
+                            </div>
+                          )}
+                        </div>
+                      </IonCardContent>
+                    </IonCard>
+                  );
+                })}
               </div>
             )}
           </div>

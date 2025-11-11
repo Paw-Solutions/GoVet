@@ -305,14 +305,10 @@ const ModalInfoPaciente: React.FC<ModalInfoPacienteProps> = ({
           </IonCard>
         )}
 
-        {/* Widget de Citas y Vacunas Pendientes */}
+        {/* Widget de Vacunas Pendientes */}
         {paciente && (
           <PendientesPaciente
             idPaciente={paciente.id_paciente}
-            onVerDetalleCita={(cita) => {
-              // TODO: Implementar modal de detalle de cita
-              console.log("Ver detalle de cita:", cita);
-            }}
             onVerDetalleVacuna={(vacuna) => {
               // TODO: Implementar modal de detalle de vacuna
               console.log("Ver detalle de vacuna:", vacuna);

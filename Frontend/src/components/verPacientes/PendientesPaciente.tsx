@@ -20,21 +20,17 @@ import {
   chevronForwardOutline,
   checkmarkCircleOutline,
 } from "ionicons/icons";
-import { obtenerCitasPendientesPorPaciente, Cita } from "../../api/citas";
 import { obtenerVacunasPendientesPorPaciente, Vacuna } from "../../api/vacunas";
 
 interface PendientesPacienteProps {
   idPaciente: number;
-  onVerDetalleCita?: (cita: Cita) => void;
   onVerDetalleVacuna?: (vacuna: Vacuna) => void;
 }
 
 const PendientesPaciente: React.FC<PendientesPacienteProps> = ({
   idPaciente,
-  onVerDetalleCita,
   onVerDetalleVacuna,
 }) => {
-  const [citas, setCitas] = useState<Cita[]>([]);
   const [vacunas, setVacunas] = useState<Vacuna[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -48,12 +44,9 @@ const PendientesPaciente: React.FC<PendientesPacienteProps> = ({
     setError(null);
 
     try {
-      const [citasResponse, vacunasResponse] = await Promise.all([
-        obtenerCitasPendientesPorPaciente(idPaciente),
-        obtenerVacunasPendientesPorPaciente(idPaciente),
-      ]);
-
-      setCitas(citasResponse.citas);
+      const vacunasResponse = await obtenerVacunasPendientesPorPaciente(
+        idPaciente
+      );
       setVacunas(vacunasResponse.vacunas);
     } catch (err) {
       console.error("Error al cargar pendientes:", err);
@@ -80,17 +73,6 @@ const PendientesPaciente: React.FC<PendientesPacienteProps> = ({
     });
   };
 
-  const getColorEstado = (estado: string) => {
-    switch (estado) {
-      case "programada":
-        return "primary";
-      case "confirmada":
-        return "success";
-      default:
-        return "medium";
-    }
-  };
-
   if (loading) {
     return (
       <IonCard>
@@ -102,7 +84,7 @@ const PendientesPaciente: React.FC<PendientesPacienteProps> = ({
     );
   }
 
-  const totalPendientes = citas.length + vacunas.length;
+  const totalPendientes = vacunas.length;
 
   if (totalPendientes === 0) {
     return (
@@ -113,7 +95,7 @@ const PendientesPaciente: React.FC<PendientesPacienteProps> = ({
               icon={checkmarkCircleOutline}
               style={{ marginRight: "8px" }}
             />
-            Citas y Vacunas
+            Vacunas Pendientes
           </IonCardTitle>
         </IonCardHeader>
         <IonCardContent>
@@ -123,7 +105,7 @@ const PendientesPaciente: React.FC<PendientesPacienteProps> = ({
               style={{ fontSize: "48px", color: "var(--ion-color-success)" }}
             />
             <p style={{ marginTop: "16px", color: "var(--ion-color-medium)" }}>
-              No hay citas ni vacunas pendientes
+              No hay vacunas pendientes
             </p>
           </div>
         </IonCardContent>
@@ -142,8 +124,8 @@ const PendientesPaciente: React.FC<PendientesPacienteProps> = ({
             gap: "8px",
           }}
         >
-          <IonIcon icon={calendarOutline} />
-          Pendientes
+          <IonIcon icon={medkitOutline} />
+          Vacunas Pendientes
           <IonBadge color="primary" style={{ marginLeft: "8px" }}>
             {totalPendientes}
           </IonBadge>
@@ -157,122 +139,9 @@ const PendientesPaciente: React.FC<PendientesPacienteProps> = ({
           </IonText>
         )}
 
-        {/* Citas Pendientes */}
-        {citas.length > 0 && (
-          <div
-            style={{
-              marginBottom:
-                citas.length > 0 && vacunas.length > 0 ? "16px" : "0",
-            }}
-          >
-            <h3
-              style={{
-                fontSize: "0.9rem",
-                fontWeight: "600",
-                marginBottom: "8px",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-              }}
-            >
-              <IonIcon icon={calendarOutline} style={{ fontSize: "1rem" }} />
-              Citas Programadas
-              <IonChip
-                color="primary"
-                style={{ height: "20px", fontSize: "0.75rem" }}
-              >
-                {citas.length}
-              </IonChip>
-            </h3>
-            <IonList lines="none" style={{ background: "transparent" }}>
-              {citas.slice(0, 3).map((cita) => (
-                <IonItem
-                  key={cita.id_cita}
-                  button={!!onVerDetalleCita}
-                  detail={!!onVerDetalleCita}
-                  onClick={() => onVerDetalleCita && onVerDetalleCita(cita)}
-                  style={{
-                    "--background": "var(--ion-color-light)",
-                    borderRadius: "8px",
-                    marginBottom: "8px",
-                  }}
-                >
-                  <IonLabel>
-                    <h3 style={{ fontWeight: "500", fontSize: "0.95rem" }}>
-                      {cita.motivo}
-                    </h3>
-                    <p
-                      style={{
-                        fontSize: "0.85rem",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "4px",
-                        marginTop: "4px",
-                      }}
-                    >
-                      <IonIcon
-                        icon={timeOutline}
-                        style={{ fontSize: "0.9rem" }}
-                      />
-                      {formatearFecha(cita.fecha_hora)} •{" "}
-                      {formatearHora(cita.fecha_hora)}
-                    </p>
-                  </IonLabel>
-                  <IonChip
-                    slot="end"
-                    color={getColorEstado(cita.estado)}
-                    style={{ height: "24px" }}
-                  >
-                    <IonLabel
-                      style={{
-                        fontSize: "0.75rem",
-                        textTransform: "capitalize",
-                      }}
-                    >
-                      {cita.estado}
-                    </IonLabel>
-                  </IonChip>
-                </IonItem>
-              ))}
-              {citas.length > 3 && (
-                <IonText color="medium">
-                  <p
-                    style={{
-                      textAlign: "center",
-                      fontSize: "0.85rem",
-                      marginTop: "8px",
-                    }}
-                  >
-                    + {citas.length - 3} citas más
-                  </p>
-                </IonText>
-              )}
-            </IonList>
-          </div>
-        )}
-
         {/* Vacunas Pendientes */}
         {vacunas.length > 0 && (
           <div>
-            <h3
-              style={{
-                fontSize: "0.9rem",
-                fontWeight: "600",
-                marginBottom: "8px",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-              }}
-            >
-              <IonIcon icon={medkitOutline} style={{ fontSize: "1rem" }} />
-              Vacunas Pendientes
-              <IonChip
-                color="warning"
-                style={{ height: "20px", fontSize: "0.75rem" }}
-              >
-                {vacunas.length}
-              </IonChip>
-            </h3>
             <IonList lines="none" style={{ background: "transparent" }}>
               {vacunas.slice(0, 3).map((vacuna) => (
                 <IonItem

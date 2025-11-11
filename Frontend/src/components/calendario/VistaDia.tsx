@@ -15,7 +15,6 @@ import {
   timeOutline,
   personOutline,
 } from "ionicons/icons";
-import { obtenerCitasPorFecha, type Cita } from "../../api/citas";
 import { CalendarEvent, getEventsDay } from "../../api/calendario";
 import ModalDetalleCita from "./ModalDetalleCita";
 
@@ -26,7 +25,8 @@ interface VistaDiaProps {
 
 const VistaDia: React.FC<VistaDiaProps> = ({ fecha, onCambiarFecha }) => {
   const [eventos, setEventos] = useState<CalendarEvent[]>([]);
-  const [eventoSeleccionado, setEventoSeleccionado] = useState<CalendarEvent | null>(null);
+  const [eventoSeleccionado, setEventoSeleccionado] =
+    useState<CalendarEvent | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [mostrarDetalle, setMostrarDetalle] = useState(false);
@@ -34,7 +34,7 @@ const VistaDia: React.FC<VistaDiaProps> = ({ fecha, onCambiarFecha }) => {
   useEffect(() => {
     fetchEvents();
   }, [fecha]);
-  
+
   const fetchEvents = async () => {
     setLoading(true);
     try {
@@ -140,15 +140,14 @@ const VistaDia: React.FC<VistaDiaProps> = ({ fecha, onCambiarFecha }) => {
                   <div className="cita-info">
                     <div className="cita-tutor">
                       <IonIcon icon={personOutline} />
-                      <span>
-                        {evento.summary}
-                      </span>
+                      <span>{evento.summary}</span>
                     </div>
 
                     <div className="cita-pacientes">
                       <IonIcon icon={pawOutline} />
                       <span>
-                        Ubicación: {evento.location || "No hay ubicación especificada"}
+                        Ubicación:{" "}
+                        {evento.location || "No hay ubicación especificada"}
                       </span>
                     </div>
 

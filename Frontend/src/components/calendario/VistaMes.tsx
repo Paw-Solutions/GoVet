@@ -16,7 +16,7 @@ import {
   timeOutline,
   calendarOutline,
 } from "ionicons/icons";
-import { obtenerCitasPorRango, type Cita } from "../../api/citas";
+import { getEventsMonth, type CalendarEvent } from "../../api/calendario";
 
 interface VistaMesProps {
   fecha: Date;
@@ -29,26 +29,25 @@ const VistaMes: React.FC<VistaMesProps> = ({
   onCambiarFecha,
   onSeleccionarDia,
 }) => {
-  const [citas, setCitas] = useState<Cita[]>([]);
+  const [eventos, setEventos] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    cargarCitas();
+    cargarEventos();
   }, [fecha]);
 
-  const cargarCitas = async () => {
+  const cargarEventos = async () => {
     setLoading(true);
     try {
-      // Obtener primer y último día del mes
-      const primerDia = new Date(fecha.getFullYear(), fecha.getMonth(), 1);
-      const ultimoDia = new Date(fecha.getFullYear(), fecha.getMonth() + 1, 0);
-
-      const inicioStr = primerDia.toISOString().split("T")[0];
-      const finStr = ultimoDia.toISOString().split("T")[0];
-      const response = await obtenerCitasPorRango(inicioStr, finStr);
-      setCitas(response.citas);
+      const year = fecha.getFullYear();
+      const month = fecha.getMonth() + 1; // getMonth() devuelve 0-11
+      console.log("Cargando eventos del mes:", year, month);
+      const response = await getEventsMonth(year, month);
+      console.log("Eventos recibidos:", response);
+      setEventos(response || []);
     } catch (error) {
-      console.error("Error al cargar citas:", error);
+      console.error("Error al cargar eventos:", error);
+      setEventos([]);
     } finally {
       setLoading(false);
     }
@@ -98,11 +97,15 @@ const VistaMes: React.FC<VistaMesProps> = ({
     return dias;
   };
 
-  const obtenerCitasDelDia = (dia: Date) => {
+  const obtenerEventosDelDia = (dia: Date) => {
     const diaStr = dia.toISOString().split("T")[0];
-    return citas.filter((cita) => {
-      const citaFecha = cita.fecha_hora.split("T")[0];
-      return citaFecha === diaStr;
+    return eventos.filter((evento) => {
+      // Validar que el evento tenga la estructura correcta
+      if (!evento || !evento.start || !evento.start.dateTime) {
+        return false;
+      }
+      const eventoFecha = evento.start.dateTime.split("T")[0];
+      return eventoFecha === diaStr;
     });
   };
 
@@ -122,21 +125,6 @@ const VistaMes: React.FC<VistaMesProps> = ({
     });
   };
 
-  const getColorEstado = (estado: string) => {
-    switch (estado) {
-      case "programada":
-        return "primary";
-      case "confirmada":
-        return "success";
-      case "cancelada":
-        return "danger";
-      case "completada":
-        return "medium";
-      default:
-        return "medium";
-    }
-  };
-
   const diasDelMes = generarDiasDelMes();
   const diasSemana = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 
@@ -151,7 +139,7 @@ const VistaMes: React.FC<VistaMesProps> = ({
         <div className="mes-titulo">
           <h2 className="capitalize">{formatearMesAño()}</h2>
           <p className="mes-contador">
-            {citas.length} {citas.length === 1 ? "cita" : "citas"}
+            {eventos.length} {eventos.length === 1 ? "evento" : "eventos"}
           </p>
         </div>
 
@@ -180,7 +168,7 @@ const VistaMes: React.FC<VistaMesProps> = ({
             {/* Grid de días del mes */}
             <div className="mes-grid">
               {diasDelMes.map((diaInfo, index) => {
-                const citasDelDia = obtenerCitasDelDia(diaInfo.fecha);
+                const eventosDelDia = obtenerEventosDelDia(diaInfo.fecha);
                 const isHoy = esHoy(diaInfo.fecha);
 
                 return (
@@ -189,7 +177,7 @@ const VistaMes: React.FC<VistaMesProps> = ({
                     className={`mes-dia ${
                       diaInfo.mesActual ? "" : "mes-dia-otro"
                     } ${isHoy ? "mes-dia-hoy" : ""} ${
-                      citasDelDia.length > 0 ? "mes-dia-con-citas" : ""
+                      eventosDelDia.length > 0 ? "mes-dia-con-citas" : ""
                     }`}
                     onClick={() => onSeleccionarDia(diaInfo.fecha)}
                   >
@@ -197,18 +185,18 @@ const VistaMes: React.FC<VistaMesProps> = ({
                       {diaInfo.fecha.getDate()}
                     </div>
 
-                    {citasDelDia.length > 0 && (
+                    {eventosDelDia.length > 0 && (
                       <div className="mes-dia-indicadores">
-                        {citasDelDia.slice(0, 3).map((cita, idx) => (
+                        {eventosDelDia.slice(0, 3).map((evento, idx) => (
                           <div
                             key={idx}
-                            className={`mes-indicador ${cita.estado}`}
-                            title={`${cita.tutor_nombre} - ${cita.motivo}`}
+                            className={`mes-indicador programada`}
+                            title={evento.summary}
                           />
                         ))}
-                        {citasDelDia.length > 3 && (
+                        {eventosDelDia.length > 3 && (
                           <div className="mes-indicador-mas">
-                            +{citasDelDia.length - 3}
+                            +{eventosDelDia.length - 3}
                           </div>
                         )}
                       </div>
@@ -221,102 +209,103 @@ const VistaMes: React.FC<VistaMesProps> = ({
 
           {/* Lista de citas del mes */}
           <div className="citas-lista-container">
-            <h3 className="lista-titulo">Citas del mes</h3>
-            {citas.length === 0 ? (
+            <h3 className="lista-titulo">Eventos del mes</h3>
+            {eventos.length === 0 ? (
               <div className="mes-vacio">
                 <IonIcon icon={pawOutline} className="icono-vacio" />
-                <p>No hay citas programadas para este mes</p>
+                <p>No hay eventos programados para este mes</p>
               </div>
             ) : (
               <div className="citas-lista">
-                {citas.map((cita) => (
-                  <IonCard
-                    key={cita.id_cita}
-                    className="cita-card"
-                    button
-                    onClick={() => {
-                      // Navegar al día de la cita
-                      onSeleccionarDia(new Date(cita.fecha_hora));
-                    }}
-                  >
-                    <IonCardContent>
-                      <div className="cita-fecha-hora">
-                        <div className="cita-fecha">
-                          <IonIcon icon={calendarOutline} />
-                          <span>
-                            {new Date(cita.fecha_hora).toLocaleDateString(
-                              "es-CL",
-                              {
+                {eventos.map((evento) => {
+                  // Validar que el evento tenga los datos mínimos necesarios
+                  if (!evento?.start?.dateTime || !evento?.id) {
+                    return null;
+                  }
+
+                  return (
+                    <IonCard
+                      key={evento.id}
+                      className="cita-card"
+                      button
+                      onClick={() => {
+                        // Navegar al día del evento
+                        onSeleccionarDia(new Date(evento.start.dateTime));
+                      }}
+                    >
+                      <IonCardContent>
+                        <div className="cita-fecha-hora">
+                          <div className="cita-fecha">
+                            <IonIcon icon={calendarOutline} />
+                            <span>
+                              {new Date(
+                                evento.start.dateTime
+                              ).toLocaleDateString("es-CL", {
                                 weekday: "short",
                                 day: "numeric",
                                 month: "short",
-                              }
-                            )}
-                          </span>
-                        </div>
-                        <div className="cita-hora">
-                          <IonIcon icon={timeOutline} />
-                          <span className="hora-texto">
-                            {new Date(cita.fecha_hora).toLocaleTimeString(
-                              "es-CL",
-                              {
+                              })}
+                            </span>
+                          </div>
+                          <div className="cita-hora">
+                            <IonIcon icon={timeOutline} />
+                            <span className="hora-texto">
+                              {new Date(
+                                evento.start.dateTime
+                              ).toLocaleTimeString("es-CL", {
                                 hour: "2-digit",
                                 minute: "2-digit",
-                              }
-                            )}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="cita-info">
-                        <div className="cita-tutor">
-                          <IonIcon icon={personOutline} />
-                          <span>
-                            {cita.tutor_nombre} {cita.tutor_apellido_paterno}
-                          </span>
+                              })}
+                            </span>
+                          </div>
                         </div>
 
-                        <div className="cita-pacientes">
-                          <IonIcon icon={pawOutline} />
-                          <span>
-                            {cita.pacientes.map((p) => p.nombre).join(", ")}
-                          </span>
+                        <div className="cita-info">
+                          <div className="cita-tutor">
+                            <strong>{evento.summary || "Sin título"}</strong>
+                          </div>
+
+                          {evento.location && (
+                            <div className="cita-pacientes">
+                              <IonIcon icon={personOutline} />
+                              <span>{evento.location}</span>
+                            </div>
+                          )}
+
+                          {evento.description && (
+                            <div className="cita-motivo">
+                              <strong>Descripción:</strong> {evento.description}
+                            </div>
+                          )}
+
+                          {evento.attendees && evento.attendees.length > 0 && (
+                            <div className="cita-asistentes">
+                              <IonIcon icon={personOutline} />
+                              <span>
+                                {evento.attendees
+                                  .map((a) => a.email)
+                                  .join(", ")}
+                              </span>
+                            </div>
+                          )}
                         </div>
 
-                        <div className="cita-motivo">
-                          <strong>Motivo:</strong> {cita.motivo}
-                        </div>
-                      </div>
-
-                      <IonChip color={getColorEstado(cita.estado)}>
-                        <IonLabel className="capitalize">
-                          {cita.estado}
-                        </IonLabel>
-                      </IonChip>
-                    </IonCardContent>
-                  </IonCard>
-                ))}
+                        <IonChip color="primary">
+                          <IonLabel>Evento</IonLabel>
+                        </IonChip>
+                      </IonCardContent>
+                    </IonCard>
+                  );
+                })}
               </div>
             )}
           </div>
 
-          {/* Leyenda de estados */}
+          {/* Leyenda */}
           <div className="mes-leyenda">
             <div className="leyenda-item">
               <div className="leyenda-color programada"></div>
-              <span>Programada</span>
-            </div>
-            <div className="leyenda-item">
-              <div className="leyenda-color confirmada"></div>
-              <span>Confirmada</span>
-            </div>
-            <div className="leyenda-item">
-              <div className="leyenda-color completada"></div>
-              <span>Completada</span>
-            </div>
-            <div className="leyenda-item">
-              <div className="leyenda-color cancelada"></div>
-              <span>Cancelada</span>
+              <span>Evento programado</span>
             </div>
           </div>
         </>
