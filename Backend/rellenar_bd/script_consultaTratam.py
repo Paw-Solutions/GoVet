@@ -48,8 +48,8 @@ observaciones_opciones = [
 
 # --- Función Helper para Fechas (Copiado de tu script) ---
 def fecha_aleatoria():
-    inicio = datetime(2023, 1, 1)
-    fin = datetime(2024, 12, 31)
+    inicio = datetime(2025, 1, 1)
+    fin = datetime(2025, 12, 31)
     delta = fin - inicio
     random_days = random.randint(0, delta.days)
     return inicio + timedelta(days=random_days)

@@ -161,6 +161,22 @@ class consultaTratamientoResponse(consultaTratamientoBase):
     class Config:
         from_attributes = True
 
+# Agregar al final del archivo schemas.py
+class consultaTratamientoConDetallesResponse(BaseModel):
+    id_consulta: int
+    id_tratamiento: int
+    id_paciente: int
+    dosis: str
+    fecha_tratamiento: date
+    id_aplicacion: int
+    # Información adicional
+    nombre_tratamiento: str
+    descripcion_tratamiento: Optional[str] = None
+    nombre_paciente: Optional[str] = None
+    
+    class Config:
+        from_attributes = True
+
 """ Esquema de datos para la entidad consulta """
 class ConsultaBase(BaseModel):
     id_paciente: int

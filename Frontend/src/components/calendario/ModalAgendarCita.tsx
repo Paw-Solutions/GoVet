@@ -28,7 +28,12 @@ import {
   personOutline,
   pawOutline,
 } from "ionicons/icons";
+<<<<<<< Updated upstream
 import { createEvent, type CalendarEventCreate } from "../../api/calendario";
+=======
+import { crearCita, type CitaCreate } from "../../api/citas";
+import { Attendee, createEvent, type CalendarEventCreate } from "../../api/calendario";
+>>>>>>> Stashed changes
 import { enviarNotificacion } from "../../api/notificacion";
 import { obtenerTutoresPaginados, type TutorData } from "../../api/tutores";
 import {
@@ -289,7 +294,16 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
   const handleAnterior = () => {
     setPaso(paso - 1);
   };
-
+ const isValidEmail = (email: string | undefined | null): boolean => {
+    if (!email) return false;
+    
+    // Verificar que no sea "NaN", vacío o solo espacios
+    if (email === "NaN" || email.trim() === "") return false;
+    
+    // Validación básica de formato de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email.trim());
+  };
   const handleCrearCita = async () => {
     setLoading(true);
     try {
@@ -318,13 +332,25 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
             } ${tutorSeleccionado!.apellido_paterno}${
               notas ? "\n\nNotas: " + notas : ""
             }`,
-        start: fechaInicio.toISOString(), // ✅ String directo
+        start: fechaInicio.toISOString(),
         end: fechaTermino.toISOString(),
+<<<<<<< Updated upstream
         attendees: undefined, //tutorSeleccionado?.email
           //? [{ email: tutorSeleccionado.email }]
           //: undefined,
+=======
+        attendees: (() => {
+          const attendees: Attendee[] = [];
+          
+          // Validar y agregar email del tutor
+          if (tutorSeleccionado?.email && isValidEmail(tutorSeleccionado.email)) {
+            attendees.push({ email: tutorSeleccionado.email.trim() });
+          }
+          return attendees;
+        })()
+>>>>>>> Stashed changes
       };
-
+      console.log(nuevoEvento)
       await createEvent(nuevoEvento);
 
       present({

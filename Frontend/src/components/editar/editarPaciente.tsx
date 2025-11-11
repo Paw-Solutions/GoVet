@@ -301,7 +301,7 @@ const ModalEditarPaciente: React.FC<ModalEditarPacienteProps> = ({
     <IonModal isOpen={isOpen} onDidDismiss={onDismiss}>
       <IonHeader>
         <IonToolbar>
-          <IonTitle>Editar paciente</IonTitle>
+          <IonTitle>Editar información de paciente</IonTitle>
         </IonToolbar>
       </IonHeader>
 
@@ -490,9 +490,10 @@ const ModalEditarPaciente: React.FC<ModalEditarPacienteProps> = ({
                       <strong>RUT:</strong> {tutorSeleccionado.rut}
                     </p>
                     <p>
-                      <strong>Email:</strong> {tutorSeleccionado.email || "N/A"}{" "}
-                      •<strong> Tel:</strong>{" "}
-                      {tutorSeleccionado.telefono || "N/A"}
+                      <strong>Email: </strong> {tutorSeleccionado.email != "NaN" ? tutorSeleccionado.email : "No asignado"}{" "}
+                    </p>
+                    <p>
+                      <strong> Tel: </strong>{tutorSeleccionado.telefono? tutorSeleccionado.telefono : "No asignado"}
                     </p>
                   </IonLabel>
                   <IonButton

@@ -262,7 +262,7 @@ const ModalBuscarTutor: React.FC<ModalBuscarTutorProps> = ({
               <IonLabel>
                 <h2>{`${tutorSeleccionadoTemp.nombre} ${tutorSeleccionadoTemp.apellido}`}</h2>
                 <p>RUT: {tutorSeleccionadoTemp.rut}</p>
-                <p>Email: {tutorSeleccionadoTemp.email || "N/A"}</p>
+                <p>Email: {tutorSeleccionadoTemp.email != "NaN" ? tutorSeleccionadoTemp.email : "No asignado"}</p>
               </IonLabel>
               <IonIcon
                 icon={checkmark}

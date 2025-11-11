@@ -18,7 +18,7 @@ from schemas import (
     TratamientoBase, TratamientoCreate, TratamientoResponse,
     consultaTratamientoBase, consultaTratamientoCreate, consultaTratamientoResponse,
     ConsultaBase, ConsultaCreate, ConsultaResponse, EmailSchema,
-    EventCreate
+    EventCreate, consultaTratamientoConDetallesResponse
 )
 from fastapi import FastAPI, Depends, HTTPException, Query
 from pydantic import BaseModel
@@ -1062,6 +1062,42 @@ def obtener_consultas_tratamiento_por_nombre_paciente(nombre_paciente: str, db: 
         raise HTTPException(status_code=404, detail="No se encontraron tratamientos para ese paciente")
     return db_consultas_tratamiento
 
+# Ruta GET para obtener registros de consulta_tratamiento solo de vacunas con detalles
+@app.get("/consultas/tratamientos/vacunas/nombre/", response_model=List[consultaTratamientoConDetallesResponse])
+def obtener_vacunas_por_nombre(db: Session = Depends(get_db)):
+    db_vacunas = db.query(
+        models.ConsultaTratamiento,
+        models.Tratamiento.nombre.label('nombre_tratamiento'),
+        models.Tratamiento.descripcion.label('descripcion_tratamiento'),
+        models.Paciente.nombre.label('nombre_paciente')
+    ).join(
+        models.Tratamiento, 
+        models.ConsultaTratamiento.id_tratamiento == models.Tratamiento.id_tratamiento
+    ).join(
+        models.Paciente,
+        models.ConsultaTratamiento.id_paciente == models.Paciente.id_paciente,
+        isouter=True
+    ).filter(
+        models.Tratamiento.nombre.ilike("%Vacuna%")
+    ).order_by(desc(models.ConsultaTratamiento.fecha_tratamiento)).all()
+    
+    if not db_vacunas:
+        raise HTTPException(status_code=404, detail="No se encontraron vacunas administradas")
+    
+    # Construir la respuesta usando el nuevo esquema
+    return [
+        consultaTratamientoConDetallesResponse(
+            id_consulta=resultado[0].id_consulta,
+            id_tratamiento=resultado[0].id_tratamiento,
+            id_paciente=resultado[0].id_paciente,
+            dosis=resultado[0].dosis,
+            fecha_tratamiento=resultado[0].fecha_tratamiento,
+            id_aplicacion=resultado[0].id_aplicacion,
+            nombre_tratamiento=resultado.nombre_tratamiento,
+            descripcion_tratamiento=resultado.descripcion_tratamiento,
+            nombre_paciente=resultado.nombre_paciente
+        ) for resultado in db_vacunas
+    ]
 
 """ RUTA PARA ENVIAR EMAILS A TUTORES """
 conf = ConnectionConfig (

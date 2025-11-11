@@ -18,7 +18,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
   fixed = true
 }) => {
   return (
-    <div className={`search-container ${fixed ? 'search-container-sticky' : ''}`}>
+    <div className="modal-search-container">
       <IonSearchbar
         value={value}
         onIonInput={(e) => onSearch(e.detail.value!)}

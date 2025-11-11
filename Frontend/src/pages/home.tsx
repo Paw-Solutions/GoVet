@@ -34,6 +34,7 @@ import {
 import { useHistory } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import BotonAnadir from "../components/BotonAnadir";
+import CajaVacunas from "../components/vacunas/cajaVacunas";
 
 import "../styles/home.css";
 
@@ -152,6 +153,11 @@ const Home: React.FC = () => {
             </IonCol>
           </IonRow>
         </IonGrid>
+        <IonRow>
+          <IonCol>
+            <CajaVacunas limite={5}/>
+          </IonCol>
+        </IonRow>
       </IonContent>
       <IonFooter className="ion-no-border footer-right">
         <div className="boton-anadir-container">

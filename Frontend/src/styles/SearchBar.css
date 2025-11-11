@@ -1,21 +1,22 @@
-.search-container {
-  padding: 8px 16px;
-  background: var(--ion-background-color, white);
+.modal-search-container {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: var(--ion-background-color);
+  padding: 1rem;
+  border-bottom: 1px solid var(--ion-color-light-shade);
 }
 
-.search-container-sticky {
-  position: sticky;
-  top: 0px; /* Debajo del segmento (altura aproximada del segment) */
-  z-index: 1000; /* Menor que SegmentedView */
-  padding: 8px 16px;
-  box-shadow: 0 2px 8px rgba(128, 85, 136, 0.28);
-  margin-bottom: 8px;
+
+.modal-search-container ion-searchbar {
+  --background: #ffffff;
+  --border-radius: 0.75rem;
+  --box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.1);
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-  .search-container-sticky {
-    top: 86px; /* Ajustar para pantallas más pequeñas */
-    padding: 6px 12px;
+  .modal-search-container {
+    padding: 0.75rem;
   }
 }
