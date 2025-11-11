@@ -13,7 +13,8 @@
 
 # Entornos virtuales
 venv/
-.env/
+.env
+Backend/.env
 
 *.bck
 credentials.json
