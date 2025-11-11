@@ -427,10 +427,65 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
             );
 
             const nombreCompleto = `${tutorSeleccionado.nombre} ${tutorSeleccionado.apellido_paterno}`;
+
+            // Formatear fecha y hora
+            const fechaInicio = new Date(fechaHora);
+            const fechaTermino = new Date(fechaHoraTermino);
+
+            const fechaFormateada = fechaInicio.toLocaleDateString("es-CL", {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            });
+
+            const horaInicioFormateada = fechaInicio.toLocaleTimeString(
+              "es-CL",
+              {
+                hour: "2-digit",
+                minute: "2-digit",
+              }
+            );
+
+            const horaTerminoFormateada = fechaTermino.toLocaleTimeString(
+              "es-CL",
+              {
+                hour: "2-digit",
+                minute: "2-digit",
+              }
+            );
+
+            // Obtener nombres de los pacientes seleccionados
+            const nombresPacientes = pacientesDisponibles
+              .filter((p) => pacientesSeleccionados.includes(p.id_paciente))
+              .map((p) => p.nombre)
+              .join(", ");
+
             const cuerpo = `
-              <p>Hola ${nombreCompleto},</p>
-              <p>Tu cita ha sido agendada.</p>
-              <p>Motivo: ${motivo || "(Sin especificar)"}</p>
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #2563eb;">Confirmación de Cita - GoVet</h2>
+                <p>Hola <strong>${nombreCompleto}</strong>,</p>
+                <p>Tu cita ha sido agendada exitosamente con los siguientes detalles:</p>
+                
+                <div style="background-color: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                  <p><strong>📅 Fecha:</strong> ${fechaFormateada}</p>
+                  <p><strong>🕐 Horario:</strong> ${horaInicioFormateada} - ${horaTerminoFormateada}</p>
+                  <p><strong>🐾 Paciente(s):</strong> ${nombresPacientes}</p>
+                  ${
+                    ubicacion
+                      ? `<p><strong>📍 Ubicación:</strong> ${ubicacion}</p>`
+                      : ""
+                  }
+                  ${
+                    motivo ? `<p><strong>📋 Motivo:</strong> ${motivo}</p>` : ""
+                  }
+                </div>
+                
+                <p>Si necesitas cancelar o reprogramar, por favor contáctanos con anticipación.</p>
+                <p style="color: #6b7280; font-size: 14px; margin-top: 30px;">
+                  Este es un correo automático, por favor no respondas a este mensaje.
+                </p>
+              </div>
             `;
 
             const fechaEnvioDate = calcularFechaNotificacion(
