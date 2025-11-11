@@ -12,8 +12,8 @@ export interface CalendarEventCreate {
   summary: string; // Título del evento
   location?: string; // Dirección o lugar
   description?: string; // Descripción del evento
-  start: { dateTime: string; timeZone: string };
-  end: { dateTime: string; timeZone: string };
+  start: string; // ✅ String ISO 8601
+  end: string;
   attendees?: Attendee[]; // Lista de asistentes
 }
 

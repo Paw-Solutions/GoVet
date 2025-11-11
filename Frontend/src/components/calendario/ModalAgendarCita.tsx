@@ -319,14 +319,8 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
             } ${tutorSeleccionado!.apellido_paterno}${
               notas ? "\n\nNotas: " + notas : ""
             }`,
-        start: {
-          dateTime: fechaInicio.toISOString(),
-          timeZone: "America/Santiago",
-        },
-        end: {
-          dateTime: fechaTermino.toISOString(),
-          timeZone: "America/Santiago",
-        },
+        start: fechaInicio.toISOString(), // ✅ String directo
+        end: fechaTermino.toISOString(),
         attendees: tutorSeleccionado?.email
           ? [{ email: tutorSeleccionado.email }]
           : undefined,
