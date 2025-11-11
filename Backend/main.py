@@ -80,6 +80,20 @@ def get_db():
 
 db_dependency = Annotated[Session, Depends(get_db)]
 
+# Función helper para normalizar texto de búsqueda
+def normalize_search_text(text: str) -> str:
+    """
+    Normaliza el texto de búsqueda eliminando puntos, guiones y espacios extras.
+    Útil para búsquedas de RUT, nombres completos, etc.
+    """
+    if not text:
+        return ""
+    # Eliminar puntos y guiones
+    normalized = text.replace(".", "").replace("-", "")
+    # Reemplazar múltiples espacios por uno solo
+    normalized = " ".join(normalized.split())
+    return normalized.strip()
+
 # HU1: HU 1: Como Veterinaria quiero ver el calendario con los horarios de atención disponibles, para organizarme con la agenda de horas
 
 def get_calendar_service():
@@ -476,14 +490,31 @@ def obtener_tutores_paginados(
     query = db.query(models.Tutor)
     
     if search:
-        search_pattern = f"%{search}%"
+        # Normalizar texto de búsqueda
+        search_normalized = normalize_search_text(search)
+        
+        # Búsqueda flexible: permite buscar por nombre completo, RUT sin formato, etc.
+        search_pattern = f"%{search_normalized}%"
+        
+        # Para RUT: buscar sin puntos ni guiones
+        # Para nombres: concatenar nombre + apellidos y buscar en el texto completo
         query = query.filter(
             or_(
-                models.Tutor.nombre.ilike(search_pattern),
-                models.Tutor.apellido_paterno.ilike(search_pattern),
-                models.Tutor.apellido_materno.ilike(search_pattern),
-                models.Tutor.rut.ilike(search_pattern),
-                models.Tutor.email.ilike(search_pattern)
+                # Búsqueda en nombre individual
+                models.Tutor.nombre.ilike(f"%{search}%"),
+                models.Tutor.apellido_paterno.ilike(f"%{search}%"),
+                models.Tutor.apellido_materno.ilike(f"%{search}%"),
+                models.Tutor.email.ilike(f"%{search}%"),
+                # Búsqueda en nombre completo (permite "nicolas ortiz")
+                func.concat(
+                    models.Tutor.nombre, ' ',
+                    models.Tutor.apellido_paterno, ' ',
+                    models.Tutor.apellido_materno
+                ).ilike(f"%{search}%"),
+                # Búsqueda en RUT sin formato (permite buscar con o sin puntos/guiones)
+                func.replace(
+                    func.replace(models.Tutor.rut, '.', ''), '-', ''
+                ).ilike(search_pattern)
             )
         )
     
@@ -639,15 +670,30 @@ def obtener_pacientes_paginados(
     )
     
     if search:
-        search_pattern = f"%{search}%"
+        # Normalizar texto de búsqueda
+        search_normalized = normalize_search_text(search)
+        search_pattern = f"%{search_normalized}%"
+        
         query = query.filter(
             or_(
-                models.Paciente.nombre.ilike(search_pattern),
-                models.Raza.nombre.ilike(search_pattern),
-                models.Especie.nombre_comun.ilike(search_pattern),
-                models.Tutor.nombre.ilike(search_pattern),
-                models.Tutor.apellido_paterno.ilike(search_pattern),
-                models.Tutor.rut.ilike(search_pattern)
+                # Búsqueda en nombre del paciente
+                models.Paciente.nombre.ilike(f"%{search}%"),
+                # Búsqueda en raza y especie
+                models.Raza.nombre.ilike(f"%{search}%"),
+                models.Especie.nombre_comun.ilike(f"%{search}%"),
+                # Búsqueda en nombre del tutor (individual)
+                models.Tutor.nombre.ilike(f"%{search}%"),
+                models.Tutor.apellido_paterno.ilike(f"%{search}%"),
+                # Búsqueda en nombre completo del tutor
+                func.concat(
+                    models.Tutor.nombre, ' ',
+                    models.Tutor.apellido_paterno, ' ',
+                    models.Tutor.apellido_materno
+                ).ilike(f"%{search}%"),
+                # Búsqueda en RUT del tutor sin formato
+                func.replace(
+                    func.replace(models.Tutor.rut, '.', ''), '-', ''
+                ).ilike(search_pattern)
             )
         )
     
@@ -906,7 +952,10 @@ def obtener_consultas_por_id_paciente(id_paciente: int, db: Session = Depends(ge
 # Ruta GET para obtener consultas por nombre de paciente
 @app.get("/consultas/paciente/{nombre_paciente}", response_model=List[ConsultaResponse])
 def obtener_consultas_por_nombre_paciente(nombre_paciente: str, db: Session = Depends(get_db)):
-    db_consultas = db.query(models.Consulta).join(models.Paciente).filter(models.Paciente.nombre.ilike(f"%{nombre_paciente}%")).order_by(desc(models.Consulta.fecha_consulta)).all()
+    # Normalizar búsqueda para mayor flexibilidad
+    db_consultas = db.query(models.Consulta).join(models.Paciente).filter(
+        models.Paciente.nombre.ilike(f"%{nombre_paciente}%")
+    ).order_by(desc(models.Consulta.fecha_consulta)).all()
     if not db_consultas:
         raise HTTPException(status_code=404, detail="No se encontraron consultas para ese paciente")
     return db_consultas
@@ -948,23 +997,34 @@ def obtener_consultas_paginadas(
     )
     
     if search:
-        search_pattern = f"%{search}%"
+        # Normalizar texto de búsqueda
+        search_normalized = normalize_search_text(search)
+        search_pattern_normalized = f"%{search_normalized}%"
+        
         query = query.filter(
             or_(
                 # Búsqueda en datos de la consulta
-                models.Consulta.diagnostico.ilike(search_pattern),
-                models.Consulta.motivo.ilike(search_pattern),
-                models.Consulta.observaciones.ilike(search_pattern),
+                models.Consulta.diagnostico.ilike(f"%{search}%"),
+                models.Consulta.motivo.ilike(f"%{search}%"),
+                models.Consulta.observaciones.ilike(f"%{search}%"),
                 # Búsqueda en datos del paciente
-                models.Paciente.nombre.ilike(search_pattern),
-                models.Paciente.codigo_chip.ilike(search_pattern),
+                models.Paciente.nombre.ilike(f"%{search}%"),
+                models.Paciente.codigo_chip.ilike(f"%{search}%"),
                 # Búsqueda en raza y especie
-                models.Raza.nombre.ilike(search_pattern),
-                models.Especie.nombre_comun.ilike(search_pattern),
-                # Búsqueda en datos del tutor
-                models.Tutor.nombre.ilike(search_pattern),
-                models.Tutor.apellido_paterno.ilike(search_pattern),
-                models.Tutor.rut.ilike(search_pattern)
+                models.Raza.nombre.ilike(f"%{search}%"),
+                models.Especie.nombre_comun.ilike(f"%{search}%"),
+                # Búsqueda en datos del tutor (individual y completo)
+                models.Tutor.nombre.ilike(f"%{search}%"),
+                models.Tutor.apellido_paterno.ilike(f"%{search}%"),
+                func.concat(
+                    models.Tutor.nombre, ' ',
+                    models.Tutor.apellido_paterno, ' ',
+                    models.Tutor.apellido_materno
+                ).ilike(f"%{search}%"),
+                # Búsqueda en RUT sin formato
+                func.replace(
+                    func.replace(models.Tutor.rut, '.', ''), '-', ''
+                ).ilike(search_pattern_normalized)
             )
         )
     
