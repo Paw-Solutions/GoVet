@@ -15,6 +15,8 @@ import {
   personOutline,
   timeOutline,
   calendarOutline,
+  chevronUpOutline,
+  chevronDownOutline,
 } from "ionicons/icons";
 import { getEventsMonth, type CalendarEvent } from "../../api/calendario";
 
@@ -31,6 +33,7 @@ const VistaMes: React.FC<VistaMesProps> = ({
 }) => {
   const [eventos, setEventos] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
+  const [calendarioColapsado, setCalendarioColapsado] = useState(false);
 
   useEffect(() => {
     cargarEventos();
@@ -155,7 +158,11 @@ const VistaMes: React.FC<VistaMesProps> = ({
         </div>
       ) : (
         <>
-          <div className="mes-calendario">
+          <div
+            className={`mes-calendario ${
+              calendarioColapsado ? "colapsado" : "expandido"
+            }`}
+          >
             {/* Encabezados de días de la semana */}
             <div className="mes-encabezados">
               {diasSemana.map((dia) => (
@@ -205,6 +212,20 @@ const VistaMes: React.FC<VistaMesProps> = ({
                 );
               })}
             </div>
+          </div>
+
+          {/* Botón de colapsar como pestañita */}
+          <div className="mes-pestaña-colapsar">
+            <button
+              onClick={() => setCalendarioColapsado(!calendarioColapsado)}
+              className="btn-pestaña"
+            >
+              <IonIcon
+                icon={
+                  calendarioColapsado ? chevronDownOutline : chevronUpOutline
+                }
+              />
+            </button>
           </div>
 
           {/* Lista de citas del mes */}

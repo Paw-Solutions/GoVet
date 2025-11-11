@@ -1,6 +1,17 @@
 import React from "react";
-import { IonItem, IonLabel, IonIcon, IonButton, IonButtons } from "@ionic/react";
-import { personOutline, pencilOutline, eyeOutline, personSharp, idCardOutline } from "ionicons/icons";
+import {
+  IonItem,
+  IonLabel,
+  IonIcon,
+  IonButton,
+  IonButtons,
+} from "@ionic/react";
+import {
+  personOutline,
+  pencilOutline,
+  personSharp,
+  idCardOutline,
+} from "ionicons/icons";
 import { TutorData } from "../../api/tutores";
 
 interface TutorItemProps {
@@ -9,25 +20,47 @@ interface TutorItemProps {
   onEdit: () => void;
   disabled: boolean;
 }
-import "../../styles/ver.css"
+import "../../styles/ver.css";
 
-const TutorItem: React.FC<TutorItemProps> = ({ tutor, onView, onEdit, disabled }) => {
+const TutorItem: React.FC<TutorItemProps> = ({
+  tutor,
+  onView,
+  onEdit,
+  disabled,
+}) => {
   return (
-    <IonItem lines="full">
-      <IonIcon icon={personSharp} slot="start" style={{ width: '20px', height: '20px' }} />
+    <IonItem
+      lines="none"
+      className="tutor-item"
+      button
+      onClick={onView}
+      disabled={disabled}
+    >
+      <IonIcon icon={personSharp} slot="start" className="item-icon" />
       <IonLabel>
-        <h2 className="tutor-nombre">{tutor.nombre} {tutor.apellido_paterno} {tutor.apellido_materno}</h2>
+        <h2 className="tutor-nombre">
+          {tutor.nombre} {tutor.apellido_paterno} {tutor.apellido_materno}
+        </h2>
         <p>
-          <IonIcon src="/id.svg" className="pacientes-icon"/>
-            <span style={{marginLeft: '8px'}}>: {tutor.rut}</span>
+          <IonIcon src="/id.svg" className="pacientes-icon" />
+          <span style={{ marginLeft: "8px" }}>: {tutor.rut}</span>
         </p>
       </IonLabel>
-      <IonButtons>
-        <IonButton fill="clear" onClick={onEdit} disabled={disabled}>
-          <IonIcon className="icon" icon={pencilOutline} slot="icon-only" size="small" />
-        </IonButton>
-        <IonButton fill="clear" onClick={onView} disabled={disabled}>
-          <IonIcon className="icon" icon={eyeOutline} slot="icon-only" size="small"/>
+      <IonButtons slot="end">
+        <IonButton
+          fill="clear"
+          onClick={(e) => {
+            e.stopPropagation();
+            onEdit();
+          }}
+          disabled={disabled}
+        >
+          <IonIcon
+            className="icon"
+            icon={pencilOutline}
+            slot="icon-only"
+            size="small"
+          />
         </IonButton>
       </IonButtons>
     </IonItem>
