@@ -223,6 +223,84 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
   const handleCambioInicio = (value: string | null | undefined) => {
     if (value) {
       setFechaHora(value);
+
+      // Actualizar la hora de término para mantener la misma diferencia
+      // o establecer una hora por defecto si es necesario
+      const nuevaFechaInicio = new Date(value);
+      const fechaTerminoActual = new Date(fechaHoraTermino);
+
+      // Si la fecha de término es anterior a la nueva fecha de inicio,
+      // establecer la fecha de término 1 hora después de inicio
+      if (fechaTerminoActual <= nuevaFechaInicio) {
+        const nuevaFechaTermino = new Date(nuevaFechaInicio);
+        nuevaFechaTermino.setHours(nuevaFechaInicio.getHours() + 1);
+        setFechaHoraTermino(nuevaFechaTermino.toISOString());
+      }
+    }
+  };
+
+  // Handler para cambio de fecha (solo día, mes, año)
+  const handleCambioFecha = (value: string | null | undefined) => {
+    if (value) {
+      const nuevaFecha = new Date(value);
+      const fechaInicioActual = new Date(fechaHora);
+      const fechaTerminoActual = new Date(fechaHoraTermino);
+
+      // Mantener las horas actuales pero actualizar la fecha
+      nuevaFecha.setHours(
+        fechaInicioActual.getHours(),
+        fechaInicioActual.getMinutes(),
+        0,
+        0
+      );
+      setFechaHora(nuevaFecha.toISOString());
+
+      // Actualizar la fecha de término manteniendo la misma diferencia horaria
+      const diferenciaMinutos =
+        (fechaTerminoActual.getTime() - fechaInicioActual.getTime()) / 60000;
+
+      const nuevaFechaTermino = new Date(nuevaFecha);
+      nuevaFechaTermino.setMinutes(
+        nuevaFechaTermino.getMinutes() + diferenciaMinutos
+      );
+      setFechaHoraTermino(nuevaFechaTermino.toISOString());
+    }
+  };
+
+  // Handler para cambio solo de hora de inicio
+  const handleCambioHoraInicio = (value: string | null | undefined) => {
+    if (value) {
+      const nuevaHora = new Date(value);
+      const fechaActual = new Date(fechaHora);
+
+      // Mantener la fecha pero actualizar la hora
+      fechaActual.setHours(nuevaHora.getHours(), nuevaHora.getMinutes(), 0, 0);
+      setFechaHora(fechaActual.toISOString());
+
+      // Si la hora de término queda antes de inicio, ajustarla
+      const fechaTerminoActual = new Date(fechaHoraTermino);
+      if (fechaTerminoActual <= fechaActual) {
+        const nuevaFechaTermino = new Date(fechaActual);
+        nuevaFechaTermino.setMinutes(fechaActual.getMinutes() + 30);
+        setFechaHoraTermino(nuevaFechaTermino.toISOString());
+      }
+    }
+  };
+
+  // Handler para cambio solo de hora de término
+  const handleCambioHoraTermino = (value: string | null | undefined) => {
+    if (value) {
+      const nuevaHora = new Date(value);
+      const fechaTerminoActual = new Date(fechaHoraTermino);
+
+      // Mantener la fecha pero actualizar la hora
+      fechaTerminoActual.setHours(
+        nuevaHora.getHours(),
+        nuevaHora.getMinutes(),
+        0,
+        0
+      );
+      setFechaHoraTermino(fechaTerminoActual.toISOString());
     }
   };
 
@@ -339,56 +417,59 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
         icon: checkmarkOutline,
       });
 
-      try {
-        if (tutorSeleccionado?.email) {
-          console.log(
-            "Enviando notificación al email:",
-            tutorSeleccionado.email
-          );
+      // Solo enviar notificación si no es "noNotificar"
+      if (notificacion !== "noNotificar") {
+        try {
+          if (tutorSeleccionado?.email) {
+            console.log(
+              "Enviando notificación al email:",
+              tutorSeleccionado.email
+            );
 
-          const nombreCompleto = `${tutorSeleccionado.nombre} ${tutorSeleccionado.apellido_paterno}`;
-          const cuerpo = `
-            <p>Hola ${nombreCompleto},</p>
-            <p>Tu cita ha sido agendada.</p>
-            <p>Motivo: ${motivo || "(Sin especificar)"}</p>
-          `;
+            const nombreCompleto = `${tutorSeleccionado.nombre} ${tutorSeleccionado.apellido_paterno}`;
+            const cuerpo = `
+              <p>Hola ${nombreCompleto},</p>
+              <p>Tu cita ha sido agendada.</p>
+              <p>Motivo: ${motivo || "(Sin especificar)"}</p>
+            `;
 
-          // calcular fecha de envío localmente (no confiar en setState que es asíncrono)
-          const fechaEnvioDate = calcularFechaNotificacion(
-            notificacion,
-            fechaHora
-          );
-          const fechaEnvioIso = fechaEnvioDate.toISOString();
+            const fechaEnvioDate = calcularFechaNotificacion(
+              notificacion,
+              fechaHora
+            );
+            const fechaEnvioIso = fechaEnvioDate.toISOString();
 
-          // actualizar el estado para mostrar en el resumen si se necesita
-          setFechaNotificacion(fechaEnvioDate);
+            setFechaNotificacion(fechaEnvioDate);
 
-          await enviarNotificacion(
-            {
-              email: tutorSeleccionado.email,
-              asunto: "Confirmación de cita - GoVet",
-              cuerpo,
-            },
-            fechaEnvioIso
-          );
+            await enviarNotificacion(
+              {
+                email: tutorSeleccionado.email,
+                asunto: "Confirmación de cita - GoVet",
+                cuerpo,
+              },
+              fechaEnvioIso
+            );
 
+            present({
+              message: "Correo de confirmación enviado",
+              duration: 2200,
+              color: "success",
+            });
+          } else {
+            console.log(
+              "No hay email de tutor; se omite el envío de notificación."
+            );
+          }
+        } catch (emailError) {
+          console.error("Error enviando notificación:", emailError);
           present({
-            message: "Correo de confirmación enviado",
-            duration: 2200,
-            color: "success",
+            message: "Cita creada, pero falló el envío del correo",
+            duration: 4000,
+            color: "warning",
           });
-        } else {
-          console.log(
-            "No hay email de tutor; se omite el envío de notificación."
-          );
         }
-      } catch (emailError) {
-        console.error("Error enviando notificación:", emailError);
-        present({
-          message: "Cita creada, pero falló el envío del correo",
-          duration: 4000,
-          color: "warning",
-        });
+      } else {
+        console.log("Notificación deshabilitada por el usuario");
       }
 
       onCitaCreada();
@@ -593,7 +674,7 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
           </IonLabel>
           <IonDatetime
             value={fechaHora}
-            onIonChange={(e) => handleCambioInicio(e.detail.value as string)}
+            onIonChange={(e) => handleCambioFecha(e.detail.value as string)}
             presentation="date"
             locale="es-CL"
             min={new Date().toISOString()}
@@ -623,7 +704,7 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
                 presentation="time"
                 value={fechaHora}
                 onIonChange={(e) => {
-                  handleCambioInicio(e.detail.value as string);
+                  handleCambioHoraInicio(e.detail.value as string);
                 }}
                 hourCycle="h23"
                 locale="es-CL"
@@ -651,7 +732,7 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
                 presentation="time"
                 value={fechaHoraTermino}
                 onIonChange={(e) => {
-                  setFechaHoraTermino(e.detail.value as string);
+                  handleCambioHoraTermino(e.detail.value as string);
                 }}
                 hourCycle="h23"
                 locale="es-CL"
@@ -737,16 +818,17 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
               value={notificacion}
               onIonChange={(e) => setNotificacion(e.detail.value as string)}
             >
+              <IonSelectOption value="noNotificar">
+                No notificar
+              </IonSelectOption>
               <IonSelectOption value="diaAnterior">
                 Día anterior
               </IonSelectOption>
               <IonSelectOption value="semanaAntes">
                 Una semana antes
               </IonSelectOption>
-              <IonSelectOption value="ahora">Ahora (test)</IonSelectOption>
-              <IonSelectOption value="minutos">
-                2h 40min antes (test)
-              </IonSelectOption>
+              <IonSelectOption value="ahora">Ahora</IonSelectOption>
+              <IonSelectOption value="minutos">2h 40min antes</IonSelectOption>
             </IonSelect>
           </IonItem>
         </IonList>
@@ -802,7 +884,9 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
           )}
           <div className="resumen-item">
             <strong>Notificación:</strong>{" "}
-            {notificacion === "diaAnterior"
+            {notificacion === "noNotificar"
+              ? "No notificar"
+              : notificacion === "diaAnterior"
               ? "Día anterior"
               : notificacion === "semanaAntes"
               ? "Una semana antes"
