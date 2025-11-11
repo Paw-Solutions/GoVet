@@ -87,7 +87,7 @@ La busqueda de pacientes se pueden hacer por su nombre, su tutor *(por nombre)*,
 
 En cada uno de los pacientes encontrados van a existir 2 opciones, uno para editar la informacion de este *(el lapiz)* y uno para ver la informacion de este de manera mas detallada *(el ojo)*.
 
-En la edicion se pueden modificar todo tipo de datos, como el nombre, chip, y si esta esterilizado, he incluso cambiar el dueño del paciente
+La edición del paciente permite el cambio de nombre y tutor de la mascota, además de editar información que cambio (codigo de chip si se le coloco uno o si fue esterilizado)
 
 ### Busqueda de tutores.
 
