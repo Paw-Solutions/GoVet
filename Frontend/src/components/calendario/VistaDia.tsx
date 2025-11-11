@@ -14,6 +14,8 @@ import {
   pawOutline,
   timeOutline,
   personOutline,
+  locationOutline,
+  documentTextOutline,
 } from "ionicons/icons";
 import { CalendarEvent, getEventsDay } from "../../api/calendario";
 import ModalDetalleCita from "./ModalDetalleCita";
@@ -70,6 +72,12 @@ const VistaDia: React.FC<VistaDiaProps> = ({ fecha, onCambiarFecha }) => {
       hour: "2-digit",
       minute: "2-digit",
     });
+  };
+
+  const formatearRangoHorario = (inicio: string, fin: string) => {
+    const horaInicio = formatearHora(inicio);
+    const horaFin = formatearHora(fin);
+    return `${horaInicio} - ${horaFin}`;
   };
 
   const handleCitaClick = (evento: CalendarEvent) => {
@@ -130,30 +138,66 @@ const VistaDia: React.FC<VistaDiaProps> = ({ fecha, onCambiarFecha }) => {
                 onClick={() => handleCitaClick(evento)}
               >
                 <IonCardContent>
+                  {/* Hora de inicio y fin - PRIORIDAD 1 */}
                   <div className="cita-hora">
                     <IonIcon icon={timeOutline} />
                     <span className="hora-texto">
-                      {formatearHora(evento.start.dateTime)}
+                      {formatearRangoHorario(
+                        evento.start.dateTime,
+                        evento.end.dateTime
+                      )}
                     </span>
                   </div>
 
                   <div className="cita-info">
-                    <div className="cita-tutor">
-                      <IonIcon icon={personOutline} />
-                      <span>{evento.summary}</span>
+                    {/* Ubicación - PRIORIDAD 2 */}
+                    {evento.location && (
+                      <div>
+                        <h2>
+                          <p>
+                            <IonIcon
+                              icon={locationOutline}
+                              className="pacientes-icon"
+                            />
+                            <span style={{ marginLeft: "8px" }}>
+                              : {evento.location}
+                            </span>
+                          </p>
+                        </h2>
+                      </div>
+                    )}
+
+                    {/* Nombre del tutor - PRIORIDAD 3 */}
+                    <div>
+                      <h2>
+                        <p>
+                          <IonIcon
+                            icon={personOutline}
+                            className="pacientes-icon"
+                          />
+                          <span style={{ marginLeft: "8px" }}>
+                            : {evento.summary}
+                          </span>
+                        </p>
+                      </h2>
                     </div>
 
-                    <div className="cita-pacientes">
-                      <IonIcon icon={pawOutline} />
-                      <span>
-                        Ubicación:{" "}
-                        {evento.location || "No hay ubicación especificada"}
-                      </span>
-                    </div>
-
-                    <div className="cita-motivo">
-                      <strong>Descripción:</strong> {evento.description}
-                    </div>
+                    {/* Descripción/Motivo (puede contener info del paciente) */}
+                    {evento.description && (
+                      <div>
+                        <h2>
+                          <p>
+                            <IonIcon
+                              icon={documentTextOutline}
+                              className="pacientes-icon"
+                            />
+                            <span style={{ marginLeft: "8px" }}>
+                              : {evento.description}
+                            </span>
+                          </p>
+                        </h2>
+                      </div>
+                    )}
                   </div>
                 </IonCardContent>
               </IonCard>

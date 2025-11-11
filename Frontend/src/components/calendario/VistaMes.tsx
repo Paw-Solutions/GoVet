@@ -17,6 +17,8 @@ import {
   calendarOutline,
   chevronUpOutline,
   chevronDownOutline,
+  locationOutline,
+  documentTextOutline,
 } from "ionicons/icons";
 import { getEventsMonth, type CalendarEvent } from "../../api/calendario";
 
@@ -126,6 +128,19 @@ const VistaMes: React.FC<VistaMesProps> = ({
       month: "long",
       year: "numeric",
     });
+  };
+
+  const formatearHora = (fechaHora: string) => {
+    return new Date(fechaHora).toLocaleTimeString("es-CL", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const formatearRangoHorario = (inicio: string, fin: string) => {
+    const horaInicio = formatearHora(inicio);
+    const horaFin = formatearHora(fin);
+    return `${horaInicio} - ${horaFin}`;
   };
 
   const diasDelMes = generarDiasDelMes();
@@ -268,45 +283,65 @@ const VistaMes: React.FC<VistaMesProps> = ({
                               })}
                             </span>
                           </div>
+                          {/* Hora de inicio y fin - PRIORIDAD 1 */}
                           <div className="cita-hora">
                             <IonIcon icon={timeOutline} />
                             <span className="hora-texto">
-                              {new Date(
-                                evento.start.dateTime
-                              ).toLocaleTimeString("es-CL", {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })}
+                              {formatearRangoHorario(
+                                evento.start.dateTime,
+                                evento.end.dateTime
+                              )}
                             </span>
                           </div>
                         </div>
 
                         <div className="cita-info">
-                          <div className="cita-tutor">
-                            <strong>{evento.summary || "Sin título"}</strong>
+                          {/* Ubicación - PRIORIDAD 2 */}
+                          {evento.location && (
+                            <div>
+                              <h2>
+                                <p>
+                                  <IonIcon
+                                    icon={locationOutline}
+                                    className="pacientes-icon"
+                                  />
+                                  <span style={{ marginLeft: "8px" }}>
+                                    : {evento.location}
+                                  </span>
+                                </p>
+                              </h2>
+                            </div>
+                          )}
+
+                          {/* Nombre del tutor - PRIORIDAD 3 */}
+                          <div>
+                            <h2>
+                              <p>
+                                <IonIcon
+                                  icon={personOutline}
+                                  className="pacientes-icon"
+                                />
+                                <span style={{ marginLeft: "8px" }}>
+                                  : {evento.summary || "Sin título"}
+                                </span>
+                              </p>
+                            </h2>
                           </div>
 
-                          {evento.location && (
-                            <div className="cita-pacientes">
-                              <IonIcon icon={personOutline} />
-                              <span>{evento.location}</span>
-                            </div>
-                          )}
-
+                          {/* Descripción/Motivo */}
                           {evento.description && (
-                            <div className="cita-motivo">
-                              <strong>Descripción:</strong> {evento.description}
-                            </div>
-                          )}
-
-                          {evento.attendees && evento.attendees.length > 0 && (
-                            <div className="cita-asistentes">
-                              <IonIcon icon={personOutline} />
-                              <span>
-                                {evento.attendees
-                                  .map((a) => a.email)
-                                  .join(", ")}
-                              </span>
+                            <div>
+                              <h2>
+                                <p>
+                                  <IonIcon
+                                    icon={documentTextOutline}
+                                    className="pacientes-icon"
+                                  />
+                                  <span style={{ marginLeft: "8px" }}>
+                                    : {evento.description}
+                                  </span>
+                                </p>
+                              </h2>
                             </div>
                           )}
                         </div>

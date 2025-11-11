@@ -5,13 +5,15 @@ import {
   IonIcon,
   IonButton,
   IonButtons,
+  IonAvatar,
 } from "@ionic/react";
 import {
   personOutline,
   pencilOutline,
-  personSharp,
-  idCardOutline,
+  pawOutline,
   shareOutline,
+  calendarOutline,
+  documentTextOutline,
 } from "ionicons/icons";
 import { ConsultaData } from "../../api/fichas";
 
@@ -31,6 +33,35 @@ const FichaItem: React.FC<COnsultaItemProps> = ({
   onExport,
   disabled,
 }) => {
+  // Función para obtener el icono según la especie del paciente
+  const getIcon = () => {
+    if (!consulta?.paciente?.especie) return pawOutline;
+
+    const especies: { [key: string]: string } = {
+      perro: "dog.svg",
+      gato: "cat.svg",
+      conejo: "rabbit.svg",
+      hamster: "hamster.svg",
+      erizo: "hedgehog.svg",
+      tortuga: "turtle.svg",
+      cuy: "cuy.svg",
+    };
+
+    return especies[consulta.paciente.especie.toLowerCase()] || pawOutline;
+  };
+
+  // Función para formatear la fecha
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return "Sin fecha";
+
+    const date = new Date(dateString);
+    return date.toLocaleDateString("es-CL", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  };
+
   return (
     <IonItem
       lines="none"
@@ -39,10 +70,63 @@ const FichaItem: React.FC<COnsultaItemProps> = ({
       onClick={onView}
       disabled={disabled}
     >
-      <IonIcon icon={personSharp} slot="start" className="item-icon" />
-      <IonLabel>
-        <h2 className="tutor-nombre">{consulta?.paciente?.nombre}</h2>
+      <IonAvatar slot="start" className="item-icon">
+        <IonIcon icon={getIcon()} />
+      </IonAvatar>
+
+      <IonLabel style={{ padding: "5px" }}>
+        {/* Nombre del paciente */}
+        <h2 className="paciente-nombre">
+          {consulta?.paciente?.nombre || "Sin nombre"}
+        </h2>
+
+        {/* Fecha de consulta */}
+        {consulta.fecha_consulta && (
+          <div>
+            <h2>
+              <p>
+                <IonIcon icon={calendarOutline} className="pacientes-icon" />
+                <span style={{ marginLeft: "8px" }}>
+                  : {formatDate(consulta.fecha_consulta)}
+                </span>
+              </p>
+            </h2>
+          </div>
+        )}
+
+        {/* Motivo de consulta */}
+        {(consulta.motivo || consulta.motivo_consulta) && (
+          <div>
+            <h2>
+              <p>
+                <IonIcon
+                  icon={documentTextOutline}
+                  className="pacientes-icon"
+                />
+                <span style={{ marginLeft: "8px" }}>
+                  : {consulta.motivo || consulta.motivo_consulta}
+                </span>
+              </p>
+            </h2>
+          </div>
+        )}
+
+        {/* Información del tutor */}
+        {consulta.tutor && (
+          <div>
+            <h2>
+              <p>
+                <IonIcon className="pacientes-icon" icon={personOutline} />
+                <span style={{ marginLeft: "8px" }}>
+                  : {consulta.tutor.nombre}{" "}
+                  {consulta.tutor.apellido_paterno || ""}
+                </span>
+              </p>
+            </h2>
+          </div>
+        )}
       </IonLabel>
+
       <IonButtons slot="end">
         <IonButton
           fill="clear"

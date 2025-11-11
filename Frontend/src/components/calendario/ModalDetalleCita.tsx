@@ -19,6 +19,9 @@ import {
   timeOutline,
   calendarOutline,
   documentTextOutline,
+  locationOutline,
+  personOutline,
+  pawOutline,
 } from "ionicons/icons";
 import { deteleEvent } from "../../api/calendario";
 import { CalendarEvent } from "../../api/calendario";
@@ -105,79 +108,207 @@ const ModalDetalleCita: React.FC<ModalDetalleCitaProps> = ({
         </IonHeader>
 
         <IonContent className="ion-padding">
-          {/* Título del evento */}
+          {/* Título principal del evento */}
           <div className="detalle-section">
-            <h2>{evento.summary}</h2>
+            <h2
+              style={{
+                fontSize: "1.5rem",
+                fontWeight: "bold",
+                marginBottom: "1rem",
+              }}
+            >
+              {evento.summary || "Evento sin título"}
+            </h2>
           </div>
 
-          {/* Fecha y hora */}
+          {/* Fecha y Hora con rango horario */}
           <div className="detalle-section">
-            <h3>
+            <h3
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                marginBottom: "0.5rem",
+              }}
+            >
               <IonIcon icon={calendarOutline} /> Fecha y Hora
             </h3>
-            <IonItem lines="none">
-              <IonLabel>
-                <div className="detalle-fecha">
-                  <IonIcon icon={calendarOutline} />
-                  <span className="capitalize">{fecha}</span>
-                </div>
-                <div className="detalle-hora">
-                  <IonIcon icon={timeOutline} />
-                  <span>
-                    {horaInicio} - {horaFin}
-                  </span>
-                </div>
-              </IonLabel>
-            </IonItem>
+            <div style={{ padding: "0.5rem 0" }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  marginBottom: "0.5rem",
+                }}
+              >
+                <IonIcon icon={calendarOutline} className="pacientes-icon" />
+                <span className="capitalize">{fecha}</span>
+              </div>
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "8px" }}
+              >
+                <IonIcon icon={timeOutline} className="pacientes-icon" />
+                <span>
+                  {horaInicio} - {horaFin}
+                </span>
+              </div>
+            </div>
           </div>
 
           {/* Ubicación */}
           {evento.location && (
             <div className="detalle-section">
-              <h3>Ubicación</h3>
-              <IonItem lines="none">
-                <IonLabel className="ion-text-wrap">
-                  <p>{evento.location}</p>
-                </IonLabel>
-              </IonItem>
+              <h3
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  marginBottom: "0.5rem",
+                }}
+              >
+                <IonIcon icon={locationOutline} /> Ubicación
+              </h3>
+              <div style={{ padding: "0.5rem 0" }}>
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "8px" }}
+                >
+                  <IonIcon icon={locationOutline} className="pacientes-icon" />
+                  <span>{evento.location}</span>
+                </div>
+              </div>
             </div>
           )}
-
-          {/* Descripción */}
+          {/* 
+          Información del Tutor 
+          <div className="detalle-section">
+            <h3
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                marginBottom: "0.5rem",
+              }}
+            >
+              <IonIcon icon={personOutline} /> Información del Tutor
+            </h3>
+            <div style={{ padding: "0.5rem 0" }}>
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "8px" }}
+              >
+                <IonIcon icon={personOutline} className="pacientes-icon" />
+                <span>{evento.summary || "No especificado"}</span>
+              </div>
+            </div>
+          </div>
+            */}
+          {/* Descripción completa (incluye paciente, especie, raza, motivo) */}
           {evento.description && (
             <div className="detalle-section">
-              <h3>
-                <IonIcon icon={documentTextOutline} /> Descripción
+              <h3
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  marginBottom: "0.5rem",
+                }}
+              >
+                <IonIcon icon={documentTextOutline} /> Información del Paciente
+                y Motivo
               </h3>
-              <IonItem lines="none">
-                <IonLabel className="ion-text-wrap">
-                  <p>{evento.description}</p>
-                </IonLabel>
-              </IonItem>
+              <div style={{ padding: "0.5rem 0" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "flex-start",
+                    gap: "8px",
+                  }}
+                >
+                  <IonIcon
+                    icon={pawOutline}
+                    className="pacientes-icon"
+                    style={{ marginTop: "4px" }}
+                  />
+                  <div style={{ whiteSpace: "pre-wrap", lineHeight: "1.6" }}>
+                    {evento.description}
+                  </div>
+                </div>
+              </div>
+              <div
+                style={{
+                  padding: "0.75rem",
+                  backgroundColor: "var(--ion-color-light)",
+                  borderRadius: "8px",
+                  marginTop: "0.5rem",
+                }}
+              >
+                <p
+                  style={{
+                    fontSize: "0.85rem",
+                    color: "var(--ion-color-medium)",
+                    margin: 0,
+                  }}
+                >
+                  💡 <strong>Nota:</strong> La información del paciente (nombre,
+                  especie, raza) y el motivo de la consulta se encuentran en
+                  este campo de descripción.
+                </p>
+              </div>
             </div>
           )}
 
           {/* Asistentes */}
           {evento.attendees && evento.attendees.length > 0 && (
             <div className="detalle-section">
-              <h3>Asistentes</h3>
+              <h3
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  marginBottom: "0.5rem",
+                }}
+              >
+                <IonIcon icon={personOutline} /> Asistentes
+              </h3>
               {evento.attendees.map((asistente, index) => (
-                <IonItem key={index} lines="none">
-                  <IonLabel>
-                    <p>{asistente.email}</p>
-                  </IonLabel>
-                </IonItem>
+                <div key={index} style={{ padding: "0.5rem 0" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                    }}
+                  >
+                    <IonIcon icon={personOutline} className="pacientes-icon" />
+                    <span>{asistente.email}</span>
+                  </div>
+                </div>
               ))}
             </div>
           )}
 
           {/* Zona horaria */}
-          <div className="detalle-footer">
-            <p className="texto-small">Zona horaria: {evento.start.timeZone}</p>
+          <div
+            className="detalle-footer"
+            style={{
+              marginTop: "1rem",
+              paddingTop: "1rem",
+              borderTop: "1px solid var(--ion-color-light)",
+            }}
+          >
+            <p
+              style={{
+                fontSize: "0.85rem",
+                color: "var(--ion-color-medium)",
+                margin: 0,
+              }}
+            >
+              Zona horaria: {evento.start.timeZone}
+            </p>
           </div>
 
           {/* Botones de acción */}
-          <div className="detalle-acciones">
+          <div className="detalle-acciones" style={{ marginTop: "1.5rem" }}>
             <IonButton
               expand="block"
               color="danger"

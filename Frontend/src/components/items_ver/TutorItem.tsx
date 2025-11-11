@@ -11,6 +11,8 @@ import {
   pencilOutline,
   personSharp,
   idCardOutline,
+  mailOutline,
+  locationOutline,
 } from "ionicons/icons";
 import { TutorData } from "../../api/tutores";
 
@@ -37,14 +39,38 @@ const TutorItem: React.FC<TutorItemProps> = ({
       disabled={disabled}
     >
       <IonIcon icon={personSharp} slot="start" className="item-icon" />
-      <IonLabel>
+      <IonLabel style={{ padding: "5px" }}>
         <h2 className="tutor-nombre">
           {tutor.nombre} {tutor.apellido_paterno} {tutor.apellido_materno}
         </h2>
-        <p>
-          <IonIcon src="/id.svg" className="pacientes-icon" />
-          <span style={{ marginLeft: "8px" }}>: {tutor.rut}</span>
-        </p>
+        <div>
+          <h2>
+            <p>
+              <IonIcon src="/id.svg" className="pacientes-icon" />
+              <span style={{ marginLeft: "8px" }}>: {tutor.rut}</span>
+            </p>
+          </h2>
+        </div>
+        {tutor.direccion && (
+          <div>
+            <h2>
+              <p>
+                <IonIcon icon={locationOutline} className="pacientes-icon" />
+                <span style={{ marginLeft: "8px" }}>: {tutor.direccion}</span>
+              </p>
+            </h2>
+          </div>
+        )}
+        {tutor.email && (
+          <div>
+            <h2>
+              <p>
+                <IonIcon icon={mailOutline} className="pacientes-icon" />
+                <span style={{ marginLeft: "8px" }}>: {tutor.email}</span>
+              </p>
+            </h2>
+          </div>
+        )}
       </IonLabel>
       <IonButtons slot="end">
         <IonButton
