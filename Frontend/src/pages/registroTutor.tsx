@@ -20,7 +20,9 @@ import {
   IonCol,
   IonToast,
   IonText,
+  IonIcon,
 } from "@ionic/react";
+import { close } from "ionicons/icons";
 import "../styles/registroTutor.css";
 import InputTelefono, {
   InputTelefonoHandle,
@@ -32,7 +34,11 @@ import { crearTutor } from "../api/tutores";
 import { obtenerRegiones } from "../api/regiones";
 import { formatRegionName, formatComunaName } from "../utils/formatters";
 
-const RegistroTutor: React.FC = () => {
+interface RegistroTutorProps {
+  onClose?: () => void;
+}
+
+const RegistroTutor: React.FC<RegistroTutorProps> = ({ onClose }) => {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -263,6 +269,13 @@ const RegistroTutor: React.FC = () => {
       <IonHeader translucent={true}>
         <IonToolbar>
           <IonTitle>Registrar Tutor</IonTitle>
+          {onClose && (
+            <IonButtons slot="end">
+              <IonButton onClick={onClose}>
+                <IonIcon icon={close} slot="icon-only" />
+              </IonButton>
+            </IonButtons>
+          )}
         </IonToolbar>
       </IonHeader>
       <IonContent fullscreen={true}>

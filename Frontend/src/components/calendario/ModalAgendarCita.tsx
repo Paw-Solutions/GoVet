@@ -223,10 +223,6 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
   const handleCambioInicio = (value: string | null | undefined) => {
     if (value) {
       setFechaHora(value);
-      // Auto-ajustar hora de término a inicio + 30 minutos
-      const nuevaFechaInicio = new Date(value);
-      nuevaFechaInicio.setMinutes(nuevaFechaInicio.getMinutes() + 30);
-      setFechaHoraTermino(nuevaFechaInicio.toISOString());
     }
   };
 
@@ -574,13 +570,6 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
   );
 
   const renderPaso3 = () => {
-    // Calcular mínimo para hora de término (inicio + 30 minutos)
-    const minTerminoTimeOnly = () => {
-      const minFecha = new Date(fechaHora);
-      minFecha.setMinutes(minFecha.getMinutes() + 30);
-      return minFecha.toISOString();
-    };
-
     // Formatear hora para mostrar en el botón
     const formatearHora = (isoString: string) => {
       const fecha = new Date(isoString);
@@ -665,7 +654,6 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
                   setFechaHoraTermino(e.detail.value as string);
                 }}
                 hourCycle="h23"
-                min={minTerminoTimeOnly()}
                 locale="es-CL"
                 showDefaultButtons={true}
               />
@@ -673,7 +661,7 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
           </div>
           {errorDuracion && (
             <IonNote color="danger">
-              La cita debe durar al menos 30 minutos
+              ⚠️ La cita debe durar al menos 30 minutos
             </IonNote>
           )}
         </IonItem>

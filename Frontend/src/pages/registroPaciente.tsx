@@ -410,7 +410,7 @@ const RegistroPaciente: React.FC = () => {
           isOpen={showModalRegistroTutor}
           onDidDismiss={() => setShowModalRegistroTutor(false)}
         >
-          <RegistroTutor />
+          <RegistroTutor onClose={() => setShowModalRegistroTutor(false)} />
         </IonModal>
 
         <IonToast
