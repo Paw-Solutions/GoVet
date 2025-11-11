@@ -1104,6 +1104,53 @@ def obtener_vacunas_por_nombre(db: Session = Depends(get_db)):
         ) for resultado in db_vacunas
     ]
 
+# Ruta GET para obtener próximas vacunas por ID de paciente
+@app.get("/consultas/tratamientos/vacunas/paciente/{id_paciente}/proximas/", response_model=List[consultaTratamientoConDetallesResponse])
+def obtener_proximas_vacunas_por_paciente(id_paciente: int, db: Session = Depends(get_db)):
+    # Verificar que el paciente existe
+    db_paciente = db.query(models.Paciente).filter(models.Paciente.id_paciente == id_paciente).first()
+    if not db_paciente:
+        raise HTTPException(status_code=404, detail="Paciente no encontrado")
+    
+    # Obtener fecha actual para filtrar vacunas futuras
+    fecha_actual = datetime.now().date()
+    
+    # Query para obtener vacunas próximas del paciente específico
+    db_vacunas = db.query(
+        models.ConsultaTratamiento,
+        models.Tratamiento.nombre.label('nombre_tratamiento'),
+        models.Tratamiento.descripcion.label('descripcion_tratamiento'),
+        models.Paciente.nombre.label('nombre_paciente')
+    ).join(
+        models.Tratamiento, 
+        models.ConsultaTratamiento.id_tratamiento == models.Tratamiento.id_tratamiento
+    ).join(
+        models.Paciente,
+        models.ConsultaTratamiento.id_paciente == models.Paciente.id_paciente
+    ).filter(
+        models.Tratamiento.nombre.ilike("%Vacuna%"),  # Solo tratamientos que contengan "Vacuna"
+        models.ConsultaTratamiento.id_paciente == id_paciente,  # Solo del paciente específico
+        models.ConsultaTratamiento.fecha_tratamiento >= fecha_actual  # Solo fechas futuras o hoy
+    ).order_by(models.ConsultaTratamiento.fecha_tratamiento.asc()).all()  # Ordenar por fecha más próxima
+    
+    if not db_vacunas:
+        raise HTTPException(status_code=404, detail="No se encontraron próximas vacunas para este paciente")
+    
+    # Construir la respuesta usando el esquema
+    return [
+        consultaTratamientoConDetallesResponse(
+            id_consulta=resultado[0].id_consulta,
+            id_tratamiento=resultado[0].id_tratamiento,
+            id_paciente=resultado[0].id_paciente,
+            dosis=resultado[0].dosis,
+            fecha_tratamiento=resultado[0].fecha_tratamiento,
+            id_aplicacion=resultado[0].id_aplicacion,
+            nombre_tratamiento=resultado.nombre_tratamiento,
+            descripcion_tratamiento=resultado.descripcion_tratamiento,
+            nombre_paciente=resultado.nombre_paciente
+        ) for resultado in db_vacunas
+    ]
+
 """ RUTA PARA ENVIAR EMAILS A TUTORES """
 conf = ConnectionConfig (
     MAIL_USERNAME = os.getenv("USER"),

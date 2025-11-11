@@ -20,18 +20,18 @@ import {
   chevronForwardOutline,
   checkmarkCircleOutline,
 } from "ionicons/icons";
-import { obtenerVacunasPendientesPorPaciente, Vacuna } from "../../api/vacunas";
+import { ConsultaTratamiento, obtenerTratamientosPorPaciente } from "../../api/tratamientos";
 
 interface PendientesPacienteProps {
   idPaciente: number;
-  onVerDetalleVacuna?: (vacuna: Vacuna) => void;
+  onVerDetalleVacuna?: (vacuna: ConsultaTratamiento) => void;
 }
 
 const PendientesPaciente: React.FC<PendientesPacienteProps> = ({
   idPaciente,
   onVerDetalleVacuna,
 }) => {
-  const [vacunas, setVacunas] = useState<Vacuna[]>([]);
+  const [vacunas, setVacunas] = useState<ConsultaTratamiento[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -44,10 +44,10 @@ const PendientesPaciente: React.FC<PendientesPacienteProps> = ({
     setError(null);
 
     try {
-      const vacunasResponse = await obtenerVacunasPendientesPorPaciente(
+      const vacunasResponse = await obtenerTratamientosPorPaciente(
         idPaciente
       );
-      setVacunas(vacunasResponse.vacunas);
+      setVacunas(vacunasResponse);
     } catch (err) {
       console.error("Error al cargar pendientes:", err);
       setError("No se pudieron cargar los pendientes");
@@ -145,7 +145,7 @@ const PendientesPaciente: React.FC<PendientesPacienteProps> = ({
             <IonList lines="none" style={{ background: "transparent" }}>
               {vacunas.slice(0, 3).map((vacuna) => (
                 <IonItem
-                  key={vacuna.id_vacuna}
+                  key={vacuna.id_tratamiento}
                   button={!!onVerDetalleVacuna}
                   detail={!!onVerDetalleVacuna}
                   onClick={() =>
@@ -165,22 +165,11 @@ const PendientesPaciente: React.FC<PendientesPacienteProps> = ({
                   />
                   <IonLabel>
                     <h3 style={{ fontWeight: "500", fontSize: "0.95rem" }}>
-                      {vacuna.nombre}
+                      {vacuna.nombre_tratamiento}
                     </h3>
                     <p style={{ fontSize: "0.85rem", marginTop: "4px" }}>
-                      {formatearFecha(vacuna.fecha_programada)}
+                      {formatearFecha(vacuna.fecha_tratamiento)} a las {formatearHora(vacuna.fecha_tratamiento)}
                     </p>
-                    {vacuna.observaciones && (
-                      <p
-                        style={{
-                          fontSize: "0.8rem",
-                          color: "var(--ion-color-medium)",
-                          marginTop: "2px",
-                        }}
-                      >
-                        {vacuna.observaciones}
-                      </p>
-                    )}
                   </IonLabel>
                   {onVerDetalleVacuna && (
                     <IonIcon

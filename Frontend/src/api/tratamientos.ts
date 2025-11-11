@@ -34,3 +34,24 @@ export async function obtenerTratamientosProximos() {
     throw error;
   }
 }
+
+export async function obtenerTratamientosPorPaciente(idPaciente: number): Promise<ConsultaTratamiento[]> {
+  try {
+    console.log(`Obteniendo tratamientos para el paciente ID: ${idPaciente}...`);
+    const response = await fetch(`${API_URL}/consultas/tratamientos/vacunas/paciente/${idPaciente}/proximas/`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
+    if (!response.ok) {
+      throw new Error(`Error al obtener tratamientos para el paciente: ${response.status}`);
+    }
+    const data = await response.json();
+    console.log(`Tratamientos obtenidos para el paciente ID: ${idPaciente}:`, data);
+    return data;
+  } catch (error) {
+    console.error(`Error obteniendo tratamientos para el paciente ID: ${idPaciente}:`, error);
+    throw error;
+  }
+}
