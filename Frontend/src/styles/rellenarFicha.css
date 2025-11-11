@@ -58,7 +58,7 @@
 /* Ajuste específico para elementos outline - NUEVO */
 .ficha-general-container ion-input[fill="outline"],
 .ficha-general-container ion-textarea[fill="outline"] {
-  --border-radius: 8px;
+  --border-radius: var(--radius-md);
   --border-width: 2px;
   --border-color: var(--ion-color-light-shade);
   margin: 0;

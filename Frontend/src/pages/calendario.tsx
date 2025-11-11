@@ -1,15 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   IonContent,
   IonPage,
   IonSegment,
   IonSegmentButton,
   IonLabel,
-  IonFab,
-  IonFabButton,
-  IonIcon,
 } from "@ionic/react";
-import { add } from "ionicons/icons";
+import { useLocation } from "react-router-dom";
 import PageHeader from "../components/common/PageHeader";
 import VistaDia from "../components/calendario/VistaDia";
 import VistaSemana from "../components/calendario/VistaSemana";
@@ -23,6 +20,15 @@ const Calendario: React.FC = () => {
   const [vistaActual, setVistaActual] = useState<VistaType>("semana");
   const [fechaSeleccionada, setFechaSeleccionada] = useState(new Date());
   const [mostrarModalAgendar, setMostrarModalAgendar] = useState(false);
+  const location = useLocation();
+
+  // Detectar si se debe abrir el modal desde URL
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get("abrirModal") === "true") {
+      setMostrarModalAgendar(true);
+    }
+  }, [location]);
 
   const handleVistaChange = (e: CustomEvent) => {
     setVistaActual(e.detail.value as VistaType);
@@ -42,6 +48,10 @@ const Calendario: React.FC = () => {
           <VistaSemana
             fecha={fechaSeleccionada}
             onCambiarFecha={setFechaSeleccionada}
+            onSeleccionarDia={(fecha: Date) => {
+              setFechaSeleccionada(fecha);
+              setVistaActual("dia");
+            }}
           />
         );
       case "mes":
@@ -88,13 +98,6 @@ const Calendario: React.FC = () => {
           {/* Vista del calendario */}
           <div className="calendario-vista">{renderVista()}</div>
         </div>
-
-        {/* Botón flotante para agendar cita */}
-        <IonFab vertical="bottom" horizontal="end" slot="fixed">
-          <IonFabButton onClick={() => setMostrarModalAgendar(true)}>
-            <IonIcon icon={add} />
-          </IonFabButton>
-        </IonFab>
 
         {/* Modal para agendar nueva cita */}
         <ModalAgendarCita

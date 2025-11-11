@@ -1,82 +1,102 @@
-/* Estilos para la página de inicio - Home */
-/* Usando rem para PWA - Responsive y escalable */
+/* ============================================
+   HOME PAGE - Página de Inicio
+   Usando Design Tokens para consistencia
+   ============================================ */
 
-/* Estilo para las tarjetas principales */
+/* Tarjetas principales */
 .home-card {
-  border-radius: 1rem !important;
-  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.1) !important;
-  margin: 1rem 0;
-  background: var(--ion-color-light);
+  border-radius: var(--radius-card) !important;
+  box-shadow: var(--shadow-card) !important;
+  margin: var(--spacing-md) 0;
+  background: var(--color-light);
+  transition: transform var(--transition-fast),
+    box-shadow var(--transition-fast);
 }
 
-/* Estilo para los botones principales */
+.home-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg) !important;
+}
+
+/* Botones principales */
 .home-button {
-  border-radius: 0.75rem !important;
-  margin: 0.5rem 0 !important;
-  height: 3.75rem;
-  font-weight: 600;
-  --box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.15);
+  border-radius: var(--radius-button) !important;
+  margin: var(--spacing-sm) 0 !important;
+  height: 60px;
+  font-weight: var(--font-weight-semibold);
+  --box-shadow: var(--shadow-button);
+  transition: all var(--transition-fast);
 }
 
-/* Estilo para el header de las tarjetas */
+.home-button:active {
+  transform: scale(0.97);
+}
+
+/* Header de las tarjetas */
 .home-card-header {
-  border-radius: 1rem 1rem 0 0 !important;
+  border-radius: var(--radius-card) var(--radius-card) 0 0 !important;
   background: linear-gradient(
     135deg,
-    var(--ion-color-primary),
-    var(--ion-color-primary-shade)
+    var(--color-primary),
+    var(--color-primary-shade)
   );
   color: white;
+  padding: var(--spacing-md);
 }
 
 .home-card-title {
   color: white !important;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-lg);
   display: flex;
   align-items: center;
+  gap: var(--spacing-sm);
 }
 
-/* Estilo para la lista de tutores */
+/* Lista de tutores */
 .tutores-list {
-  border-radius: 0.75rem;
+  border-radius: var(--radius-md);
   overflow: hidden;
-  margin: 1rem 0;
+  margin: var(--spacing-md) 0;
 }
 
 .tutor-item {
-  border-radius: 0.5rem !important;
-  margin: 0.5rem 0;
-  background: var(--ion-color-light-tint);
-  --inner-padding-end: 1rem;
-  --inner-padding-start: 1rem;
+  border-radius: var(--radius-md) !important;
+  margin: var(--spacing-sm) 0;
+  background: var(--color-light-tint);
+  --inner-padding-end: var(--spacing-md);
+  --inner-padding-start: var(--spacing-md);
   --padding-start: 0;
   --padding-end: 0;
+  transition: background var(--transition-fast);
 }
 
 .tutor-item:hover {
-  background: var(--ion-color-medium-tint);
-  transition: background 0.3s ease;
+  background: var(--background-color-secondary);
+  cursor: pointer;
 }
 
-/* Estilo para las etiquetas de información del tutor */
+/* Información del tutor */
 .tutor-label h2 {
-  color: var(--ion-color-dark);
-  font-weight: 600;
-  margin-bottom: 0.25rem;
+  color: var(--text-color);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-md);
+  margin-bottom: var(--spacing-xs);
 }
 
 .tutor-label p {
-  color: var(--ion-color-medium-shade);
-  font-size: 0.9rem;
-  margin: 0.125rem 0;
+  color: var(--text-color-secondary);
+  font-size: var(--font-size-sm);
+  margin: var(--spacing-xs) 0;
 }
 
-/* Estilo para el botón de actualizar */
+/* Botón de actualizar */
 .refresh-button {
-  border-radius: 1.25rem !important;
-  --color: var(--ion-color-primary);
-  margin-top: 0.75rem;
-  font-size: 0.9rem;
+  border-radius: var(--radius-full) !important;
+  --color: var(--color-primary);
+  margin-top: var(--spacing-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
 }
 
 /* Estilo para el contenedor principal */

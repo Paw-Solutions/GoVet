@@ -9,7 +9,7 @@
 .custom-segment {
   --background: var(--ion-color-light);
   --indicator-color: var(--ion-color-primary);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   padding: 4px;
 }
 
@@ -17,9 +17,10 @@
   --color: var(--ion-color-medium);
   --color-activated: var(--ion-color-primary);
   --indicator-box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  --indicator-border-radius: 8px;
+  --indicator-border-radius: var(--radius-md);
   min-height: 44px;
   font-weight: 500;
+  border-radius: var(--radius-md);
 }
 
 /* Responsive */
@@ -27,7 +28,7 @@
   .segment-container-sticky {
     padding: 12px;
   }
-  
+
   .custom-segment ion-segment-button {
     min-height: 40px;
     font-size: 0.9em;

@@ -565,10 +565,47 @@ def obtener_todos_los_pacientes(db: Session = Depends(get_db)):
 # Rut GET para obtener todos los pacientes por rut de su tutor
 @app.get("/pacientes/tutor/{rut}", response_model=List[PacienteResponse])
 def obtener_pacientes_por_rut_tutor(rut: str, db: Session = Depends(get_db)):
-    db_pacientes = db.query(models.Paciente).join(models.TutorPaciente).filter(models.TutorPaciente.rut == rut).all()
-    if not db_pacientes:
+    # Hacer JOIN con Raza y Especie para obtener esa información
+    pacientes_query = db.query(
+        models.Paciente,
+        models.Raza.nombre.label('raza_nombre'),
+        models.Especie.nombre_comun.label('especie_nombre')
+    ).join(
+        models.TutorPaciente, 
+        models.Paciente.id_paciente == models.TutorPaciente.id_paciente
+    ).join(
+        models.Raza,
+        models.Paciente.id_raza == models.Raza.id_raza,
+        isouter=True
+    ).join(
+        models.Especie,
+        models.Raza.id_especie == models.Especie.id_especie,
+        isouter=True
+    ).filter(
+        models.TutorPaciente.rut == rut
+    ).all()
+    
+    if not pacientes_query:
         raise HTTPException(status_code=404, detail="No se encontraron pacientes para ese tutor")
-    return db_pacientes
+    
+    # Convertir resultados a la estructura esperada
+    resultado = []
+    for paciente, raza_nombre, especie_nombre in pacientes_query:
+        paciente_dict = {
+            "id_paciente": paciente.id_paciente,
+            "nombre": paciente.nombre,
+            "color": paciente.color,
+            "sexo": paciente.sexo,
+            "esterilizado": paciente.esterilizado,
+            "fecha_nacimiento": paciente.fecha_nacimiento,
+            "id_raza": paciente.id_raza,
+            "codigo_chip": paciente.codigo_chip,
+            "raza": raza_nombre,
+            "especie": especie_nombre
+        }
+        resultado.append(paciente_dict)
+    
+    return resultado
 
 # Ruta GET para obtener pacientes con paginación y búsqueda avanzada
 @app.get("/pacientes/paginated/")

@@ -34,6 +34,8 @@ class PacienteCreate(PacienteBase):
 
 class PacienteResponse(PacienteBase):
     id_paciente: int 
+    raza: Optional[str] = None
+    especie: Optional[str] = None
 
     class Config:
         from_attributes = True 

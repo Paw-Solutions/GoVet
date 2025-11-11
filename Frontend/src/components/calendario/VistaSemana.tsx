@@ -24,9 +24,14 @@ import { CalendarEvent, getEventsWeek } from "../../api/calendario";
 interface VistaSemanaProps {
   fecha: Date;
   onCambiarFecha: (fecha: Date) => void;
+  onSeleccionarDia: (fecha: Date) => void;
 }
 
-const VistaSemana: React.FC<VistaSemanaProps> = ({ fecha, onCambiarFecha }) => {
+const VistaSemana: React.FC<VistaSemanaProps> = ({
+  fecha,
+  onCambiarFecha,
+  onSeleccionarDia,
+}) => {
   const [loading, setLoading] = useState(true);
   const [eventoSeleccionado, setEventoSeleccionado] =
     useState<CalendarEvent | null>(null);
@@ -192,6 +197,8 @@ const VistaSemana: React.FC<VistaSemanaProps> = ({ fecha, onCambiarFecha }) => {
                 <div
                   key={index}
                   className={`semana-dia-horizontal ${isHoy ? "dia-hoy" : ""}`}
+                  onClick={() => onSeleccionarDia(dia)}
+                  style={{ cursor: "pointer" }}
                 >
                   <div className="dia-header-horizontal">
                     <span className="dia-nombre">

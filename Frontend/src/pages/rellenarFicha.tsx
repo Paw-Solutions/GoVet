@@ -14,7 +14,6 @@ import {
   IonTextarea,
   IonButton,
   IonButtons,
-  IonMenuButton,
   IonGrid,
   IonRow,
   IonCol,
@@ -263,9 +262,6 @@ const RellenarFicha: React.FC = () => {
     <IonPage>
       <IonHeader translucent={true}>
         <IonToolbar>
-          <IonButtons slot="start">
-            <IonMenuButton />
-          </IonButtons>
           <IonTitle>Generar ficha</IonTitle>
         </IonToolbar>
       </IonHeader>

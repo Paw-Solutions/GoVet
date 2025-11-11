@@ -539,11 +539,20 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
               <IonIcon icon={pawOutline} slot="start" />
               <IonLabel>
                 <h3>{paciente.nombre}</h3>
-                <p>
-                  {paciente.especie || "Especie no especificada"}
-                  {paciente.raza && ` - ${paciente.raza}`}
+                <p style={{ marginTop: "4px", marginBottom: "4px" }}>
+                  <strong>Especie:</strong>{" "}
+                  {paciente.especie || "No especificada"}
                 </p>
-                {paciente.sexo && <p>Sexo: {paciente.sexo}</p>}
+                {paciente.raza && (
+                  <p style={{ marginTop: "4px", marginBottom: "4px" }}>
+                    <strong>Raza:</strong> {paciente.raza}
+                  </p>
+                )}
+                {paciente.sexo && (
+                  <p style={{ marginTop: "4px", marginBottom: "4px" }}>
+                    <strong>Sexo:</strong> {paciente.sexo}
+                  </p>
+                )}
               </IonLabel>
               {pacientesSeleccionados.includes(paciente.id_paciente) && (
                 <IonIcon icon={checkmarkOutline} slot="end" color="success" />

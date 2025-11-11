@@ -8,7 +8,6 @@ import {
   IonItem,
   IonButton,
   IonButtons,
-  IonMenuButton,
   IonGrid,
   IonRow,
   IonCol,
@@ -40,7 +39,7 @@ import "../styles/home.css";
 
 const Home: React.FC = () => {
   const history = useHistory();
-  const API_URL = import.meta.env.VITE_API_URL || '/api'; // usa tu variable de entorno
+  const API_URL = import.meta.env.VITE_API_URL || "/api"; // usa tu variable de entorno
 
   // Estado para los últimos tutores
   const [ultimosTutores, setUltimosTutores] = useState<any[]>([]);
@@ -77,9 +76,6 @@ const Home: React.FC = () => {
     <IonPage>
       <IonHeader translucent={true}>
         <IonToolbar>
-          <IonButtons slot="start">
-            <IonMenuButton />
-          </IonButtons>
           <IonTitle>Inicio</IonTitle>
         </IonToolbar>
       </IonHeader>
@@ -155,16 +151,19 @@ const Home: React.FC = () => {
         </IonGrid>
         <IonRow>
           <IonCol>
-            <CajaVacunas limite={5}/>
+            <CajaVacunas limite={5} />
           </IonCol>
         </IonRow>
       </IonContent>
+
+      {/*
       <IonFooter className="ion-no-border footer-right">
         <div className="boton-anadir-container">
-          {/* Botón con opciones automáticas por defecto */}
+          {/* Botón con opciones automáticas por defecto 
           <BotonAnadir tipo="opcionesDefault" />
         </div>
       </IonFooter>
+      */}
     </IonPage>
   );
 };

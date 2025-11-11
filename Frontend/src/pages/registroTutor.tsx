@@ -15,7 +15,6 @@ import {
   IonRadio,
   IonButton,
   IonButtons,
-  IonMenuButton,
   IonGrid,
   IonRow,
   IonCol,
@@ -263,9 +262,6 @@ const RegistroTutor: React.FC = () => {
     <IonPage>
       <IonHeader translucent={true}>
         <IonToolbar>
-          <IonButtons slot="start">
-            <IonMenuButton />
-          </IonButtons>
           <IonTitle>Registrar Tutor</IonTitle>
         </IonToolbar>
       </IonHeader>

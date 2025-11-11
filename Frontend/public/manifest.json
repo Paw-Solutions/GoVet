@@ -1,6 +1,7 @@
 {
   "short_name": "GoVet",
-  "name": "GoVet",
+  "name": "GoVet - Gestión Veterinaria",
+  "description": "Sistema de gestión veterinaria para administrar pacientes, tutores y citas",
   "icons": [
     {
       "src": "assets/icon/favicon.png",
@@ -8,14 +9,49 @@
       "type": "image/x-icon"
     },
     {
-      "src": "assets/icon/icon.png",
+      "src": "assets/icon/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icon/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icon/icon-maskable-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "maskable"
+    },
+    {
+      "src": "assets/icon/icon-maskable-512.png",
       "type": "image/png",
       "sizes": "512x512",
       "purpose": "maskable"
     }
   ],
-  "start_url": ".",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "theme_color": "#ffffff",
-  "background_color": "#ffffff"
+  "orientation": "portrait-primary",
+  "theme_color": "#dc8add",
+  "background_color": "#f6f8fc",
+  "categories": ["medical", "productivity", "business"],
+  "screenshots": [
+    {
+      "src": "assets/screenshots/home.png",
+      "type": "image/png",
+      "sizes": "540x720",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "assets/screenshots/calendario.png",
+      "type": "image/png",
+      "sizes": "540x720",
+      "form_factor": "narrow"
+    }
+  ]
 }

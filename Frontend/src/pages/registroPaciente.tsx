@@ -12,7 +12,6 @@ import {
   IonInput,
   IonButton,
   IonButtons,
-  IonMenuButton,
   IonGrid,
   IonRow,
   IonCol,
@@ -131,9 +130,6 @@ const RegistroPaciente: React.FC = () => {
     <IonPage>
       <IonHeader translucent={true}>
         <IonToolbar>
-          <IonButtons slot="start">
-            <IonMenuButton />
-          </IonButtons>
           <IonTitle>Registrar Paciente</IonTitle>
         </IonToolbar>
       </IonHeader>
