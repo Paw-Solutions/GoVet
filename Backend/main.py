@@ -446,7 +446,28 @@ def crear_paciente(paciente: PacienteCreate, db: Session = Depends(get_db)):
     db.add(db_paciente)
     db.commit()
     db.refresh(db_paciente)
-    return db_paciente
+    
+    # Cargar los nombres de la raza y especie
+    raza_obj = db.query(models.Raza).filter(models.Raza.id_raza == db_paciente.id_raza).first()
+    especie_obj = None
+    if raza_obj:
+        especie_obj = db.query(models.Especie).filter(models.Especie.id_especie == raza_obj.id_especie).first()
+    
+    # Construir la respuesta con los nombres
+    response_data = {
+        "id_paciente": db_paciente.id_paciente,
+        "nombre": db_paciente.nombre,
+        "color": db_paciente.color,
+        "sexo": db_paciente.sexo,
+        "esterilizado": db_paciente.esterilizado,
+        "fecha_nacimiento": db_paciente.fecha_nacimiento,
+        "id_raza": db_paciente.id_raza,
+        "codigo_chip": db_paciente.codigo_chip,
+        "raza": raza_obj.nombre if raza_obj else None,
+        "especie": especie_obj.nombre_comun if especie_obj else None
+    }
+    
+    return response_data
 
 # Ruta GET para obtener un paciente por su ID
 @app.get("/pacientes/{id_paciente}", response_model=PacienteResponse)
