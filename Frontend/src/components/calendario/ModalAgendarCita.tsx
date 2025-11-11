@@ -28,7 +28,6 @@ import {
   personOutline,
   pawOutline,
 } from "ionicons/icons";
-import { crearCita, type CitaCreate } from "../../api/citas";
 import { createEvent, type CalendarEventCreate } from "../../api/calendario";
 import { enviarNotificacion } from "../../api/notificacion";
 import { obtenerTutoresPaginados, type TutorData } from "../../api/tutores";
@@ -321,23 +320,12 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
             }`,
         start: fechaInicio.toISOString(), // ✅ String directo
         end: fechaTermino.toISOString(),
-        attendees: tutorSeleccionado?.email
-          ? [{ email: tutorSeleccionado.email }]
-          : undefined,
+        attendees: undefined, //tutorSeleccionado?.email
+          //? [{ email: tutorSeleccionado.email }]
+          //: undefined,
       };
 
       await createEvent(nuevoEvento);
-
-      // También crear en el sistema de citas local
-      const nuevaCita: CitaCreate = {
-        rut_tutor: tutorSeleccionado!.rut,
-        fecha_hora: fechaHora,
-        motivo: motivo,
-        notas: notas || undefined,
-        pacientes_ids: pacientesSeleccionados,
-      };
-
-      await crearCita(nuevaCita);
 
       present({
         message: "Cita agendada exitosamente",
