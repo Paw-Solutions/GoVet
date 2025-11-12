@@ -672,7 +672,18 @@ def actualizar_paciente(id_paciente: int, paciente: PacienteCreate, db: Session 
         setattr(db_paciente, key, value)
     db.commit()
     db.refresh(db_paciente)
-    return db_paciente
+
+    return {
+        "id_paciente": db_paciente.id_paciente,
+        "nombre": db_paciente.nombre,
+        "color": db_paciente.color,
+        "sexo": db_paciente.sexo,
+        "esterilizado": db_paciente.esterilizado,
+        "fecha_nacimiento": db_paciente.fecha_nacimiento,
+        "raza": db_paciente.raza.nombre,
+        "id_raza": db_paciente.raza.id_raza,
+        "codigo_chip": db_paciente.codigo_chip,
+    }
 
 # Ruta PUT para actualizar el tutor de un paciente
 @app.put("/pacientes/{id_paciente}/tutor/{rut_tutor}", response_model=PacienteResponse)
@@ -691,7 +702,17 @@ def actualizar_tutor_paciente(id_paciente: int, rut_tutor: str, db: Session = De
         db_tutor_paciente = models.TutorPaciente(rut=rut_tutor, id_paciente=id_paciente, fecha=date.today())
         db.add(db_tutor_paciente)
     db.commit()
-    return db_paciente
+    return {
+        "id_paciente": db_paciente.id_paciente,
+        "nombre": db_paciente.nombre,
+        "color": db_paciente.color,
+        "sexo": db_paciente.sexo,
+        "esterilizado": db_paciente.esterilizado,
+        "fecha_nacimiento": db_paciente.fecha_nacimiento,
+        "raza": db_paciente.raza.nombre,
+        "id_raza": db_paciente.raza.id_raza,
+        "codigo_chip": db_paciente.codigo_chip,
+    }
 
 """ RUTAS PARA ASOCIAR TUTORES Y PACIENTES """
 # Ruta PUT para editar la asociación tutor_paciente
@@ -706,7 +727,7 @@ def editar_asociacion_tutor_paciente(rut_tutor: str, id_paciente: int, fecha: da
     db_tutor_paciente.fecha = fecha
     db.commit()
     db.refresh(db_tutor_paciente)
-    return db_tutor_paciente
+    
 
 # ruta put para editar la informacion de un tutor
 @app.put("/tutores/{rut}", response_model=TutorResponse)

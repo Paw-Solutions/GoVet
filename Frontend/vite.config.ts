@@ -14,14 +14,10 @@ export default defineConfig({
       devOptions: {
         enabled: false,
       },
-      strategies: "injectManifest",
-      srcDir: "public",
+      strategies: "generateSW", // ✅ cambiar a generateSW
+      srcDir: "public",          // mantiene tu estructura
       filename: "service-worker.js",
-      manifest: false, // Usamos nuestro manifest.json personalizado
-      injectManifest: {
-        globPatterns: ["**/*.{js,css,html,ico,png,svg,woff,woff2}"],
-        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
-      },
+      manifest: false,           // usas tu propio manifest.json
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff,woff2}"],
         runtimeCaching: [
@@ -32,7 +28,7 @@ export default defineConfig({
               cacheName: "google-fonts-cache",
               expiration: {
                 maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365, // 1 año
+                maxAgeSeconds: 60 * 60 * 24 * 365,
               },
               cacheableResponse: {
                 statuses: [0, 200],
