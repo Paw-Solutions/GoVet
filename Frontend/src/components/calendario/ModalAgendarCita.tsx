@@ -78,9 +78,8 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
   const [ubicacion, setUbicacion] = useState("");
   const [errorDuracion, setErrorDuracion] = useState(false);
 
-  // Datos del formulario - Paso 4: Motivo, Descripción y Notas
+  // Datos del formulario - Paso 4: Motivo y Notas
   const [motivo, setMotivo] = useState("");
-  const [descripcion, setDescripcion] = useState("");
   const [notas, setNotas] = useState("");
   const [notificacion, setNotificacion] = useState<string>("diaAnterior");
   const [fechaNotificacion, setFechaNotificacion] = useState<Date | null>(null);
@@ -97,7 +96,6 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
     setFechaHoraTermino(fechaDefault.toISOString());
     setUbicacion("");
     setMotivo("");
-    setDescripcion("");
     setNotas("");
   };
 
@@ -135,6 +133,21 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
     setTutorSeleccionado(tutor);
     setTutoresEncontrados([]);
     setBusquedaTutor("");
+
+    // Advertir si el tutor no tiene correo
+    if (!isValidEmail(tutor.email)) {
+      present({
+        message:
+          "⚠️ Este tutor no tiene un correo electrónico registrado. Podrás agendar la cita pero no se enviará notificación por correo.",
+        duration: 5000,
+        color: "warning",
+      });
+    }
+
+    // Precargar la dirección del tutor en el campo ubicación
+    if (tutor.direccion) {
+      setUbicacion(tutor.direccion);
+    }
     // Cargar pacientes del tutor seleccionado
     cargarPacientesDeTutor(tutor.rut);
   };
@@ -208,6 +221,13 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
   useEffect(() => {
     handleNotificacion();
   }, [handleNotificacion]);
+
+  // Si el tutor no tiene email válido, forzar "noNotificar"
+  useEffect(() => {
+    if (tutorSeleccionado && !isValidEmail(tutorSeleccionado.email)) {
+      setNotificacion("noNotificar");
+    }
+  }, [tutorSeleccionado]);
 
   // Validar duración de la cita (mínimo 30 minutos)
   useEffect(() => {
@@ -390,17 +410,11 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
       const nuevoEvento: CalendarEventCreate = {
         summary: `${motivo} - ${nombresPacientes}`,
         location: ubicacion || undefined,
-        description: descripcion
-          ? `${descripcion}\n\nPacientes: ${nombresPacientes}\nTutor: ${
-              tutorSeleccionado!.nombre
-            } ${tutorSeleccionado!.apellido_paterno}${
-              notas ? "\n\nNotas: " + notas : ""
-            }`
-          : `Pacientes: ${nombresPacientes}\nTutor: ${
-              tutorSeleccionado!.nombre
-            } ${tutorSeleccionado!.apellido_paterno}${
-              notas ? "\n\nNotas: " + notas : ""
-            }`,
+        description: `Pacientes: ${nombresPacientes}\nTutor: ${
+          tutorSeleccionado!.nombre
+        } ${tutorSeleccionado!.apellido_paterno}${
+          notas ? "\n\nNotas: " + notas : ""
+        }`,
         start: fechaInicio.toISOString(),
         end: fechaTermino.toISOString(),
         attendees: undefined, //tutorSeleccionado?.email
@@ -419,8 +433,19 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
 
       // Solo enviar notificación si no es "noNotificar"
       if (notificacion !== "noNotificar") {
-        try {
-          if (tutorSeleccionado?.email) {
+        // Validar que el tutor tenga un email válido
+        if (!tutorSeleccionado || !isValidEmail(tutorSeleccionado?.email)) {
+          console.log(
+            "El tutor no tiene un email válido; se omite el envío de notificación."
+          );
+          present({
+            message:
+              "Cita agendada. No se envió correo (tutor sin email válido)",
+            duration: 3000,
+            color: "warning",
+          });
+        } else {
+          try {
             console.log(
               "Enviando notificación al email:",
               tutorSeleccionado.email
@@ -506,22 +531,19 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
             );
 
             present({
-              message: "Correo de confirmación enviado",
-              duration: 2200,
+              message: "Correo de confirmación enviado exitosamente",
+              duration: 2500,
               color: "success",
             });
-          } else {
-            console.log(
-              "No hay email de tutor; se omite el envío de notificación."
-            );
+          } catch (emailError) {
+            console.error("Error enviando notificación:", emailError);
+            present({
+              message:
+                "Cita agendada exitosamente, pero falló el envío del correo",
+              duration: 4000,
+              color: "warning",
+            });
           }
-        } catch (emailError) {
-          console.error("Error enviando notificación:", emailError);
-          present({
-            message: "Cita creada, pero falló el envío del correo",
-            duration: 4000,
-            color: "warning",
-          });
         }
       } else {
         console.log("Notificación deshabilitada por el usuario");
@@ -608,8 +630,12 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
           </IonChip>
           <div className="tutor-info">
             <IonNote>RUT: {tutorSeleccionado.rut}</IonNote>
-            {tutorSeleccionado.email && (
+            {isValidEmail(tutorSeleccionado.email) ? (
               <IonNote>Email: {tutorSeleccionado.email}</IonNote>
+            ) : (
+              <IonNote color="warning">
+                ⚠️ Sin correo electrónico registrado
+              </IonNote>
             )}
           </div>
           <IonButton
@@ -733,6 +759,7 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
             presentation="date"
             locale="es-CL"
             min={new Date().toISOString()}
+            max={new Date(new Date().getFullYear() + 5, 11, 31).toISOString()}
           />
         </IonItem>
 
@@ -803,12 +830,15 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
         </IonItem>
 
         <IonItem className="mt-3">
-          <IonLabel position="stacked">Ubicación (opcional)</IonLabel>
+          <IonLabel position="stacked">Ubicación</IonLabel>
           <IonInput
             value={ubicacion}
             onIonInput={(e) => setUbicacion(e.detail.value || "")}
             placeholder="Ej: Consultorio 1, Sala de vacunación..."
           />
+          <IonNote slot="helper">
+            Se precarga con la dirección del tutor, pero puedes modificarla
+          </IonNote>
         </IonItem>
       </div>
     );
@@ -854,16 +884,6 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
           />
         </IonItem>
 
-        <IonItem>
-          <IonLabel position="stacked">Descripción (opcional)</IonLabel>
-          <IonTextarea
-            value={descripcion}
-            onIonInput={(e) => setDescripcion(e.detail.value || "")}
-            placeholder="Detalles adicionales sobre la cita..."
-            rows={3}
-          />
-        </IonItem>
-
         <IonList className="mt-3">
           <IonItem>
             <IonLabel position="stacked">¿Cuándo notificar al tutor?</IonLabel>
@@ -872,6 +892,7 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
               placeholder="Selecciona cuándo notificar..."
               value={notificacion}
               onIonChange={(e) => setNotificacion(e.detail.value as string)}
+              disabled={!isValidEmail(tutorSeleccionado?.email)}
             >
               <IonSelectOption value="noNotificar">
                 No notificar
@@ -885,6 +906,12 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
               <IonSelectOption value="ahora">Ahora</IonSelectOption>
               <IonSelectOption value="minutos">2h 40min antes</IonSelectOption>
             </IonSelect>
+            {!isValidEmail(tutorSeleccionado?.email) && (
+              <IonNote color="warning" slot="helper">
+                ⚠️ El tutor no tiene un email válido. No se pueden enviar
+                notificaciones.
+              </IonNote>
+            )}
           </IonItem>
         </IonList>
 
@@ -906,7 +933,11 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
             {tutorSeleccionado
               ? `${tutorSeleccionado.nombre} ${tutorSeleccionado.apellido_paterno} ${tutorSeleccionado.apellido_materno}`
               : "-"}
-            {tutorSeleccionado?.email && ` (${tutorSeleccionado.email})`}
+            {isValidEmail(tutorSeleccionado?.email) ? (
+              ` (${tutorSeleccionado?.email})`
+            ) : (
+              <IonNote color="warning"> ⚠️ Sin email</IonNote>
+            )}
           </div>
           <div className="resumen-item">
             <strong>Pacientes:</strong>{" "}
@@ -932,11 +963,6 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
           <div className="resumen-item">
             <strong>Motivo:</strong> {motivo || "(Por completar)"}
           </div>
-          {descripcion && (
-            <div className="resumen-item">
-              <strong>Descripción:</strong> {descripcion}
-            </div>
-          )}
           <div className="resumen-item">
             <strong>Notificación:</strong>{" "}
             {notificacion === "noNotificar"

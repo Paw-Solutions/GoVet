@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   IonModal,
   IonHeader,
@@ -16,47 +16,65 @@ import {
   IonCardContent,
   IonCardHeader,
   IonCardTitle,
-} from '@ionic/react';
+} from "@ionic/react";
 import {
   closeOutline,
   personOutline,
   callOutline,
   mailOutline,
   locationOutline,
-} from 'ionicons/icons';
-import { TutorData } from '../../api/tutores';
+  pencilOutline,
+} from "ionicons/icons";
+import { TutorData } from "../../api/tutores";
 
 interface ModalInfoTutorProps {
   isOpen: boolean;
   onDismiss: () => void;
   tutor: TutorData | null;
+  onEdit?: () => void; // Nueva prop opcional para manejar la edición
 }
 
-const ModalInfoTutor: React.FC<ModalInfoTutorProps> = ({ isOpen, onDismiss, tutor }) => {
+const ModalInfoTutor: React.FC<ModalInfoTutorProps> = ({
+  isOpen,
+  onDismiss,
+  tutor,
+  onEdit,
+}) => {
   // Función segura para cerrar el modal
   const handleDismiss = () => {
     try {
       onDismiss();
     } catch (error) {
-      console.error('Error closing modal:', error);
+      console.error("Error closing modal:", error);
+    }
+  };
+
+  // Función para manejar la edición
+  const handleEdit = () => {
+    try {
+      if (onEdit) {
+        onEdit();
+      }
+    } catch (error) {
+      console.error("Error opening edit:", error);
     }
   };
 
   // Función para hacer llamada
   const handleCall = (telefono: number) => {
     try {
-      window.open(`tel:${telefono}`, '_system');
+      window.open(`tel:${telefono}`, "_system");
     } catch (error) {
-      console.error('Error making call:', error);
+      console.error("Error making call:", error);
     }
   };
 
   // Función para enviar email
   const handleEmail = (email: string) => {
     try {
-      window.open(`mailto:${email}`, '_system');
+      window.open(`mailto:${email}`, "_system");
     } catch (error) {
-      console.error('Error sending email:', error);
+      console.error("Error sending email:", error);
     }
   };
 
@@ -64,9 +82,12 @@ const ModalInfoTutor: React.FC<ModalInfoTutorProps> = ({ isOpen, onDismiss, tuto
   const handleLocation = (direccion: string) => {
     try {
       const encodedAddress = encodeURIComponent(direccion);
-      window.open(`https://www.google.com/maps/search/?api=1&query=${encodedAddress}`, '_blank');
+      window.open(
+        `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`,
+        "_blank"
+      );
     } catch (error) {
-      console.error('Error opening maps:', error);
+      console.error("Error opening maps:", error);
     }
   };
 
@@ -76,8 +97,8 @@ const ModalInfoTutor: React.FC<ModalInfoTutorProps> = ({ isOpen, onDismiss, tuto
   }
 
   return (
-    <IonModal 
-      isOpen={isOpen} 
+    <IonModal
+      isOpen={isOpen}
       onDidDismiss={handleDismiss}
       backdropDismiss={true}
     >
@@ -85,8 +106,13 @@ const ModalInfoTutor: React.FC<ModalInfoTutorProps> = ({ isOpen, onDismiss, tuto
         <IonToolbar>
           <IonTitle>Información del Tutor</IonTitle>
           <IonButtons slot="end">
-            <IonButton onClick={handleDismiss}>
-              <IonIcon icon={closeOutline} />
+            {onEdit && (
+              <IonButton onClick={handleEdit} fill="clear" color="primary">
+                <IonIcon icon={pencilOutline} slot="icon-only" />
+              </IonButton>
+            )}
+            <IonButton onClick={handleDismiss} fill="clear">
+              <IonIcon icon={closeOutline} slot="icon-only" />
             </IonButton>
           </IonButtons>
         </IonToolbar>
@@ -97,7 +123,7 @@ const ModalInfoTutor: React.FC<ModalInfoTutorProps> = ({ isOpen, onDismiss, tuto
         <IonCard>
           <IonCardHeader>
             <IonCardTitle>
-              <IonIcon icon={personOutline} style={{ marginRight: '8px' }} />
+              <IonIcon icon={personOutline} style={{ marginRight: "8px" }} />
               Información Personal
             </IonCardTitle>
           </IonCardHeader>
@@ -106,10 +132,13 @@ const ModalInfoTutor: React.FC<ModalInfoTutorProps> = ({ isOpen, onDismiss, tuto
               <IonItem>
                 <IonLabel>
                   <h2>Nombre Completo</h2>
-                  <p>{tutor.nombre} {tutor.apellido_paterno} {tutor.apellido_materno || ''}</p>
+                  <p>
+                    {tutor.nombre} {tutor.apellido_paterno}{" "}
+                    {tutor.apellido_materno || ""}
+                  </p>
                 </IonLabel>
               </IonItem>
-              
+
               <IonItem>
                 <IonLabel>
                   <h2>RUT</h2>
@@ -120,7 +149,9 @@ const ModalInfoTutor: React.FC<ModalInfoTutorProps> = ({ isOpen, onDismiss, tuto
               <IonItem>
                 <IonLabel>
                   <h2>Comuna</h2>
-                  <p>{tutor.comuna}, {tutor.region}</p>
+                  <p>
+                    {tutor.comuna}, {tutor.region}
+                  </p>
                 </IonLabel>
               </IonItem>
 
@@ -134,7 +165,11 @@ const ModalInfoTutor: React.FC<ModalInfoTutorProps> = ({ isOpen, onDismiss, tuto
               <IonItem>
                 <IonLabel>
                   <h2>Observación</h2>
-                  <p>{tutor.observacion != "NaN" ? tutor.observacion : 'Sin observación'}</p>
+                  <p>
+                    {tutor.observacion != "NaN"
+                      ? tutor.observacion
+                      : "Sin observación"}
+                  </p>
                 </IonLabel>
               </IonItem>
             </IonList>
@@ -148,7 +183,9 @@ const ModalInfoTutor: React.FC<ModalInfoTutorProps> = ({ isOpen, onDismiss, tuto
           </IonCardHeader>
           <IonCardContent>
             {/* Verificar si hay información de contacto */}
-            {!tutor.telefono && (tutor.email === "NaN" || !tutor.email) && !tutor.direccion ? (
+            {!tutor.telefono &&
+            (tutor.email === "NaN" || !tutor.email) &&
+            !tutor.direccion ? (
               <IonText color="medium">
                 <p>No hay información de contacto registrada.</p>
               </IonText>
@@ -231,23 +268,25 @@ const ModalInfoTutor: React.FC<ModalInfoTutorProps> = ({ isOpen, onDismiss, tuto
                 )}
 
                 {/* Email */}
-                {tutor.email && tutor.email !== "NaN" && tutor.email.trim() !== "" && (
-                  <IonItem>
-                    <IonLabel>
-                      <h2>Email</h2>
-                      <p>{tutor.email}</p>
-                    </IonLabel>
-                    <IonButton
-                      fill="clear"
-                      size="small"
-                      color="secondary"
-                      onClick={() => handleEmail(tutor.email!)}
-                    >
-                      <IonIcon icon={mailOutline} slot="start" />
-                      Enviar
-                    </IonButton>
-                  </IonItem>
-                )}
+                {tutor.email &&
+                  tutor.email !== "NaN" &&
+                  tutor.email.trim() !== "" && (
+                    <IonItem>
+                      <IonLabel>
+                        <h2>Email</h2>
+                        <p>{tutor.email}</p>
+                      </IonLabel>
+                      <IonButton
+                        fill="clear"
+                        size="small"
+                        color="secondary"
+                        onClick={() => handleEmail(tutor.email!)}
+                      >
+                        <IonIcon icon={mailOutline} slot="start" />
+                        Enviar
+                      </IonButton>
+                    </IonItem>
+                  )}
 
                 {/* Dirección */}
                 {tutor.direccion && tutor.direccion.trim() !== "" && (
@@ -273,7 +312,7 @@ const ModalInfoTutor: React.FC<ModalInfoTutorProps> = ({ isOpen, onDismiss, tuto
         </IonCard>
 
         {/* Botón de cierre adicional */}
-        <div style={{ padding: '20px', textAlign: 'center' }}>
+        <div style={{ padding: "20px", textAlign: "center" }}>
           <IonButton expand="block" fill="outline" onClick={handleDismiss}>
             Cerrar
           </IonButton>

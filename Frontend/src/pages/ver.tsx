@@ -120,10 +120,12 @@ const Ver: React.FC = () => {
         showTutorInfo={tutores.showTutorInfo}
         selectedTutor={tutores.selectedTutor}
         onCloseTutorInfo={tutores.closeTutorInfo}
+        onEditTutorFromInfo={tutores.editTutorFromInfo}
         // Ver pacientes
         showPacienteInfo={pacientes.showPacienteInfo}
         selectedPaciente={pacientes.selectedPaciente}
         onClosePacienteInfo={pacientes.closePacienteInfo}
+        onEditPacienteFromInfo={pacientes.editPacienteFromInfo}
         // Ver fichas
         showConsultaInfo={consultas.showConsultaInfo}
         selectedConsulta={consultas.selectedConsulta}

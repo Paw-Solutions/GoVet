@@ -67,6 +67,7 @@ interface TutoresActions {
   refresh: (event?: CustomEvent) => Promise<void>;
   viewTutor: (tutor: TutorData) => void;
   editTutor: (tutor: TutorData) => void;
+  editTutorFromInfo: () => void;
   closeTutorInfo: () => void;
   closeTutorEdit: () => void;
   retry: () => void;
@@ -79,6 +80,7 @@ interface PacientesActions {
   refresh: (event?: CustomEvent) => Promise<void>;
   viewPaciente: (paciente: PacienteData) => void;
   editPaciente: (paciente: PacienteData) => void;
+  editPacienteFromInfo: () => void;
   closePacienteInfo: () => void;
   closePacienteEdit: () => void;
   retry: () => void;
@@ -295,6 +297,14 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
     }, 150);
   }, []);
 
+  const editTutorFromInfo = useCallback(() => {
+    setTutoresState((prev) => ({
+      ...prev,
+      showTutorInfo: false,
+      showTutorEdit: true,
+    }));
+  }, []);
+
   const retryTutores = useCallback(() => {
     loadTutoresData(true, tutoresState.busqueda.trim() || undefined);
   }, [loadTutoresData, tutoresState.busqueda]);
@@ -423,6 +433,14 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
         selectedPaciente: null,
       }));
     }, 150);
+  }, []);
+
+  const editPacienteFromInfo = useCallback(() => {
+    setPacientesState((prev) => ({
+      ...prev,
+      showPacienteInfo: false,
+      showPacienteEdit: true,
+    }));
   }, []);
 
   // Función para ver tutor desde el modal de paciente
@@ -645,6 +663,7 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
     refresh: refreshTutores,
     viewTutor,
     editTutor,
+    editTutorFromInfo,
     closeTutorInfo,
     closeTutorEdit,
     retry: retryTutores,
@@ -657,6 +676,7 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
     refresh: refreshPacientes,
     viewPaciente,
     editPaciente,
+    editPacienteFromInfo,
     closePacienteInfo,
     closePacienteEdit,
     retry: retryPacientes,

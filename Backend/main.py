@@ -94,6 +94,32 @@ def normalize_search_text(text: str) -> str:
     normalized = " ".join(normalized.split())
     return normalized.strip()
 
+# Función helper para convertir paciente ORM a PacienteResponse
+def paciente_to_response(db_paciente: models.Paciente, db: Session) -> PacienteResponse:
+    """
+    Convierte un objeto Paciente ORM a PacienteResponse.
+    Carga explícitamente los nombres de raza y especie como strings.
+    """
+    # Cargar los nombres de la raza y especie
+    raza_obj = db.query(models.Raza).filter(models.Raza.id_raza == db_paciente.id_raza).first()
+    especie_obj = None
+    if raza_obj:
+        especie_obj = db.query(models.Especie).filter(models.Especie.id_especie == raza_obj.id_especie).first()
+    
+    # Construir la respuesta con los nombres como strings explícitos
+    return PacienteResponse(
+        id_paciente=db_paciente.id_paciente,
+        nombre=db_paciente.nombre,
+        color=db_paciente.color,
+        sexo=db_paciente.sexo,
+        esterilizado=db_paciente.esterilizado,
+        fecha_nacimiento=db_paciente.fecha_nacimiento,
+        id_raza=db_paciente.id_raza,
+        codigo_chip=db_paciente.codigo_chip,
+        raza=str(raza_obj.nombre) if raza_obj else None,
+        especie=str(especie_obj.nombre_comun) if especie_obj else None
+    )
+
 # HU1: HU 1: Como Veterinaria quiero ver el calendario con los horarios de atención disponibles, para organizarme con la agenda de horas
 
 def get_calendar_service():
@@ -435,7 +461,8 @@ def obtener_mascotas_de_tutor(rut: str, db: Session = Depends(get_db)):
     db_tutor = db.query(models.Tutor).filter(models.Tutor.rut == rut).first()
     if not db_tutor:
         raise HTTPException(status_code=404, detail="Tutor no encontrado")
-    return db.query(models.Paciente).join(models.TutorPaciente).filter(models.TutorPaciente.rut == rut).all()
+    db_pacientes = db.query(models.Paciente).join(models.TutorPaciente).filter(models.TutorPaciente.rut == rut).all()
+    return [paciente_to_response(p, db) for p in db_pacientes]
 
 # HU 3: Como Veterinaria, quiero poder almacenar el paciente por su nombre y raza para indentificarlos y buscarlos facilmente
 """ RUTAS PARA PACIENTES (mascotas) """
@@ -447,27 +474,8 @@ def crear_paciente(paciente: PacienteCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(db_paciente)
     
-    # Cargar los nombres de la raza y especie
-    raza_obj = db.query(models.Raza).filter(models.Raza.id_raza == db_paciente.id_raza).first()
-    especie_obj = None
-    if raza_obj:
-        especie_obj = db.query(models.Especie).filter(models.Especie.id_especie == raza_obj.id_especie).first()
-    
-    # Construir la respuesta con los nombres
-    response_data = {
-        "id_paciente": db_paciente.id_paciente,
-        "nombre": db_paciente.nombre,
-        "color": db_paciente.color,
-        "sexo": db_paciente.sexo,
-        "esterilizado": db_paciente.esterilizado,
-        "fecha_nacimiento": db_paciente.fecha_nacimiento,
-        "id_raza": db_paciente.id_raza,
-        "codigo_chip": db_paciente.codigo_chip,
-        "raza": raza_obj.nombre if raza_obj else None,
-        "especie": especie_obj.nombre_comun if especie_obj else None
-    }
-    
-    return response_data
+    # Usar helper function para construir la respuesta
+    return paciente_to_response(db_paciente, db)
 
 # Ruta GET para obtener un paciente por su ID
 @app.get("/pacientes/{id_paciente}", response_model=PacienteResponse)
@@ -475,7 +483,7 @@ def obtener_paciente(id_paciente: int, db: Session = Depends(get_db)):
     db_paciente = db.query(models.Paciente).filter(models.Paciente.id_paciente == id_paciente).first()
     if db_paciente is None:
         raise HTTPException(status_code=404, detail="Paciente no encontrado")
-    return db_paciente
+    return paciente_to_response(db_paciente, db)
 
 # Ruta GET para obtener pacientes por su nombre
 @app.get("/pacientes/nombre/{nombre}", response_model=List[PacienteResponse])
@@ -483,7 +491,7 @@ def obtener_pacientes_por_nombre(nombre: str, db: Session = Depends(get_db)):
     db_pacientes = db.query(models.Paciente).filter(models.Paciente.nombre.ilike(f"%{nombre}%")).all() # el ilike no diferencia mayusculas o minusculas asi facilitamos la busqueda al no ser tan estricta
     if not db_pacientes:
         raise HTTPException(status_code=404, detail="No se encontraron pacientes con ese nombre")
-    return db_pacientes
+    return [paciente_to_response(p, db) for p in db_pacientes]
 
 # Ruta GET para obtener pacientes por su raza (nombre de la raza)
 @app.get("/pacientes/raza/{nombre_raza}", response_model=List[PacienteResponse])
@@ -491,7 +499,7 @@ def obtener_pacientes_por_raza(nombre_raza: str, db: Session = Depends(get_db)):
     db_pacientes = db.query(models.Paciente).join(models.Raza).filter(models.Raza.nombre.ilike(f"%{nombre_raza}%")).all()
     if not db_pacientes:
         raise HTTPException(status_code=404, detail="No se encontraron pacientes con esa raza")
-    return db_pacientes
+    return [paciente_to_response(p, db) for p in db_pacientes]
 
 # Ruta GET para obtener todos los pacientes
 @app.get("/pacientes/", response_model=List[PacienteResponse])
@@ -499,7 +507,7 @@ def obtener_todos_los_pacientes(db: Session = Depends(get_db)):
     db_pacientes = db.query(models.Paciente).all()
     if not db_pacientes:
         raise HTTPException(status_code=404, detail="No se encontraron pacientes")
-    return db_pacientes
+    return [paciente_to_response(p, db) for p in db_pacientes]
 
 # Rut GET para obtener todos los pacientes por rut de su tutor
 @app.get("/pacientes/tutor/{rut}", response_model=List[PacienteResponse])

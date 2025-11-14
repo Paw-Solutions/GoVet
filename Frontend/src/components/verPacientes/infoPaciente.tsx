@@ -25,6 +25,7 @@ import {
   locationOutline,
   pawOutline,
   documentTextOutline,
+  pencilOutline,
 } from "ionicons/icons";
 import { PacienteData } from "../../api/pacientes";
 import { TutorData } from "../../api/tutores";
@@ -37,6 +38,7 @@ interface ModalInfoPacienteProps {
   paciente: PacienteData | null;
   onViewTutor?: (tutorData: TutorData) => void;
   onViewConsulta?: (consulta: any) => void;
+  onEdit?: () => void;
 }
 
 const ModalInfoPaciente: React.FC<ModalInfoPacienteProps> = ({
@@ -45,6 +47,7 @@ const ModalInfoPaciente: React.FC<ModalInfoPacienteProps> = ({
   paciente,
   onViewTutor,
   onViewConsulta,
+  onEdit,
 }) => {
   const [showHistorial, setShowHistorial] = useState(false);
 
@@ -99,9 +102,21 @@ const ModalInfoPaciente: React.FC<ModalInfoPacienteProps> = ({
   // Función segura para cerrar el modal
   const handleDismiss = () => {
     try {
+      setShowHistorial(false);
       onDismiss();
     } catch (error) {
       console.error("Error closing modal:", error);
+    }
+  };
+
+  // Función para manejar la edición
+  const handleEdit = () => {
+    try {
+      if (onEdit) {
+        onEdit();
+      }
+    } catch (error) {
+      console.error("Error opening edit:", error);
     }
   };
 
@@ -120,8 +135,13 @@ const ModalInfoPaciente: React.FC<ModalInfoPacienteProps> = ({
         <IonToolbar>
           <IonTitle>Información del Paciente</IonTitle>
           <IonButtons slot="end">
-            <IonButton onClick={handleDismiss}>
-              <IonIcon icon={closeOutline} />
+            {onEdit && (
+              <IonButton onClick={handleEdit} fill="clear" color="primary">
+                <IonIcon icon={pencilOutline} slot="icon-only" />
+              </IonButton>
+            )}
+            <IonButton onClick={handleDismiss} fill="clear">
+              <IonIcon icon={closeOutline} slot="icon-only" />
             </IonButton>
           </IonButtons>
         </IonToolbar>

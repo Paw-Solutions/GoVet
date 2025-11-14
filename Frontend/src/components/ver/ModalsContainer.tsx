@@ -13,11 +13,13 @@ interface ModalsContainerProps {
   showTutorInfo: boolean;
   selectedTutor: TutorData | null;
   onCloseTutorInfo: () => void;
+  onEditTutorFromInfo?: () => void; // Nueva prop para editar desde info
 
   // Props para modal de pacientes
   showPacienteInfo: boolean;
   selectedPaciente: PacienteData | null;
   onClosePacienteInfo: () => void;
+  onEditPacienteFromInfo?: () => void; // Nueva prop para editar desde info
 
   // Props para modal de fichas
   showConsultaInfo: boolean;
@@ -42,11 +44,13 @@ const ModalsContainer: React.FC<ModalsContainerProps> = ({
   showTutorInfo,
   selectedTutor,
   onCloseTutorInfo,
+  onEditTutorFromInfo,
 
   // Pacientes
   showPacienteInfo,
   selectedPaciente,
   onClosePacienteInfo,
+  onEditPacienteFromInfo,
 
   // Fichas
   showConsultaInfo,
@@ -72,6 +76,7 @@ const ModalsContainer: React.FC<ModalsContainerProps> = ({
         isOpen={showTutorInfo}
         onDismiss={onCloseTutorInfo}
         tutor={selectedTutor}
+        onEdit={onEditTutorFromInfo}
       />
 
       {/* Modal de información del paciente */}
@@ -81,6 +86,7 @@ const ModalsContainer: React.FC<ModalsContainerProps> = ({
         paciente={selectedPaciente}
         onViewTutor={onViewTutorFromPaciente}
         onViewConsulta={onViewConsultaFromPaciente}
+        onEdit={onEditPacienteFromInfo}
       />
 
       {/* Modal de informacion de consulta*/}

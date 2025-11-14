@@ -186,7 +186,7 @@ class ConsultaBase(BaseModel):
     fecha_consulta: date
     motivo: str 
     diagnostico: str
-    observaciones: str
+    observaciones: Optional[str] = None
     dht: str
     nodulos_linfaticos: str
     mucosas: str
