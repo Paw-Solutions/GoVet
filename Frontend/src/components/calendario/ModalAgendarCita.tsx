@@ -884,36 +884,31 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
           />
         </IonItem>
 
-        <IonList className="mt-3">
-          <IonItem>
-            <IonLabel position="stacked">¿Cuándo notificar al tutor?</IonLabel>
-            <IonSelect
-              aria-label="notificacion"
-              placeholder="Selecciona cuándo notificar..."
-              value={notificacion}
-              onIonChange={(e) => setNotificacion(e.detail.value as string)}
-              disabled={!isValidEmail(tutorSeleccionado?.email)}
-            >
-              <IonSelectOption value="noNotificar">
-                No notificar
-              </IonSelectOption>
-              <IonSelectOption value="diaAnterior">
-                Día anterior
-              </IonSelectOption>
-              <IonSelectOption value="semanaAntes">
-                Una semana antes
-              </IonSelectOption>
-              <IonSelectOption value="ahora">Ahora</IonSelectOption>
-              <IonSelectOption value="minutos">2h 40min antes</IonSelectOption>
-            </IonSelect>
-            {!isValidEmail(tutorSeleccionado?.email) && (
-              <IonNote color="warning" slot="helper">
-                ⚠️ El tutor no tiene un email válido. No se pueden enviar
-                notificaciones.
-              </IonNote>
-            )}
-          </IonItem>
-        </IonList>
+        <IonItem className="mt-3">
+          <IonLabel position="stacked">¿Cuándo notificar al tutor?</IonLabel>
+          <IonSelect
+            aria-label="notificacion"
+            placeholder="Selecciona cuándo notificar..."
+            value={notificacion}
+            onIonChange={(e) => setNotificacion(e.detail.value as string)}
+            disabled={!isValidEmail(tutorSeleccionado?.email)}
+            interface="popover"
+          >
+            <IonSelectOption value="noNotificar">No notificar</IonSelectOption>
+            <IonSelectOption value="diaAnterior">Día anterior</IonSelectOption>
+            <IonSelectOption value="semanaAntes">
+              Una semana antes
+            </IonSelectOption>
+            <IonSelectOption value="ahora">Ahora</IonSelectOption>
+            <IonSelectOption value="minutos">2h 40min antes</IonSelectOption>
+          </IonSelect>
+          {!isValidEmail(tutorSeleccionado?.email) && (
+            <IonNote color="warning" slot="helper">
+              ⚠️ El tutor no tiene un email válido. No se pueden enviar
+              notificaciones.
+            </IonNote>
+          )}
+        </IonItem>
 
         <IonItem className="mt-3">
           <IonLabel position="stacked">Notas adicionales (opcional)</IonLabel>
