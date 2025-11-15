@@ -8,7 +8,7 @@ import {
   IonText,
 } from "@ionic/react";
 import { formatRegionName } from "../../utils/formatters";
-
+// Componente: Gestor de tutores
 interface SelectorRegionProps {
   regionQuery: string;
   setRegionQuery: (query: string) => void;

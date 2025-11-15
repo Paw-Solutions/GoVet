@@ -8,7 +8,7 @@ import {
   IonAvatar,
   IonLabel,
 } from '@ionic/react';
-
+// Componente: Visualizador del detalle de un paciente
 const ListaPacientes = () => {
   const [items, setItems] = useState<string[]>([]);
 

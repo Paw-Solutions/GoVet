@@ -25,7 +25,7 @@ import {
 } from "ionicons/icons";
 import { deleteEvent } from "../../api/calendario";
 import { CalendarEvent } from "../../api/calendario";
-
+// Componente: Interfaz para gestionar horas y vista calendario
 interface ModalDetalleCitaProps {
   isOpen: boolean;
   onClose: () => void;

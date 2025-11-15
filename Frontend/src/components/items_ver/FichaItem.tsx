@@ -16,8 +16,8 @@ import {
   documentTextOutline,
 } from "ionicons/icons";
 import { ConsultaData } from "../../api/fichas";
-
-interface COnsultaItemProps {
+// Componente: Visualizador del detalle de una ficha clínica
+interface ConsultaItemProps {
   consulta: ConsultaData;
   onView: () => void;
   onEdit: () => void;
@@ -26,7 +26,7 @@ interface COnsultaItemProps {
 }
 import "../../styles/ver.css";
 
-const FichaItem: React.FC<COnsultaItemProps> = ({
+const FichaItem: React.FC<ConsultaItemProps> = ({
   consulta,
   onView,
   onEdit,

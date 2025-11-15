@@ -20,7 +20,7 @@ import {
 } from "ionicons/icons";
 import ModalDetalleCita from "./ModalDetalleCita";
 import { CalendarEvent, getEventsWeek } from "../../api/calendario";
-
+// Componente: Vista semanal de calendario
 interface VistaSemanaProps {
   fecha: Date;
   onCambiarFecha: (fecha: Date) => void;

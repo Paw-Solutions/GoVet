@@ -1,3 +1,4 @@
+// Componente: Gestor de citas
 export interface CalendarEvent {
   id: string; // ID único del evento
   summary: string; // Título del evento

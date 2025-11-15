@@ -1,5 +1,5 @@
 // src/api/especies.ts
-
+// Componente: Gestor de razas y especies - Frontend
 const API_URL = import.meta.env.VITE_API_URL || '/api'; // usa tu variable de entorno
 
 export async function obtenerEspecies() {

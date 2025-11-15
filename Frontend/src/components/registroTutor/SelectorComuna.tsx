@@ -8,7 +8,7 @@ import {
   IonText,
 } from "@ionic/react";
 import { formatComunaName } from "../../utils/formatters";
-
+// Componente: Gestor de tutores
 interface SelectorComunaProps {
   comunaQuery: string;
   setComunaQuery: (query: string) => void;

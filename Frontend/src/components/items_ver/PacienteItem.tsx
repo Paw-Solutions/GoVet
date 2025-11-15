@@ -20,7 +20,7 @@ import {
 } from "ionicons/icons";
 import { PacienteData } from "../../api/pacientes";
 import "../../styles/ver.css";
-
+// Componente: Visualizador del detalle de un paciente
 interface PacienteItemProps {
   paciente: PacienteData;
   onView: () => void;

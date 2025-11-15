@@ -27,7 +27,7 @@ import { SelectorRegion } from "../registroTutor/SelectorRegion";
 import { SelectorComuna } from "../registroTutor/SelectorComuna";
 import { obtenerRegiones } from "../../api/regiones";
 import { formatRegionName, formatComunaName } from "../../utils/formatters";
-
+// Componente: Editor de información de tutor
 interface ModalEditarTutorProps {
   isOpen: boolean;
   onDismiss: () => void;

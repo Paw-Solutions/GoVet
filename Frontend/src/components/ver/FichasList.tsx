@@ -10,7 +10,7 @@ import ResultsCounter from "../ver/ResultsCounter";
 import InfiniteScroll from "../common/InfiniteScroll";
 import FichaItem from "../items_ver/FichaItem";
 import "../../styles/ver.css";
-
+// Componente: Visualizador del detalle de consulta
 interface FichasListProps {
   consultas: ConsultaData[];
   loading: boolean;

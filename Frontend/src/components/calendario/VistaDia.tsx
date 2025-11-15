@@ -19,7 +19,7 @@ import {
 } from "ionicons/icons";
 import { CalendarEvent, getEventsDay } from "../../api/calendario";
 import ModalDetalleCita from "./ModalDetalleCita";
-
+// Componente: Vista diaria de calendario
 interface VistaDiaProps {
   fecha: Date;
   onCambiarFecha: (fecha: Date) => void;

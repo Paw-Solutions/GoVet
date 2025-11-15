@@ -13,7 +13,7 @@ import ResultsCounter from "../ver/ResultsCounter";
 import InfiniteScroll from "../common/InfiniteScroll";
 import PacienteItem from "../items_ver/PacienteItem";
 import '../../styles/ver.css';
-
+// Componente: Visualizador del detalle de un paciente
 interface PacientesListProps {
   pacientes: PacienteData[];
   loading: boolean;

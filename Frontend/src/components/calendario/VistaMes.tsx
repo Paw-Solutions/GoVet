@@ -21,7 +21,7 @@ import {
   documentTextOutline,
 } from "ionicons/icons";
 import { getEventsMonth, type CalendarEvent } from "../../api/calendario";
-
+// Componente: Vista mensual de calendario
 interface VistaMesProps {
   fecha: Date;
   onCambiarFecha: (fecha: Date) => void;

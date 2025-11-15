@@ -3,7 +3,7 @@
  * Google Calendar API no soporta edición directa de eventos.
  * Para editar un evento, se debe eliminar y crear uno nuevo.
  */
-
+// Componente: Gestor de edición y eliminación de cita
 import { IonModal } from "@ionic/react";
 import { CalendarEvent } from "../../api/calendario";
 

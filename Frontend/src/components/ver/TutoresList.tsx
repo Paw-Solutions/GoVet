@@ -12,7 +12,7 @@ import EmptyState from "../common/EmptyState";
 import ResultsCounter from "../ver/ResultsCounter";
 import TutorItem from "../items_ver/TutorItem";
 import InfiniteScroll from "../common/InfiniteScroll";
-
+// Componente: Visualizador del detalle de un tutor
 interface TutoresListProps {
   tutores: TutorData[];
   loading: boolean;

@@ -19,7 +19,7 @@ import {
   refreshOutline,
 } from "ionicons/icons";
 import { obtenerTratamientosProximos, ConsultaTratamiento } from "../../api/tratamientos";
-
+// Componente: Visualizador de próximas vacunas
 interface CajaVacunasProps {
   limite?: number; // Número máximo de tratamientos a mostrar
 }

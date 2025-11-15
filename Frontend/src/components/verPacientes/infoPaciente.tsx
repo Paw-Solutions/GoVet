@@ -31,7 +31,7 @@ import { PacienteData } from "../../api/pacientes";
 import { TutorData } from "../../api/tutores";
 import HistorialConsultas from "./HistorialConsultas";
 import PendientesPaciente from "./PendientesPaciente";
-
+// Componente: Visualizador del detalle de un paciente
 interface ModalInfoPacienteProps {
   isOpen: boolean;
   onDismiss: () => void;

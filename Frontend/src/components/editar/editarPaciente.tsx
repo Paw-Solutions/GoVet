@@ -45,7 +45,7 @@ interface ModalEditarPacienteProps {
   onDismiss: () => void;
   paciente: PacienteData | null;
 }
-
+// Componente: Editor de información de paciente
 const ModalEditarPaciente: React.FC<ModalEditarPacienteProps> = ({
   isOpen,
   onDismiss,

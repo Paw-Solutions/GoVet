@@ -25,7 +25,7 @@ import { TutorData } from "../../api/tutores";
 import { obtenerTutoresPaginados } from "../../api/tutores";
 import ModalInfoTutor from "../verTutores/infoTutor";
 import "../../styles/modalBuscarTutor.css";
-
+// Componente: Búsqueda de tutores
 interface Tutor {
   rut: string;
   nombre: string;
