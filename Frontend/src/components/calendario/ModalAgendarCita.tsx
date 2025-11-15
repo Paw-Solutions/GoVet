@@ -28,6 +28,7 @@ import {
   personOutline,
   pawOutline,
 } from "ionicons/icons";
+// Componente: Interfaz para gestionar horas y vista calendario
 import { createEvent, type CalendarEventCreate } from "../../api/calendario";
 import { enviarNotificacion } from "../../api/notificacion";
 import { obtenerTutoresPaginados, type TutorData } from "../../api/tutores";

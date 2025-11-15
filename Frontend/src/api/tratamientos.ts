@@ -1,3 +1,4 @@
+// Componente: Gestor de próximas vacunas - Frontend
 export interface ConsultaTratamiento {
     id_consulta: number;
     id_tratamiento: number;

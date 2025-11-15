@@ -26,7 +26,7 @@ import {
   pencilOutline,
 } from "ionicons/icons";
 import { TutorData } from "../../api/tutores";
-
+// Componente: Visualizador del detalle de un tutor
 interface ModalInfoTutorProps {
   isOpen: boolean;
   onDismiss: () => void;

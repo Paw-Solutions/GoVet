@@ -1,3 +1,4 @@
+// Componente: Gestor de fichas clínicas - Frontend
 // Ficha data interface
 export interface ConsultaData {
   id_paciente: number;

@@ -21,7 +21,7 @@ import {
   checkmarkCircleOutline,
 } from "ionicons/icons";
 import { ConsultaTratamiento, obtenerTratamientosPorPaciente } from "../../api/tratamientos";
-
+// Componente: Visualizador de próximas vacunas
 interface PendientesPacienteProps {
   idPaciente: number;
   onVerDetalleVacuna?: (vacuna: ConsultaTratamiento) => void;

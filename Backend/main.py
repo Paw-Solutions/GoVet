@@ -1,3 +1,4 @@
+# Componente: Persistencia de datos
 import asyncio
 from datetime import date, datetime
 try:

@@ -1,3 +1,4 @@
+// Componente: Gestor de notificaciones - Frontend
 // Estructura que espera el backend
 export interface NotificacionPayload {
   email: string; // destinatario
@@ -7,6 +8,7 @@ export interface NotificacionPayload {
 
 const API_URL = import.meta.env.VITE_API_URL;
 
+// Componente: Despachador de notificaciones - Frontend
 /**
  * Envía una notificación (correo) al backend.
  * @param payload - { email, cuerpo, asunto? }

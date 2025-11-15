@@ -1,3 +1,4 @@
+// Componente: Gestor de pacientes - Frontend
 const API_URL = import.meta.env.VITE_API_URL || "/api";
 
 // Interfaz para crear un paciente (SIN rut_tutor)

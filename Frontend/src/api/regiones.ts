@@ -1,5 +1,5 @@
 // src/api/regiones.ts
-
+// Componente: Gestor de fichas clinicas
 const API_URL = import.meta.env.VITE_API_URL || '/api'; // usa tu variable de entorno
 
 export async function obtenerRegiones() {

@@ -14,7 +14,7 @@ import SearchBar from "../common/SearchBar";
 import TutorItemSimple from "./TutorItemSimple";
 import "../../styles/ver.css";
 import "../../styles/buscadorTutor.css";
-
+// Componente: Visualizador del detalle de un tutor
 interface BuscadorTutorProps {
   onSelectTutor: (tutor: TutorData) => void;
   tutorSeleccionado?: TutorData | null;

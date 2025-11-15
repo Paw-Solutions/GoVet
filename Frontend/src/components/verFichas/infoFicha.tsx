@@ -38,7 +38,7 @@ import {
   pulseOutline,
 } from 'ionicons/icons';
 import { ConsultaData, calcularEdadPaciente } from '../../api/fichas';
-
+// Componente: Visualizador del detalle de consulta
 interface ModalInfoFichaProps {
   isOpen: boolean;
   onDismiss: () => void;

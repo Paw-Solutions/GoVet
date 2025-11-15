@@ -1,6 +1,6 @@
 import React from "react";
 import { IonItem, IonInput, IonList, IonLabel, IonSpinner } from "@ionic/react";
-
+// Componente: Gestor de razas y especies
 interface SelectorEspecieProps {
   especieQuery: string;
   setEspecieQuery: (query: string) => void;
