@@ -27,6 +27,15 @@ import { SelectorRegion } from "../registroTutor/SelectorRegion";
 import { SelectorComuna } from "../registroTutor/SelectorComuna";
 import { obtenerRegiones } from "../../api/regiones";
 import { formatRegionName, formatComunaName } from "../../utils/formatters";
+import {
+  validarFormatoRut,
+  validarEmail,
+  validarTelefono,
+  validarCampoObligatorio,
+  validarNombre,
+  mensajesError,
+} from "../../utils/validaciones";
+
 // Componente: Editor de información de tutor
 interface ModalEditarTutorProps {
   isOpen: boolean;
@@ -71,6 +80,18 @@ const ModalEditarTutor: React.FC<ModalEditarTutorProps> = ({
   const [toastColor, setToastColor] = useState<"success" | "danger">("success");
   const [telefonoValue, setTelefonoValue] = useState("");
 
+  // Estados para errores de validación
+  const [errores, setErrores] = useState({
+    rut: "",
+    nombre: "",
+    apellidoPaterno: "",
+    direccion: "",
+    telefono: "",
+    email: "",
+    region: "",
+    comuna: "",
+  });
+
   // Referencias
   const inputRutRef = useRef<InputRutHandle>(null);
   const inputTelefonoRef = useRef<InputTelefonoHandle>(null);
@@ -107,9 +128,12 @@ const ModalEditarTutor: React.FC<ModalEditarTutorProps> = ({
       setEmail(tutor.email ?? "");
       setObservacion(tutor.observacion ?? "");
 
-      // Teléfono principal - guardar el valor sin formato
+      // Teléfono principal - usar el ref para establecer el valor
       const telefonoStr = tutor.telefono != null ? String(tutor.telefono) : "";
       setTelefonoValue(telefonoStr);
+      if (inputTelefonoRef.current && telefonoStr) {
+        inputTelefonoRef.current.setValue(telefonoStr);
+      }
 
       // Región
       if (tutor.region) {
@@ -125,6 +149,18 @@ const ModalEditarTutor: React.FC<ModalEditarTutorProps> = ({
         setComunaQuery(tutor.comuna);
         setSelectedComuna({ id: tutor.comuna, name: tutor.comuna });
       }
+
+      // Limpiar errores
+      setErrores({
+        rut: "",
+        nombre: "",
+        apellidoPaterno: "",
+        direccion: "",
+        telefono: "",
+        email: "",
+        region: "",
+        comuna: "",
+      });
 
       setSaving(false);
     }
@@ -165,20 +201,149 @@ const ModalEditarTutor: React.FC<ModalEditarTutorProps> = ({
     setSelectedComuna(null);
     setComunaQuery("");
     setShowComunaList(false);
+    // Limpiar error de región
+    setErrores((prev) => ({ ...prev, region: "" }));
   };
 
   const selectComuna = (id: string, name: string) => {
     setSelectedComuna({ id, name });
     setComunaQuery(name);
     setShowComunaList(false);
-  };
-
-  const handlePhoneChange = (phone: string) => {
-    setTelefonoValue(phone);
+    // Limpiar error de comuna
+    setErrores((prev) => ({ ...prev, comuna: "" }));
   };
 
   const handleRutChange = (rutValue: string) => {
     setRut(rutValue);
+    // Validar RUT
+    if (!validarCampoObligatorio(rutValue)) {
+      setErrores((prev) => ({ ...prev, rut: mensajesError.rutRequerido }));
+    } else if (!validarFormatoRut(rutValue)) {
+      setErrores((prev) => ({ ...prev, rut: mensajesError.rutInvalido }));
+    } else {
+      setErrores((prev) => ({ ...prev, rut: "" }));
+    }
+  };
+
+  // Validación de nombre
+  const handleNombreChange = (valor: string) => {
+    setNombre(valor);
+    if (!validarCampoObligatorio(valor)) {
+      setErrores((prev) => ({
+        ...prev,
+        nombre: mensajesError.nombreRequerido,
+      }));
+    } else if (!validarNombre(valor)) {
+      setErrores((prev) => ({ ...prev, nombre: mensajesError.nombreInvalido }));
+    } else {
+      setErrores((prev) => ({ ...prev, nombre: "" }));
+    }
+  };
+
+  // Validación de apellido paterno
+  const handleApellidoPaternoChange = (valor: string) => {
+    setApellidoPaterno(valor);
+    if (!validarCampoObligatorio(valor)) {
+      setErrores((prev) => ({
+        ...prev,
+        apellidoPaterno: mensajesError.apellidoRequerido,
+      }));
+    } else if (!validarNombre(valor)) {
+      setErrores((prev) => ({
+        ...prev,
+        apellidoPaterno: mensajesError.apellidoInvalido,
+      }));
+    } else {
+      setErrores((prev) => ({ ...prev, apellidoPaterno: "" }));
+    }
+  };
+
+  // Validación de dirección
+  const handleDireccionChange = (valor: string) => {
+    setDireccion(valor);
+    if (!validarCampoObligatorio(valor)) {
+      setErrores((prev) => ({
+        ...prev,
+        direccion: mensajesError.direccionRequerida,
+      }));
+    } else {
+      setErrores((prev) => ({ ...prev, direccion: "" }));
+    }
+  };
+
+  // Validación de teléfono
+  const handlePhoneChange = (phone: string) => {
+    setTelefonoValue(phone);
+    if (!validarCampoObligatorio(phone)) {
+      setErrores((prev) => ({
+        ...prev,
+        telefono: mensajesError.telefonoRequerido,
+      }));
+    } else if (!validarTelefono(phone)) {
+      setErrores((prev) => ({
+        ...prev,
+        telefono: mensajesError.telefonoInvalido,
+      }));
+    } else {
+      setErrores((prev) => ({ ...prev, telefono: "" }));
+    }
+  };
+
+  // Validación de email
+  const handleEmailChange = (valor: string) => {
+    setEmail(valor);
+    if (!validarCampoObligatorio(valor)) {
+      setErrores((prev) => ({ ...prev, email: mensajesError.emailRequerido }));
+    } else if (!validarEmail(valor)) {
+      setErrores((prev) => ({ ...prev, email: mensajesError.emailInvalido }));
+    } else {
+      setErrores((prev) => ({ ...prev, email: "" }));
+    }
+  };
+
+  // Validación de región
+  const handleRegionChange = (regionName: string) => {
+    setRegionQuery(regionName);
+
+    // Si el campo está vacío, limpiar la región seleccionada y comuna
+    if (!validarCampoObligatorio(regionName)) {
+      setSelectedRegion(null);
+      setSelectedComuna(null);
+      setComunaQuery("");
+      setErrores((prev) => ({
+        ...prev,
+        region: mensajesError.regionRequerida,
+        comuna: "", // Limpiar error de comuna también
+      }));
+    } else {
+      // Si no coincide con la región seleccionada, limpiarla
+      if (selectedRegion && formatRegionName(selectedRegion) !== regionName) {
+        setSelectedRegion(null);
+        setSelectedComuna(null);
+        setComunaQuery("");
+      }
+      setErrores((prev) => ({ ...prev, region: "" }));
+    }
+  };
+
+  // Validación de comuna
+  const handleComunaChange = (comunaName: string) => {
+    setComunaQuery(comunaName);
+
+    // Si el campo está vacío, limpiar la comuna seleccionada
+    if (!validarCampoObligatorio(comunaName)) {
+      setSelectedComuna(null);
+      setErrores((prev) => ({
+        ...prev,
+        comuna: mensajesError.comunaRequerida,
+      }));
+    } else {
+      // Si no coincide con la comuna seleccionada, limpiarla
+      if (selectedComuna && selectedComuna.name !== comunaName) {
+        setSelectedComuna(null);
+      }
+      setErrores((prev) => ({ ...prev, comuna: "" }));
+    }
   };
 
   const toNumberOrNull = (v: string) => {
@@ -191,6 +356,88 @@ const ModalEditarTutor: React.FC<ModalEditarTutorProps> = ({
   const handleGuardar = async () => {
     if (!tutor) return;
 
+    // Validar todos los campos antes de enviar
+    const nuevosErrores = {
+      rut: "",
+      nombre: "",
+      apellidoPaterno: "",
+      direccion: "",
+      telefono: "",
+      email: "",
+      region: "",
+      comuna: "",
+    };
+
+    // Validar RUT
+    if (!validarCampoObligatorio(rut)) {
+      nuevosErrores.rut = mensajesError.rutRequerido;
+    } else if (!validarFormatoRut(rut)) {
+      nuevosErrores.rut = mensajesError.rutInvalido;
+    }
+
+    // Validar nombre
+    if (!validarCampoObligatorio(nombre)) {
+      nuevosErrores.nombre = mensajesError.nombreRequerido;
+    } else if (!validarNombre(nombre)) {
+      nuevosErrores.nombre = mensajesError.nombreInvalido;
+    }
+
+    // Validar apellido paterno
+    if (!validarCampoObligatorio(apellidoPaterno)) {
+      nuevosErrores.apellidoPaterno = mensajesError.apellidoRequerido;
+    } else if (!validarNombre(apellidoPaterno)) {
+      nuevosErrores.apellidoPaterno = mensajesError.apellidoInvalido;
+    }
+
+    // Validar dirección
+    if (!validarCampoObligatorio(direccion)) {
+      nuevosErrores.direccion = mensajesError.direccionRequerida;
+    }
+
+    // Validar teléfono
+    if (!validarCampoObligatorio(telefonoValue)) {
+      nuevosErrores.telefono = mensajesError.telefonoRequerido;
+    } else if (!validarTelefono(telefonoValue)) {
+      nuevosErrores.telefono = mensajesError.telefonoInvalido;
+    }
+
+    // Validar email
+    if (!validarCampoObligatorio(email)) {
+      nuevosErrores.email = mensajesError.emailRequerido;
+    } else if (!validarEmail(email)) {
+      nuevosErrores.email = mensajesError.emailInvalido;
+    }
+
+    // Validar región
+    const regionFinal = selectedRegion
+      ? formatRegionName(selectedRegion)
+      : regionQuery.trim();
+    if (!validarCampoObligatorio(regionFinal)) {
+      nuevosErrores.region = mensajesError.regionRequerida;
+    }
+
+    // Validar comuna
+    const comunaFinal = selectedComuna
+      ? selectedComuna.name
+      : comunaQuery.trim();
+    if (!validarCampoObligatorio(comunaFinal)) {
+      nuevosErrores.comuna = mensajesError.comunaRequerida;
+    }
+
+    // Actualizar estado de errores
+    setErrores(nuevosErrores);
+
+    // Si hay errores, no continuar
+    const hayErrores = Object.values(nuevosErrores).some(
+      (error) => error !== ""
+    );
+    if (hayErrores) {
+      setToastMessage("Por favor, corrija los errores antes de continuar");
+      setToastColor("danger");
+      setShowToast(true);
+      return;
+    }
+
     try {
       setSaving(true);
 
@@ -202,10 +449,8 @@ const ModalEditarTutor: React.FC<ModalEditarTutorProps> = ({
         apellido_materno: apellidoMaterno.trim(),
         rut: rut,
         direccion: direccion.trim(),
-        comuna: selectedComuna ? selectedComuna.name : comunaQuery.trim(),
-        region: selectedRegion
-          ? formatRegionName(selectedRegion)
-          : regionQuery.trim(),
+        comuna: comunaFinal,
+        region: regionFinal,
         telefono: toNumberOrNull(telefonoValue) ?? undefined,
         telefono2: toNumberOrNull(telefono2) ?? undefined,
         celular: toNumberOrNull(celular) ?? undefined,
@@ -236,6 +481,21 @@ const ModalEditarTutor: React.FC<ModalEditarTutorProps> = ({
     }
   };
 
+  // Calcular si hay errores o campos vacíos
+  const tieneErrores = Object.values(errores).some((error) => error !== "");
+  const formularioIncompleto =
+    !rut ||
+    !nombre ||
+    !apellidoPaterno ||
+    !direccion ||
+    !telefonoValue ||
+    !email ||
+    (!selectedRegion && !regionQuery.trim()) ||
+    (!selectedComuna && !comunaQuery.trim());
+
+  const deshabilitarGuardar =
+    saving || !tutor || tieneErrores || formularioIncompleto;
+
   return (
     <IonModal isOpen={isOpen} onDidDismiss={onDismiss}>
       <IonHeader>
@@ -249,18 +509,17 @@ const ModalEditarTutor: React.FC<ModalEditarTutorProps> = ({
           {/* RUT (readonly) */}
           <IonRow>
             <IonCol>
-              <IonItem lines="none">
-                <IonInput
-                  labelPlacement="stacked"
-                  fill="outline"
-                  value={rut}
-                  readonly
-                >
-                  <div slot="label">
-                    RUT (no editable) <IonText color="danger">(*)</IonText>
-                  </div>
-                </IonInput>
-              </IonItem>
+              <InputRut
+                onRutChange={handleRutChange}
+                ref={inputRutRef}
+                initialValue={rut}
+                readonly={true}
+              />
+              {errores.rut && (
+                <IonText color="danger">
+                  <small>{errores.rut}</small>
+                </IonText>
+              )}
             </IonCol>
           </IonRow>
 
@@ -274,13 +533,19 @@ const ModalEditarTutor: React.FC<ModalEditarTutorProps> = ({
                   fill="outline"
                   placeholder="Daniela"
                   value={nombre}
-                  onIonInput={(e) => setNombre(e.detail.value ?? "")}
+                  onIonInput={(e) => handleNombreChange(e.detail.value ?? "")}
+                  className={errores.nombre ? "ion-invalid ion-touched" : ""}
                 >
                   <div slot="label">
                     Nombre <IonText color="danger">(*)</IonText>
                   </div>
                 </IonInput>
               </IonItem>
+              {errores.nombre && (
+                <IonText color="danger">
+                  <small>{errores.nombre}</small>
+                </IonText>
+              )}
             </IonCol>
           </IonRow>
 
@@ -294,13 +559,23 @@ const ModalEditarTutor: React.FC<ModalEditarTutorProps> = ({
                   fill="outline"
                   placeholder="Huenuman"
                   value={apellidoPaterno}
-                  onIonInput={(e) => setApellidoPaterno(e.detail.value ?? "")}
+                  onIonInput={(e) =>
+                    handleApellidoPaternoChange(e.detail.value ?? "")
+                  }
+                  className={
+                    errores.apellidoPaterno ? "ion-invalid ion-touched" : ""
+                  }
                 >
                   <div slot="label">
                     Primer Apellido <IonText color="danger">(*)</IonText>
                   </div>
                 </IonInput>
               </IonItem>
+              {errores.apellidoPaterno && (
+                <IonText color="danger">
+                  <small>{errores.apellidoPaterno}</small>
+                </IonText>
+              )}
             </IonCol>
             <IonCol>
               <IonItem lines="none">
@@ -327,13 +602,21 @@ const ModalEditarTutor: React.FC<ModalEditarTutorProps> = ({
                   fill="outline"
                   placeholder="Calle Falsa 123"
                   value={direccion}
-                  onIonInput={(e) => setDireccion(e.detail.value ?? "")}
+                  onIonInput={(e) =>
+                    handleDireccionChange(e.detail.value ?? "")
+                  }
+                  className={errores.direccion ? "ion-invalid ion-touched" : ""}
                 >
                   <div slot="label">
                     Dirección <IonText color="danger">(*)</IonText>
                   </div>
                 </IonInput>
               </IonItem>
+              {errores.direccion && (
+                <IonText color="danger">
+                  <small>{errores.direccion}</small>
+                </IonText>
+              )}
             </IonCol>
           </IonRow>
 
@@ -343,7 +626,13 @@ const ModalEditarTutor: React.FC<ModalEditarTutorProps> = ({
               <InputTelefono
                 onPhoneChange={handlePhoneChange}
                 ref={inputTelefonoRef}
+                initialValue={telefonoValue}
               />
+              {errores.telefono && (
+                <IonText color="danger">
+                  <small>{errores.telefono}</small>
+                </IonText>
+              )}
             </IonCol>
           </IonRow>
 
@@ -403,13 +692,18 @@ const ModalEditarTutor: React.FC<ModalEditarTutorProps> = ({
             <IonCol>
               <SelectorRegion
                 regionQuery={regionQuery}
-                setRegionQuery={setRegionQuery}
+                setRegionQuery={handleRegionChange}
                 showRegionList={showRegionList}
                 setShowRegionList={setShowRegionList}
                 filteredRegiones={filteredRegiones}
                 loadingRegiones={loadingRegiones}
                 selectRegion={selectRegion}
               />
+              {errores.region && (
+                <IonText color="danger">
+                  <small>{errores.region}</small>
+                </IonText>
+              )}
             </IonCol>
           </IonRow>
 
@@ -418,7 +712,7 @@ const ModalEditarTutor: React.FC<ModalEditarTutorProps> = ({
             <IonCol>
               <SelectorComuna
                 comunaQuery={comunaQuery}
-                setComunaQuery={setComunaQuery}
+                setComunaQuery={handleComunaChange}
                 showComunaList={showComunaList}
                 setShowComunaList={setShowComunaList}
                 filteredComunas={filteredComunas}
@@ -426,6 +720,11 @@ const ModalEditarTutor: React.FC<ModalEditarTutorProps> = ({
                 selectComuna={selectComuna}
                 regionSeleccionada={!!selectedRegion}
               />
+              {errores.comuna && (
+                <IonText color="danger">
+                  <small>{errores.comuna}</small>
+                </IonText>
+              )}
             </IonCol>
           </IonRow>
 
@@ -439,13 +738,19 @@ const ModalEditarTutor: React.FC<ModalEditarTutorProps> = ({
                   fill="outline"
                   placeholder="govet@paw-solutions.com"
                   value={email}
-                  onIonInput={(e) => setEmail(e.detail.value ?? "")}
+                  onIonInput={(e) => handleEmailChange(e.detail.value ?? "")}
+                  className={errores.email ? "ion-invalid ion-touched" : ""}
                 >
                   <div slot="label">
                     Email <IonText color="danger">(*)</IonText>
                   </div>
                 </IonInput>
               </IonItem>
+              {errores.email && (
+                <IonText color="danger">
+                  <small>{errores.email}</small>
+                </IonText>
+              )}
             </IonCol>
           </IonRow>
 
@@ -468,7 +773,7 @@ const ModalEditarTutor: React.FC<ModalEditarTutorProps> = ({
         </IonGrid>
 
         <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
-          <IonButton onClick={handleGuardar} disabled={saving || !tutor}>
+          <IonButton onClick={handleGuardar} disabled={deshabilitarGuardar}>
             {saving ? "Guardando..." : "Guardar"}
           </IonButton>
           <IonButton fill="clear" onClick={onDismiss} disabled={saving}>
