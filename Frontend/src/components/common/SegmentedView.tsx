@@ -1,18 +1,23 @@
 import React from "react";
 import { IonSegment, IonSegmentButton, IonLabel, IonIcon } from "@ionic/react";
 import { personOutline, pawOutline, documentTextOutline } from "ionicons/icons";
+import SearchBar from "./SearchBar";
 import "../../styles/SegmentedView.css";
 
 interface SegmentedViewProps {
   selectedSegment: string;
   onSegmentChange: (segment: string) => void;
+  busqueda: string;
+  onSearch: (texto: string) => void;
   children: React.ReactNode;
 }
 
 const SegmentedView: React.FC<SegmentedViewProps> = ({
   selectedSegment,
   onSegmentChange,
-  children
+  busqueda,
+  onSearch,
+  children,
 }) => {
   return (
     <>
@@ -34,6 +39,18 @@ const SegmentedView: React.FC<SegmentedViewProps> = ({
             <IonLabel>Consultas</IonLabel>
           </IonSegmentButton>
         </IonSegment>
+        <SearchBar
+          value={busqueda}
+          onSearch={onSearch}
+          placeholder={
+            selectedSegment === "tutores"
+              ? "Buscar por nombre, apellido, RUT o email..."
+              : selectedSegment === "pacientes"
+              ? "Buscar por nombre, raza o especie..."
+              : "Buscar por nombre de paciente o tutor..."
+          }
+          className="searchbar"
+        />
       </div>
       {children}
     </>

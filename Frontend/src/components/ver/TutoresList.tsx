@@ -1,11 +1,6 @@
 import React from "react";
-import {
-  IonList,
-  IonRefresher,
-  IonRefresherContent,
-} from "@ionic/react";
+import { IonList, IonRefresher, IonRefresherContent } from "@ionic/react";
 import { TutorData } from "../../api/tutores";
-import SearchBar from "../common/SearchBar";
 import LoadingState from "../common/LoadingState";
 import ErrorState from "../common/ErrorState";
 import EmptyState from "../common/EmptyState";
@@ -38,7 +33,7 @@ const TutoresList: React.FC<TutoresListProps> = ({
   onLoadMore,
   onViewTutor,
   onEditTutor,
-  onRetry
+  onRetry,
 }) => {
   return (
     <>
@@ -47,21 +42,13 @@ const TutoresList: React.FC<TutoresListProps> = ({
       </IonRefresher>
 
       <div className="info-container">
-        <SearchBar
-          value={busqueda}
-          onSearch={onSearch}
-          placeholder="Buscar por nombre, apellido, RUT o email..."
-          className="searchbar"
-          fixed={true}
+        <LoadingState
+          loading={loading}
+          itemCount={tutores.length}
+          type="tutores"
         />
-        
-        <LoadingState loading={loading} itemCount={tutores.length} type="tutores" />
-        
-        <ErrorState 
-          error={error} 
-          onRetry={onRetry} 
-          type="tutores" 
-        />
+
+        <ErrorState error={error} onRetry={onRetry} type="tutores" />
 
         <EmptyState
           isEmpty={!loading && !error && tutores.length === 0}

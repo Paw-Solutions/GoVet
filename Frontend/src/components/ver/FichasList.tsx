@@ -1,7 +1,6 @@
 import React from "react";
 import { IonList, IonRefresher, IonRefresherContent } from "@ionic/react";
 import { ConsultaData } from "../../api/fichas";
-import SearchBar from "../common/SearchBar";
 import SortDropdown from "../common/SortDropdown";
 import LoadingState from "../common/LoadingState";
 import ErrorState from "../common/ErrorState";
@@ -51,13 +50,6 @@ const FichasList: React.FC<FichasListProps> = ({
       </IonRefresher>
 
       <div className="info-container">
-        <SearchBar
-          value={busqueda}
-          onSearch={onSearch}
-          placeholder="Buscar por nombre de paciente o tutor..."
-          className="searchbar"
-        />
-
         <SortDropdown value={sortOrder} onChange={onSortOrderChange} />
 
         <LoadingState

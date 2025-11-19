@@ -1,18 +1,13 @@
 import React from "react";
-import {
-  IonList,
-  IonRefresher,
-  IonRefresherContent,
-} from "@ionic/react";
+import { IonList, IonRefresher, IonRefresherContent } from "@ionic/react";
 import { PacienteData } from "../../api/pacientes";
-import SearchBar from "../common/SearchBar";
 import LoadingState from "../common/LoadingState";
 import ErrorState from "../common/ErrorState";
 import EmptyState from "../common/EmptyState";
 import ResultsCounter from "../ver/ResultsCounter";
 import InfiniteScroll from "../common/InfiniteScroll";
 import PacienteItem from "../items_ver/PacienteItem";
-import '../../styles/ver.css';
+import "../../styles/ver.css";
 // Componente: Visualizador del detalle de un paciente
 interface PacientesListProps {
   pacientes: PacienteData[];
@@ -39,7 +34,7 @@ const PacientesList: React.FC<PacientesListProps> = ({
   onLoadMore,
   onViewPaciente,
   onEditPaciente,
-  onRetry
+  onRetry,
 }) => {
   return (
     <>
@@ -48,20 +43,13 @@ const PacientesList: React.FC<PacientesListProps> = ({
       </IonRefresher>
 
       <div className="info-container">
-        <SearchBar
-          value={busqueda}
-          onSearch={onSearch}
-          placeholder="Buscar por nombre, raza o especie..."
-          className="searchbar"
+        <LoadingState
+          loading={loading}
+          itemCount={pacientes.length}
+          type="pacientes"
         />
-        
-        <LoadingState loading={loading} itemCount={pacientes.length} type="pacientes" />
-        
-        <ErrorState 
-          error={error} 
-          onRetry={onRetry} 
-          type="pacientes" 
-        />
+
+        <ErrorState error={error} onRetry={onRetry} type="pacientes" />
 
         <EmptyState
           isEmpty={!loading && !error && pacientes.length === 0}

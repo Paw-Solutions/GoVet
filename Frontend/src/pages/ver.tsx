@@ -61,6 +61,20 @@ const Ver: React.FC = () => {
         <SegmentedView
           selectedSegment={selectedSegment}
           onSegmentChange={handleSegmentChange}
+          busqueda={
+            selectedSegment === "tutores"
+              ? tutores.busqueda
+              : selectedSegment === "pacientes"
+              ? pacientes.busqueda
+              : consultas.busqueda
+          }
+          onSearch={
+            selectedSegment === "tutores"
+              ? tutores.handleSearch
+              : selectedSegment === "pacientes"
+              ? pacientes.handleSearch
+              : consultas.handleSearch
+          }
         >
           {selectedSegment === "tutores" && (
             <TutoresList

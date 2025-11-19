@@ -2,8 +2,33 @@
   position: sticky;
   top: 0; /* Pegado al header */
   z-index: 1001; /* Mayor que SearchBar */
+  background: transparent;
+  padding: 12px 16px 8px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.segment-container-sticky .modal-search-container {
+  position: static;
+  z-index: auto;
+  background: transparent;
+  padding: 0;
+  border-bottom: none;
+  margin: 0;
+}
+
+.segment-container-sticky ion-segment {
   background: var(--ion-background-color, white);
-  padding: 16px 16px 8px 16px;
+  border-radius: var(--radius-lg);
+  padding: 8px;
+}
+
+.segment-container-sticky .modal-search-container ion-searchbar {
+  --background: var(--background-color);
+  --border-radius: var(--radius-lg);
+  --box-shadow: var(--shadow-md);
+  padding: 0;
 }
 
 .custom-segment {
@@ -26,7 +51,8 @@
 /* Responsive */
 @media (max-width: 768px) {
   .segment-container-sticky {
-    padding: 12px;
+    padding: 10px 12px 6px 12px;
+    gap: 8px;
   }
 
   .custom-segment ion-segment-button {
