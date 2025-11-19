@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useHistory } from "react-router-dom";
 import {
   IonModal,
   IonHeader,
@@ -50,6 +51,7 @@ const ModalInfoPaciente: React.FC<ModalInfoPacienteProps> = ({
   onEdit,
 }) => {
   const [showHistorial, setShowHistorial] = useState(false);
+  const history = useHistory();
 
   // Función para calcular edad aproximada
   const calculateAge = (fechaNacimiento?: string) => {
@@ -346,6 +348,31 @@ const ModalInfoPaciente: React.FC<ModalInfoPacienteProps> = ({
           >
             <IonIcon icon={documentTextOutline} slot="start" />
             Ver Historial de Consultas
+          </IonButton>
+        </div>
+
+        {/* Botón para agregar ficha */}
+        <div style={{ padding: "16px" }}>
+          <IonButton
+            expand="block"
+            fill="solid"
+            color="primary"
+            onClick={() => {
+              if (paciente) {
+                // Guardar el paciente en sessionStorage para rellenarFicha
+                sessionStorage.setItem(
+                  "pacienteParaFicha",
+                  JSON.stringify(paciente)
+                );
+                // Navegar a RellenarFicha
+                history.push("/rellenar-ficha");
+                // Cerrar el modal
+                onDismiss();
+              }
+            }}
+          >
+            <IonIcon icon={documentTextOutline} slot="start" />
+            Agregar Ficha
           </IonButton>
         </div>
 

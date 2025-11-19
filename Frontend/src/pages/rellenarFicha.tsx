@@ -149,6 +149,20 @@ const RellenarFicha: React.FC = () => {
     setShowModalPacientes(false);
   };
 
+  // useEffect para cargar el paciente desde sessionStorage si existe
+  useEffect(() => {
+    const pacienteStr = sessionStorage.getItem("pacienteParaFicha");
+    if (pacienteStr) {
+      try {
+        const pacienteData: PacienteData = JSON.parse(pacienteStr);
+        handlePacienteSelected(pacienteData);
+        sessionStorage.removeItem("pacienteParaFicha");
+      } catch (error) {
+        console.error("Error parsing paciente from sessionStorage:", error);
+      }
+    }
+  }, []);
+
   const navegarSiguiente = () => {
     if (currentStep === "general") {
       setCurrentStep("fisico");
@@ -804,6 +818,27 @@ const RellenarFicha: React.FC = () => {
           </IonGrid>
         </IonToolbar>
       </IonFooter>
+
+      {/* Botón flotante para agregar nueva ficha rápidamente */}
+      {currentStep === "general" && !selectedPaciente && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: "100px",
+            right: "16px",
+            zIndex: 999,
+          }}
+        >
+          <IonButton
+            fill="solid"
+            shape="round"
+            onClick={() => setShowModalPacientes(true)}
+            style={{ width: "56px", height: "56px" }}
+          >
+            <IonIcon icon={saveOutline} style={{ fontSize: "24px" }} />
+          </IonButton>
+        </div>
+      )}
 
       {/* Modal para escoger paciente */}
       <ModalEscogerPaciente
