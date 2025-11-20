@@ -50,3 +50,4 @@ test_*.py
 testing/
 temp/
 local_testing/
+!Backend/rellenar_bd/script_limpia_rellena_test.py
