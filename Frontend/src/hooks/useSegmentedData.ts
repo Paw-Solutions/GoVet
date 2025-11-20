@@ -3,7 +3,10 @@ import { TutorData } from "../api/tutores";
 import { ConsultaData } from "../api/fichas";
 import { PacienteData } from "../api/pacientes";
 import { obtenerTutoresPaginados } from "../api/tutores";
-import { obtenerPacientesPaginados } from "../api/pacientes";
+import {
+  obtenerPacientesPaginados,
+  obtenerPacientePorId,
+} from "../api/pacientes";
 import { obtenerConsultasPaginadas } from "../api/fichas";
 
 interface PaginatedResponseTutores {
@@ -86,6 +89,7 @@ interface PacientesActions {
   retry: () => void;
   viewTutorFromPaciente: (tutorData: TutorData) => void;
   viewConsultaFromPaciente: (consultaData: ConsultaData) => void;
+  viewPacienteFromTutor: (pacienteData: PacienteData) => void;
 }
 
 interface PaginatedResponseConsultas {
@@ -479,6 +483,37 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
     }, 200);
   }, []);
 
+  // Función para ver paciente desde el modal de tutor
+  const viewPacienteFromTutor = useCallback((pacienteData: PacienteData) => {
+    // 1. Cerrar modal de tutor inmediatamente
+    setTutoresState((prev) => ({
+      ...prev,
+      showTutorInfo: false,
+    }));
+
+    // 2. Obtener datos completos del paciente y luego abrir modal
+    setTimeout(async () => {
+      try {
+        const pacienteCompleto = await obtenerPacientePorId(
+          pacienteData.id_paciente
+        );
+        setPacientesState((prev) => ({
+          ...prev,
+          selectedPaciente: pacienteCompleto,
+          showPacienteInfo: true,
+        }));
+      } catch (error) {
+        console.error("Error obteniendo datos completos del paciente:", error);
+        // Si falla, usar los datos parciales
+        setPacientesState((prev) => ({
+          ...prev,
+          selectedPaciente: pacienteData,
+          showPacienteInfo: true,
+        }));
+      }
+    }, 200);
+  }, []);
+
   const retryPacientes = useCallback(() => {
     loadPacientesData(true, pacientesState.busqueda.trim() || undefined);
   }, [loadPacientesData, pacientesState.busqueda]);
@@ -682,6 +717,7 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
     retry: retryPacientes,
     viewTutorFromPaciente,
     viewConsultaFromPaciente,
+    viewPacienteFromTutor,
   };
 
   const consultasActions: ConsultasActions = {

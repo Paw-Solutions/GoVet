@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   IonModal,
   IonHeader,
@@ -16,6 +16,7 @@ import {
   IonCardContent,
   IonCardHeader,
   IonCardTitle,
+  IonSpinner,
 } from "@ionic/react";
 import {
   closeOutline,
@@ -24,14 +25,17 @@ import {
   mailOutline,
   locationOutline,
   pencilOutline,
+  pawOutline,
 } from "ionicons/icons";
 import { TutorData } from "../../api/tutores";
+import { obtenerPacientesPorTutor, PacienteData } from "../../api/pacientes";
 // Componente: Visualizador del detalle de un tutor
 interface ModalInfoTutorProps {
   isOpen: boolean;
   onDismiss: () => void;
   tutor: TutorData | null;
   onEdit?: () => void; // Nueva prop opcional para manejar la edición
+  onViewPaciente?: (pacienteData: PacienteData) => void; // Callback para ver paciente
 }
 
 const ModalInfoTutor: React.FC<ModalInfoTutorProps> = ({
@@ -39,8 +43,29 @@ const ModalInfoTutor: React.FC<ModalInfoTutorProps> = ({
   onDismiss,
   tutor,
   onEdit,
+  onViewPaciente,
 }) => {
-  // Función segura para cerrar el modal
+  const [pacientes, setPacientes] = useState<PacienteData[]>([]);
+  const [loadingPacientes, setLoadingPacientes] = useState(false);
+
+  // Cargar pacientes del tutor cuando el modal se abre
+  useEffect(() => {
+    if (isOpen && tutor?.rut) {
+      setLoadingPacientes(true);
+      obtenerPacientesPorTutor(tutor.rut)
+        .then((data) => {
+          setPacientes(data);
+          console.log(`📋 Pacientes del tutor ${tutor.rut}:`, data);
+        })
+        .catch((error) => {
+          console.error("Error cargando pacientes del tutor:", error);
+          setPacientes([]);
+        })
+        .finally(() => {
+          setLoadingPacientes(false);
+        });
+    }
+  }, [isOpen, tutor?.rut]);
   const handleDismiss = () => {
     try {
       onDismiss();
@@ -307,6 +332,77 @@ const ModalInfoTutor: React.FC<ModalInfoTutorProps> = ({
                   </IonItem>
                 )}
               </IonList>
+            )}
+          </IonCardContent>
+        </IonCard>
+
+        {/* Pacientes del Tutor */}
+        <IonCard>
+          <IonCardHeader>
+            <IonCardTitle>
+              <IonIcon icon={pawOutline} style={{ marginRight: "8px" }} />
+              Mascotas Asociadas
+            </IonCardTitle>
+          </IonCardHeader>
+          <IonCardContent>
+            {loadingPacientes ? (
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  padding: "20px",
+                }}
+              >
+                <IonSpinner name="crescent" color="primary" />
+              </div>
+            ) : pacientes && pacientes.length > 0 ? (
+              <IonList>
+                {pacientes.map((paciente) => (
+                  <IonItem
+                    key={paciente.id_paciente}
+                    button
+                    onClick={() => {
+                      if (onViewPaciente) {
+                        onViewPaciente(paciente);
+                      }
+                    }}
+                    detail={onViewPaciente ? true : false}
+                    disabled={!onViewPaciente}
+                    style={{ cursor: onViewPaciente ? "pointer" : "default" }}
+                  >
+                    <IonLabel>
+                      <h2>{paciente.nombre}</h2>
+                      <p>
+                        {paciente.raza && `${paciente.raza} `}
+                        {paciente.especie && `(${paciente.especie})`}
+                      </p>
+                      {paciente.fecha_nacimiento && (
+                        <p
+                          style={{
+                            fontSize: "0.85em",
+                            color: "var(--ion-color-medium)",
+                          }}
+                        >
+                          Nacimiento:{" "}
+                          {new Date(
+                            paciente.fecha_nacimiento
+                          ).toLocaleDateString()}
+                        </p>
+                      )}
+                      {onViewPaciente && (
+                        <IonText color="medium" style={{ fontSize: "0.85em" }}>
+                          <p>Toca para ver perfil completo</p>
+                        </IonText>
+                      )}
+                    </IonLabel>
+                  </IonItem>
+                ))}
+              </IonList>
+            ) : (
+              <IonText color="medium">
+                <p>Este tutor no tiene mascotas registradas.</p>
+              </IonText>
             )}
           </IonCardContent>
         </IonCard>

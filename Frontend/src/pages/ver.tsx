@@ -153,6 +153,7 @@ const Ver: React.FC = () => {
         // Navegación entre modales
         onViewTutorFromPaciente={pacientes.viewTutorFromPaciente}
         onViewConsultaFromPaciente={pacientes.viewConsultaFromPaciente}
+        onViewPacienteFromTutor={pacientes.viewPacienteFromTutor}
       />
     </IonPage>
   );
