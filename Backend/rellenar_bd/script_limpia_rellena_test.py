@@ -68,6 +68,16 @@ apellidos_comunes = [
     "Espinoza", "Escobar", "Estévez", "Feliciano", "Figueroa", "Fontana", "Frías", "Garrido", "Gómez", "Goyeneche"
 ]
 
+nombres_mascotas = [
+    "Luna", "Toby", "Pelusa", "Max", "Rocky", "Princesa", "Simba", "Coco", 
+    "Thor", "Mia", "Lola", "Zeus", "Bruno", "Kira", "Nala", "Duque", "Jack", 
+    "Tom", "Negro", "Peque", "Oso", "Lucas", "Sasha", "Apolo", "Boni", "Chester",
+    "Caty", "Cholo", "Dina", "Estrella", "Firulais", "Gaston", "Hachiko", 
+    "Indy", "Jagger", "Kaiser", "Laika", "Manchitas", "Nieve", "Oddie", "Puky",
+    "Queen", "Rambo", "Sam", "Titan", "Uma", "Vinchuka", "Wally", "Xena", "Yago",
+    "Zuma", "Bella", "Charlie", "Daisy", "Buddy", "Molly", "Milo", "Maggie"
+]
+
 colores_mascotas = [
     "Negro", "Blanco", "Café", "Gris", "Rojo", "Marrón", "Crema", "Mixto", "Tricolor", "Manchado",
     "Atigrado", "Canela", "Chocolate", "Plateado", "Dorado", "Leonado", "Pío", "Brindle"
@@ -354,7 +364,7 @@ try:
         
         for _ in range(num_pacientes):
             # Datos del paciente
-            nombre_paciente = random.choice(nombres_comunes)
+            nombre_paciente = random.choice(nombres_mascotas)
             color = random.choice(colores_mascotas)
             sexo = random.choice(['M', 'F'])
             esterilizado = random.choice([True, False])

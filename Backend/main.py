@@ -100,12 +100,41 @@ def paciente_to_response(db_paciente: models.Paciente, db: Session) -> PacienteR
     """
     Convierte un objeto Paciente ORM a PacienteResponse.
     Carga explícitamente los nombres de raza y especie como strings.
+    Incluye información del tutor si existe.
     """
     # Cargar los nombres de la raza y especie
     raza_obj = db.query(models.Raza).filter(models.Raza.id_raza == db_paciente.id_raza).first()
     especie_obj = None
     if raza_obj:
         especie_obj = db.query(models.Especie).filter(models.Especie.id_especie == raza_obj.id_especie).first()
+    
+    # Obtener el tutor del paciente
+    tutor_data = None
+    tutor_paciente = db.query(models.TutorPaciente).filter(
+        models.TutorPaciente.id_paciente == db_paciente.id_paciente
+    ).first()
+    
+    if tutor_paciente:
+        tutor_obj = db.query(models.Tutor).filter(
+            models.Tutor.rut == tutor_paciente.rut
+        ).first()
+        
+        if tutor_obj:
+            tutor_data = TutorResponse(
+                rut=tutor_obj.rut,
+                nombre=tutor_obj.nombre,
+                apellido_paterno=tutor_obj.apellido_paterno,
+                apellido_materno=tutor_obj.apellido_materno,
+                celular=tutor_obj.celular,
+                celular2=tutor_obj.celular2,
+                comuna=tutor_obj.comuna,
+                region=tutor_obj.region,
+                observacion=tutor_obj.observacion,
+                telefono=tutor_obj.telefono,
+                telefono2=tutor_obj.telefono2,
+                direccion=tutor_obj.direccion,
+                email=tutor_obj.email
+            )
     
     # Construir la respuesta con los nombres como strings explícitos
     return PacienteResponse(
@@ -118,7 +147,8 @@ def paciente_to_response(db_paciente: models.Paciente, db: Session) -> PacienteR
         id_raza=db_paciente.id_raza,
         codigo_chip=db_paciente.codigo_chip,
         raza=str(raza_obj.nombre) if raza_obj else None,
-        especie=str(especie_obj.nombre_comun) if especie_obj else None
+        especie=str(especie_obj.nombre_comun) if especie_obj else None,
+        tutor=tutor_data
     )
 
 # HU1: HU 1: Como Veterinaria quiero ver el calendario con los horarios de atención disponibles, para organizarme con la agenda de horas
