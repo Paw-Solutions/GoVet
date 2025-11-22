@@ -2,6 +2,35 @@ from typing import Optional
 from pydantic import BaseModel, EmailStr
 from datetime import date
 
+""" Esquema de datos para la entidad Tutor (dueño de una mascota) """
+
+class TutorBase(BaseModel):
+    rut: str
+    nombre: str
+    apellido_paterno: Optional[str] = None
+    apellido_materno: Optional[str] = None
+    celular: Optional[int] = None
+    celular2: Optional[int] = None
+    comuna: Optional[str] = None
+    region: Optional[str] = None
+    observacion: Optional[str] = None
+    telefono: Optional[int] = None
+    telefono2: Optional[int] = None
+    direccion: Optional[str] = None
+    email: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+class TutorCreate(TutorBase):
+    pass
+
+class TutorResponse(TutorBase):
+    rut: str
+
+    class Config:
+        from_attributes = True
+
 """ Esquema de datos para la entidad Paciente (Mascota) """
 # define los campos comunes que se usan tanto para crear como para mostrar mostrar, 
 # No incluye el id_paciente, que es generado automáticamente por la base de datos al momento de hacer el commit.
@@ -36,6 +65,7 @@ class PacienteResponse(PacienteBase):
     id_paciente: int 
     raza: Optional[str] = None
     especie: Optional[str] = None
+    tutor: Optional[TutorResponse] = None
 
     class Config:
         from_attributes = True 
@@ -72,35 +102,6 @@ class EspecieCreate(EspecieBase):
 
 class EspecieResponse(EspecieBase):
     id_especie: int
-
-    class Config:
-        from_attributes = True
-
-""" Esquema de datos para la entidad tutor (dueño de una mascota) """
-
-class TutorBase(BaseModel):
-    rut: str
-    nombre: str
-    apellido_paterno: Optional[str] = None
-    apellido_materno: Optional[str] = None
-    celular: Optional[int] = None
-    celular2: Optional[int] = None
-    comuna: Optional[str] = None
-    region: Optional[str] = None
-    observacion: Optional[str] = None
-    telefono: Optional[int] = None
-    telefono2: Optional[int] = None
-    direccion: Optional[str] = None
-    email: Optional[str] = None
-
-    class Config:
-        from_attributes = True
-
-class TutorCreate(TutorBase):
-    pass
-
-class TutorResponse(TutorBase):
-    rut: str
 
     class Config:
         from_attributes = True

@@ -203,6 +203,32 @@ export async function obtenerPacientesPorTutor(
   }
 }
 
+// Función para obtener un paciente específico por ID
+export async function obtenerPacientePorId(
+  idPaciente: number
+): Promise<PacienteData> {
+  try {
+    console.log(`Obteniendo paciente con ID ${idPaciente}...`);
+    const response = await fetch(`${API_URL}/pacientes/${idPaciente}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error en la petición: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("Paciente obtenido:", data);
+    return data;
+  } catch (error) {
+    console.error("Error obteniendo paciente:", error);
+    throw error;
+  }
+}
+
 {
   /* Actualizar relacion paciente tutor */
 }

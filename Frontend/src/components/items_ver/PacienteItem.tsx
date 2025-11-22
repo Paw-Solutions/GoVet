@@ -85,7 +85,7 @@ const PacienteItem: React.FC<PacienteItemProps> = ({
     const especies: { [key: string]: string } = {
       perro: "dog.svg",
       gato: "cat.svg",
-      conejo: "rabbit.svg",
+      conejo: "bunny.svg",
       hamster: "hamster.svg",
       erizo: "hedgehog.svg",
       tortuga: "turtle.svg",

@@ -37,6 +37,7 @@ interface ModalsContainerProps {
   // Navegación entre modales
   onViewTutorFromPaciente?: (tutorData: TutorData) => void;
   onViewConsultaFromPaciente?: (consulta: ConsultaData) => void;
+  onViewPacienteFromTutor?: (pacienteData: PacienteData) => void;
 }
 
 const ModalsContainer: React.FC<ModalsContainerProps> = ({
@@ -68,6 +69,7 @@ const ModalsContainer: React.FC<ModalsContainerProps> = ({
   // Navegación entre modales
   onViewTutorFromPaciente,
   onViewConsultaFromPaciente,
+  onViewPacienteFromTutor,
 }) => {
   return (
     <>
@@ -77,6 +79,7 @@ const ModalsContainer: React.FC<ModalsContainerProps> = ({
         onDismiss={onCloseTutorInfo}
         tutor={selectedTutor}
         onEdit={onEditTutorFromInfo}
+        onViewPaciente={onViewPacienteFromTutor}
       />
 
       {/* Modal de información del paciente */}
