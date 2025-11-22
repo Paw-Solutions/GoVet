@@ -44,6 +44,10 @@ from googleapiclient.errors import HttpError
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google_auth_oauthlib.flow import Flow
 
+# Para generar pdf
+from services.pdf_service import generar_pdf_consulta
+from fastapi.responses import Response
+
 
 # Cargar variables de entorno desde el archivo .env
 load_dotenv()
@@ -121,7 +125,8 @@ def paciente_to_response(db_paciente: models.Paciente, db: Session) -> PacienteR
         especie=str(especie_obj.nombre_comun) if especie_obj else None
     )
 
-# HU1: HU 1: Como Veterinaria quiero ver el calendario con los horarios de atención disponibles, para organizarme con la agenda de horas
+
+# HU1: Como Veterinaria quiero ver el calendario con los horarios de atención disponibles, para organizarme con la agenda de horas
 
 def get_calendar_service():
     """
@@ -390,6 +395,18 @@ def obtener_todos_los_tutores(db: Session = Depends(get_db)):
     if not db_tutores:
         raise HTTPException(status_code=404, detail="No se encontraron tutores")
     return db_tutores
+
+# HU16:
+@app.get("/consultas/{id_consulta}/pdf", response_model=ConsultaResponse)
+def descargar_pdf_consulta(id_consulta: int, db: Session = Depends(get_db)):
+    pdf = generar_pdf_consulta(db, id_consulta)
+    return Response(
+        content=pdf,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'attachment; filename="ficha_consulta_{id_consulta}.pdf"'
+        }
+    )
 
 # Ruta GET para obtener tutores con paginación
 # Opción alternativa más corta
@@ -1263,6 +1280,21 @@ async def programar_envio(email: EmailSchema, fecha_envio: datetime):
         schedule_via_asyncio(fecha_envio, email)
 
     return JSONResponse(status_code=200, content={"message": "La notificación fue programada correctamente"})
+
+
+# HU 16: Cómo veterinaria quiero generar resumenes de citas que pueda enviar a los dueños
+@app.get("/consultas/{id_consulta}/pdf")
+def descargar_pdf_consulta(id_consulta: int, db: Session = Depends(get_db)):
+    # Cuerpo del endpoint, se encuentra en Backend/services/pdf_service.py y devuelve los bytes del pdf
+    pdf = generar_pdf_consulta(db, id_consulta)
+    # Respuesta cruda de fastApi, permite mejor control
+    return Response(
+        content=pdf, # Contenido: Bytes del pdf
+        media_type="application/pdf", # Tipo de media: Le dice a la web que tipo de data es, para no confundir pdf por texto
+        headers={ # Que hacer con la respuesta: inline = Muestra en navegador - attachment = Descarga como archivo con el filename
+            "Content-Disposition": f'attachment; filename="ficha_consulta_{id_consulta}.pdf"' 
+        }
+    )
 
 # async def envia(email: EmailSchema) -> JSONResponse:
 #     html = f"""<p>{email.cuerpo}</p>"""

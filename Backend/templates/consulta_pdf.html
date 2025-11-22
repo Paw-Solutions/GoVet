@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Ficha #{{ consulta.id_consulta }}</title>
+  <style>
+    body { font-family: Arial, sans-serif; font-size: 13px; margin: 24px; color:#222; }
+    h1 { font-size: 18px; margin: 0 0 12px; color:#4a2d7a; }
+    h2 { font-size: 14px; margin: 18px 0 6px; border-bottom:1px solid #ccc; padding-bottom:4px; color:#4a2d7a; }
+    .section { margin-bottom: 12px; }
+    .box { background:#f7f7fb; border:1px solid #ddd; padding:8px 10px; border-radius:4px; }
+    .label { font-weight:600; }
+    table { width:100%; border-collapse:collapse; margin-top:6px; }
+    th, td { border:1px solid #ccc; padding:4px 6px; font-size:12px; text-align:left; }
+    th { background:#eee; }
+    .observaciones { background:#fff8e1; border:1px solid #e0c56d; padding:8px; border-radius:4px; font-size:12px; }
+    footer { margin-top:18px; font-size:10px; text-align:right; color:#666; border-top:1px solid #ccc; padding-top:6px; }
+  </style>
+</head>
+<body>
+  <h1>Ficha Clínica #{{ consulta.id_consulta }}</h1>
+
+  <div class="section box">
+    <p><span class="label">Fecha:</span> {{ fecha_consulta }}</p>
+    <p><span class="label">Motivo:</span> {{ consulta.motivo or consulta.motivo_consulta or '—' }}</p>
+    <p><span class="label">Diagnóstico:</span> {{ consulta.diagnostico or '—' }}</p>
+  </div>
+
+  <h2>Paciente</h2>
+  <div class="box">
+    <p><span class="label">Nombre:</span> {{ paciente.nombre }}</p>
+    <p><span class="label">Especie:</span> {{ paciente.raza.especie.nombre_comun or '—' }}</p>
+    <p><span class="label">Raza:</span> {{ paciente.raza.nombre or '—' }}</p>
+    <p><span class="label">Sexo:</span> {{ sexo }}</p>
+    <p><span class="label">Edad:</span> {{ edad }}</p>
+    <p><span class="label">Chip:</span> {{ paciente.codigo_chip or '—' }}</p>
+  </div>
+
+  <h2>Tutor</h2>
+  <div class="box">
+    <p><span class="label">Nombre:</span> {{ tutor.nombre }} {{ tutor.apellido_paterno or '' }} {{ tutor.apellido_materno or '' }}</p>
+    <p><span class="label">RUT:</span> {{ tutor.rut }}</p>
+    <p><span class="label">Email:</span> {{ tutor.email or '—' }}</p>
+    <p><span class="label">Teléfono:</span> {{ tutor.telefono or tutor.celular or '—' }}</p>
+    <p><span class="label">Dirección:</span> {{ tutor.direccion or '—' }}</p>
+  </div>
+
+  <h2>Parámetros Clínicos</h2>
+  <table>
+    <tr>
+      <th>Peso</th>
+      <th>Condición</th>
+      <th>Pelaje</th>
+      <th>Mucosas</th>
+      <th>Nódulos</th>
+      <th>DHT</th>
+      <th>Auscultación</th>
+    </tr>
+    <tr>
+      <td>{{ consulta.peso or '—' }}</td>
+      <td>{{ consulta.condicion_corporal or '—' }}</td>
+      <td>{{ consulta.estado_pelaje or '—' }}</td>
+      <td>{{ consulta.mucosas or '—' }}</td>
+      <td>{{ consulta.nodulos_linfaticos or '—' }}</td>
+      <td>{{ consulta.dht or '—' }}</td>
+      <td>{{ consulta.auscultacion_cardiaca_toraxica or '—' }}</td>
+    </tr>
+  </table>
+
+  {% if consulta.observaciones %}
+    <h2>Observaciones</h2>
+    <div class="observaciones">{{ consulta.observaciones }}</div>
+  {% endif %}
+
+  <footer>
+    Generado: {{ generado }} · GoVet · ID Interno: {{ consulta.id_consulta }}
+  </footer>
+</body>
+</html>
