@@ -42,6 +42,8 @@ interface ModalAgendarCitaProps {
   onClose: () => void;
   fechaInicial?: Date;
   onCitaCreada: () => void;
+  tutorInicial?: TutorData;
+  pacienteInicial?: PacienteData;
 }
 
 const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
@@ -49,6 +51,8 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
   onClose,
   fechaInicial = new Date(),
   onCitaCreada,
+  tutorInicial,
+  pacienteInicial,
 }) => {
   const [present] = useIonToast();
   const [paso, setPaso] = useState(1);
@@ -99,6 +103,49 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
     setMotivo("");
     setNotas("");
   };
+
+  // useEffect para pre-cargar datos cuando se pasan tutorInicial y/o pacienteInicial
+  useEffect(() => {
+    if (isOpen && tutorInicial) {
+      // Pre-cargar tutor seleccionado
+      setTutorSeleccionado(tutorInicial);
+
+      // Pre-cargar ubicación desde dirección del tutor
+      if (tutorInicial.direccion) {
+        setUbicacion(tutorInicial.direccion);
+      }
+
+      // Cargar pacientes del tutor
+      const cargarDatosIniciales = async () => {
+        setCargandoPacientes(true);
+        try {
+          const pacientes = await obtenerPacientesPorTutor(tutorInicial.rut);
+          setPacientesDisponibles(pacientes);
+
+          // Si también hay pacienteInicial, pre-seleccionarlo y saltar al paso 3
+          if (pacienteInicial?.id_paciente) {
+            setPacientesSeleccionados([pacienteInicial.id_paciente]);
+            // Saltar directamente al paso 3 (Fecha y Hora)
+            setPaso(3);
+          } else {
+            // Solo hay tutorInicial, ir al paso 2 (Selección de Paciente)
+            setPaso(2);
+          }
+        } catch (error) {
+          console.error("Error cargando pacientes:", error);
+          present({
+            message: "Error al cargar los datos iniciales",
+            duration: 2000,
+            color: "danger",
+          });
+        } finally {
+          setCargandoPacientes(false);
+        }
+      };
+
+      cargarDatosIniciales();
+    }
+  }, [isOpen, tutorInicial, pacienteInicial]);
 
   const handleClose = () => {
     resetForm();

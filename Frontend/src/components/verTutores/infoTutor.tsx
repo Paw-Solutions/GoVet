@@ -26,9 +26,11 @@ import {
   locationOutline,
   pencilOutline,
   pawOutline,
+  calendarOutline,
 } from "ionicons/icons";
 import { TutorData } from "../../api/tutores";
 import { obtenerPacientesPorTutor, PacienteData } from "../../api/pacientes";
+import ModalAgendarCita from "../calendario/ModalAgendarCita";
 // Componente: Visualizador del detalle de un tutor
 interface ModalInfoTutorProps {
   isOpen: boolean;
@@ -47,6 +49,7 @@ const ModalInfoTutor: React.FC<ModalInfoTutorProps> = ({
 }) => {
   const [pacientes, setPacientes] = useState<PacienteData[]>([]);
   const [loadingPacientes, setLoadingPacientes] = useState(false);
+  const [showAgendarModal, setShowAgendarModal] = useState(false);
 
   // Cargar pacientes del tutor cuando el modal se abre
   useEffect(() => {
@@ -407,6 +410,19 @@ const ModalInfoTutor: React.FC<ModalInfoTutorProps> = ({
           </IonCardContent>
         </IonCard>
 
+        {/* Botón para agendar cita */}
+        <div style={{ padding: "16px" }}>
+          <IonButton
+            expand="block"
+            fill="solid"
+            color="tertiary"
+            onClick={() => setShowAgendarModal(true)}
+          >
+            <IonIcon icon={calendarOutline} slot="start" />
+            Agendar Cita
+          </IonButton>
+        </div>
+
         {/* Botón de cierre adicional */}
         <div style={{ padding: "20px", textAlign: "center" }}>
           <IonButton expand="block" fill="outline" onClick={handleDismiss}>
@@ -414,6 +430,18 @@ const ModalInfoTutor: React.FC<ModalInfoTutorProps> = ({
           </IonButton>
         </div>
       </IonContent>
+
+      {/* Modal para agendar cita con tutor pre-cargado */}
+      {tutor && (
+        <ModalAgendarCita
+          isOpen={showAgendarModal}
+          onClose={() => setShowAgendarModal(false)}
+          tutorInicial={tutor}
+          onCitaCreada={() => {
+            setShowAgendarModal(false);
+          }}
+        />
+      )}
     </IonModal>
   );
 };

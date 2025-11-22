@@ -27,11 +27,13 @@ import {
   pawOutline,
   documentTextOutline,
   pencilOutline,
+  calendarOutline,
 } from "ionicons/icons";
 import { PacienteData } from "../../api/pacientes";
 import { TutorData } from "../../api/tutores";
 import HistorialConsultas from "./HistorialConsultas";
 import PendientesPaciente from "./PendientesPaciente";
+import ModalAgendarCita from "../calendario/ModalAgendarCita";
 // Componente: Visualizador del detalle de un paciente
 interface ModalInfoPacienteProps {
   isOpen: boolean;
@@ -51,6 +53,7 @@ const ModalInfoPaciente: React.FC<ModalInfoPacienteProps> = ({
   onEdit,
 }) => {
   const [showHistorial, setShowHistorial] = useState(false);
+  const [showAgendarModal, setShowAgendarModal] = useState(false);
   const history = useHistory();
 
   // Función para calcular edad aproximada
@@ -376,6 +379,19 @@ const ModalInfoPaciente: React.FC<ModalInfoPacienteProps> = ({
           </IonButton>
         </div>
 
+        {/* Botón para agendar cita */}
+        <div style={{ padding: "16px" }}>
+          <IonButton
+            expand="block"
+            fill="solid"
+            color="tertiary"
+            onClick={() => setShowAgendarModal(true)}
+          >
+            <IonIcon icon={calendarOutline} slot="start" />
+            Agendar Cita
+          </IonButton>
+        </div>
+
         {/* Botón de cierre adicional */}
         <div style={{ padding: "20px", textAlign: "center" }}>
           <IonButton expand="block" fill="outline" onClick={handleDismiss}>
@@ -396,6 +412,37 @@ const ModalInfoPaciente: React.FC<ModalInfoPacienteProps> = ({
           }
         }}
       />
+
+      {/* Modal para agendar cita con datos pre-cargados */}
+      {paciente && (
+        <ModalAgendarCita
+          isOpen={showAgendarModal}
+          onClose={() => setShowAgendarModal(false)}
+          tutorInicial={
+            paciente.tutor
+              ? {
+                  nombre: paciente.tutor.nombre ?? "",
+                  apellido_paterno: paciente.tutor.apellido_paterno ?? "",
+                  apellido_materno: paciente.tutor.apellido_materno ?? "",
+                  rut: paciente.tutor.rut ?? "",
+                  telefono: paciente.tutor.telefono ?? 0,
+                  email: paciente.tutor.email ?? "",
+                  direccion: "",
+                  telefono2: 0,
+                  comuna: "",
+                  region: "",
+                  celular: 0,
+                  celular2: 0,
+                  observacion: "",
+                }
+              : undefined
+          }
+          pacienteInicial={paciente}
+          onCitaCreada={() => {
+            setShowAgendarModal(false);
+          }}
+        />
+      )}
     </IonModal>
   );
 };
