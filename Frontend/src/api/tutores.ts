@@ -1,6 +1,6 @@
 // src/api/tutoresApi.ts
 // Componente: Gestor de tutores - Frontend
-const API_URL = import.meta.env.VITE_API_URL || '/api'; // usa tu variable de entorno
+const API_URL = import.meta.env.VITE_API_URL || "/api"; // usa tu variable de entorno
 
 export interface TutorCreate {
   nombre: string;
@@ -108,9 +108,9 @@ export async function obtenerTutoresPaginados(
       page: page.toString(),
       limit: limit.toString(),
     });
-    
+
     if (search) {
-      params.append('search', search);
+      params.append("search", search);
     }
 
     console.log(`Obteniendo tutores página ${page}...`);
@@ -134,23 +134,30 @@ export async function obtenerTutoresPaginados(
   }
 }
 
-{/* Obtener tutor por RUT */}
+{
+  /* Obtener tutor por RUT */
+}
 export async function obtenerTutorPorRut(rut: string): Promise<TutorData> {
   try {
     console.log(`Obteniendo tutor con RUT ${rut}...`);
-    const response = await fetch(`${API_URL}/tutores/${encodeURIComponent(rut)}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    const response = await fetch(
+      `${API_URL}/tutores/${encodeURIComponent(rut)}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     if (!response.ok) {
       if (response.status === 404) {
         throw new Error("Tutor no encontrado");
       }
       const errorText = await response.text().catch(() => "");
-      throw new Error(`Error ${response.status} al obtener tutor: ${errorText}`);
+      throw new Error(
+        `Error ${response.status} al obtener tutor: ${errorText}`
+      );
     }
 
     const data = await response.json();
@@ -162,21 +169,28 @@ export async function obtenerTutorPorRut(rut: string): Promise<TutorData> {
   }
 }
 
-{/* Actualizar informacion tutor */}
+{
+  /* Actualizar informacion tutor */
+}
 export async function actualizarTutor(
   rutActual: string,
   payload: TutorCreate
 ): Promise<TutorData> {
-  const API_URL = import.meta.env.VITE_API_URL || '/api';
+  const API_URL = import.meta.env.VITE_API_URL || "/api";
   try {
-    const response = await fetch(`${API_URL}/tutores/${encodeURIComponent(rutActual)}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+    const response = await fetch(
+      `${API_URL}/tutores/${encodeURIComponent(rutActual)}`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      }
+    );
     if (!response.ok) {
       const errorText = await response.text().catch(() => "");
-      throw new Error(`Error ${response.status} al actualizar tutor: ${errorText}`);
+      throw new Error(
+        `Error ${response.status} al actualizar tutor: ${errorText}`
+      );
     }
     return (await response.json()) as TutorData;
   } catch (err) {
