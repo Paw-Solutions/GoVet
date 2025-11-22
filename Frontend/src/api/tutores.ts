@@ -134,6 +134,34 @@ export async function obtenerTutoresPaginados(
   }
 }
 
+{/* Obtener tutor por RUT */}
+export async function obtenerTutorPorRut(rut: string): Promise<TutorData> {
+  try {
+    console.log(`Obteniendo tutor con RUT ${rut}...`);
+    const response = await fetch(`${API_URL}/tutores/${encodeURIComponent(rut)}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        throw new Error("Tutor no encontrado");
+      }
+      const errorText = await response.text().catch(() => "");
+      throw new Error(`Error ${response.status} al obtener tutor: ${errorText}`);
+    }
+
+    const data = await response.json();
+    console.log("Tutor obtenido:", data);
+    return data as TutorData;
+  } catch (error) {
+    console.error("Error obteniendo tutor:", error);
+    throw error;
+  }
+}
+
 {/* Actualizar informacion tutor */}
 export async function actualizarTutor(
   rutActual: string,

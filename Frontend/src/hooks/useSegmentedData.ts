@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from "react";
 import { TutorData } from "../api/tutores";
 import { ConsultaData } from "../api/fichas";
 import { PacienteData } from "../api/pacientes";
-import { obtenerTutoresPaginados } from "../api/tutores";
+import { obtenerTutoresPaginados, obtenerTutorPorRut } from "../api/tutores";
 import {
   obtenerPacientesPaginados,
   obtenerPacientePorId,
@@ -455,15 +455,27 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
       showPacienteInfo: false,
     }));
 
-    // 2. Abrir modal de tutor con un pequeño delay
-    setTimeout(() => {
-      setTutoresState((prev) => ({
-        ...prev,
-        selectedTutor: tutorData,
-        showTutorInfo: true,
-      }));
+    // 2. Obtener datos completos del tutor y luego abrir modal
+    setTimeout(async () => {
+      try {
+        // Fetch complete tutor data from API using RUT
+        const tutorCompleto = await obtenerTutorPorRut(tutorData.rut);
+        setTutoresState((prev) => ({
+          ...prev,
+          selectedTutor: tutorCompleto,
+          showTutorInfo: true,
+        }));
+      } catch (error) {
+        console.error("Error obteniendo datos completos del tutor:", error);
+        // Si falla, usar los datos parciales (fallback)
+        setTutoresState((prev) => ({
+          ...prev,
+          selectedTutor: tutorData,
+          showTutorInfo: true,
+        }));
+      }
     }, 200);
-  }, []); // Sin dependencias - solo manipula estado
+  }, []);
 
   // Función para ver consulta desde el modal de paciente
   const viewConsultaFromPaciente = useCallback((consultaData: ConsultaData) => {
