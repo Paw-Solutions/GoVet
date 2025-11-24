@@ -21,6 +21,37 @@ export interface ConsultaData {
   frecuencia_cardiaca?: number;
   frecuencia_respiratoria?: number;
   deshidratacion?: number;
+  vacunas_inoculadas? : {
+    nombre_vacuna: string;
+    fecha_vacunacion: string;
+    marca: string;
+    numero_de_serie?: string;
+    proxima_dosis?: string;
+  };
+  desparasitacion_interna? : {
+    nombre_desparasitante: string;
+    fecha_administracion: string;
+    marca: string;
+    numero_de_serie?: string;
+  };
+  desparasitacion_externa? : {
+    nombre_desparasitante: string;
+    fecha_administracion: string;
+    marca: string;
+    numero_de_serie?: string;
+  };
+  examen_clinico?: string;
+  indicaciones_generales?: string;
+  orden_de_examenes?: string;
+  receta_medica?: {
+    medicamento: string;
+    dosis: string;
+    frecuencia: string; /* Frecuencia en días */
+    duracion: string; /* Duración en días */
+    numero_de_serie?: string;
+  };
+  proxima_consulta?: string;
+  ttlc?: string;
 
   // Información relacionada del paciente
   paciente?: {
