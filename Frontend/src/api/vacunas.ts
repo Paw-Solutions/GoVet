@@ -1,6 +1,5 @@
 // API para gestión de vacunas pendientes
 // TODO: Implementar endpoints en el backend cuando se cree el modelo de Vacuna
-// Componente: Gestor de vacunas - Frontend
 const API_URL = import.meta.env.VITE_API_URL || "/api";
 
 export interface Vacuna {

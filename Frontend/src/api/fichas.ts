@@ -16,6 +16,11 @@ export interface ConsultaData {
   condicion_corporal: string;
   id_consulta: number;
   motivo_consulta?: string; // ← Agregar para compatibilidad con backend
+  estado_piel?: string;
+  temperatura?: number;
+  frecuencia_cardiaca?: number;
+  frecuencia_respiratoria?: number;
+  deshidratacion?: number;
 
   // Información relacionada del paciente
   paciente?: {

@@ -13,7 +13,7 @@ import VistaSemana from "../components/calendario/VistaSemana";
 import VistaMes from "../components/calendario/VistaMes";
 import ModalAgendarCita from "../components/calendario/ModalAgendarCita";
 import "../styles/calendario.css";
-
+// Componente: Interfaz para gestionar horas y vista calendario
 type VistaType = "dia" | "semana" | "mes";
 
 const Calendario: React.FC = () => {

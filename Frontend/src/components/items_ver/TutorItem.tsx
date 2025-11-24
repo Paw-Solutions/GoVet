@@ -15,7 +15,7 @@ import {
   locationOutline,
 } from "ionicons/icons";
 import { TutorData } from "../../api/tutores";
-// Componente: Visualizador del detalle de un tutor
+// Componente: Visualizador de información de tutor
 interface TutorItemProps {
   tutor: TutorData;
   onView: () => void;

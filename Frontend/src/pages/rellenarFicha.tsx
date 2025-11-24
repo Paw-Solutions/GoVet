@@ -47,7 +47,7 @@ import ModalEscogerPaciente from "../components/rellenarFicha/modalEscogerPacien
 import { PacienteData } from "../api/pacientes"; // Importar la interfaz correcta
 import { TutorData } from "../api/tutores";
 import { ConsultaData, crearConsulta } from "../api/fichas";
-
+// Componente: Interfaz para gestionar consultas
 const RellenarFicha: React.FC = () => {
   const [showModalPacientes, setShowModalPacientes] = useState(false);
   const [currentStep, setCurrentStep] = useState<
@@ -70,13 +70,18 @@ const RellenarFicha: React.FC = () => {
     observaciones: "",
     dht: "",
     nodulos_linfaticos: "",
-    mucosas: "",
+    mucosas: "Rosadas y brillantes",
     peso: 0,
     auscultacion_cardiaca_toraxica: "",
-    estado_pelaje: "",
+    estado_pelaje: "Muy bueno",
     condicion_corporal: "",
     id_consulta: 0,
     motivo_consulta: "", // ← Agregar para compatibilidad con backend
+    estado_piel: "Muy bueno",
+    temperatura: 0,
+    frecuencia_cardiaca: 0,
+    frecuencia_respiratoria: 0,
+    deshidratacion: 0,
 
     // Información relacionada del paciente
     paciente: {
@@ -524,7 +529,7 @@ const RellenarFicha: React.FC = () => {
                                 <IonIcon icon={mailOutline} />
                                 <span>
                                   <strong>Email:</strong>{" "}
-                                  {selectedPaciente.tutor.email}
+                                  {selectedPaciente.tutor.email != "NaN" ? selectedPaciente.tutor.email : "No asignado"}
                                 </span>
                               </div>
                             )}
@@ -576,76 +581,89 @@ const RellenarFicha: React.FC = () => {
                     />
                   </IonItem>
                 </IonCol>
+                  <IonCol size="12" size-md="6">
+                    <IonItem>
+                      <IonInput
+                        label="Frecuencia cardíaca ( 1pm )"
+                        labelPlacement="stacked"
+                        fill="outline"
+                        placeholder="Ej: 80"
+                        type="number"
+                        name="frecuencia_cardiaca"
+                        value={formData.frecuencia_cardiaca}
+                        onIonChange={handleInputChange}
+                      />
+                    </IonItem>
+                </IonCol>
+                  <IonCol size="12" size-md="6">
+                    <IonItem>
+                      <IonInput
+                        label="Frecuencia respiratoria ( rpm )"
+                        labelPlacement="stacked"
+                        fill="outline"
+                        placeholder="Ej: 20"
+                        type="number"
+                        name="frecuencia_respiratoria"
+                        value={formData.frecuencia_respiratoria}
+                        onIonChange={handleInputChange}
+                      />
+                    </IonItem>
+                </IonCol>
                 <IonCol size="12" size-md="6">
                   <IonItem>
-                    <IonSelect
-                      label="Condición Corporal"
+                    <IonTextarea
+                      label="Condición corporal"
                       labelPlacement="stacked"
                       fill="outline"
-                      placeholder="Seleccione condición"
+                      placeholder="Valores de 3-5"
+                      rows={3}
                       name="condicion_corporal"
                       value={formData.condicion_corporal}
                       onIonChange={handleInputChange}
-                    >
-                      <IonSelectOption value="muy_delgado">
-                        Muy Delgado
-                      </IonSelectOption>
-                      <IonSelectOption value="delgado">Delgado</IonSelectOption>
-                      <IonSelectOption value="ideal">Ideal</IonSelectOption>
-                      <IonSelectOption value="sobrepeso">
-                        Sobrepeso
-                      </IonSelectOption>
-                      <IonSelectOption value="obeso">Obeso</IonSelectOption>
-                    </IonSelect>
+                    />
                   </IonItem>
                 </IonCol>
               </IonRow>
               <IonRow>
                 <IonCol size="12" size-md="6">
                   <IonItem>
-                    <IonSelect
-                      label="Estado del Pelaje"
+                    <IonTextarea
+                      label="Estado de la piel"
                       labelPlacement="stacked"
                       fill="outline"
-                      placeholder="Seleccione estado"
-                      name="estado_pelaje"
-                      value={formData.estado_pelaje}
+                      placeholder="Describa el estado de la piel"
+                      rows={3}
+                      name="estado_piel"
+                      value={formData.estado_piel}
                       onIonChange={handleInputChange}
-                    >
-                      <IonSelectOption value="excelente">
-                        Excelente
-                      </IonSelectOption>
-                      <IonSelectOption value="bueno">Bueno</IonSelectOption>
-                      <IonSelectOption value="regular">Regular</IonSelectOption>
-                      <IonSelectOption value="malo">Malo</IonSelectOption>
-                      <IonSelectOption value="muy_malo">
-                        Muy Malo
-                      </IonSelectOption>
-                    </IonSelect>
+                    />
                   </IonItem>
+                </IonCol>
+                  <IonCol size="12" size-md="6">
+                    <IonItem>
+                      <IonTextarea
+                        label="Estado del pelaje"
+                        labelPlacement="stacked"
+                        fill="outline"
+                        placeholder="Describa el estado del pelaje"
+                        rows={3}
+                        name="estado_pelaje"
+                        value={formData.estado_pelaje}
+                        onIonChange={handleInputChange}
+                      />
+                    </IonItem>
                 </IonCol>
                 <IonCol size="12" size-md="6">
                   <IonItem>
-                    <IonSelect
+                    <IonTextarea
                       label="Mucosas"
                       labelPlacement="stacked"
                       fill="outline"
-                      placeholder="Seleccione estado"
+                      placeholder="Rosadas y brillantes"
+                      rows={3}
                       name="mucosas"
                       value={formData.mucosas}
-                      onIonChange={handleInputChange}
-                    >
-                      <IonSelectOption value="rosadas">
-                        Rosadas (Normal)
-                      </IonSelectOption>
-                      <IonSelectOption value="palidas">Pálidas</IonSelectOption>
-                      <IonSelectOption value="cianoticas">
-                        Cianóticas
-                      </IonSelectOption>
-                      <IonSelectOption value="ictericas">
-                        Ictéricas
-                      </IonSelectOption>
-                    </IonSelect>
+                      onIonChange={handleInputChange} />
                   </IonItem>
                 </IonCol>
               </IonRow>
@@ -674,16 +692,30 @@ const RellenarFicha: React.FC = () => {
           <IonList>
             <IonGrid>
               <IonRow>
-                <IonCol size="12">
+                <IonCol size="12" size-md="6">
                   <IonItem>
-                    <IonTextarea
-                      label="DHT (Deshidratación, Hidratación, Temperatura)"
+                    <IonInput
+                      label="Temperatura (°C)"
                       labelPlacement="stacked"
                       fill="outline"
-                      placeholder="Describa el estado de DHT"
-                      rows={3}
-                      name="dht"
-                      value={formData.dht}
+                      placeholder="Describa el estado del pelaje"
+                      type="number"
+                      name="temperatura"
+                      value={formData.temperatura}
+                      onIonChange={handleInputChange}
+                    />
+                  </IonItem>
+                </IonCol>
+                <IonCol size="12" size-md="6">
+                  <IonItem>
+                    <IonInput
+                      label="Deshidtratación (%)"
+                      labelPlacement="stacked"
+                      fill="outline"
+                      placeholder="Describa el estado del pelaje"
+                      type="number"
+                      name="deshidratacion"
+                      value={formData.deshidratacion}
                       onIonChange={handleInputChange}
                     />
                   </IonItem>
@@ -693,26 +725,10 @@ const RellenarFicha: React.FC = () => {
                 <IonCol size="12">
                   <IonItem>
                     <IonTextarea
-                      label="Auscultación Cardíaca y Torácica"
+                      label="Examen clínico"
                       labelPlacement="stacked"
                       fill="outline"
-                      placeholder="Describa los hallazgos de auscultación"
-                      rows={3}
-                      name="auscultacion_cardiaca_toraxica"
-                      value={formData.auscultacion_cardiaca_toraxica}
-                      onIonChange={handleInputChange}
-                    />
-                  </IonItem>
-                </IonCol>
-              </IonRow>
-              <IonRow>
-                <IonCol size="12">
-                  <IonItem>
-                    <IonTextarea
-                      label="Diagnóstico"
-                      labelPlacement="stacked"
-                      fill="outline"
-                      placeholder="Ingrese el diagnóstico"
+                      placeholder="Describa el examen clínico realizado"
                       rows={4}
                       name="diagnostico"
                       value={formData.diagnostico}
@@ -725,15 +741,50 @@ const RellenarFicha: React.FC = () => {
                 <IonCol size="12">
                   <IonItem>
                     <IonTextarea
-                      label="Observaciones"
+                      label="Pre diagnósticos"
                       labelPlacement="stacked"
                       fill="outline"
-                      placeholder="Observaciones adicionales"
+                      placeholder="Describa los pre diagnósticos realizados"
                       rows={4}
                       name="observaciones"
                       value={formData.observaciones}
                       onIonChange={handleInputChange}
                     />
+                  </IonItem>
+                </IonCol>
+              </IonRow>
+              <IonRow>
+                <IonCol size="12">
+                  <IonItem>
+                    <IonTextarea
+                      label="Diagnóstico"
+                      labelPlacement="stacked"
+                      fill="outline"
+                      placeholder="Describa el diagnóstico realizado"
+                      rows={4}
+                      name="diagnostico"
+                      value={formData.diagnostico}
+                      onIonChange={handleInputChange}
+                    />
+                  </IonItem>
+                </IonCol>
+              </IonRow>
+              <IonRow>
+                <IonCol size="12">
+                  <IonItem>
+                    <IonSelect
+                      label="Pronóstico"
+                      labelPlacement="stacked"
+                      fill="outline"
+                      placeholder="Seleccione un pronóstico"
+                      name="dht"
+                      value={formData.dht}
+                      onIonChange={handleInputChange}
+                    >
+                      <IonSelectOption value="favorable">Favorable</IonSelectOption>
+                      <IonSelectOption value="desfavorable">Desfavorable</IonSelectOption>
+                      <IonSelectOption value="reservado">Reservado</IonSelectOption>
+                    </IonSelect>
                   </IonItem>
                 </IonCol>
               </IonRow>

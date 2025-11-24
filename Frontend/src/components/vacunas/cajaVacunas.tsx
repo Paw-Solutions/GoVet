@@ -15,8 +15,8 @@ import {
 import {
   medicalOutline,
   calendarOutline,
-  pawOutline,
   refreshOutline,
+  radioButtonOnOutline,
 } from "ionicons/icons";
 import { obtenerTratamientosProximos, ConsultaTratamiento } from "../../api/tratamientos";
 // Componente: Visualizador de próximas vacunas
@@ -28,7 +28,7 @@ const CajaVacunas: React.FC<CajaVacunasProps> = ({ limite = 5 }) => {
   const [tratamientos, setTratamientos] = useState<ConsultaTratamiento[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
+  
   // Función para filtrar tratamientos próximos desde la fecha actual
   const filtrarTratamientosProximos = (tratamientos: ConsultaTratamiento[]) => {
     const fechaActual = new Date();
@@ -44,6 +44,20 @@ const CajaVacunas: React.FC<CajaVacunasProps> = ({ limite = 5 }) => {
         new Date(a.fecha_tratamiento).getTime() - new Date(b.fecha_tratamiento).getTime()
       )
       .slice(0, limite);
+  };
+
+  const getCuentaRegresiva = (fechaTratamiento: string) => {
+    const hoy = new Date();
+    const fecha = new Date(fechaTratamiento);
+    const diffTime = fecha.getTime() - hoy.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
+
+  const getColorCuentaRegresiva = (dias: number) => {
+    if (dias < 3) return "danger";
+    if (dias < 7) return "warning";
+    return "primary";
   };
 
   // Función para cargar los tratamientos
@@ -125,11 +139,6 @@ const CajaVacunas: React.FC<CajaVacunasProps> = ({ limite = 5 }) => {
                 lines="inset"
                 className={esHoy(tratamiento.fecha_tratamiento) ? "tratamiento-hoy" : ""}
               >
-                <IonIcon 
-                  icon={pawOutline} 
-                  slot="start" 
-                  color={esHoy(tratamiento.fecha_tratamiento) ? "warning" : "medium"}
-                />
                 <IonLabel>
                   <strong>
                     {tratamiento.nombre_paciente}
@@ -146,9 +155,17 @@ const CajaVacunas: React.FC<CajaVacunasProps> = ({ limite = 5 }) => {
                     />
                     Fecha: {formatearFecha(tratamiento.fecha_tratamiento)}
                   </p>
-                  <p>{tratamiento.nombre_tratamiento}</p>
-                  <p>Dosis: {tratamiento.dosis}</p>
+                  <p>
+                  <IonIcon src="/vaccine.svg" style={{ marginRight: "4px", fontSize: "12px" }} />
+                  {tratamiento.nombre_tratamiento}: {tratamiento.dosis}
+                  </p>
                 </IonLabel>
+                <IonIcon icon={radioButtonOnOutline} color={getColorCuentaRegresiva(getCuentaRegresiva(tratamiento.fecha_tratamiento))} style={{marginRight: "8px", marginTop: "4px"}}/>
+                <p style={{ marginTop: "6px" }}>
+                  {getCuentaRegresiva(tratamiento.fecha_tratamiento) === 0
+                    ? "Hoy"
+                    : `${getCuentaRegresiva(tratamiento.fecha_tratamiento)} días`} 
+                </p>
               </IonItem>
             ))}
           </IonList>

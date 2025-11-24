@@ -33,7 +33,7 @@ import { SelectorComuna } from "../components/registroTutor/SelectorComuna";
 import { crearTutor } from "../api/tutores";
 import { obtenerRegiones } from "../api/regiones";
 import { formatRegionName, formatComunaName } from "../utils/formatters";
-
+// Componente: Interfaz para gestionar dueños
 interface RegistroTutorProps {
   onClose?: () => void;
 }

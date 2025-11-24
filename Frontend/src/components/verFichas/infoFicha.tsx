@@ -36,7 +36,11 @@ import {
   scaleOutline,
   bodyOutline,
   pulseOutline,
+  femaleOutline,
+  maleOutline,
+  banOutline,
 } from 'ionicons/icons';
+import "../../styles/infoFicha.css";
 import { ConsultaData, calcularEdadPaciente } from '../../api/fichas';
 // Componente: Visualizador del detalle de consulta
 interface ModalInfoFichaProps {
@@ -87,15 +91,30 @@ const ModalInfoFicha: React.FC<ModalInfoFichaProps> = ({ isOpen, onDismiss, cons
     }
   };
 
+  const formatEspecie = (especie?: string) => {
+    if (!especie) return pawOutline;
+
+    const especies: { [key: string]: string } = {
+      perro: 'dog.svg',
+      gato: 'cat.svg',
+      conejo: 'rabbit.svg',
+      hamster: 'hamster.svg',
+      erizo: 'hedgehog.svg',
+      tortuga: 'turtle.svg',
+      cuy: 'cuy.svg',
+    };
+
+    return especies[especie.toLowerCase()] || pawOutline;
+  };
   // Función para formatear sexo
   const formatSex = (sexo?: string) => {
     switch (sexo?.toLowerCase()) {
       case 'm':
-        return 'Macho';
+        return maleOutline;
       case 'h':
-        return 'Hembra';
+        return femaleOutline;
       default:
-        return 'No especificado';
+        return banOutline;
     }
   };
 
@@ -188,20 +207,13 @@ const ModalInfoFicha: React.FC<ModalInfoFichaProps> = ({ isOpen, onDismiss, cons
                 <IonRow>
                   <IonCol size="12" sizeMd="6">
                     <IonItem lines="none" className="info-item">
+                      <IonIcon src={formatEspecie(consulta.paciente.especie)} slot="start" color="primary" />
                       <IonLabel>
-                        <h2>{consulta.paciente.nombre}</h2>
-                        <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
+                        <b>{consulta.paciente.nombre}
                           {consulta.paciente.sexo && (
-                            <IonBadge color={getSexColor(consulta.paciente.sexo)}>
-                              {formatSex(consulta.paciente.sexo)}
-                            </IonBadge>
+                            <IonIcon icon={formatSex(consulta.paciente.sexo)} style={{size: "15px"}}/>
                           )}
-                          {consulta.paciente.especie && (
-                            <IonChip outline>
-                              <IonLabel>{capitalizeText(consulta.paciente.especie)}</IonLabel>
-                            </IonChip>
-                          )}
-                        </div>
+                        </b>
                       </IonLabel>
                     </IonItem>
                   </IonCol>

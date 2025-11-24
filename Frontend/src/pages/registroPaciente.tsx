@@ -31,7 +31,7 @@ import { SelectorEspecie } from "../components/registroPaciente/SelectorEspecie"
 import { SelectorRaza } from "../components/registroPaciente/SelectorRaza";
 import ModalBuscarTutor from "../components/registroPaciente/ModalBuscarTutor";
 import RegistroTutor from "./registroTutor";
-
+// Componente: Interfaz para gestionar pacientes
 interface Tutor {
   rut: string;
   nombre: string;

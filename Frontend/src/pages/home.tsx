@@ -34,7 +34,7 @@ import { useHistory } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import BotonAnadir from "../components/BotonAnadir";
 import CajaVacunas from "../components/vacunas/cajaVacunas";
-
+// Componente: Interfaz principal
 import "../styles/home.css";
 
 const Home: React.FC = () => {
@@ -124,7 +124,7 @@ const Home: React.FC = () => {
                               {tutor.nombre} {tutor.apellido_paterno}
                             </h2>
                             <p>RUT: {tutor.rut}</p>
-                            <p>Email: {tutor.email}</p>
+                            <p>Email: {tutor.email != "NaN" ? tutor.email : "No disponible"}</p>
                             <p>
                               Comuna: {tutor.comuna}, {tutor.region}
                             </p>
