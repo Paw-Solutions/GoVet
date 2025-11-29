@@ -547,10 +547,10 @@ GRANT ALL ON TABLE govet.consulta_tratamiento TO pawsolutions;
 -- DROP TABLE govet.receta_medica;
 
 CREATE TABLE govet.receta_medica (
-	medicamiento varchar NOT NULL,
-	dosis varchar NOT NULL, -- dosis del medicamiento, puede ser algo como 2 tabletas o 8 ml
-	frecuencia int4 NOT NULL, -- cada cuanto tiepo hay que dar el medicamiento, en horas
-	duracion int4 NOT NULL, -- por cuanto tiempo hay que dar medicamiento, en dias
+	medicamento varchar NOT NULL,
+	dosis varchar NOT NULL, -- dosis del medicamento, puede ser algo como 2 tabletas o 8 ml
+	frecuencia int4 NOT NULL, -- cada cuanto tiepo hay que dar el medicamento, en horas
+	duracion int4 NOT NULL, -- por cuanto tiempo hay que dar medicamento, en dias
 	numero_serie varchar NULL,
 	id_receta bigserial NOT NULL,
 	id_consulta int8 NOT NULL, -- consulta a la que se asocia esta receta
@@ -560,9 +560,9 @@ CREATE TABLE govet.receta_medica (
 
 -- Column comments
 
-COMMENT ON COLUMN govet.receta_medica.dosis IS 'dosis del medicamiento, puede ser algo como 2 tabletas o 8 ml';
-COMMENT ON COLUMN govet.receta_medica.frecuencia IS 'cada cuanto tiepo hay que dar el medicamiento, en horas';
-COMMENT ON COLUMN govet.receta_medica.duracion IS 'por cuanto tiempo hay que dar medicamiento, en dias';
+COMMENT ON COLUMN govet.receta_medica.dosis IS 'dosis del medicamento, puede ser algo como 2 tabletas o 8 ml';
+COMMENT ON COLUMN govet.receta_medica.frecuencia IS 'cada cuanto tiepo hay que dar el medicamento, en horas';
+COMMENT ON COLUMN govet.receta_medica.duracion IS 'por cuanto tiempo hay que dar medicamento, en dias';
 COMMENT ON COLUMN govet.receta_medica.id_consulta IS 'consulta a la que se asocia esta receta';
 
 -- Permissions
