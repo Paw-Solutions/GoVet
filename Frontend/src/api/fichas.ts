@@ -55,7 +55,7 @@ export interface PaginatedResponse {
 }
 
 // API
-const API_URL = import.meta.env.VITE_API_URL || '/api';
+const API_URL = import.meta.env.VITE_API_URL || "/api";
 
 // Ruta para crear una nueva consulta/ficha
 export async function crearConsulta(formData: ConsultaData) {
@@ -260,6 +260,31 @@ export async function obtenerConsultasPorPaciente(
     return await response.json();
   } catch (error) {
     console.error("Error obteniendo consultas del paciente:", error);
+    throw error;
+  }
+}
+
+/**
+ * Descarga el PDF de una consulta específica
+ * @param idConsulta - ID de la consulta
+ * @returns Promise con el Blob del PDF
+ */
+export async function descargarPdfConsulta(idConsulta: number): Promise<Blob> {
+  try {
+    const response = await fetch(`${API_URL}/consultas/${idConsulta}/pdf`, {
+      method: "GET",
+      headers: {
+        Accept: "application/pdf",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error al descargar PDF: ${response.status}`);
+    }
+
+    return await response.blob();
+  } catch (error) {
+    console.error(`Error descargando PDF de consulta ${idConsulta}:`, error);
     throw error;
   }
 }

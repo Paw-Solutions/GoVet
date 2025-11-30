@@ -7,7 +7,7 @@ import {
   obtenerPacientesPaginados,
   obtenerPacientePorId,
 } from "../api/pacientes";
-import { obtenerConsultasPaginadas } from "../api/fichas";
+import { obtenerConsultasPaginadas, descargarPdfConsulta } from "../api/fichas";
 
 interface PaginatedResponseTutores {
   tutores: TutorData[];
@@ -659,9 +659,40 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
     // Aqui va la logica d edicion k aun no se implementa ups
   }, []);
 
-  const exportConsulta = useCallback((consulta: ConsultaData) => {
-    console.log("Exportar consulta.");
-    // Aqui va la logica para exportar consultas
+  const exportConsulta = useCallback(async (consulta: ConsultaData) => {
+    try {
+      console.log("Descargando PDF de consulta:", consulta.id_consulta);
+
+      // Llamar al endpoint que ya existe en el backend
+      const blob = await descargarPdfConsulta(consulta.id_consulta);
+
+      // Crear URL temporal para el blob
+      const url = window.URL.createObjectURL(blob);
+
+      // Crear elemento <a> temporal para forzar la descarga
+      const link = document.createElement("a");
+      link.href = url;
+
+      // Nombre del archivo: consulta_{nombrePaciente}_{fecha}.pdf
+      const fecha = consulta.fecha_consulta
+        ? new Date(consulta.fecha_consulta).toISOString().split("T")[0]
+        : new Date().toISOString().split("T")[0];
+      const nombrePaciente = consulta.paciente?.nombre || "paciente";
+      link.download = `consulta_${nombrePaciente}_${fecha}.pdf`;
+
+      // Simular click para iniciar descarga
+      document.body.appendChild(link);
+      link.click();
+
+      // Limpiar
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      console.log("✅ PDF descargado exitosamente");
+    } catch (error) {
+      console.error("❌ Error exportando consulta:", error);
+      alert("Error al descargar el PDF. Por favor, intente nuevamente.");
+    }
   }, []);
 
   const retryConsultas = useCallback(() => {
