@@ -1147,6 +1147,10 @@ def obtener_consultas_tratamiento_por_nombre_paciente(nombre_paciente: str, db: 
 # Ruta GET para obtener registros de consulta_tratamiento solo de vacunas con detalles
 @app.get("/consultas/tratamientos/vacunas/nombre/", response_model=List[consultaTratamientoConDetallesResponse])
 def obtener_vacunas_por_nombre(db: Session = Depends(get_db)):
+    # Filtrar próximas vacunas en los próximos 30 días (1 mes)
+    fecha_actual = datetime.now().date()
+    fecha_limite = fecha_actual + timedelta(days=30)
+    
     db_vacunas = db.query(
         models.ConsultaTratamiento,
         models.Tratamiento.nombre.label('nombre_tratamiento'),
@@ -1160,8 +1164,11 @@ def obtener_vacunas_por_nombre(db: Session = Depends(get_db)):
         models.ConsultaTratamiento.id_paciente == models.Paciente.id_paciente,
         isouter=True
     ).filter(
-        models.Tratamiento.nombre.ilike("%Vacuna%")
-    ).order_by(desc(models.ConsultaTratamiento.fecha_tratamiento)).all()
+        models.Tratamiento.nombre.ilike("%Vacuna%"),
+        models.ConsultaTratamiento.proxima_dosis.isnot(None),
+        models.ConsultaTratamiento.proxima_dosis >= fecha_actual,
+        models.ConsultaTratamiento.proxima_dosis <= fecha_limite
+    ).order_by(models.ConsultaTratamiento.proxima_dosis.asc()).limit(20).all()
     
     if not db_vacunas:
         raise HTTPException(status_code=404, detail="No se encontraron vacunas administradas")

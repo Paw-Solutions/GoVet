@@ -123,7 +123,7 @@ def generar_rut_valido():
 # ==============================================================================
 def generar_telefono_chileno():
     """Genera un teléfono chileno como número: 569XXXXXXXX"""
-    numero = random. randint(10000000, 99999999)
+    numero = random.randint(10000000, 99999999)
     return int(f"569{numero:08d}")
 
 # =============================================================================
@@ -145,10 +145,10 @@ try:
         ('consulta', 'Consultas/Fichas médicas'),
         ('tutor_paciente', 'Relaciones Tutor-Paciente'),
         ('paciente', 'Pacientes'),
-        ('tutor', 'Tutores'),
         ('raza', 'Razas'),
-        ('especie', 'Especies'),
         ('tratamiento', 'Tratamientos'),
+        ('especie', 'Especies'),
+        ('tutor', 'Tutores'),
     ]
     
     for tabla, descripcion in tablas_a_limpiar:
@@ -164,20 +164,20 @@ try:
     # Reiniciar secuencias (autoincrement)
     print("\n   🔄 Reiniciando secuencias de IDs...")
     secuencias = [
-        ('especie_id_especie_seq', 'Especies'),
-        ('raza_id_raza_seq', 'Razas'),
-        ('mascota_id_mascota_seq', 'Pacientes'),
-        ('consulta_id_consulta_seq', 'Consultas'),
-        ('consulta_tratamiento_id_aplicacion_seq', 'Aplicaciones de tratamiento'),
-        ('tratamiento_id_tratamiento_seq', 'Tratamientos'),
-        ('receta_medica_id_receta_seq', 'Recetas médicas'),
+        'especie_id_especie_seq',
+        'raza_id_raza_seq',
+        'mascota_id_mascota_seq',
+        'consulta_id_consulta_seq',
+        'consulta_tratamiento_id_aplicacion_seq',
+        'tratamiento_id_tratamiento_seq',
+        'receta_medica_id_receta_seq',
     ]
     
-    for secuencia, descripcion in secuencias:
+    for secuencia in secuencias:
         try:
             cur.execute(f"ALTER SEQUENCE govet.{secuencia} RESTART WITH 1;")
             conn.commit()
-            print(f"   ✅ Secuencia reiniciada: {descripcion}")
+            print(f"   ✅ Secuencia reiniciada: {secuencia}")
         except Exception as e:
             print(f"   ⚠️  Advertencia reiniciando {secuencia}: {str(e)[:80]}")
             conn.rollback()
@@ -219,7 +219,7 @@ try:
         if pd.notna(nombre):
             if id_especie:
                 cur.execute("""
-                    INSERT INTO govet. especie (id_especie, nombre_cientifico, nombre_comun)
+                    INSERT INTO govet.especie (id_especie, nombre_cientifico, nombre_comun)
                     VALUES (%s, %s, %s);
                 """, (id_especie, nombre, nombre_comun))
                 especies_map[id_especie] = nombre_comun
@@ -250,10 +250,10 @@ try:
     razas_insertadas = 0
     razas_por_especie = {}
     
-    for _, row in df_razas. iterrows():
+    for _, row in df_razas.iterrows():
         nombre = row['nombre']
         id_especie = row['id_especie']
-        id_raza = row['id_raza'] if 'id_raza' in row and pd. notna(row['id_raza']) else None
+        id_raza = row['id_raza'] if 'id_raza' in row and pd.notna(row['id_raza']) else None
         
         if pd.notna(nombre):
             if id_raza:
@@ -344,18 +344,22 @@ try:
                 break
         
         celular = generar_telefono_chileno()
-        email = "govet.test@atomicmail. io"
+        telefono = None  # Teléfono fijo opcional
+        email = "govet.test@atomicmail.io"
         direccion = f"Calle {random.choice(['Los', 'Las', 'El', 'La'])} {random.choice(apellidos_comunes)} {random.randint(100, 9999)}"
         comuna = random.choice(comunas_valdivia)
         region = "Región de Los Ríos"
+        observacion = None  # Campo opcional
         
         try:
             cur.execute("""
                 INSERT INTO govet.tutor (rut, nombre, apellido_paterno, apellido_materno, 
-                                         celular, region, comuna, direccion, email)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);
-            """, (rut, nombre, apellido_paterno, apellido_materno, celular, 
-                  region, comuna, direccion, email))
+                                         telefono, email, direccion, celular, celular2,
+                                         comuna, region, observacion, telefono2)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+            """, (rut, nombre, apellido_paterno, apellido_materno, 
+                  telefono, email, direccion, celular, None,
+                  comuna, region, observacion, None))
             
             tutores_ruts.append(rut)
             tutores_insertados += 1
@@ -383,7 +387,7 @@ print("\n📊 5/7 - Generando y asociando PACIENTES (1-3 por tutor)...")
 try:
     pacientes_insertados = 0
     pacientes_por_tutor = {}
-    fecha_actual = datetime.now(). date()
+    fecha_actual = datetime.now().date()
     
     def fecha_aleatoria():
         """Genera fecha aleatoria últimos 15 años"""
@@ -413,14 +417,14 @@ try:
             
             try:
                 cur.execute("""
-                    INSERT INTO govet. paciente (nombre, color, sexo, esterilizado, 
+                    INSERT INTO govet.paciente (nombre, color, sexo, esterilizado, 
                                                fecha_nacimiento, id_raza, codigo_chip)
                     VALUES (%s, %s, %s, %s, %s, %s, %s)
                     RETURNING id_paciente;
                 """, (nombre_paciente, color, sexo, esterilizado, 
                       fecha_nacimiento, id_raza, codigo_chip))
                 
-                id_paciente = cur. fetchone()[0]
+                id_paciente = cur.fetchone()[0]
                 
                 cur.execute("""
                     INSERT INTO govet.tutor_paciente (id_paciente, rut, fecha)
@@ -530,7 +534,7 @@ try:
                 tllc = round(random.uniform(1.0, 3.5), 1)
                 estado_piel_valor = random.choice(estados_piel)
                 temp = round(random.uniform(37.5, 39.5), 1)
-                freq_cardiaca = round(random. uniform(60, 180), 1)
+                freq_cardiaca = round(random.uniform(60, 180), 1)
                 freq_respiratoria = round(random.uniform(10, 40), 1)
                 examen_clinico = random.choice(examenes_clinicos)
                 prediagnostico = random.choice(prediagnosticos)
@@ -591,10 +595,12 @@ try:
                                 recetas_insertadas += 1
                             except Exception as e:
                                 print(f"   ⚠️  Error insertando receta: {e}")
+                                conn.rollback()  # Rollback de la transacción fallida
                                 continue
                     
                 except Exception as e:
                     print(f"   ⚠️  Error en consulta para paciente {id_paciente}: {e}")
+                    conn.rollback()  # Rollback de la transacción fallida
                     continue
             
             pacientes_procesados += 1
@@ -654,6 +660,7 @@ try:
                     aplicaciones_insertadas += 1
                 except Exception as e:
                     print(f"   ⚠️  Error insertando aplicación: {e}")
+                    conn.rollback()  # Rollback de la transacción fallida
                     continue
     
     conn.commit()
@@ -672,7 +679,7 @@ print("✅ PROCESO COMPLETADO EXITOSAMENTE")
 print("="*70)
 
 try:
-    cur.execute("SELECT COUNT(*) FROM govet. especie")
+    cur.execute("SELECT COUNT(*) FROM govet.especie")
     total_especies = cur.fetchone()[0]
     
     cur.execute("SELECT COUNT(*) FROM govet.raza")
@@ -684,16 +691,16 @@ try:
     cur.execute("SELECT COUNT(*) FROM govet.tutor")
     total_tutores = cur.fetchone()[0]
     
-    cur.execute("SELECT COUNT(*) FROM govet. paciente")
+    cur.execute("SELECT COUNT(*) FROM govet.paciente")
     total_pacientes = cur.fetchone()[0]
     
-    cur.execute("SELECT COUNT(*) FROM govet. tutor_paciente")
+    cur.execute("SELECT COUNT(*) FROM govet.tutor_paciente")
     total_relaciones = cur.fetchone()[0]
     
     cur.execute("SELECT COUNT(*) FROM govet.consulta")
     total_consultas = cur.fetchone()[0]
     
-    cur. execute("SELECT COUNT(*) FROM govet.consulta_tratamiento")
+    cur.execute("SELECT COUNT(*) FROM govet.consulta_tratamiento")
     total_aplicaciones = cur.fetchone()[0]
     
     cur.execute("SELECT COUNT(*) FROM govet.receta_medica")
@@ -709,7 +716,7 @@ try:
     print(f"   - Consultas: {total_consultas}")
     print(f"   - Aplicaciones de Tratamiento: {total_aplicaciones}")
     print(f"   - Recetas médicas: {total_recetas}")
-    print(f"\n📧 Email de prueba para todos los tutores: govet. test@atomicmail.io")
+    print(f"\n📧 Email de prueba para todos los tutores: govet.test@atomicmail.io")
     print(f"\n✅ Base de datos limpia y rellenada exitosamente con DATOS DE PRUEBA")
     
 except Exception as e:

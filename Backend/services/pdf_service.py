@@ -1,9 +1,10 @@
 from datetime import date, datetime
 from fastapi import HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from weasyprint import HTML
 import os
+import locale
 
 import models  
 
@@ -33,6 +34,21 @@ def _format_fecha(fecha: date) -> str:
     if not fecha: return "—"
     return fecha.strftime("%d-%m-%Y")
 
+# Formato fecha en texto largo (ej: "09 de septiembre de 2024")
+def _format_fecha_larga(fecha: date) -> str:
+    if not fecha: return "—"
+    meses = [
+        "enero", "febrero", "marzo", "abril", "mayo", "junio",
+        "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
+    ]
+    return f"{fecha.day} de {meses[fecha.month - 1]} de {fecha.year}"
+
+# Formato sexo
+def _format_sexo(sexo: str) -> str:
+    if not sexo: return "—"
+    sexo_map = {"M": "Macho", "H": "Hembra", "m": "Macho", "h": "Hembra"}
+    return sexo_map.get(sexo, sexo)
+
 # Funcion para leer una consulta y devolver bytes de un pdf generado a partir de esta y una plantilla
 # "-> bytes" Aclara que se estan entregando bytes, no string, no objetos, bytes
 def generar_pdf_consulta(db: Session, id_consulta: int) -> bytes: 
@@ -56,3 +72,116 @@ def generar_pdf_consulta(db: Session, id_consulta: int) -> bytes:
 
     pdf_bytes = HTML(string=html).write_pdf() # WeasyPrint convierte HTML a un PDF
     return pdf_bytes # Se devuelven los bytes del pdf
+
+
+# Funcion para generar certificado de transporte de animales de compañía
+def generar_certificado_transporte(db: Session, id_paciente: int) -> bytes:
+    # Buscar paciente con sus relaciones
+    paciente = db.query(models.Paciente).options(
+        joinedload(models.Paciente.raza).joinedload(models.Raza.especie),
+        joinedload(models.Paciente.tutores).joinedload(models.TutorPaciente.tutor)
+    ).filter(models.Paciente.id_paciente == id_paciente).first()
+    
+    if not paciente:
+        raise HTTPException(status_code=404, detail="Paciente no encontrado")
+    
+    # Obtener tutor (el primero asociado)
+    if not paciente.tutores or len(paciente.tutores) == 0:
+        raise HTTPException(status_code=404, detail="El paciente no tiene tutor asociado")
+    
+    tutor = paciente.tutores[0].tutor
+    
+    # Obtener historial de vacunación/desparasitación
+    # Filtra tratamientos que contengan "Vacuna" o "Desparasit" en el tipo
+    vacunas = db.query(models.ConsultaTratamiento).options(
+        joinedload(models.ConsultaTratamiento.tratamiento)
+    ).filter(
+        models.ConsultaTratamiento.id_paciente == id_paciente
+    ).join(
+        models.Tratamiento
+    ).filter(
+        (models.Tratamiento.tipo_tratamiento.ilike("%vacuna%")) |
+        (models.Tratamiento.tipo_tratamiento.ilike("%desparasit%")) |
+        (models.Tratamiento.tipo_tratamiento.ilike("%antiparasit%"))
+    ).order_by(
+        models.ConsultaTratamiento.fecha_tratamiento.desc()
+    ).all()
+    
+    # Renderizar template
+    template = env.get_template("certificado_transporte_pdf.html")
+    html = template.render(
+        paciente=paciente,
+        tutor=tutor,
+        vacunas=vacunas,
+        edad=_edad(paciente.fecha_nacimiento) if paciente else "—",
+        sexo=_format_sexo(paciente.sexo) if paciente else "—",
+        fecha_nacimiento=_format_fecha(paciente.fecha_nacimiento) if paciente else "—",
+        fecha_actual=_format_fecha_larga(date.today()),
+        fecha_generacion=datetime.now().strftime("%d-%m-%Y %H:%M")
+    )
+    
+    pdf_bytes = HTML(string=html).write_pdf()
+    return pdf_bytes
+
+
+# ==================== FUNCIONES AUXILIARES PARA TESTING ====================
+
+def generar_pdf_consulta_desde_datos(datos: dict) -> bytes:
+    """
+    Genera un PDF de consulta a partir de un diccionario de datos (sin DB).
+    Útil para testing y generación de PDFs de ejemplo.
+    """
+    template = env.get_template("consulta_pdf.html")
+    
+    consulta = datos.get('consulta', {})
+    paciente = datos.get('paciente', {})
+    tutor = datos.get('tutor', {})
+    
+    fecha_nac = paciente.get('fecha_nacimiento')
+    fecha_cons = consulta.get('fecha_consulta')
+    
+    html = template.render(
+        consulta=type('obj', (object,), consulta)(),
+        paciente=type('obj', (object,), paciente)(),
+        tutor=type('obj', (object,), tutor)(),
+        edad=_edad(fecha_nac) if fecha_nac else "—",
+        sexo=_format_sexo(paciente.get('sexo', '')),
+        fecha_consulta=_format_fecha(fecha_cons) if fecha_cons else "—",
+        generado=datetime.now().strftime("%d-%m-%Y %H:%M")
+    )
+    
+    pdf_bytes = HTML(string=html).write_pdf()
+    return pdf_bytes
+
+
+def generar_pdf_certificado_transporte(datos: dict) -> bytes:
+    """
+    Genera un PDF de certificado de transporte a partir de un diccionario de datos (sin DB).
+    Útil para testing y generación de PDFs de ejemplo.
+    """
+    template = env.get_template("certificado_transporte_pdf.html")
+    
+    paciente = datos.get('paciente', {})
+    tutor = datos.get('tutor', {})
+    vacunas = datos.get('vacunas', [])
+    
+    # Convertir diccionarios a objetos para que funcionen con la plantilla
+    paciente_obj = type('obj', (object,), paciente)()
+    tutor_obj = type('obj', (object,), tutor)()
+    vacunas_objs = [type('obj', (object,), v)() for v in vacunas]
+    
+    fecha_nac = paciente.get('fecha_nacimiento')
+    
+    html = template.render(
+        paciente=paciente_obj,
+        tutor=tutor_obj,
+        vacunas=vacunas_objs,
+        edad=_edad(fecha_nac) if fecha_nac else "—",
+        sexo=_format_sexo(paciente.get('sexo', '')),
+        fecha_nacimiento=_format_fecha(fecha_nac) if fecha_nac else "—",
+        fecha_actual=_format_fecha_larga(date.today()),
+        fecha_generacion=datetime.now().strftime("%d-%m-%Y %H:%M")
+    )
+    
+    pdf_bytes = HTML(string=html).write_pdf()
+    return pdf_bytes
