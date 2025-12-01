@@ -47,6 +47,7 @@ from google_auth_oauthlib.flow import Flow
 # Para generar pdf
 from services.pdf_service import generar_pdf_consulta
 from fastapi.responses import Response
+import httpx  # Para hacer requests HTTP desde el backend
 
 
 # Cargar variables de entorno desde el archivo .env
@@ -401,6 +402,28 @@ def delete_event(event_id: str):
 
 # HU 4: Como Veterinaria, quiero poder almacenar al tutor con su RUT y nombre, para poder tener su información para consultas futuras
 """ RUTAS PARA TUTORES (dueños de mascotas) """
+
+# Endpoint para obtener regiones - Datos locales SUBDERE
+@app.get("/regiones/")
+async def obtener_regiones():
+    """
+    Retorna regiones chilenas desde datos estáticos locales.
+    Los datos provienen de SUBDERE (Subsecretaría de Desarrollo Regional y Administrativo).
+    """
+    from regiones_data import REGIONES_CHILE
+    
+    print(f"✅ Retornando {len(REGIONES_CHILE)} regiones desde datos locales")
+    return REGIONES_CHILE
+
+def obtener_numero_romano(codigo_region: str) -> str:
+    """Convierte el código de región a número romano chileno"""
+    numeros_romanos = {
+        "15": "XV", "01": "I", "02": "II", "03": "III", "04": "IV",
+        "05": "V", "06": "VI", "07": "VII", "08": "VIII", "09": "IX",
+        "10": "X", "11": "XI", "12": "XII", "13": "RM", "14": "XIV", "16": "XVI"
+    }
+    return numeros_romanos.get(codigo_region, codigo_region)
+
 # Ruta POST para añadir un dueño
 @app.post("/tutores/", response_model=TutorResponse)
 def crear_tutor(tutor: TutorCreate, db: Session = Depends(get_db)):

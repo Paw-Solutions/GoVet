@@ -34,6 +34,16 @@ import { crearTutor } from "../api/tutores";
 import { obtenerRegiones } from "../api/regiones";
 import { formatRegionName, formatComunaName } from "../utils/formatters";
 
+// FUNCIÓN DE NORMALIZACIÓN PARA BÚSQUEDA ROBUSTA
+const normalizarTexto = (texto: string) => {
+  if (!texto) return "";
+  return texto
+    .toLowerCase() // A minúsculas
+    .normalize("NFD") // Descomponer caracteres (á -> a + ´)
+    .replace(/[\u0300-\u036f]/g, "") // Eliminar diacríticos (acentos)
+    .replace(/\s+/g, ""); // Eliminar TODOS los espacios
+};
+
 interface RegistroTutorProps {
   onClose?: () => void;
 }
@@ -79,9 +89,13 @@ const RegistroTutor: React.FC<RegistroTutorProps> = ({ onClose }) => {
       try {
         setLoadingRegiones(true);
         const data = await obtenerRegiones();
+        console.log("✅ Regiones cargadas:", data);
+        console.log("📊 Cantidad de regiones:", data?.length);
         setRegiones(data);
       } catch (error) {
-        console.error("Error cargando regiones:", error);
+        console.error("❌ Error cargando regiones:", error);
+        setToastMessage("Error al cargar regiones");
+        setShowToast(true);
       } finally {
         setLoadingRegiones(false);
       }
@@ -90,23 +104,38 @@ const RegistroTutor: React.FC<RegistroTutorProps> = ({ onClose }) => {
     fetchRegiones();
   }, []);
 
-  // Filtrar regiones basado en la búsqueda (ahora busca en el formato legible)
+  // Filtrar regiones basado en la búsqueda con normalización fuzzy
   const filteredRegiones = useMemo(() => {
-    return regiones.filter((region) => {
+    const filtered = regiones.filter((region) => {
       // Si no hay búsqueda, mostrar todas las regiones
       if (!regionQuery.trim()) {
         return true;
       }
-      // Si hay búsqueda, filtrar por nombre
+      // Normalizar término de búsqueda
+      const terminoNormalizado = normalizarTexto(regionQuery);
+
+      // Normalizar nombre formateado y nombre original
       const formattedName = formatRegionName(region);
+      const nombreFormateadoNormalizado = normalizarTexto(formattedName);
+      const nombreOriginalNormalizado = normalizarTexto(region.name);
+
       return (
-        formattedName.toLowerCase().includes(regionQuery.toLowerCase()) ||
-        region.name.toLowerCase().includes(regionQuery.toLowerCase())
+        nombreFormateadoNormalizado.includes(terminoNormalizado) ||
+        nombreOriginalNormalizado.includes(terminoNormalizado)
       );
     });
+
+    console.log(
+      "🔍 Regiones filtradas:",
+      filtered.length,
+      "de",
+      regiones.length
+    );
+    console.log("🔍 Búsqueda actual:", regionQuery);
+    return filtered;
   }, [regiones, regionQuery]);
 
-  // Filtrar comunas basado en la región seleccionada y la búsqueda
+  // Filtrar comunas basado en la región seleccionada y la búsqueda con normalización fuzzy
   const filteredComunas = useMemo(() => {
     if (!selectedRegion) return [];
     const region = regiones.find((r) => r.id === selectedRegion.id);
@@ -117,11 +146,17 @@ const RegistroTutor: React.FC<RegistroTutorProps> = ({ onClose }) => {
       if (!comunaQuery.trim()) {
         return true;
       }
-      // Si hay búsqueda, filtrar por nombre
+      // Normalizar término de búsqueda
+      const terminoNormalizado = normalizarTexto(comunaQuery);
+
+      // Normalizar nombre formateado y nombre original
       const formattedName = formatComunaName(comuna.name);
+      const nombreFormateadoNormalizado = normalizarTexto(formattedName);
+      const nombreOriginalNormalizado = normalizarTexto(comuna.name);
+
       return (
-        formattedName.toLowerCase().includes(comunaQuery.toLowerCase()) ||
-        comuna.name.toLowerCase().includes(comunaQuery.toLowerCase())
+        nombreFormateadoNormalizado.includes(terminoNormalizado) ||
+        nombreOriginalNormalizado.includes(terminoNormalizado)
       );
     });
   }, [regiones, selectedRegion, comunaQuery]);
