@@ -123,8 +123,10 @@ def generar_rut_valido():
 # ==============================================================================
 def generar_telefono_chileno():
     """Genera un teléfono chileno como número: 569XXXXXXXX"""
-    numero = random.randint(10000000, 99999999)
-    return int(f"569{numero:08d}")
+    """numero = random.randint(10000000, 99999999)
+    return int(f"569{numero:08d}")"""
+    numero = 56998624169 # Numero hardcodeado para testeo de whattsapp que no afecte externos
+    return numero
 
 # =============================================================================
 # FASE 1: LIMPIEZA DE LA BASE DE DATOS

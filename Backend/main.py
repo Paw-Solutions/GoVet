@@ -47,7 +47,6 @@ from google_auth_oauthlib.flow import Flow
 # Para generar pdf
 from services.pdf_service import generar_pdf_consulta
 from fastapi.responses import Response
-import httpx  # Para hacer requests HTTP desde el backend
 
 
 # Cargar variables de entorno desde el archivo .env
