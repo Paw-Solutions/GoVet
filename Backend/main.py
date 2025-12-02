@@ -401,6 +401,28 @@ def delete_event(event_id: str):
 
 # HU 4: Como Veterinaria, quiero poder almacenar al tutor con su RUT y nombre, para poder tener su información para consultas futuras
 """ RUTAS PARA TUTORES (dueños de mascotas) """
+
+# Endpoint para obtener regiones - Datos locales SUBDERE
+@app.get("/regiones/")
+async def obtener_regiones():
+    """
+    Retorna regiones chilenas desde datos estáticos locales.
+    Los datos provienen de SUBDERE (Subsecretaría de Desarrollo Regional y Administrativo).
+    """
+    from regiones_data import REGIONES_CHILE
+    
+    print(f"✅ Retornando {len(REGIONES_CHILE)} regiones desde datos locales")
+    return REGIONES_CHILE
+
+def obtener_numero_romano(codigo_region: str) -> str:
+    """Convierte el código de región a número romano chileno"""
+    numeros_romanos = {
+        "15": "XV", "01": "I", "02": "II", "03": "III", "04": "IV",
+        "05": "V", "06": "VI", "07": "VII", "08": "VIII", "09": "IX",
+        "10": "X", "11": "XI", "12": "XII", "13": "RM", "14": "XIV", "16": "XVI"
+    }
+    return numeros_romanos.get(codigo_region, codigo_region)
+
 # Ruta POST para añadir un dueño
 @app.post("/tutores/", response_model=TutorResponse)
 def crear_tutor(tutor: TutorCreate, db: Session = Depends(get_db)):
@@ -1183,6 +1205,10 @@ def obtener_consultas_tratamiento_por_nombre_paciente(nombre_paciente: str, db: 
 # Ruta GET para obtener registros de consulta_tratamiento solo de vacunas con detalles
 @app.get("/consultas/tratamientos/vacunas/nombre/", response_model=List[consultaTratamientoConDetallesResponse])
 def obtener_vacunas_por_nombre(db: Session = Depends(get_db)):
+    # Filtrar próximas vacunas en los próximos 30 días (1 mes)
+    fecha_actual = datetime.now().date()
+    fecha_limite = fecha_actual + timedelta(days=30)
+    
     db_vacunas = db.query(
         models.ConsultaTratamiento,
         models.Tratamiento.nombre.label('nombre_tratamiento'),
@@ -1196,8 +1222,11 @@ def obtener_vacunas_por_nombre(db: Session = Depends(get_db)):
         models.ConsultaTratamiento.id_paciente == models.Paciente.id_paciente,
         isouter=True
     ).filter(
-        models.Tratamiento.nombre.ilike("%Vacuna%")
-    ).order_by(desc(models.ConsultaTratamiento.fecha_tratamiento)).all()
+        models.Tratamiento.nombre.ilike("%Vacuna%"),
+        models.ConsultaTratamiento.proxima_dosis.isnot(None),
+        models.ConsultaTratamiento.proxima_dosis >= fecha_actual,
+        models.ConsultaTratamiento.proxima_dosis <= fecha_limite
+    ).order_by(models.ConsultaTratamiento.proxima_dosis.asc()).limit(20).all()
     
     if not db_vacunas:
         raise HTTPException(status_code=404, detail="No se encontraron vacunas administradas")

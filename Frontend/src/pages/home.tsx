@@ -20,6 +20,7 @@ import {
   IonSpinner,
   IonText,
   IonFooter,
+  IonNote,
 } from "@ionic/react";
 import {
   add,
@@ -29,48 +30,117 @@ import {
   personAddOutline,
   settingsSharp,
   timeOutline,
+  calendarOutline,
+  locationOutline,
+  personOutline,
 } from "ionicons/icons";
 import { useHistory } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import BotonAnadir from "../components/BotonAnadir";
 import CajaVacunas from "../components/vacunas/cajaVacunas";
+import ModalDetalleCita from "../components/calendario/ModalDetalleCita";
+import { getEventsDay, CalendarEvent } from "../api/calendario";
 
 import "../styles/home.css";
 
 const Home: React.FC = () => {
   const history = useHistory();
-  const API_URL = import.meta.env.VITE_API_URL || "/api"; // usa tu variable de entorno
+  const API_URL = import.meta.env.VITE_API_URL || "/api";
 
-  // Estado para los últimos tutores
-  const [ultimosTutores, setUltimosTutores] = useState<any[]>([]);
-  const [loadingTutores, setLoadingTutores] = useState(false);
-  const [errorTutores, setErrorTutores] = useState("");
+  // Estados para citas del día
+  const [citasHoy, setCitasHoy] = useState<CalendarEvent[]>([]);
+  const [loadingCitas, setLoadingCitas] = useState(false);
+  const [errorCitas, setErrorCitas] = useState("");
 
-  // Función para cargar los últimos tutores
-  const cargarUltimosTutores = async () => {
+  // Estado para el modal de detalles
+  const [citaSeleccionada, setCitaSeleccionada] =
+    useState<CalendarEvent | null>(null);
+  const [mostrarModalDetalle, setMostrarModalDetalle] = useState(false);
+
+  // Función para cargar las citas del día
+  const cargarCitasDelDia = async () => {
     try {
-      setLoadingTutores(true);
-      setErrorTutores("");
-      const response = await fetch(`${API_URL}/tutores/`);
+      setLoadingCitas(true);
+      setErrorCitas("");
 
-      if (response.ok) {
-        const tutores = await response.json();
-        // Mostrar solo los últimos 3 tutores
-        setUltimosTutores(tutores.slice(-3).reverse());
-      } else {
-        setErrorTutores("No se pudieron cargar los tutores");
-      }
+      // Obtener la fecha de hoy en formato YYYY-MM-DD
+      const hoy = new Date();
+      const fechaHoy = hoy.toISOString().split("T")[0];
+
+      const eventos = await getEventsDay(fechaHoy);
+
+      // Ordenar por hora de inicio
+      const eventosOrdenados = eventos.sort(
+        (a, b) =>
+          new Date(a.start.dateTime).getTime() -
+          new Date(b.start.dateTime).getTime()
+      );
+
+      setCitasHoy(eventosOrdenados);
     } catch (error) {
-      setErrorTutores("Error de conexión");
+      console.error("Error cargando citas del día:", error);
+      setErrorCitas("Error al cargar las citas");
     } finally {
-      setLoadingTutores(false);
+      setLoadingCitas(false);
     }
   };
 
-  // Cargar tutores al montar el componente
+  // Cargar citas al montar el componente
   useEffect(() => {
-    cargarUltimosTutores();
+    cargarCitasDelDia();
   }, []);
+
+  // Manejador al hacer click en una cita
+  const handleVerDetalleCita = (cita: CalendarEvent) => {
+    setCitaSeleccionada(cita);
+    setMostrarModalDetalle(true);
+  };
+
+  // Manejador para cerrar modal
+  const handleCerrarModal = () => {
+    setMostrarModalDetalle(false);
+    setCitaSeleccionada(null);
+    // Recargar citas por si hubo cambios
+    cargarCitasDelDia();
+  };
+
+  // Función para formatear la hora
+  const formatearHora = (dateTimeString: string) => {
+    const fecha = new Date(dateTimeString);
+    return fecha.toLocaleTimeString("es-CL", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  // Función para extraer el nombre del paciente de la descripción o summary
+  const obtenerNombrePaciente = (evento: CalendarEvent) => {
+    // Intentar extraer del campo description
+    if (evento.description) {
+      const match = evento.description.match(/Paciente:\s*([^\n]+)/i);
+      if (match) return match[1].trim();
+    }
+    // Si no, usar el summary
+    return evento.summary || "Paciente no especificado";
+  };
+
+  // Función para extraer el nombre del tutor
+  const obtenerNombreTutor = (evento: CalendarEvent) => {
+    if (evento.description) {
+      const match = evento.description.match(/Tutor:\s*([^\n]+)/i);
+      if (match) return match[1].trim();
+    }
+    return "Tutor no especificado";
+  };
+
+  // Función para extraer el motivo
+  const obtenerMotivo = (evento: CalendarEvent) => {
+    if (evento.description) {
+      const match = evento.description.match(/Motivo:\s*([^\n]+)/i);
+      if (match) return match[1].trim();
+    }
+    return "Sin motivo especificado";
+  };
 
   return (
     <IonPage>
@@ -86,48 +156,82 @@ const Home: React.FC = () => {
           </IonToolbar>
         </IonHeader>
         <IonGrid>
-          {/* Recuadro de últimos tutores registrados */}
+          {/* Recuadro de citas del día */}
           <IonRow>
             <IonCol>
-              <IonCard>
+              <IonCard className="card-citas-dia">
                 <IonCardHeader>
                   <IonCardTitle>
                     <IonIcon
-                      icon={timeOutline}
+                      icon={calendarOutline}
                       style={{ marginRight: "8px" }}
                     />
-                    Últimos Tutores Registrados
+                    Citas de Hoy
                   </IonCardTitle>
                 </IonCardHeader>
                 <IonCardContent>
-                  {loadingTutores ? (
+                  {loadingCitas ? (
                     <div style={{ textAlign: "center", padding: "20px" }}>
                       <IonSpinner />
                       <IonText>
-                        <p>Cargando tutores...</p>
+                        <p>Cargando citas...</p>
                       </IonText>
                     </div>
-                  ) : errorTutores ? (
+                  ) : errorCitas ? (
                     <IonText color="danger">
-                      <p>{errorTutores}</p>
+                      <p>{errorCitas}</p>
                     </IonText>
-                  ) : ultimosTutores.length === 0 ? (
+                  ) : citasHoy.length === 0 ? (
                     <IonText color="medium">
-                      <p>No hay tutores registrados aún</p>
+                      <p>No hay citas programadas para hoy</p>
                     </IonText>
                   ) : (
                     <IonList>
-                      {ultimosTutores.map((tutor, index) => (
-                        <IonItem key={tutor.rut || index} lines="inset">
+                      {citasHoy.map((cita) => (
+                        <IonItem
+                          key={cita.id}
+                          button
+                          detail={true}
+                          onClick={() => handleVerDetalleCita(cita)}
+                          lines="inset"
+                        >
                           <IonLabel>
                             <h2>
-                              {tutor.nombre} {tutor.apellido_paterno}
+                              {formatearHora(cita.start.dateTime)} -{" "}
+                              {obtenerNombrePaciente(cita)}
                             </h2>
-                            <p>RUT: {tutor.rut}</p>
-                            <p>Email: {tutor.email}</p>
-                            <p>
-                              Comuna: {tutor.comuna}, {tutor.region}
-                            </p>
+                            <h3>
+                              <IonIcon
+                                icon={personOutline}
+                                style={{
+                                  fontSize: "0.9em",
+                                  marginRight: "4px",
+                                }}
+                              />
+                              Tutor: {obtenerNombreTutor(cita)}
+                            </h3>
+                            {cita.location && (
+                              <p
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "4px",
+                                  marginTop: "4px",
+                                }}
+                              >
+                                <IonIcon
+                                  icon={locationOutline}
+                                  style={{ fontSize: "0.9em" }}
+                                />
+                                {cita.location}
+                              </p>
+                            )}
+                            <IonNote
+                              color="medium"
+                              style={{ display: "block", marginTop: "4px" }}
+                            >
+                              Motivo: {obtenerMotivo(cita)}
+                            </IonNote>
                           </IonLabel>
                         </IonItem>
                       ))}
@@ -138,23 +242,33 @@ const Home: React.FC = () => {
                   <IonButton
                     fill="clear"
                     size="small"
-                    onClick={cargarUltimosTutores}
+                    onClick={cargarCitasDelDia}
                     style={{ marginTop: "0.625rem" }}
                   >
-                    <IonIcon icon={timeOutline} slot="start" />
+                    <IonIcon icon={calendarOutline} slot="start" />
                     Actualizar
                   </IonButton>
                 </IonCardContent>
               </IonCard>
             </IonCol>
           </IonRow>
+          <IonRow>
+            <IonCol>
+              <CajaVacunas limite={5} />
+            </IonCol>
+          </IonRow>
         </IonGrid>
-        <IonRow>
-          <IonCol>
-            <CajaVacunas limite={5} />
-          </IonCol>
-        </IonRow>
       </IonContent>
+
+      {/* Modal de Detalle de Cita */}
+      {citaSeleccionada && (
+        <ModalDetalleCita
+          isOpen={mostrarModalDetalle}
+          onClose={handleCerrarModal}
+          evento={citaSeleccionada}
+          onEventoActualizado={cargarCitasDelDia}
+        />
+      )}
 
       {/*
       <IonFooter className="ion-no-border footer-right">

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useEffect } from "react";
 import {
   IonItem,
   IonInput,
@@ -6,7 +6,9 @@ import {
   IonLabel,
   IonSpinner,
   IonText,
+  IonIcon,
 } from "@ionic/react";
+import { chevronDownOutline, locationOutline } from "ionicons/icons";
 import { formatRegionName } from "../../utils/formatters";
 // Componente: Gestor de tutores
 interface SelectorRegionProps {
@@ -28,8 +30,40 @@ export const SelectorRegion: React.FC<SelectorRegionProps> = ({
   loadingRegiones,
   selectRegion,
 }) => {
+  const wrapperRef = useRef<HTMLDivElement>(null);
+
+  // Debug: mostrar estado del componente
+  useEffect(() => {
+    console.log("📋 SelectorRegion estado:", {
+      showRegionList,
+      filteredRegionesCount: filteredRegiones.length,
+      loadingRegiones,
+      regionQuery,
+    });
+  }, [showRegionList, filteredRegiones, loadingRegiones, regionQuery]);
+
+  // Cerrar dropdown al hacer click fuera
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        wrapperRef.current &&
+        !wrapperRef.current.contains(event.target as Node)
+      ) {
+        setShowRegionList(false);
+      }
+    };
+
+    if (showRegionList) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showRegionList, setShowRegionList]);
+
   return (
-    <>
+    <div ref={wrapperRef} style={{ position: "relative", width: "100%" }}>
       <IonItem lines="none" className="searchbar-container">
         <IonInput
           labelPlacement="stacked"
@@ -41,41 +75,95 @@ export const SelectorRegion: React.FC<SelectorRegionProps> = ({
             setShowRegionList(true);
           }}
           onIonFocus={() => setShowRegionList(true)}
-          onIonBlur={() => {
-            // Pequeño delay para permitir que el click en la lista se registre
-            setTimeout(() => {
-              setShowRegionList(false);
-            }, 150);
-          }}
         >
           <div slot="label">
             Región <IonText color="danger">(*)</IonText>
           </div>
         </IonInput>
+        <IonIcon
+          icon={chevronDownOutline}
+          slot="end"
+          style={{
+            marginTop: "1.5rem",
+            color: "var(--ion-color-medium)",
+            pointerEvents: "none",
+          }}
+        />
       </IonItem>
-      {showRegionList && filteredRegiones.length > 0 && (
-        <IonList className="filter-list">
+
+      {showRegionList && (
+        <div
+          style={{
+            position: "absolute",
+            top: "100%",
+            left: 0,
+            right: 0,
+            zIndex: 9999,
+            backgroundColor: "white",
+            boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+            borderRadius: "8px",
+            marginTop: "4px",
+            border: "1px solid var(--ion-color-light-shade)",
+            maxHeight: "240px",
+            overflowY: "auto",
+          }}
+        >
           {loadingRegiones ? (
-            <IonItem>
-              <IonSpinner />
-              <IonLabel>Cargando regiones...</IonLabel>
-            </IonItem>
+            <div style={{ padding: "1rem", textAlign: "center" }}>
+              <IonSpinner name="dots" />
+              <div
+                style={{
+                  marginTop: "0.5rem",
+                  color: "var(--ion-color-medium)",
+                }}
+              >
+                Cargando regiones...
+              </div>
+            </div>
+          ) : filteredRegiones.length > 0 ? (
+            <IonList style={{ padding: 0, margin: 0 }}>
+              {filteredRegiones.map((region) => {
+                const formattedName = formatRegionName(region);
+                return (
+                  <IonItem
+                    key={region.id}
+                    button
+                    onClick={() =>
+                      selectRegion(region.id, formattedName, region)
+                    }
+                    style={{
+                      "--padding-start": "12px",
+                      "--inner-padding-end": "12px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <IonIcon
+                      icon={locationOutline}
+                      slot="start"
+                      style={{
+                        color: "var(--ion-color-primary)",
+                        opacity: 0.6,
+                      }}
+                    />
+                    <IonLabel>{formattedName}</IonLabel>
+                  </IonItem>
+                );
+              })}
+            </IonList>
           ) : (
-            filteredRegiones.map((region) => {
-              const formattedName = formatRegionName(region);
-              return (
-                <IonItem
-                  key={region.id}
-                  button
-                  onClick={() => selectRegion(region.id, formattedName, region)}
-                >
-                  <IonLabel>{formattedName}</IonLabel>
-                </IonItem>
-              );
-            })
+            <div
+              style={{
+                padding: "1rem",
+                textAlign: "center",
+                color: "var(--ion-color-medium)",
+                fontSize: "0.9rem",
+              }}
+            >
+              No se encontraron regiones con "{regionQuery}"
+            </div>
           )}
-        </IonList>
+        </div>
       )}
-    </>
+    </div>
   );
 };
