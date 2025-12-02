@@ -19,6 +19,7 @@ class Tutor(Base):
     region = Column(String, nullable=True)
     observacion = Column(String, nullable=True)
     telefono2 = Column(BigInteger, nullable=True)
+    activo = Column(Boolean, default=True)
 
     # Relaciones
     consultas = relationship("Consulta", back_populates="tutor")
@@ -71,6 +72,7 @@ class Paciente(Base):
     fecha_nacimiento = Column(Date, nullable=False)
     id_raza = Column(BigInteger, ForeignKey('govet.raza.id_raza'), nullable=False)
     codigo_chip = Column(String)
+    activo = Column(Boolean, default=True)
     
     # Relaciones
     raza = relationship("Raza", back_populates="pacientes")

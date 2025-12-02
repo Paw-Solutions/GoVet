@@ -1,13 +1,4 @@
 -- DROP SCHEMA govet;
-DO $$
-BEGIN
-   IF NOT EXISTS (
-      SELECT FROM pg_database WHERE datname = 'govet'
-   ) THEN
-      CREATE DATABASE govet;
-   END IF;
-END
-$$;
 
 CREATE SCHEMA govet AUTHORIZATION pg_database_owner;
 
@@ -58,6 +49,21 @@ CREATE SEQUENCE govet.consulta_id_consulta_seq2
 ALTER SEQUENCE govet.consulta_id_consulta_seq2 OWNER TO pawsolutions;
 GRANT ALL ON SEQUENCE govet.consulta_id_consulta_seq2 TO pawsolutions;
 
+-- DROP SEQUENCE govet.consulta_id_consulta_seq3;
+
+CREATE SEQUENCE govet.consulta_id_consulta_seq3
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 9223372036854775807
+	START 1
+	CACHE 1
+	NO CYCLE;
+
+-- Permissions
+
+ALTER SEQUENCE govet.consulta_id_consulta_seq3 OWNER TO pawsolutions;
+GRANT ALL ON SEQUENCE govet.consulta_id_consulta_seq3 TO pawsolutions;
+
 -- DROP SEQUENCE govet.consulta_tratamiento_id_aplicacion_seq;
 
 CREATE SEQUENCE govet.consulta_tratamiento_id_aplicacion_seq
@@ -103,6 +109,21 @@ CREATE SEQUENCE govet.consulta_tratamiento_id_aplicacion_seq2
 ALTER SEQUENCE govet.consulta_tratamiento_id_aplicacion_seq2 OWNER TO pawsolutions;
 GRANT ALL ON SEQUENCE govet.consulta_tratamiento_id_aplicacion_seq2 TO pawsolutions;
 
+-- DROP SEQUENCE govet.consulta_tratamiento_id_aplicacion_seq3;
+
+CREATE SEQUENCE govet.consulta_tratamiento_id_aplicacion_seq3
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 9223372036854775807
+	START 1
+	CACHE 1
+	NO CYCLE;
+
+-- Permissions
+
+ALTER SEQUENCE govet.consulta_tratamiento_id_aplicacion_seq3 OWNER TO pawsolutions;
+GRANT ALL ON SEQUENCE govet.consulta_tratamiento_id_aplicacion_seq3 TO pawsolutions;
+
 -- DROP SEQUENCE govet.especie_id_especie_seq;
 
 CREATE SEQUENCE govet.especie_id_especie_seq
@@ -147,6 +168,21 @@ CREATE SEQUENCE govet.especie_id_especie_seq2
 
 ALTER SEQUENCE govet.especie_id_especie_seq2 OWNER TO pawsolutions;
 GRANT ALL ON SEQUENCE govet.especie_id_especie_seq2 TO pawsolutions;
+
+-- DROP SEQUENCE govet.especie_id_especie_seq3;
+
+CREATE SEQUENCE govet.especie_id_especie_seq3
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 9223372036854775807
+	START 1
+	CACHE 1
+	NO CYCLE;
+
+-- Permissions
+
+ALTER SEQUENCE govet.especie_id_especie_seq3 OWNER TO pawsolutions;
+GRANT ALL ON SEQUENCE govet.especie_id_especie_seq3 TO pawsolutions;
 
 -- DROP SEQUENCE govet.mascota_id_mascota_seq;
 
@@ -208,6 +244,21 @@ CREATE SEQUENCE govet.raza_id_raza_seq2
 ALTER SEQUENCE govet.raza_id_raza_seq2 OWNER TO pawsolutions;
 GRANT ALL ON SEQUENCE govet.raza_id_raza_seq2 TO pawsolutions;
 
+-- DROP SEQUENCE govet.raza_id_raza_seq3;
+
+CREATE SEQUENCE govet.raza_id_raza_seq3
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 9223372036854775807
+	START 1
+	CACHE 1
+	NO CYCLE;
+
+-- Permissions
+
+ALTER SEQUENCE govet.raza_id_raza_seq3 OWNER TO pawsolutions;
+GRANT ALL ON SEQUENCE govet.raza_id_raza_seq3 TO pawsolutions;
+
 -- DROP SEQUENCE govet.receta_medica_id_receta_seq;
 
 CREATE SEQUENCE govet.receta_medica_id_receta_seq
@@ -222,6 +273,21 @@ CREATE SEQUENCE govet.receta_medica_id_receta_seq
 
 ALTER SEQUENCE govet.receta_medica_id_receta_seq OWNER TO pawsolutions;
 GRANT ALL ON SEQUENCE govet.receta_medica_id_receta_seq TO pawsolutions;
+
+-- DROP SEQUENCE govet.receta_medica_id_receta_seq1;
+
+CREATE SEQUENCE govet.receta_medica_id_receta_seq1
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 9223372036854775807
+	START 1
+	CACHE 1
+	NO CYCLE;
+
+-- Permissions
+
+ALTER SEQUENCE govet.receta_medica_id_receta_seq1 OWNER TO pawsolutions;
+GRANT ALL ON SEQUENCE govet.receta_medica_id_receta_seq1 TO pawsolutions;
 
 -- DROP SEQUENCE govet.tratamiento_id_tratamiento_seq;
 
@@ -267,6 +333,21 @@ CREATE SEQUENCE govet.tratamiento_id_tratamiento_seq2
 
 ALTER SEQUENCE govet.tratamiento_id_tratamiento_seq2 OWNER TO pawsolutions;
 GRANT ALL ON SEQUENCE govet.tratamiento_id_tratamiento_seq2 TO pawsolutions;
+
+-- DROP SEQUENCE govet.tratamiento_id_tratamiento_seq3;
+
+CREATE SEQUENCE govet.tratamiento_id_tratamiento_seq3
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 2147483647
+	START 1
+	CACHE 1
+	NO CYCLE;
+
+-- Permissions
+
+ALTER SEQUENCE govet.tratamiento_id_tratamiento_seq3 OWNER TO pawsolutions;
+GRANT ALL ON SEQUENCE govet.tratamiento_id_tratamiento_seq3 TO pawsolutions;
 -- govet.especie definition
 
 -- Drop table
@@ -338,6 +419,7 @@ CREATE TABLE govet.tutor (
 	region varchar NULL, -- Region del tutor
 	observacion varchar NULL, -- Observacion/notas que considerar sobre un tutor
 	telefono2 int8 NULL, -- Numero telefonico 2 del tutor
+	activo bool NOT NULL, -- verdadero: está activo, falso: esta inactivo.
 	CONSTRAINT dueno_pk PRIMARY KEY (rut)
 );
 COMMENT ON TABLE govet.tutor IS 'Tutor de la mascota o persona encargada de la mascota';
@@ -357,6 +439,7 @@ COMMENT ON COLUMN govet.tutor.comuna IS 'Comuna del tutor';
 COMMENT ON COLUMN govet.tutor.region IS 'Region del tutor';
 COMMENT ON COLUMN govet.tutor.observacion IS 'Observacion/notas que considerar sobre un tutor';
 COMMENT ON COLUMN govet.tutor.telefono2 IS 'Numero telefonico 2 del tutor';
+COMMENT ON COLUMN govet.tutor.activo IS 'verdadero: está activo, falso: esta inactivo.';
 
 -- Permissions
 
@@ -406,6 +489,7 @@ CREATE TABLE govet.paciente (
 	fecha_nacimiento date NOT NULL, -- Fecha de nacimiento de la mascota
 	id_raza int8 NOT NULL,
 	codigo_chip varchar NULL, -- Codigo del chip de la mascota, en caso de poseerlo
+	activo bool NOT NULL, -- verdadero: está activo, falso: está inactivo.
 	CONSTRAINT mascota_pk PRIMARY KEY (id_paciente),
 	CONSTRAINT mascota_raza_fk FOREIGN KEY (id_raza) REFERENCES govet.raza(id_raza)
 );
@@ -422,6 +506,7 @@ COMMENT ON COLUMN govet.paciente.esterilizado IS 'V: si la mascota se encuentra 
 F: si no';
 COMMENT ON COLUMN govet.paciente.fecha_nacimiento IS 'Fecha de nacimiento de la mascota';
 COMMENT ON COLUMN govet.paciente.codigo_chip IS 'Codigo del chip de la mascota, en caso de poseerlo';
+COMMENT ON COLUMN govet.paciente.activo IS 'verdadero: está activo, falso: está inactivo.';
 
 -- Permissions
 

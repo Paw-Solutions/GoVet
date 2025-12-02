@@ -413,7 +413,10 @@ def crear_tutor(tutor: TutorCreate, db: Session = Depends(get_db)):
 # Ruta GET para obtener un dueño por su RUT
 @app.get("/tutores/{rut}", response_model=TutorResponse)
 def obtener_tutor(rut: str, db: Session = Depends(get_db)):
-    db_tutor = db.query(models.Tutor).filter(models.Tutor.rut == rut).first()
+    db_tutor = db.query(models.Tutor).filter(
+        models.Tutor.rut == rut,
+        models.Tutor.activo == True
+    ).first()
     if db_tutor is None:
         raise HTTPException(status_code=404, detail="Tutor no encontrado")
     return db_tutor
@@ -421,7 +424,7 @@ def obtener_tutor(rut: str, db: Session = Depends(get_db)):
 # Ruta GET para obtener todos los dueños
 @app.get("/tutores/", response_model=List[TutorResponse])
 def obtener_todos_los_tutores(db: Session = Depends(get_db)):
-    db_tutores = db.query(models.Tutor).all()
+    db_tutores = db.query(models.Tutor).filter(models.Tutor.activo == True).all()
     if not db_tutores:
         raise HTTPException(status_code=404, detail="No se encontraron tutores")
     return db_tutores
@@ -448,7 +451,7 @@ def obtener_tutores_paginados(
     db: Session = Depends(get_db)
 ):
     offset = (page - 1) * limit
-    query = db.query(models.Tutor)
+    query = db.query(models.Tutor).filter(models.Tutor.activo == True)
     
     if search:
         # Normalizar texto de búsqueda
@@ -506,10 +509,16 @@ def obtener_tutores_paginados(
 # Ruta para ver todas las mascotas de un tutor
 @app.get("/tutores/{rut}/pacientes/", response_model=List[PacienteResponse])
 def obtener_mascotas_de_tutor(rut: str, db: Session = Depends(get_db)):
-    db_tutor = db.query(models.Tutor).filter(models.Tutor.rut == rut).first()
+    db_tutor = db.query(models.Tutor).filter(
+        models.Tutor.rut == rut,
+        models.Tutor.activo == True
+    ).first()
     if not db_tutor:
         raise HTTPException(status_code=404, detail="Tutor no encontrado")
-    db_pacientes = db.query(models.Paciente).join(models.TutorPaciente).filter(models.TutorPaciente.rut == rut).all()
+    db_pacientes = db.query(models.Paciente).join(models.TutorPaciente).filter(
+        models.TutorPaciente.rut == rut,
+        models.Paciente.activo == True
+    ).all()
     return [paciente_to_response(p, db) for p in db_pacientes]
 
 # HU 3: Como Veterinaria, quiero poder almacenar el paciente por su nombre y raza para indentificarlos y buscarlos facilmente
@@ -528,7 +537,10 @@ def crear_paciente(paciente: PacienteCreate, db: Session = Depends(get_db)):
 # Ruta GET para obtener un paciente por su ID
 @app.get("/pacientes/{id_paciente}", response_model=PacienteResponse)
 def obtener_paciente(id_paciente: int, db: Session = Depends(get_db)):
-    db_paciente = db.query(models.Paciente).filter(models.Paciente.id_paciente == id_paciente).first()
+    db_paciente = db.query(models.Paciente).filter(
+        models.Paciente.id_paciente == id_paciente,
+        models.Paciente.activo == True
+    ).first()
     if db_paciente is None:
         raise HTTPException(status_code=404, detail="Paciente no encontrado")
     return paciente_to_response(db_paciente, db)
@@ -536,7 +548,10 @@ def obtener_paciente(id_paciente: int, db: Session = Depends(get_db)):
 # Ruta GET para obtener pacientes por su nombre
 @app.get("/pacientes/nombre/{nombre}", response_model=List[PacienteResponse])
 def obtener_pacientes_por_nombre(nombre: str, db: Session = Depends(get_db)):
-    db_pacientes = db.query(models.Paciente).filter(models.Paciente.nombre.ilike(f"%{nombre}%")).all() # el ilike no diferencia mayusculas o minusculas asi facilitamos la busqueda al no ser tan estricta
+    db_pacientes = db.query(models.Paciente).filter(
+        models.Paciente.nombre.ilike(f"%{nombre}%"),
+        models.Paciente.activo == True
+    ).all() # el ilike no diferencia mayusculas o minusculas asi facilitamos la busqueda al no ser tan estricta
     if not db_pacientes:
         raise HTTPException(status_code=404, detail="No se encontraron pacientes con ese nombre")
     return [paciente_to_response(p, db) for p in db_pacientes]
@@ -544,7 +559,10 @@ def obtener_pacientes_por_nombre(nombre: str, db: Session = Depends(get_db)):
 # Ruta GET para obtener pacientes por su raza (nombre de la raza)
 @app.get("/pacientes/raza/{nombre_raza}", response_model=List[PacienteResponse])
 def obtener_pacientes_por_raza(nombre_raza: str, db: Session = Depends(get_db)):
-    db_pacientes = db.query(models.Paciente).join(models.Raza).filter(models.Raza.nombre.ilike(f"%{nombre_raza}%")).all()
+    db_pacientes = db.query(models.Paciente).join(models.Raza).filter(
+        models.Raza.nombre.ilike(f"%{nombre_raza}%"),
+        models.Paciente.activo == True
+    ).all()
     if not db_pacientes:
         raise HTTPException(status_code=404, detail="No se encontraron pacientes con esa raza")
     return [paciente_to_response(p, db) for p in db_pacientes]
@@ -552,7 +570,7 @@ def obtener_pacientes_por_raza(nombre_raza: str, db: Session = Depends(get_db)):
 # Ruta GET para obtener todos los pacientes
 @app.get("/pacientes/", response_model=List[PacienteResponse])
 def obtener_todos_los_pacientes(db: Session = Depends(get_db)):
-    db_pacientes = db.query(models.Paciente).all()
+    db_pacientes = db.query(models.Paciente).filter(models.Paciente.activo == True).all()
     if not db_pacientes:
         raise HTTPException(status_code=404, detail="No se encontraron pacientes")
     return [paciente_to_response(p, db) for p in db_pacientes]
@@ -577,7 +595,8 @@ def obtener_pacientes_por_rut_tutor(rut: str, db: Session = Depends(get_db)):
         models.Raza.id_especie == models.Especie.id_especie,
         isouter=True
     ).filter(
-        models.TutorPaciente.rut == rut
+        models.TutorPaciente.rut == rut,
+        models.Paciente.activo == True
     ).all()
     
     if not pacientes_query:
@@ -631,6 +650,8 @@ def obtener_pacientes_paginados(
         models.TutorPaciente, models.Paciente.id_paciente == models.TutorPaciente.id_paciente, isouter=True
     ).join(
         models.Tutor, models.TutorPaciente.rut == models.Tutor.rut, isouter=True
+    ).filter(
+        models.Paciente.activo == True
     )
     
     if search:
@@ -745,7 +766,10 @@ def actualizar_paciente(id_paciente: int, paciente: PacienteCreate, db: Session 
 @app.put("/pacientes/{id_paciente}/tutor/{rut_tutor}", response_model=PacienteResponse)
 def actualizar_tutor_paciente(id_paciente: int, rut_tutor: str, db: Session = Depends(get_db)):
     db_paciente = db.query(models.Paciente).filter(models.Paciente.id_paciente == id_paciente).first()
-    db_tutor = db.query(models.Tutor).filter(models.Tutor.rut == rut_tutor).first()
+    db_tutor = db.query(models.Tutor).filter(
+        models.Tutor.rut == rut_tutor,
+        models.Tutor.activo == True
+    ).first()
     if not db_paciente:
         raise HTTPException(status_code=404, detail="Paciente no encontrado")
     if not db_tutor:
@@ -788,7 +812,10 @@ def editar_asociacion_tutor_paciente(rut_tutor: str, id_paciente: int, fecha: da
 # ruta put para editar la informacion de un tutor
 @app.put("/tutores/{rut}", response_model=TutorResponse)
 def editar_tutor(rut: str, tutor: TutorCreate, db: Session = Depends(get_db)):
-    db_tutor = db.query(models.Tutor).filter(models.Tutor.rut == rut).first()
+    db_tutor = db.query(models.Tutor).filter(
+        models.Tutor.rut == rut,
+        models.Tutor.activo == True
+    ).first()
     if not db_tutor:
         raise HTTPException(status_code=404, detail="Tutor no encontrado")
     for key, value in tutor.dict().items():
@@ -800,7 +827,10 @@ def editar_tutor(rut: str, tutor: TutorCreate, db: Session = Depends(get_db)):
 # Ruta POST para asociar un tutor a un paciente (tutor_paciente)
 @app.post("/tutores/{rut_tutor}/pacientes/{id_paciente}", response_model=TutorPacienteResponse)
 def asociar_tutor_a_paciente(rut_tutor: str, id_paciente: int, fecha: date, db: Session = Depends(get_db)):
-    db_tutor = db.query(models.Tutor).filter(models.Tutor.rut == rut_tutor).first()
+    db_tutor = db.query(models.Tutor).filter(
+        models.Tutor.rut == rut_tutor,
+        models.Tutor.activo == True
+    ).first()
     db_paciente = db.query(models.Paciente).filter(models.Paciente.id_paciente == id_paciente).first()
     if not db_tutor:
         raise HTTPException(status_code=404, detail="Tutor no encontrado")
@@ -815,10 +845,16 @@ def asociar_tutor_a_paciente(rut_tutor: str, id_paciente: int, fecha: date, db: 
 # Ruta para ver mascotas asociadas a un tutor
 @app.get("/tutores/{rut}/pacientes/", response_model=List[PacienteResponse])
 def obtener_mascotas_por_tutor(rut: str, db: Session = Depends(get_db)):
-    db_tutor = db.query(models.Tutor).filter(models.Tutor.rut == rut).first()
+    db_tutor = db.query(models.Tutor).filter(
+        models.Tutor.rut == rut,
+        models.Tutor.activo == True
+    ).first()
     if not db_tutor:
         raise HTTPException(status_code=404, detail="Tutor no encontrado")
-    db_mascotas = db.query(models.Paciente).join(models.TutorPaciente).filter(models.TutorPaciente.rut == rut).all()
+    db_mascotas = db.query(models.Paciente).join(models.TutorPaciente).filter(
+        models.TutorPaciente.rut == rut,
+        models.Paciente.activo == True
+    ).all()
     if not db_mascotas:
         raise HTTPException(status_code=404, detail="No se encontraron mascotas para ese tutor")
     return db_mascotas

@@ -18,6 +18,7 @@ class TutorBase(BaseModel):
     telefono2: Optional[int] = None
     direccion: Optional[str] = None
     email: Optional[str] = None
+    activo: bool = True
 
     class Config:
         from_attributes = True
@@ -42,6 +43,7 @@ class PacienteBase(BaseModel):
     fecha_nacimiento: date
     id_raza: int
     codigo_chip: Optional[str] = None
+    activo: bool = True
     # permite que los modelos de Pydantic acepten objetos ORM como entrada y 
     # los conviertan en modelos de Pydantic.
     class Config: 
