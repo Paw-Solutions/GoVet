@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Certificado de Salud para Transporte - {{ paciente.nombre }}</title>
+    <style>
+        @page { 
+            size: A4; 
+            margin: 2cm 1.5cm; 
+            @bottom-center { 
+                content: "Página " counter(page); 
+                font-family: Helvetica, Arial, sans-serif; 
+                font-size: 9px; 
+                color: #888; 
+            } 
+        }
+        body { 
+            font-family: Helvetica, Arial, sans-serif; 
+            font-size: 12px; 
+            color: #222; 
+            line-height: 1.6; 
+        }
+
+        /* Título Principal */
+        .document-title {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 3px double #2c3e50;
+        }
+        .document-title h1 {
+            font-size: 18px;
+            color: #1a252f;
+            margin: 0;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .document-title .fecha {
+            font-size: 11px;
+            color: #555;
+            margin-top: 10px;
+        }
+
+        /* Secciones */
+        h2 {
+            font-size: 13px;
+            color: #1a252f;
+            margin-top: 25px;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #34495e;
+            padding-bottom: 5px;
+        }
+
+        /* Tablas de Datos */
+        .table-rounded {
+            border-radius: 8px;
+            border: 1px solid #bdc3c7;
+            overflow: hidden;
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border-spacing: 0;
+        }
+        th {
+            background-color: #34495e;
+            color: #ffffff;
+            font-weight: 600;
+            padding: 10px 12px;
+            text-align: left;
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+        td {
+            border-bottom: 1px solid #ecf0f1;
+            padding: 10px 12px;
+            font-size: 12px;
+            color: #2c3e50;
+        }
+        tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Tabla de Identificación (2 columnas label-value) */
+        .info-table {
+            width: 100%;
+            border: 1px solid #bdc3c7;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        .info-table td {
+            padding: 10px 14px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        .info-table tr:last-child td {
+            border-bottom: none;
+        }
+        .info-table .label-cell {
+            background-color: #ecf0f1;
+            font-weight: 600;
+            color: #2c3e50;
+            width: 35%;
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+        .info-table .value-cell {
+            background-color: #fff;
+            color: #222;
+            font-size: 12px;
+        }
+
+        /* Sección de Certificación Legal */
+        .legal-box {
+            background-color: #f8f9fa;
+            border: 2px solid #2c3e50;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 25px 0;
+            text-align: justify;
+        }
+        .legal-box p {
+            margin: 0;
+            font-size: 12px;
+            line-height: 1.8;
+            color: #1a252f;
+        }
+        .legal-box .highlight {
+            font-weight: 700;
+        }
+
+        /* Pie de Página - Firma */
+        .signature-section {
+            margin-top: 50px;
+            page-break-inside: avoid;
+        }
+        .signature-box {
+            width: 60%;
+            margin: 0 auto;
+            text-align: center;
+            padding-top: 60px;
+            border-top: 2px solid #2c3e50;
+        }
+        .signature-box .name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1a252f;
+            margin-bottom: 4px;
+        }
+        .signature-box .title {
+            font-size: 11px;
+            color: #555;
+            margin-bottom: 2px;
+        }
+        .signature-box .rut {
+            font-size: 11px;
+            color: #555;
+        }
+        .signature-box .registro {
+            font-size: 11px;
+            color: #555;
+            margin-top: 5px;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 9px;
+            color: #999;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
+
+        /* Layout tabla invisible para 2 columnas */
+        .layout-table {
+            width: 100%;
+            border: none;
+        }
+        .layout-table td {
+            border: none;
+            padding: 0 15px 0 0;
+            vertical-align: top;
+            width: 50%;
+        }
+        .layout-table td:last-child {
+            padding-right: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Título del Documento -->
+    <div class="document-title">
+        <h1>Certificado de Salud para el Transporte<br>de Animales de Compañía</h1>
+        <div class="fecha">{{ fecha_actual }}</div>
+    </div>
+
+    <!-- Sección 1: Identificación del Animal -->
+    <h2>1. Identificación del Animal</h2>
+    <table class="info-table">
+        <tr>
+            <td class="label-cell">Nombre</td>
+            <td class="value-cell">{{ paciente.nombre }}</td>
+        </tr>
+        <tr>
+            <td class="label-cell">Especie</td>
+            <td class="value-cell">{{ paciente.raza.especie.nombre_comun if paciente.raza and paciente.raza.especie else '—' }}</td>
+        </tr>
+        <tr>
+            <td class="label-cell">Raza</td>
+            <td class="value-cell">{{ paciente.raza.nombre if paciente.raza else '—' }}</td>
+        </tr>
+        <tr>
+            <td class="label-cell">Sexo</td>
+            <td class="value-cell">{{ sexo }}</td>
+        </tr>
+        <tr>
+            <td class="label-cell">Color</td>
+            <td class="value-cell">{{ paciente.color or '—' }}</td>
+        </tr>
+        <tr>
+            <td class="label-cell">Fecha de Nacimiento</td>
+            <td class="value-cell">{{ fecha_nacimiento }} ({{ edad }})</td>
+        </tr>
+        <tr>
+            <td class="label-cell">N° Microchip</td>
+            <td class="value-cell">{{ paciente.codigo_chip or 'Sin microchip registrado' }}</td>
+        </tr>
+        <tr>
+            <td class="label-cell">Sitio de Aplicación</td>
+            <td class="value-cell">Subcutáneo Interescapular</td>
+        </tr>
+    </table>
+
+    <!-- Sección 2: Identificación del Propietario -->
+    <h2>2. Identificación del Propietario</h2>
+    <table class="info-table">
+        <tr>
+            <td class="label-cell">Nombre Completo</td>
+            <td class="value-cell">{{ tutor.nombre }} {{ tutor.apellido_paterno or '' }} {{ tutor.apellido_materno or '' }}</td>
+        </tr>
+        <tr>
+            <td class="label-cell">RUT</td>
+            <td class="value-cell">{{ tutor.rut }}</td>
+        </tr>
+        <tr>
+            <td class="label-cell">Teléfono</td>
+            <td class="value-cell">{{ tutor.telefono or tutor.celular or '—' }}</td>
+        </tr>
+        <tr>
+            <td class="label-cell">Dirección</td>
+            <td class="value-cell">{{ tutor.direccion or '—' }}{% if tutor.comuna %}, {{ tutor.comuna }}{% endif %}{% if tutor.region %}, {{ tutor.region }}{% endif %}</td>
+        </tr>
+    </table>
+
+    <!-- Sección 3: Certificación -->
+    <h2>3. Certificación</h2>
+    <div class="legal-box">
+        <p>
+            El médico veterinario que suscribe <span class="highlight">certifica</span> que el animal de compañía 
+            identificado en este documento: <span class="highlight">Se encuentra clínicamente sano</span> al examen físico, 
+            sin presentar tumoraciones, heridas frescas o en proceso de cicatrización, ni signo alguno de 
+            enfermedades infectocontagiosas, cuarentenables o transmisibles, ni presencia de parásitos externos 
+            y ha sido tratado contra estos últimos.
+        </p>
+    </div>
+
+    <!-- Sección 4: Vacunas y Desparasitaciones -->
+    <h2>4. Vacunas y Desparasitaciones</h2>
+    {% if vacunas %}
+    <div class="table-rounded">
+        <table>
+            <thead>
+                <tr>
+                    <th>Enfermedad / Vacuna</th>
+                    <th>Laboratorio (Marca)</th>
+                    <th>N° Serie</th>
+                    <th>Fecha Aplicación</th>
+                    <th>Vigencia (Próxima Dosis)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for v in vacunas %}
+                <tr>
+                    <td>{{ v.tratamiento.nombre }}</td>
+                    <td>{{ v.marca or '—' }}</td>
+                    <td>{{ v.numero_serial or '—' }}</td>
+                    <td>{{ v.fecha_tratamiento.strftime('%d/%m/%Y') if v.fecha_tratamiento else '—' }}</td>
+                    <td>{{ v.proxima_dosis.strftime('%d/%m/%Y') if v.proxima_dosis else '—' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="legal-box" style="text-align: center;">
+        <p>No se registran vacunas o tratamientos antiparasitarios en el historial de este paciente.</p>
+    </div>
+    {% endif %}
+
+    <!-- Sección de Firma -->
+    <div class="signature-section">
+        <div class="signature-box">
+            <div class="name">Dra. Daniela Alejandra Otárola Arancibia</div>
+            <div class="title">Médico Veterinario</div>
+            <div class="rut">RUT: 16.372.666-1</div>
+            <div class="registro">Reg. Colmevet: _______________</div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        Documento generado el {{ fecha_generacion }} · GoVet Software
+    </div>
+
+</body>
+</html>

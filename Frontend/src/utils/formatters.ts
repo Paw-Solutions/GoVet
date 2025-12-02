@@ -1,8 +1,15 @@
 export const formatRegionName = (region: any): string => {
   if (!region) return "";
 
-  // Formatear el label: "REGIÓN DE LOS RÍOS" -> "Región de Los Ríos"
-  const formattedLabel = formatRegionLabel(region.label);
+  // Si ya tiene el formato completo desde el backend (ej: "XIV Región de Los Ríos")
+  // simplemente retornarlo
+  if (region.name && region.name.includes("Región")) {
+    return region.name;
+  }
+
+  // Caso legacy: si viene con label separado, formatear
+  const label = region.label || region.name;
+  const formattedLabel = formatRegionLabel(label);
 
   // Formato: "XIV Región de Los Ríos"
   return `${region.romanNumber} ${formattedLabel}`;

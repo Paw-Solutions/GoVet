@@ -18,6 +18,7 @@ class TutorBase(BaseModel):
     telefono2: Optional[int] = None
     direccion: Optional[str] = None
     email: Optional[str] = None
+    activo: bool = True
 
     class Config:
         from_attributes = True
@@ -42,6 +43,7 @@ class PacienteBase(BaseModel):
     fecha_nacimiento: date
     id_raza: int
     codigo_chip: Optional[str] = None
+    activo: bool = True
     # permite que los modelos de Pydantic acepten objetos ORM como entrada y 
     # los conviertan en modelos de Pydantic.
     class Config: 
@@ -130,7 +132,8 @@ class TutorPacienteResponse(TutorPacienteBase):
 
 class TratamientoBase(BaseModel):
     nombre: str
-    descripcion: str
+    descripcion: Optional[str] = None
+    tipo_tratamiento: str
     
     class Config:
         from_attributes = True
@@ -149,8 +152,11 @@ class consultaTratamientoBase(BaseModel):
     id_consulta: Optional[int] = None
     id_tratamiento: int
     id_paciente: int
-    dosis: str
-    fecha_tratamiento: date
+    dosis: Optional[str] = None
+    fecha_tratamiento: Optional[date] = None
+    marca: Optional[str] = None
+    proxima_dosis: Optional[date] = None
+    numero_serial: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -166,12 +172,15 @@ class consultaTratamientoResponse(consultaTratamientoBase):
 
 # Agregar al final del archivo schemas.py
 class consultaTratamientoConDetallesResponse(BaseModel):
-    id_consulta: int
+    id_consulta: Optional[int] = None
     id_tratamiento: int
     id_paciente: int
-    dosis: str
-    fecha_tratamiento: date
+    dosis: Optional[str] = None
+    fecha_tratamiento: Optional[date] = None
     id_aplicacion: int
+    marca: Optional[str] = None
+    proxima_dosis: Optional[date] = None
+    numero_serial: Optional[str] = None
     # Información adicional
     nombre_tratamiento: str
     descripcion_tratamiento: Optional[str] = None
@@ -184,17 +193,26 @@ class consultaTratamientoConDetallesResponse(BaseModel):
 class ConsultaBase(BaseModel):
     id_paciente: int
     rut: str
-    fecha_consulta: date
-    motivo: str 
-    diagnostico: str
+    fecha_consulta: Optional[date] = None
+    motivo: Optional[str] = None
+    diagnostico: Optional[str] = None
     observaciones: Optional[str] = None
-    dht: str
-    nodulos_linfaticos: str
-    mucosas: str
-    peso: float
-    auscultacion_cardiaca_toraxica: str
-    estado_pelaje: str
-    condicion_corporal: str
+    dht: Optional[int] = None
+    nodulos_linfaticos: Optional[str] = None
+    mucosas: Optional[str] = None
+    peso: Optional[float] = None
+    auscultacion_cardiaca_toraxica: Optional[str] = None
+    estado_pelaje: Optional[str] = None
+    condicion_corporal: Optional[str] = None
+    tllc: Optional[float] = None
+    estado_piel: Optional[str] = None
+    frecuencia_respiratoria: Optional[float] = None
+    frecuencia_cardiaca: Optional[float] = None
+    examen_clinico: Optional[str] = None
+    prediagnostico: Optional[str] = None
+    pronostico: Optional[str] = None
+    indicaciones_generales: Optional[str] = None
+    temperatura: Optional[float] = None
 
     class Config:
         from_attributes = True

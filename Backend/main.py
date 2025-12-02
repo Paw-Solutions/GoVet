@@ -401,6 +401,28 @@ def delete_event(event_id: str):
 
 # HU 4: Como Veterinaria, quiero poder almacenar al tutor con su RUT y nombre, para poder tener su información para consultas futuras
 """ RUTAS PARA TUTORES (dueños de mascotas) """
+
+# Endpoint para obtener regiones - Datos locales SUBDERE
+@app.get("/regiones/")
+async def obtener_regiones():
+    """
+    Retorna regiones chilenas desde datos estáticos locales.
+    Los datos provienen de SUBDERE (Subsecretaría de Desarrollo Regional y Administrativo).
+    """
+    from regiones_data import REGIONES_CHILE
+    
+    print(f"✅ Retornando {len(REGIONES_CHILE)} regiones desde datos locales")
+    return REGIONES_CHILE
+
+def obtener_numero_romano(codigo_region: str) -> str:
+    """Convierte el código de región a número romano chileno"""
+    numeros_romanos = {
+        "15": "XV", "01": "I", "02": "II", "03": "III", "04": "IV",
+        "05": "V", "06": "VI", "07": "VII", "08": "VIII", "09": "IX",
+        "10": "X", "11": "XI", "12": "XII", "13": "RM", "14": "XIV", "16": "XVI"
+    }
+    return numeros_romanos.get(codigo_region, codigo_region)
+
 # Ruta POST para añadir un dueño
 @app.post("/tutores/", response_model=TutorResponse)
 def crear_tutor(tutor: TutorCreate, db: Session = Depends(get_db)):
@@ -413,7 +435,10 @@ def crear_tutor(tutor: TutorCreate, db: Session = Depends(get_db)):
 # Ruta GET para obtener un dueño por su RUT
 @app.get("/tutores/{rut}", response_model=TutorResponse)
 def obtener_tutor(rut: str, db: Session = Depends(get_db)):
-    db_tutor = db.query(models.Tutor).filter(models.Tutor.rut == rut).first()
+    db_tutor = db.query(models.Tutor).filter(
+        models.Tutor.rut == rut,
+        models.Tutor.activo == True
+    ).first()
     if db_tutor is None:
         raise HTTPException(status_code=404, detail="Tutor no encontrado")
     return db_tutor
@@ -421,7 +446,7 @@ def obtener_tutor(rut: str, db: Session = Depends(get_db)):
 # Ruta GET para obtener todos los dueños
 @app.get("/tutores/", response_model=List[TutorResponse])
 def obtener_todos_los_tutores(db: Session = Depends(get_db)):
-    db_tutores = db.query(models.Tutor).all()
+    db_tutores = db.query(models.Tutor).filter(models.Tutor.activo == True).all()
     if not db_tutores:
         raise HTTPException(status_code=404, detail="No se encontraron tutores")
     return db_tutores
@@ -448,7 +473,7 @@ def obtener_tutores_paginados(
     db: Session = Depends(get_db)
 ):
     offset = (page - 1) * limit
-    query = db.query(models.Tutor)
+    query = db.query(models.Tutor).filter(models.Tutor.activo == True)
     
     if search:
         # Normalizar texto de búsqueda
@@ -506,10 +531,16 @@ def obtener_tutores_paginados(
 # Ruta para ver todas las mascotas de un tutor
 @app.get("/tutores/{rut}/pacientes/", response_model=List[PacienteResponse])
 def obtener_mascotas_de_tutor(rut: str, db: Session = Depends(get_db)):
-    db_tutor = db.query(models.Tutor).filter(models.Tutor.rut == rut).first()
+    db_tutor = db.query(models.Tutor).filter(
+        models.Tutor.rut == rut,
+        models.Tutor.activo == True
+    ).first()
     if not db_tutor:
         raise HTTPException(status_code=404, detail="Tutor no encontrado")
-    db_pacientes = db.query(models.Paciente).join(models.TutorPaciente).filter(models.TutorPaciente.rut == rut).all()
+    db_pacientes = db.query(models.Paciente).join(models.TutorPaciente).filter(
+        models.TutorPaciente.rut == rut,
+        models.Paciente.activo == True
+    ).all()
     return [paciente_to_response(p, db) for p in db_pacientes]
 
 # HU 3: Como Veterinaria, quiero poder almacenar el paciente por su nombre y raza para indentificarlos y buscarlos facilmente
@@ -528,7 +559,10 @@ def crear_paciente(paciente: PacienteCreate, db: Session = Depends(get_db)):
 # Ruta GET para obtener un paciente por su ID
 @app.get("/pacientes/{id_paciente}", response_model=PacienteResponse)
 def obtener_paciente(id_paciente: int, db: Session = Depends(get_db)):
-    db_paciente = db.query(models.Paciente).filter(models.Paciente.id_paciente == id_paciente).first()
+    db_paciente = db.query(models.Paciente).filter(
+        models.Paciente.id_paciente == id_paciente,
+        models.Paciente.activo == True
+    ).first()
     if db_paciente is None:
         raise HTTPException(status_code=404, detail="Paciente no encontrado")
     return paciente_to_response(db_paciente, db)
@@ -536,7 +570,10 @@ def obtener_paciente(id_paciente: int, db: Session = Depends(get_db)):
 # Ruta GET para obtener pacientes por su nombre
 @app.get("/pacientes/nombre/{nombre}", response_model=List[PacienteResponse])
 def obtener_pacientes_por_nombre(nombre: str, db: Session = Depends(get_db)):
-    db_pacientes = db.query(models.Paciente).filter(models.Paciente.nombre.ilike(f"%{nombre}%")).all() # el ilike no diferencia mayusculas o minusculas asi facilitamos la busqueda al no ser tan estricta
+    db_pacientes = db.query(models.Paciente).filter(
+        models.Paciente.nombre.ilike(f"%{nombre}%"),
+        models.Paciente.activo == True
+    ).all() # el ilike no diferencia mayusculas o minusculas asi facilitamos la busqueda al no ser tan estricta
     if not db_pacientes:
         raise HTTPException(status_code=404, detail="No se encontraron pacientes con ese nombre")
     return [paciente_to_response(p, db) for p in db_pacientes]
@@ -544,7 +581,10 @@ def obtener_pacientes_por_nombre(nombre: str, db: Session = Depends(get_db)):
 # Ruta GET para obtener pacientes por su raza (nombre de la raza)
 @app.get("/pacientes/raza/{nombre_raza}", response_model=List[PacienteResponse])
 def obtener_pacientes_por_raza(nombre_raza: str, db: Session = Depends(get_db)):
-    db_pacientes = db.query(models.Paciente).join(models.Raza).filter(models.Raza.nombre.ilike(f"%{nombre_raza}%")).all()
+    db_pacientes = db.query(models.Paciente).join(models.Raza).filter(
+        models.Raza.nombre.ilike(f"%{nombre_raza}%"),
+        models.Paciente.activo == True
+    ).all()
     if not db_pacientes:
         raise HTTPException(status_code=404, detail="No se encontraron pacientes con esa raza")
     return [paciente_to_response(p, db) for p in db_pacientes]
@@ -552,7 +592,7 @@ def obtener_pacientes_por_raza(nombre_raza: str, db: Session = Depends(get_db)):
 # Ruta GET para obtener todos los pacientes
 @app.get("/pacientes/", response_model=List[PacienteResponse])
 def obtener_todos_los_pacientes(db: Session = Depends(get_db)):
-    db_pacientes = db.query(models.Paciente).all()
+    db_pacientes = db.query(models.Paciente).filter(models.Paciente.activo == True).all()
     if not db_pacientes:
         raise HTTPException(status_code=404, detail="No se encontraron pacientes")
     return [paciente_to_response(p, db) for p in db_pacientes]
@@ -577,7 +617,8 @@ def obtener_pacientes_por_rut_tutor(rut: str, db: Session = Depends(get_db)):
         models.Raza.id_especie == models.Especie.id_especie,
         isouter=True
     ).filter(
-        models.TutorPaciente.rut == rut
+        models.TutorPaciente.rut == rut,
+        models.Paciente.activo == True
     ).all()
     
     if not pacientes_query:
@@ -631,6 +672,8 @@ def obtener_pacientes_paginados(
         models.TutorPaciente, models.Paciente.id_paciente == models.TutorPaciente.id_paciente, isouter=True
     ).join(
         models.Tutor, models.TutorPaciente.rut == models.Tutor.rut, isouter=True
+    ).filter(
+        models.Paciente.activo == True
     )
     
     if search:
@@ -745,7 +788,10 @@ def actualizar_paciente(id_paciente: int, paciente: PacienteCreate, db: Session 
 @app.put("/pacientes/{id_paciente}/tutor/{rut_tutor}", response_model=PacienteResponse)
 def actualizar_tutor_paciente(id_paciente: int, rut_tutor: str, db: Session = Depends(get_db)):
     db_paciente = db.query(models.Paciente).filter(models.Paciente.id_paciente == id_paciente).first()
-    db_tutor = db.query(models.Tutor).filter(models.Tutor.rut == rut_tutor).first()
+    db_tutor = db.query(models.Tutor).filter(
+        models.Tutor.rut == rut_tutor,
+        models.Tutor.activo == True
+    ).first()
     if not db_paciente:
         raise HTTPException(status_code=404, detail="Paciente no encontrado")
     if not db_tutor:
@@ -788,7 +834,10 @@ def editar_asociacion_tutor_paciente(rut_tutor: str, id_paciente: int, fecha: da
 # ruta put para editar la informacion de un tutor
 @app.put("/tutores/{rut}", response_model=TutorResponse)
 def editar_tutor(rut: str, tutor: TutorCreate, db: Session = Depends(get_db)):
-    db_tutor = db.query(models.Tutor).filter(models.Tutor.rut == rut).first()
+    db_tutor = db.query(models.Tutor).filter(
+        models.Tutor.rut == rut,
+        models.Tutor.activo == True
+    ).first()
     if not db_tutor:
         raise HTTPException(status_code=404, detail="Tutor no encontrado")
     for key, value in tutor.dict().items():
@@ -800,7 +849,10 @@ def editar_tutor(rut: str, tutor: TutorCreate, db: Session = Depends(get_db)):
 # Ruta POST para asociar un tutor a un paciente (tutor_paciente)
 @app.post("/tutores/{rut_tutor}/pacientes/{id_paciente}", response_model=TutorPacienteResponse)
 def asociar_tutor_a_paciente(rut_tutor: str, id_paciente: int, fecha: date, db: Session = Depends(get_db)):
-    db_tutor = db.query(models.Tutor).filter(models.Tutor.rut == rut_tutor).first()
+    db_tutor = db.query(models.Tutor).filter(
+        models.Tutor.rut == rut_tutor,
+        models.Tutor.activo == True
+    ).first()
     db_paciente = db.query(models.Paciente).filter(models.Paciente.id_paciente == id_paciente).first()
     if not db_tutor:
         raise HTTPException(status_code=404, detail="Tutor no encontrado")
@@ -815,10 +867,16 @@ def asociar_tutor_a_paciente(rut_tutor: str, id_paciente: int, fecha: date, db: 
 # Ruta para ver mascotas asociadas a un tutor
 @app.get("/tutores/{rut}/pacientes/", response_model=List[PacienteResponse])
 def obtener_mascotas_por_tutor(rut: str, db: Session = Depends(get_db)):
-    db_tutor = db.query(models.Tutor).filter(models.Tutor.rut == rut).first()
+    db_tutor = db.query(models.Tutor).filter(
+        models.Tutor.rut == rut,
+        models.Tutor.activo == True
+    ).first()
     if not db_tutor:
         raise HTTPException(status_code=404, detail="Tutor no encontrado")
-    db_mascotas = db.query(models.Paciente).join(models.TutorPaciente).filter(models.TutorPaciente.rut == rut).all()
+    db_mascotas = db.query(models.Paciente).join(models.TutorPaciente).filter(
+        models.TutorPaciente.rut == rut,
+        models.Paciente.activo == True
+    ).all()
     if not db_mascotas:
         raise HTTPException(status_code=404, detail="No se encontraron mascotas para ese tutor")
     return db_mascotas
@@ -1147,6 +1205,10 @@ def obtener_consultas_tratamiento_por_nombre_paciente(nombre_paciente: str, db: 
 # Ruta GET para obtener registros de consulta_tratamiento solo de vacunas con detalles
 @app.get("/consultas/tratamientos/vacunas/nombre/", response_model=List[consultaTratamientoConDetallesResponse])
 def obtener_vacunas_por_nombre(db: Session = Depends(get_db)):
+    # Filtrar próximas vacunas en los próximos 30 días (1 mes)
+    fecha_actual = datetime.now().date()
+    fecha_limite = fecha_actual + timedelta(days=30)
+    
     db_vacunas = db.query(
         models.ConsultaTratamiento,
         models.Tratamiento.nombre.label('nombre_tratamiento'),
@@ -1160,8 +1222,11 @@ def obtener_vacunas_por_nombre(db: Session = Depends(get_db)):
         models.ConsultaTratamiento.id_paciente == models.Paciente.id_paciente,
         isouter=True
     ).filter(
-        models.Tratamiento.nombre.ilike("%Vacuna%")
-    ).order_by(desc(models.ConsultaTratamiento.fecha_tratamiento)).all()
+        models.Tratamiento.nombre.ilike("%Vacuna%"),
+        models.ConsultaTratamiento.proxima_dosis.isnot(None),
+        models.ConsultaTratamiento.proxima_dosis >= fecha_actual,
+        models.ConsultaTratamiento.proxima_dosis <= fecha_limite
+    ).order_by(models.ConsultaTratamiento.proxima_dosis.asc()).limit(20).all()
     
     if not db_vacunas:
         raise HTTPException(status_code=404, detail="No se encontraron vacunas administradas")
@@ -1175,6 +1240,9 @@ def obtener_vacunas_por_nombre(db: Session = Depends(get_db)):
             dosis=resultado[0].dosis,
             fecha_tratamiento=resultado[0].fecha_tratamiento,
             id_aplicacion=resultado[0].id_aplicacion,
+            marca=resultado[0].marca,
+            proxima_dosis=resultado[0].proxima_dosis,
+            numero_serial=resultado[0].numero_serial,
             nombre_tratamiento=resultado.nombre_tratamiento,
             descripcion_tratamiento=resultado.descripcion_tratamiento,
             nombre_paciente=resultado.nombre_paciente
@@ -1222,6 +1290,9 @@ def obtener_proximas_vacunas_por_paciente(id_paciente: int, db: Session = Depend
             dosis=resultado[0].dosis,
             fecha_tratamiento=resultado[0].fecha_tratamiento,
             id_aplicacion=resultado[0].id_aplicacion,
+            marca=resultado[0].marca,
+            proxima_dosis=resultado[0].proxima_dosis,
+            numero_serial=resultado[0].numero_serial,
             nombre_tratamiento=resultado.nombre_tratamiento,
             descripcion_tratamiento=resultado.descripcion_tratamiento,
             nombre_paciente=resultado.nombre_paciente

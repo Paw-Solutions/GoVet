@@ -7,11 +7,9 @@ export interface ConsultaData {
   motivo: string;
   diagnostico: string;
   observaciones: string;
-  dht: string;
   nodulos_linfaticos: string;
   mucosas: string;
   peso: number;
-  auscultacion_cardiaca_toraxica: string;
   estado_pelaje: string;
   condicion_corporal: string;
   id_consulta: number;
@@ -21,59 +19,69 @@ export interface ConsultaData {
   frecuencia_cardiaca?: number;
   frecuencia_respiratoria?: number;
   deshidratacion?: number;
-  vacunas_inoculadas? : {
-    nombre_vacuna: string;
-    fecha_vacunacion: string;
-    marca: string;
-    numero_de_serie?: string;
-    proxima_dosis?: string;
-  };
-  desparasitacion_interna? : {
-    nombre_desparasitante: string;
-    fecha_administracion: string;
-    marca: string;
-    numero_de_serie?: string;
-  };
-  desparasitacion_externa? : {
-    nombre_desparasitante: string;
-    fecha_administracion: string;
-    marca: string;
-    numero_de_serie?: string;
-  };
+  vacunas_inoculadas? : VacunasData[];
+  desparasitacion_interna? : DesparasitacionData;
+  desparasitacion_externa? : DesparasitacionData;
   examen_clinico?: string;
   indicaciones_generales?: string;
   orden_de_examenes?: string;
-  receta_medica?: {
-    medicamento: string;
-    dosis: string;
-    frecuencia: string; /* Frecuencia en días */
-    duracion: string; /* Duración en días */
-    numero_de_serie?: string;
-  };
+  receta_medica?: RecetaMedicaData[];
   proxima_consulta?: string;
   ttlc?: string;
+  pronostico?: string;
 
   // Información relacionada del paciente
-  paciente?: {
-    id_paciente: number;
-    nombre: string;
-    color?: string;
-    sexo?: string;
-    fecha_nacimiento?: string;
-    codigo_chip?: string;
-    raza?: string;
-    especie?: string;
-  };
-
+  paciente?: PacienteData;
   // Información relacionada del tutor
-  tutor?: {
-    nombre: string;
-    apellido_paterno?: string;
-    apellido_materno?: string;
-    rut: string;
-    telefono?: string;
-    email?: string;
-  };
+  tutor?: TutorData;
+}
+
+
+export interface RecetaMedicaData {
+  medicamento: string;
+  dosis: string;
+  frecuencia: string; /* Frecuencia en días */
+  duracion: string; /* Duración en días */
+  numero_de_serie?: string;
+}
+
+
+export interface PacienteData {
+  id_paciente: number;
+  nombre: string;
+  color?: string;
+  sexo?: string;
+  fecha_nacimiento?: string;
+  codigo_chip?: string;
+  raza?: string;
+  especie?: string;
+}
+
+
+export interface VacunasData {
+  nombre_vacuna: string;
+  fecha_vacunacion: string;
+  marca: string;
+  numero_de_serie?: string;
+  proxima_dosis?: string;
+  requiere_proxima?: boolean;
+}
+
+export interface TutorData {
+  nombre: string;
+  apellido_paterno?: string;
+  apellido_materno?: string;
+  rut: string;
+  telefono?: string;
+  email?: string;
+};
+
+
+export interface DesparasitacionData {
+  nombre_desparasitante: string;
+  fecha_administracion: string;
+  marca: string;
+  numero_de_serie?: string;
 }
 
 export interface PaginatedResponse {
@@ -91,7 +99,7 @@ export interface PaginatedResponse {
 }
 
 // API
-const API_URL = import.meta.env.VITE_API_URL || '/api';
+const API_URL = import.meta.env.VITE_API_URL || "/api";
 
 // Ruta para crear una nueva consulta/ficha
 export async function crearConsulta(formData: ConsultaData) {
@@ -296,6 +304,31 @@ export async function obtenerConsultasPorPaciente(
     return await response.json();
   } catch (error) {
     console.error("Error obteniendo consultas del paciente:", error);
+    throw error;
+  }
+}
+
+/**
+ * Descarga el PDF de una consulta específica
+ * @param idConsulta - ID de la consulta
+ * @returns Promise con el Blob del PDF
+ */
+export async function descargarPdfConsulta(idConsulta: number): Promise<Blob> {
+  try {
+    const response = await fetch(`${API_URL}/consultas/${idConsulta}/pdf`, {
+      method: "GET",
+      headers: {
+        Accept: "application/pdf",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error al descargar PDF: ${response.status}`);
+    }
+
+    return await response.blob();
+  } catch (error) {
+    console.error(`Error descargando PDF de consulta ${idConsulta}:`, error);
     throw error;
   }
 }

@@ -6,6 +6,8 @@ services:
       - .env
     ports:
       - "5007:5432"
+    expose:
+      - "6007"
     volumes:
       - db_data:/var/lib/postgresql/data
       - ./Dbase/generador_schema.sql:/docker-entrypoint-initdb.d/generador_schema.sql
