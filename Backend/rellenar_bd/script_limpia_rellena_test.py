@@ -357,11 +357,11 @@ try:
             cur.execute("""
                 INSERT INTO govet.tutor (rut, nombre, apellido_paterno, apellido_materno, 
                                          telefono, email, direccion, celular, celular2,
-                                         comuna, region, observacion, telefono2)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+                                         comuna, region, observacion, telefono2, activo)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
             """, (rut, nombre, apellido_paterno, apellido_materno, 
                   telefono, email, direccion, celular, None,
-                  comuna, region, observacion, None))
+                  comuna, region, observacion, None, True))
             
             tutores_ruts.append(rut)
             tutores_insertados += 1
@@ -420,11 +420,11 @@ try:
             try:
                 cur.execute("""
                     INSERT INTO govet.paciente (nombre, color, sexo, esterilizado, 
-                                               fecha_nacimiento, id_raza, codigo_chip)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                                               fecha_nacimiento, id_raza, codigo_chip, activo)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                     RETURNING id_paciente;
                 """, (nombre_paciente, color, sexo, esterilizado, 
-                      fecha_nacimiento, id_raza, codigo_chip))
+                      fecha_nacimiento, id_raza, codigo_chip, True))
                 
                 id_paciente = cur.fetchone()[0]
                 
