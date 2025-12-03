@@ -19,15 +19,15 @@ export interface ConsultaData {
   frecuencia_cardiaca?: number;
   frecuencia_respiratoria?: number;
   deshidratacion?: number;
-  vacunas_inoculadas? : VacunasData[];
-  desparasitacion_interna? : DesparasitacionData;
-  desparasitacion_externa? : DesparasitacionData;
+  vacunas_inoculadas?: VacunasData[];
+  desparasitacion_interna?: DesparasitacionData;
+  desparasitacion_externa?: DesparasitacionData;
   examen_clinico?: string;
   indicaciones_generales?: string;
   orden_de_examenes?: string;
   receta_medica?: RecetaMedicaData[];
   proxima_consulta?: string;
-  ttlc?: string;
+  tllc?: number; // Tiempo de Llenado Capilar (numérico en segundos)
   pronostico?: string;
 
   // Información relacionada del paciente
@@ -36,15 +36,13 @@ export interface ConsultaData {
   tutor?: TutorData;
 }
 
-
 export interface RecetaMedicaData {
   medicamento: string;
   dosis: string;
-  frecuencia: string; /* Frecuencia en días */
-  duracion: string; /* Duración en días */
+  frecuencia: string /* Frecuencia en días */;
+  duracion: string /* Duración en días */;
   numero_de_serie?: string;
 }
-
 
 export interface PacienteData {
   id_paciente: number;
@@ -56,7 +54,6 @@ export interface PacienteData {
   raza?: string;
   especie?: string;
 }
-
 
 export interface VacunasData {
   nombre_vacuna: string;
@@ -74,14 +71,15 @@ export interface TutorData {
   rut: string;
   telefono?: string;
   email?: string;
-};
-
+}
 
 export interface DesparasitacionData {
   nombre_desparasitante: string;
   fecha_administracion: string;
   marca: string;
   numero_de_serie?: string;
+  proxima_dosis?: string;
+  requiere_proxima?: boolean;
 }
 
 export interface PaginatedResponse {

@@ -41,7 +41,7 @@ const HistorialConsultas: React.FC<HistorialConsultasProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const API_URL = import.meta.env.VITE_API_URL || '/api';
+  const API_URL = import.meta.env.VITE_API_URL || "/api";
 
   // Cargar consultas cuando se abre el modal
   useEffect(() => {
@@ -85,7 +85,17 @@ const HistorialConsultas: React.FC<HistorialConsultasProps> = ({
 
       const data = await response.json();
       console.log("✅ Consultas recibidas:", data);
-      setConsultas(data);
+
+      // Ordenar consultas por fecha (más recientes primero)
+      const consultasOrdenadas = data.sort(
+        (a: ConsultaData, b: ConsultaData) => {
+          const fechaA = new Date(a.fecha_consulta);
+          const fechaB = new Date(b.fecha_consulta);
+          return fechaB.getTime() - fechaA.getTime();
+        }
+      );
+
+      setConsultas(consultasOrdenadas);
     } catch (err) {
       console.error("❌ Error cargando consultas:", err);
       setError("No se pudieron cargar las consultas del paciente");

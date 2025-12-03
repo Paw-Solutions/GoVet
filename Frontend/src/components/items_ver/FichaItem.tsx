@@ -75,9 +75,9 @@ const FichaItem: React.FC<ConsultaItemProps> = ({
       </IonAvatar>
 
       <IonLabel style={{ padding: "5px" }}>
-        {/* Nombre del paciente */}
+        {/* Motivo de consulta como título */}
         <h2 className="paciente-nombre">
-          {consulta?.paciente?.nombre || "Sin nombre"}
+          {consulta.motivo || consulta.motivo_consulta || "Sin motivo"}
         </h2>
 
         {/* Fecha de consulta */}
@@ -94,8 +94,8 @@ const FichaItem: React.FC<ConsultaItemProps> = ({
           </div>
         )}
 
-        {/* Motivo de consulta */}
-        {(consulta.motivo || consulta.motivo_consulta) && (
+        {/* Diagnóstico */}
+        {consulta.diagnostico && (
           <div>
             <h2>
               <p>
@@ -104,7 +104,7 @@ const FichaItem: React.FC<ConsultaItemProps> = ({
                   className="pacientes-icon"
                 />
                 <span style={{ marginLeft: "8px" }}>
-                  : {consulta.motivo || consulta.motivo_consulta}
+                  : {consulta.diagnostico}
                 </span>
               </p>
             </h2>

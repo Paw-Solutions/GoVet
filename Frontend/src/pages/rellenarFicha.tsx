@@ -45,9 +45,17 @@ import {
 import "../styles/rellenarFicha.css";
 import "../styles/variables.css";
 import ModalEscogerPaciente from "../components/rellenarFicha/modalEscogerPaciente";
+import CajaDesparasitacion from "../components/desparasitacion/CajaDesparasitacion";
+import CajaRecetas from "../components/recetas/CajaRecetas";
 import { PacienteData } from "../api/pacientes"; // Importar la interfaz correcta
 import { TutorData } from "../api/tutores";
-import { ConsultaData, crearConsulta, VacunasData, RecetaMedicaData, DesparasitacionData } from "../api/fichas";
+import {
+  ConsultaData,
+  crearConsulta,
+  VacunasData,
+  RecetaMedicaData,
+  DesparasitacionData,
+} from "../api/fichas";
 // Componente: Interfaz para gestionar consultas
 const RellenarFicha: React.FC = () => {
   const [showModalPacientes, setShowModalPacientes] = useState(false);
@@ -66,31 +74,40 @@ const RellenarFicha: React.FC = () => {
     fecha_vacunacion: new Date().toISOString().split("T")[0],
     marca: "",
     numero_de_serie: "",
-    proxima_dosis: new Date(new Date().setDate(new Date().getDate() + 28)).toISOString().split("T")[0],
+    proxima_dosis: new Date(new Date().setDate(new Date().getDate() + 28))
+      .toISOString()
+      .split("T")[0],
     requiere_proxima: true,
   });
 
-  const [desparasitacionInternaData, setDesparasitacionInternaData] = useState<DesparasitacionData>({
-    nombre_desparasitante: "",
-    fecha_administracion: new Date().toISOString().split("T")[0],
-    marca: "",
-    numero_de_serie: "",
-  });
+  const [desparasitacionInternaData, setDesparasitacionInternaData] =
+    useState<DesparasitacionData>({
+      nombre_desparasitante: "",
+      fecha_administracion: new Date().toISOString().split("T")[0],
+      marca: "",
+      numero_de_serie: "",
+      proxima_dosis: new Date(new Date().setDate(new Date().getDate() + 30))
+        .toISOString()
+        .split("T")[0],
+      requiere_proxima: true,
+    });
 
-  const [desparasitacionExternaData, setDesparasitacionExternaData] = useState<DesparasitacionData>({
-    nombre_desparasitante: "",
-    fecha_administracion: new Date().toISOString().split("T")[0],
-    marca: "",
-    numero_de_serie: "",
-  });
+  const [desparasitacionExternaData, setDesparasitacionExternaData] =
+    useState<DesparasitacionData>({
+      nombre_desparasitante: "",
+      fecha_administracion: new Date().toISOString().split("T")[0],
+      marca: "",
+      numero_de_serie: "",
+      proxima_dosis: new Date(new Date().setDate(new Date().getDate() + 30))
+        .toISOString()
+        .split("T")[0],
+      requiere_proxima: true,
+    });
 
-  const [recetaMedicaData, setRecetaMedicaData] = useState<RecetaMedicaData>({
-    medicamento: "",
-    dosis: "",
-    frecuencia: "", /* Frecuencia en días */
-    duracion: "", /* Duración en días */
-    numero_de_serie: "",
-  });
+  // Estado para recetas médicas como array
+  const [recetaMedicaData, setRecetaMedicaData] = useState<RecetaMedicaData[]>(
+    []
+  );
 
   // Estado para los campos del formulario
   const [formData, setFormData] = useState<ConsultaData>({
@@ -120,7 +137,7 @@ const RellenarFicha: React.FC = () => {
     orden_de_examenes: "",
     receta_medica: undefined,
     proxima_consulta: "",
-    ttlc: "",
+    tllc: 0,
 
     // Información relacionada del paciente
     paciente: {
@@ -153,53 +170,35 @@ const RellenarFicha: React.FC = () => {
     }));
   };
 
-
-  const handleRecetaMedicaChange = (e: any) => {
-    const { name, value } = e.target;
-    setRecetaMedicaData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleAgregarReceta = () => {
-    setFormData(prev => ({
-      ...prev,
-      receta_medica: [...(prev.receta_medica || []), recetaMedicaData],
-    }));
-    setRecetaMedicaData({
-      medicamento: "",
-      dosis: "",
-      frecuencia: "",
-      duracion: "",
-      numero_de_serie: "",
-    });
-  };
-
-  const handleEliminarReceta = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      receta_medica: prev.receta_medica ? prev.receta_medica.filter((_, i) => i !== index) : undefined,
-    }));
-  };
-
+  // Los handlers de receta médica ahora están en el componente CajaRecetas
 
   const handleVacunasChange = (e: any) => {
-    const { name, value } = e.target ?? { name: e.detail?.name, value: e.detail?.value };
+    const { name, value } = e.target ?? {
+      name: e.detail?.name,
+      value: e.detail?.value,
+    };
     // Acepta eventos de Ion y DOM
     const val = value ?? e.detail?.value ?? "";
     setVacunasData((prev) => {
       const next = { ...prev, [name]: val };
       // Si cambió la fecha de vacunación y no hay próxima dosis explícita, calcular +28 días
-      if (name === "fecha_vacunacion" && (!next.proxima_dosis || next.proxima_dosis === "")) {
-        if (name === "fecha_vacunacion" && (next.requiere_proxima !== false) && (!next.proxima_dosis || next.proxima_dosis === "")) {
-        const fecha = new Date(val);
-        if (!isNaN(fecha.getTime())) {
-          const proxima = new Date(fecha);
-          proxima.setDate(proxima.getDate() + 28);
-          next.proxima_dosis = proxima.toISOString().split("T")[0];
+      if (
+        name === "fecha_vacunacion" &&
+        (!next.proxima_dosis || next.proxima_dosis === "")
+      ) {
+        if (
+          name === "fecha_vacunacion" &&
+          next.requiere_proxima !== false &&
+          (!next.proxima_dosis || next.proxima_dosis === "")
+        ) {
+          const fecha = new Date(val);
+          if (!isNaN(fecha.getTime())) {
+            const proxima = new Date(fecha);
+            proxima.setDate(proxima.getDate() + 28);
+            next.proxima_dosis = proxima.toISOString().split("T")[0];
+          }
         }
-      }}
+      }
       // Si selecciona la vacuna "Antirrábica", mantener campo número de certificado visible (numero_de_serie)
       return next;
     });
@@ -214,12 +213,16 @@ const RellenarFicha: React.FC = () => {
       proxima_dosis: checked ? prev.proxima_dosis : "",
     }));
   };
-  
+
   const handleAgregarVacuna = () => {
-    setFormData(prev => {
+    setFormData((prev) => {
       const vacuna = { ...vacunasData };
       // Si requiere próxima dosis y no se proporcionó, calcular +28 días desde fecha_vacunacion
-      if (vacuna.requiere_proxima !== false && !vacuna.proxima_dosis && vacuna.fecha_vacunacion) {
+      if (
+        vacuna.requiere_proxima !== false &&
+        !vacuna.proxima_dosis &&
+        vacuna.fecha_vacunacion
+      ) {
         const f = new Date(vacuna.fecha_vacunacion);
         if (!isNaN(f.getTime())) {
           f.setDate(f.getDate() + 28);
@@ -243,30 +246,98 @@ const RellenarFicha: React.FC = () => {
     });
   };
 
-
   const handleEliminarVacuna = (index: number) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      vacunas_inoculadas: prev.vacunas_inoculadas ? prev.vacunas_inoculadas.filter((_, i) => i !== index) : undefined,
+      vacunas_inoculadas: prev.vacunas_inoculadas
+        ? prev.vacunas_inoculadas.filter((_, i) => i !== index)
+        : undefined,
     }));
   };
 
+  const handleDesparasitacionInternaChange = (e: any) => {
+    const { name, value } = e.target ?? {
+      name: e.detail?.name,
+      value: e.detail?.value,
+    };
+    const val = value ?? e.detail?.value ?? "";
+    setDesparasitacionInternaData((prev) => ({
+      ...prev,
+      [name]: val,
+    }));
+  };
 
   const handleAgregarDesparasitacionInterna = () => {
-    setFormData(prev => ({
+    const desparasitacion = { ...desparasitacionInternaData };
+    // Si requiere próxima dosis y no se proporcionó, calcular +30 días
+    if (
+      desparasitacion.requiere_proxima !== false &&
+      !desparasitacion.proxima_dosis &&
+      desparasitacion.fecha_administracion
+    ) {
+      const f = new Date(desparasitacion.fecha_administracion);
+      if (!isNaN(f.getTime())) {
+        f.setDate(f.getDate() + 30);
+        desparasitacion.proxima_dosis = f.toISOString().split("T")[0];
+      }
+    }
+
+    setFormData((prev) => ({
       ...prev,
-      desparasitacion_interna: desparasitacionInternaData,
+      desparasitacion_interna: desparasitacion,
     }));
+    // Reset form
+    setDesparasitacionInternaData({
+      nombre_desparasitante: "",
+      fecha_administracion: new Date().toISOString().split("T")[0],
+      marca: "",
+      numero_de_serie: "",
+      proxima_dosis: "",
+      requiere_proxima: true,
+    });
   };
 
+  const handleDesparasitacionExternaChange = (e: any) => {
+    const { name, value } = e.target ?? {
+      name: e.detail?.name,
+      value: e.detail?.value,
+    };
+    const val = value ?? e.detail?.value ?? "";
+    setDesparasitacionExternaData((prev) => ({
+      ...prev,
+      [name]: val,
+    }));
+  };
 
   const handleAgregarDesparasitacionExterna = () => {
-    setFormData(prev => ({
-      ...prev,
-      desparasitacion_externa: desparasitacionExternaData,
-    }));
-  };
+    const desparasitacion = { ...desparasitacionExternaData };
+    // Si requiere próxima dosis y no se proporcionó, calcular +30 días
+    if (
+      desparasitacion.requiere_proxima !== false &&
+      !desparasitacion.proxima_dosis &&
+      desparasitacion.fecha_administracion
+    ) {
+      const f = new Date(desparasitacion.fecha_administracion);
+      if (!isNaN(f.getTime())) {
+        f.setDate(f.getDate() + 30);
+        desparasitacion.proxima_dosis = f.toISOString().split("T")[0];
+      }
+    }
 
+    setFormData((prev) => ({
+      ...prev,
+      desparasitacion_externa: desparasitacion,
+    }));
+    // Reset form
+    setDesparasitacionExternaData({
+      nombre_desparasitante: "",
+      fecha_administracion: new Date().toISOString().split("T")[0],
+      marca: "",
+      numero_de_serie: "",
+      proxima_dosis: "",
+      requiere_proxima: true,
+    });
+  };
 
   const handleNumericChange = (e: any) => {
     const { name, value } = e.target;
@@ -330,7 +401,7 @@ const RellenarFicha: React.FC = () => {
     } else if (currentStep === "clinico") {
       setCurrentStep("post_pronostico");
     } else if (currentStep === "post_pronostico") {
-      setCurrentStep("receta_medica")
+      setCurrentStep("receta_medica");
     }
   };
 
@@ -340,7 +411,7 @@ const RellenarFicha: React.FC = () => {
     } else if (currentStep === "fisico") {
       setCurrentStep("general");
     } else if (currentStep === "post_pronostico") {
-      setCurrentStep("clinico");  
+      setCurrentStep("clinico");
     } else if (currentStep === "receta_medica") {
       setCurrentStep("post_pronostico");
     }
@@ -356,9 +427,15 @@ const RellenarFicha: React.FC = () => {
   const guardarFicha = async () => {
     setIsLoading(true);
     try {
-      // Aquí harías la petición POST al backend
-      console.log("Guardando ficha:", formData);
-      const response = await crearConsulta(formData);
+      // Preparar datos con recetas médicas
+      const dataToSend = {
+        ...formData,
+        receta_medica:
+          recetaMedicaData.length > 0 ? recetaMedicaData : undefined,
+      };
+
+      console.log("Guardando ficha:", dataToSend);
+      const response = await crearConsulta(dataToSend);
       setToastMessage("Ficha veterinaria guardada exitosamente");
 
       // Limpiar formulario después de guardar
@@ -387,9 +464,9 @@ const RellenarFicha: React.FC = () => {
         examen_clinico: "",
         indicaciones_generales: "",
         orden_de_examenes: "",
-        receta_medica: undefined,
+        receta_medica: [],
         proxima_consulta: "",
-        ttlc: "",
+        tllc: 0,
 
         // Información relacionada del paciente
         paciente: {
@@ -415,6 +492,7 @@ const RellenarFicha: React.FC = () => {
       });
 
       setSelectedPaciente(null);
+      setRecetaMedicaData([]);
       setCurrentStep("general");
     } catch (error) {
       console.error("Error al guardar ficha:", error);
@@ -711,7 +789,9 @@ const RellenarFicha: React.FC = () => {
                                 <IonIcon icon={mailOutline} />
                                 <span>
                                   <strong>Email:</strong>{" "}
-                                  {selectedPaciente.tutor.email != "NaN" ? selectedPaciente.tutor.email : "No asignado"}
+                                  {selectedPaciente.tutor.email != "NaN"
+                                    ? selectedPaciente.tutor.email
+                                    : "No asignado"}
                                 </span>
                               </div>
                             )}
@@ -763,33 +843,33 @@ const RellenarFicha: React.FC = () => {
                     />
                   </IonItem>
                 </IonCol>
-                  <IonCol size="12" size-md="6">
-                    <IonItem>
-                      <IonInput
-                        label="Frecuencia cardíaca ( 1pm )"
-                        labelPlacement="stacked"
-                        fill="outline"
-                        placeholder="Ej: 80"
-                        type="number"
-                        name="frecuencia_cardiaca"
-                        value={formData.frecuencia_cardiaca}
-                        onIonChange={handleInputChange}
-                      />
-                    </IonItem>
+                <IonCol size="12" size-md="6">
+                  <IonItem>
+                    <IonInput
+                      label="Frecuencia cardíaca ( 1pm )"
+                      labelPlacement="stacked"
+                      fill="outline"
+                      placeholder="Ej: 80"
+                      type="number"
+                      name="frecuencia_cardiaca"
+                      value={formData.frecuencia_cardiaca}
+                      onIonChange={handleInputChange}
+                    />
+                  </IonItem>
                 </IonCol>
-                  <IonCol size="12" size-md="6">
-                    <IonItem>
-                      <IonInput
-                        label="Frecuencia respiratoria ( rpm )"
-                        labelPlacement="stacked"
-                        fill="outline"
-                        placeholder="Ej: 20"
-                        type="number"
-                        name="frecuencia_respiratoria"
-                        value={formData.frecuencia_respiratoria}
-                        onIonChange={handleInputChange}
-                      />
-                    </IonItem>
+                <IonCol size="12" size-md="6">
+                  <IonItem>
+                    <IonInput
+                      label="Frecuencia respiratoria ( rpm )"
+                      labelPlacement="stacked"
+                      fill="outline"
+                      placeholder="Ej: 20"
+                      type="number"
+                      name="frecuencia_respiratoria"
+                      value={formData.frecuencia_respiratoria}
+                      onIonChange={handleInputChange}
+                    />
+                  </IonItem>
                 </IonCol>
                 <IonCol size="12" size-md="6">
                   <IonItem>
@@ -821,19 +901,19 @@ const RellenarFicha: React.FC = () => {
                     />
                   </IonItem>
                 </IonCol>
-                  <IonCol size="12" size-md="6">
-                    <IonItem>
-                      <IonTextarea
-                        label="Estado del pelaje"
-                        labelPlacement="stacked"
-                        fill="outline"
-                        placeholder="Describa el estado del pelaje"
-                        rows={3}
-                        name="estado_pelaje"
-                        value={formData.estado_pelaje}
-                        onIonChange={handleInputChange}
-                      />
-                    </IonItem>
+                <IonCol size="12" size-md="6">
+                  <IonItem>
+                    <IonTextarea
+                      label="Estado del pelaje"
+                      labelPlacement="stacked"
+                      fill="outline"
+                      placeholder="Describa el estado del pelaje"
+                      rows={3}
+                      name="estado_pelaje"
+                      value={formData.estado_pelaje}
+                      onIonChange={handleInputChange}
+                    />
+                  </IonItem>
                 </IonCol>
                 <IonCol size="12" size-md="6">
                   <IonItem>
@@ -845,7 +925,8 @@ const RellenarFicha: React.FC = () => {
                       rows={3}
                       name="mucosas"
                       value={formData.mucosas}
-                      onIonChange={handleInputChange} />
+                      onIonChange={handleInputChange}
+                    />
                   </IonItem>
                 </IonCol>
               </IonRow>
@@ -902,6 +983,22 @@ const RellenarFicha: React.FC = () => {
                     />
                   </IonItem>
                 </IonCol>
+                <IonCol size="12" size-md="6">
+                  <IonItem>
+                    <IonInput
+                      label="TLLC - Tiempo de Llenado Capilar (seg)"
+                      labelPlacement="stacked"
+                      fill="outline"
+                      placeholder="Ej: 2"
+                      type="number"
+                      name="tllc"
+                      value={formData.tllc}
+                      onIonChange={handleNumericChange}
+                      step="0.1"
+                      min="0"
+                    />
+                  </IonItem>
+                </IonCol>
               </IonRow>
               <IonRow>
                 <IonCol size="12">
@@ -935,7 +1032,7 @@ const RellenarFicha: React.FC = () => {
                   </IonItem>
                 </IonCol>
               </IonRow>
-                <IonRow>
+              <IonRow>
                 <IonCol size="12">
                   <IonCard>
                     <IonCardHeader>
@@ -954,9 +1051,15 @@ const RellenarFicha: React.FC = () => {
                                 value={vacunasData.nombre_vacuna}
                                 onIonChange={handleVacunasChange}
                               >
-                                <IonSelectOption value="Sextuple">Sextuple</IonSelectOption>
-                                <IonSelectOption value="KC triple Felina">KC triple Felina</IonSelectOption>
-                                <IonSelectOption value="Antirrábica">Leucemia y Antirrábica</IonSelectOption>
+                                <IonSelectOption value="Sextuple">
+                                  Sextuple
+                                </IonSelectOption>
+                                <IonSelectOption value="KC triple Felina">
+                                  KC triple Felina
+                                </IonSelectOption>
+                                <IonSelectOption value="Antirrábica">
+                                  Leucemia y Antirrábica
+                                </IonSelectOption>
                               </IonSelect>
                             </IonItem>
                           </IonCol>
@@ -975,7 +1078,7 @@ const RellenarFicha: React.FC = () => {
                           </IonCol>
                         </IonRow>
                         <IonRow>
-                        <IonCol size="12" size-md="4">
+                          <IonCol size="12" size-md="4">
                             <IonItem>
                               <IonInput
                                 label="Número de serie / cert."
@@ -1033,7 +1136,10 @@ const RellenarFicha: React.FC = () => {
 
                         <IonRow>
                           <IonCol size="12" className="ion-text-end">
-                            <IonButton size="small" onClick={handleAgregarVacuna}>
+                            <IonButton
+                              size="small"
+                              onClick={handleAgregarVacuna}
+                            >
                               Agregar vacuna
                             </IonButton>
                           </IonCol>
@@ -1045,23 +1151,34 @@ const RellenarFicha: React.FC = () => {
                             <IonRow>
                               <IonCol size="12">
                                 <IonList>
-                                  {(formData.vacunas_inoculadas || []).map((v: any, idx: number) => (
-                                    <IonItem key={idx}>
-                                      <IonLabel>
-                                        <h3>{v.nombre_vacuna}</h3>
-                                        <p>
-                                          {v.marca ? `${v.marca} · ` : ""}
-                                          {v.numero_de_serie ? `N° ${v.numero_de_serie} · ` : ""}
-                                          Fecha: {v.fecha_vacunacion} · Próx: {v.proxima_dosis}
-                                        </p>
-                                      </IonLabel>
-                                      <IonButtons slot="end">
-                                        <IonButton fill="clear" color="danger" onClick={() => handleEliminarVacuna(idx)}>
-                                          Eliminar
-                                        </IonButton>
-                                      </IonButtons>
-                                    </IonItem>
-                                  ))}
+                                  {(formData.vacunas_inoculadas || []).map(
+                                    (v: any, idx: number) => (
+                                      <IonItem key={idx}>
+                                        <IonLabel>
+                                          <h3>{v.nombre_vacuna}</h3>
+                                          <p>
+                                            {v.marca ? `${v.marca} · ` : ""}
+                                            {v.numero_de_serie
+                                              ? `N° ${v.numero_de_serie} · `
+                                              : ""}
+                                            Fecha: {v.fecha_vacunacion} · Próx:{" "}
+                                            {v.proxima_dosis}
+                                          </p>
+                                        </IonLabel>
+                                        <IonButtons slot="end">
+                                          <IonButton
+                                            fill="clear"
+                                            color="danger"
+                                            onClick={() =>
+                                              handleEliminarVacuna(idx)
+                                            }
+                                          >
+                                            Eliminar
+                                          </IonButton>
+                                        </IonButtons>
+                                      </IonItem>
+                                    )
+                                  )}
                                 </IonList>
                               </IonCol>
                             </IonRow>
@@ -1072,6 +1189,35 @@ const RellenarFicha: React.FC = () => {
                   </IonCard>
                 </IonCol>
               </IonRow>
+
+              {/* Sección Desparasitación Interna */}
+              <IonRow>
+                <IonCol size="12">
+                  <CajaDesparasitacion
+                    titulo="Desparasitación Interna (Opcional)"
+                    tipo="interna"
+                    datos={desparasitacionInternaData}
+                    setDatos={setDesparasitacionInternaData}
+                    onAgregar={handleAgregarDesparasitacionInterna}
+                    datoGuardado={formData.desparasitacion_interna}
+                  />
+                </IonCol>
+              </IonRow>
+
+              {/* Sección Desparasitación Externa */}
+              <IonRow>
+                <IonCol size="12">
+                  <CajaDesparasitacion
+                    titulo="Desparasitación Externa (Opcional)"
+                    tipo="externa"
+                    datos={desparasitacionExternaData}
+                    setDatos={setDesparasitacionExternaData}
+                    onAgregar={handleAgregarDesparasitacionExterna}
+                    datoGuardado={formData.desparasitacion_externa}
+                  />
+                </IonCol>
+              </IonRow>
+
               <IonRow>
                 <IonCol size="12">
                   <IonItem>
@@ -1100,9 +1246,15 @@ const RellenarFicha: React.FC = () => {
                       value={formData.pronostico}
                       onIonChange={handleInputChange}
                     >
-                      <IonSelectOption value="favorable">Favorable</IonSelectOption>
-                      <IonSelectOption value="desfavorable">Desfavorable</IonSelectOption>
-                      <IonSelectOption value="reservado">Reservado</IonSelectOption>
+                      <IonSelectOption value="favorable">
+                        Favorable
+                      </IonSelectOption>
+                      <IonSelectOption value="desfavorable">
+                        Desfavorable
+                      </IonSelectOption>
+                      <IonSelectOption value="reservado">
+                        Reservado
+                      </IonSelectOption>
                     </IonSelect>
                   </IonItem>
                 </IonCol>
@@ -1183,82 +1335,10 @@ const RellenarFicha: React.FC = () => {
 
         {/* Paso 5: receta médica */}
         {currentStep === "receta_medica" && (
-          <IonList>
-            <IonGrid>
-              <IonRow>
-                <IonCol size="12" size-md="6">
-                  <IonItem>
-                    <IonInput
-                      label="Medicamento"
-                      labelPlacement="stacked"
-                      fill="outline"
-                      placeholder="Nombre del medicamento"
-                      type="text"
-                      name="medicamento"
-                      value={recetaMedicaData.medicamento}
-                      onIonChange={handleRecetaMedicaChange}
-                    />
-                  </IonItem>
-                </IonCol>
-                <IonCol size="12" size-md="6">
-                  <IonItem>
-                    <IonInput
-                      label="Dosis (mg/ml)"
-                      labelPlacement="stacked"
-                      fill="outline"
-                      placeholder="Cantidad de dosis"
-                      type="text"
-                      name="dosis"
-                      value={recetaMedicaData.dosis}
-                      onIonChange={handleRecetaMedicaChange}
-                    />
-                  </IonItem>
-                </IonCol>
-                <IonCol size="12" size-md="6">
-                  <IonItem>
-                    <IonInput
-                      label="Frecuencia (días)"
-                      labelPlacement="stacked"
-                      fill="outline"
-                      placeholder="Frecuencia de administración (ej: 1 vez al día)"
-                      type="text"
-                      name="frecuencia"
-                      value={recetaMedicaData.frecuencia}
-                      onIonChange={handleRecetaMedicaChange}
-                    />
-                  </IonItem>
-                </IonCol>
-                <IonCol size="12" size-md="6">
-                  <IonItem>
-                    <IonInput
-                      label="Duracion (días)"
-                      labelPlacement="stacked"
-                      fill="outline"
-                      placeholder="Duración del tratamiento (días)"
-                      type="text"
-                      name="duracion"
-                      value={recetaMedicaData.duracion}
-                      onIonChange={handleRecetaMedicaChange}
-                    />
-                  </IonItem>
-                </IonCol>
-                <IonCol size="12" size-md="6">
-                  <IonItem>
-                    <IonInput
-                      label="Número de serie"
-                      labelPlacement="stacked"
-                      fill="outline"
-                      placeholder="?"
-                      type="text"
-                      name="numeroSerie"
-                      value={recetaMedicaData.numero_de_serie}
-                      onIonChange={handleRecetaMedicaChange}
-                    />
-                  </IonItem>
-                </IonCol>
-              </IonRow>
-            </IonGrid>
-          </IonList>
+          <CajaRecetas
+            recetas={recetaMedicaData}
+            setRecetas={setRecetaMedicaData}
+          />
         )}
 
         {/* Espaciado para el footer */}
@@ -1373,7 +1453,7 @@ const RellenarFicha: React.FC = () => {
                     </IonButton>
                   </IonCol>
                 </>
-              )} 
+              )}
             </IonRow>
           </IonGrid>
         </IonToolbar>
