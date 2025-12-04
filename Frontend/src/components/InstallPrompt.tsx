@@ -2,7 +2,7 @@ import React from "react";
 import { IonButton, IonIcon, IonCard, IonCardContent } from "@ionic/react";
 import { downloadOutline, closeOutline } from "ionicons/icons";
 import { usePWAInstall, getDeviceType } from "../utils/pwaInstall";
-import "./InstallPrompt.css";
+import "../styles/InstallPrompt.css";
 
 interface InstallPromptProps {
   onDismiss?: () => void;

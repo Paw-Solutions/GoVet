@@ -6,7 +6,7 @@ import {
   refreshOutline,
 } from "ionicons/icons";
 import { useServiceWorker } from "../utils/serviceWorker";
-import "./PWAStatus.css";
+import "../styles/PWAStatus.css";
 
 const PWAStatus: React.FC = () => {
   const { updateAvailable, isOnline, skipWaiting } = useServiceWorker();

@@ -22,7 +22,7 @@ interface DesparasitacionProps {
   datos: {
     nombre_desparasitante: string;
     marca: string;
-    numero_de_serie: string;
+    numero_de_serie?: string;
     fecha_administracion: string;
     proxima_dosis?: string;
     requiere_proxima?: boolean;
@@ -32,7 +32,7 @@ interface DesparasitacionProps {
   datoGuardado?: {
     nombre_desparasitante: string;
     marca: string;
-    numero_de_serie: string;
+    numero_de_serie?: string;
     fecha_administracion: string;
     proxima_dosis?: string;
     requiere_proxima?: boolean;

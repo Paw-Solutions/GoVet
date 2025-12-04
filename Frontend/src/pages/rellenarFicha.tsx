@@ -27,6 +27,8 @@ import {
   IonCardContent,
   IonNote,
   IonToggle,
+  IonModal,
+  IonAlert,
 } from "@ionic/react";
 import {
   chevronBackOutline,
@@ -41,13 +43,23 @@ import {
   fishOutline,
   informationOutline,
   informationCircleOutline,
+  pulseOutline,
+  bodyOutline,
+  clipboardOutline,
+  flaskOutline,
+  medkitOutline,
+  documentTextOutline,
+  closeOutline,
+  closeCircleOutline,
 } from "ionicons/icons";
 import "../styles/rellenarFicha.css";
 import "../styles/variables.css";
 import ModalEscogerPaciente from "../components/rellenarFicha/modalEscogerPaciente";
 import CajaDesparasitacion from "../components/desparasitacion/CajaDesparasitacion";
 import CajaRecetas from "../components/recetas/CajaRecetas";
-import { PacienteData } from "../api/pacientes"; // Importar la interfaz correcta
+import ModuleCard from "../components/rellenarFicha/ModuleCard";
+import PatientHeader from "../components/rellenarFicha/PatientHeader";
+import { PacienteData } from "../api/pacientes";
 import { TutorData } from "../api/tutores";
 import {
   ConsultaData,
@@ -56,15 +68,17 @@ import {
   RecetaMedicaData,
   DesparasitacionData,
 } from "../api/fichas";
-// Componente: Interfaz para gestionar consultas
+
+// Componente: Dashboard con 6 módulos para gestionar consultas
 const RellenarFicha: React.FC = () => {
   const [showModalPacientes, setShowModalPacientes] = useState(false);
-  const [currentStep, setCurrentStep] = useState<
-    "general" | "fisico" | "clinico" | "post_pronostico" | "receta_medica"
-  >("general");
+  const [activeModule, setActiveModule] = useState<string | null>(null);
+  const [touchedModules, setTouchedModules] = useState<Set<string>>(new Set());
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showCancelAlert, setShowCancelAlert] = useState(false);
+  const [requiereProximaConsulta, setRequiereProximaConsulta] = useState(false);
   const [selectedPaciente, setSelectedPaciente] = useState<PacienteData | null>(
     null
   ); // Usar PacienteData
@@ -393,35 +407,87 @@ const RellenarFicha: React.FC = () => {
     }
   }, []);
 
-  const navegarSiguiente = () => {
-    if (currentStep === "general") {
-      setCurrentStep("fisico");
-    } else if (currentStep === "fisico") {
-      setCurrentStep("clinico");
-    } else if (currentStep === "clinico") {
-      setCurrentStep("post_pronostico");
-    } else if (currentStep === "post_pronostico") {
-      setCurrentStep("receta_medica");
-    }
+  // Función para abrir módulo y marcarlo como tocado
+  const openModule = (moduleId: string) => {
+    setActiveModule(moduleId);
+    setTouchedModules((prev) => new Set(prev).add(moduleId));
   };
 
-  const navegarAnterior = () => {
-    if (currentStep === "clinico") {
-      setCurrentStep("fisico");
-    } else if (currentStep === "fisico") {
-      setCurrentStep("general");
-    } else if (currentStep === "post_pronostico") {
-      setCurrentStep("clinico");
-    } else if (currentStep === "receta_medica") {
-      setCurrentStep("post_pronostico");
-    }
-  };
+  // Función de validación para determinar el estado de cada módulo
+  const getModuleStatus = (
+    moduleId: string
+  ): "empty" | "complete" | "incomplete" | "visited" => {
+    const isTouched = touchedModules.has(moduleId);
 
-  const puedeAvanzar = () => {
-    if (currentStep === "general") {
-      return selectedPaciente && formData.motivo.trim();
+    switch (moduleId) {
+      case "identificacion":
+        if (formData.motivo.trim()) return "complete";
+        return isTouched ? "visited" : "empty";
+
+      case "constantes":
+        const hasAllConstantes =
+          formData.peso > 0 && (formData.temperatura ?? 0) > 0;
+        const hasSomeConstantes =
+          formData.peso > 0 ||
+          (formData.temperatura ?? 0) > 0 ||
+          (formData.frecuencia_cardiaca ?? 0) > 0 ||
+          (formData.frecuencia_respiratoria ?? 0) > 0;
+
+        if (hasAllConstantes) return "complete";
+        if (hasSomeConstantes) return "incomplete";
+        if (isTouched) return "visited";
+        return "empty";
+
+      case "examen_fisico":
+        const hasAllFisico = formData.mucosas && formData.condicion_corporal;
+        const hasSomeFisico =
+          formData.mucosas ||
+          formData.condicion_corporal ||
+          formData.estado_pelaje ||
+          formData.estado_piel ||
+          formData.nodulos_linfaticos;
+
+        if (hasAllFisico) return "complete";
+        if (hasSomeFisico) return "incomplete";
+        if (isTouched) return "visited";
+        return "empty";
+
+      case "diagnostico":
+        if (formData.diagnostico.trim()) return "complete";
+        if (formData.examen_clinico?.trim() || formData.observaciones?.trim())
+          return "incomplete";
+        if (isTouched) return "visited";
+        return "empty";
+
+      case "vacunacion":
+        if (
+          formData.vacunas_inoculadas &&
+          formData.vacunas_inoculadas.length > 0
+        )
+          return "complete";
+        return isTouched ? "visited" : "empty";
+
+      case "antiparasitarios":
+        if (
+          formData.desparasitacion_interna ||
+          formData.desparasitacion_externa
+        )
+          return "complete";
+        return isTouched ? "visited" : "empty";
+
+      case "plan_tratamiento":
+        if (
+          (recetaMedicaData && recetaMedicaData.length > 0) ||
+          formData.indicaciones_generales?.trim()
+        )
+          return "complete";
+        if (formData.orden_de_examenes?.trim()) return "incomplete";
+        if (isTouched) return "visited";
+        return "empty";
+
+      default:
+        return "empty";
     }
-    return true;
   };
 
   const guardarFicha = async () => {
@@ -493,7 +559,7 @@ const RellenarFicha: React.FC = () => {
 
       setSelectedPaciente(null);
       setRecetaMedicaData([]);
-      setCurrentStep("general");
+      setActiveModule(null);
     } catch (error) {
       console.error("Error al guardar ficha:", error);
       setToastMessage("Error al guardar la ficha");
@@ -503,988 +569,817 @@ const RellenarFicha: React.FC = () => {
     }
   };
 
-  const getStepNumber = () => {
-    switch (currentStep) {
-      case "general":
-        return 1;
-      case "fisico":
-        return 2;
-      case "clinico":
-        return 3;
-      case "post_pronostico":
-        return 4;
-      case "receta_medica":
-        return 5;
-      default:
-        return 1;
-    }
-  };
-
-  const getStepTitle = () => {
-    switch (currentStep) {
-      case "general":
-        return "Información General";
-      case "fisico":
-        return "Examen Físico";
-      case "clinico":
-        return "Examen Clínico";
-      case "post_pronostico":
-        return "Post pronóstico";
-      case "receta_medica":
-        return "Receta Médica";
-      default:
-        return "Información General";
-    }
+  const handleCancelar = () => {
+    // Limpiar todo el formulario y estados
+    setFormData({
+      id_paciente: 0,
+      rut: "",
+      fecha_consulta: new Date().toISOString().split("T")[0],
+      motivo: "",
+      diagnostico: "",
+      observaciones: "",
+      nodulos_linfaticos: "",
+      mucosas: "",
+      peso: 0,
+      estado_pelaje: "",
+      condicion_corporal: "",
+      id_consulta: 0,
+      motivo_consulta: "",
+      estado_piel: "",
+      temperatura: 0,
+      frecuencia_cardiaca: 0,
+      frecuencia_respiratoria: 0,
+      deshidratacion: 0,
+      vacunas_inoculadas: undefined,
+      desparasitacion_interna: undefined,
+      desparasitacion_externa: undefined,
+      examen_clinico: "",
+      indicaciones_generales: "",
+      orden_de_examenes: "",
+      receta_medica: [],
+      proxima_consulta: "",
+      tllc: 0,
+      paciente: {
+        id_paciente: 0,
+        nombre: "",
+        color: "",
+        sexo: "",
+        fecha_nacimiento: "",
+        codigo_chip: "",
+        raza: "",
+        especie: "",
+      },
+      tutor: {
+        nombre: "",
+        apellido_paterno: "",
+        apellido_materno: "",
+        rut: "",
+        telefono: "",
+        email: "",
+      },
+    });
+    setSelectedPaciente(null);
+    setRecetaMedicaData([]);
+    setActiveModule(null);
+    setTouchedModules(new Set());
+    setRequiereProximaConsulta(false);
+    setShowCancelAlert(false);
+    setToastMessage("Formulario cancelado");
+    setShowToast(true);
   };
 
   return (
     <IonPage>
       <IonHeader translucent={true}>
         <IonToolbar>
-          <IonTitle>Generar ficha</IonTitle>
+          <IonTitle>Generar ficha clínica</IonTitle>
         </IonToolbar>
       </IonHeader>
 
       <IonContent fullscreen={true}>
         <IonHeader collapse="condense">
           <IonToolbar>
-            <IonTitle size="large">Generar ficha</IonTitle>
+            <IonTitle size="large">Generar ficha clínica</IonTitle>
           </IonToolbar>
         </IonHeader>
 
-        {/* Indicador de progreso */}
-        <IonItem>
-          <div>
-            <IonText>
-              <h3>{getStepTitle()}</h3>
-              <p color="medium">Paso {getStepNumber()} de 5</p>
-            </IonText>
-          </div>
-        </IonItem>
-
-        {/* Paso 1: Información General */}
-        {currentStep === "general" && (
-          <IonGrid>
-            <IonRow>
-              <IonCol>
-                <IonItem className="padding">
-                  <IonTextarea
-                    label="Motivo de la Consulta"
-                    labelPlacement="stacked"
-                    fill="outline"
-                    placeholder="Describa el motivo de la consulta"
-                    rows={4}
-                    name="motivo"
-                    value={formData.motivo}
-                    onIonChange={handleInputChange}
-                  />
-                </IonItem>
-              </IonCol>
-            </IonRow>
-
-            <IonRow>
-              <IonCol className="ficha-general-container">
-                <IonButton
-                  expand="block"
-                  fill="outline"
-                  onClick={() => setShowModalPacientes(true)}
-                >
-                  {selectedPaciente
-                    ? "Cambiar Paciente"
-                    : "Seleccionar Paciente"}
-                </IonButton>
-              </IonCol>
-            </IonRow>
-
-            {/* Información del paciente seleccionado */}
-            <IonRow>
-              <IonCol className="form-element-spacing">
-                {selectedPaciente ? (
-                  <IonCard>
-                    <IonCardContent>
-                      <IonText>
-                        <div
-                          style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: "8px",
-                          }}
-                        >
-                          {/* Nombre del paciente */}
-                          <div
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "8px",
-                            }}
-                          >
-                            <IonIcon icon={pawOutline} />
-                            <span>
-                              <strong>{selectedPaciente.nombre}</strong>
-                            </span>
-                          </div>
-
-                          {/*Especie del paciente */}
-                          <div
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "8px",
-                            }}
-                          >
-                            <IonIcon icon={informationCircleOutline} />
-                            <span>
-                              <strong>Especie: </strong>{" "}
-                              {selectedPaciente.especie}
-                            </span>
-                          </div>
-
-                          {/* Raza del paciente */}
-                          <div
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "8px",
-                            }}
-                          >
-                            <IonIcon icon={informationCircleOutline} />
-                            <span>
-                              <strong>Raza: </strong> {selectedPaciente.raza}
-                            </span>
-                          </div>
-                          {/* Sexo del paciente */}
-                          <div
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "8px",
-                            }}
-                          >
-                            <IonIcon icon={informationCircleOutline} />
-                            <span>
-                              <strong>Sexo: </strong>{" "}
-                              {selectedPaciente.sexo
-                                ? selectedPaciente.sexo === "M"
-                                  ? "Macho"
-                                  : "Hembra"
-                                : "No especificado"}
-                            </span>
-                          </div>
-                          {/* Edad del paciente */}
-                          {selectedPaciente.fecha_nacimiento && (
-                            <div
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "8px",
-                              }}
-                            >
-                              <IonIcon icon={calendarOutline} />
-                              <span>
-                                <strong>Fecha de Nacimiento:</strong>{" "}
-                                {new Date(
-                                  selectedPaciente.fecha_nacimiento
-                                ).toLocaleDateString()}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </IonText>
-                    </IonCardContent>
-                  </IonCard>
-                ) : (
-                  <IonCard>
-                    <IonCardContent
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                      }}
-                    >
-                      <IonIcon
-                        icon={pawOutline}
-                        style={{ marginRight: "8px" }}
-                      />
-                      <IonText>No se ha seleccionado ningún paciente.</IonText>
-                    </IonCardContent>
-                  </IonCard>
-                )}
-              </IonCol>
-            </IonRow>
-
-            {/* Información del tutor (solo si hay paciente seleccionado) */}
-            <IonRow>
-              <IonCol className="form-element-spacing">
-                {selectedPaciente && selectedPaciente.tutor ? (
-                  <div>
-                    <IonCard>
-                      <IonCardContent>
-                        <IonText>
-                          <div
-                            style={{
-                              display: "flex",
-                              flexDirection: "column",
-                              gap: "8px",
-                            }}
-                          >
-                            {/* Nombre del tutor */}
-                            <div
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "8px",
-                              }}
-                            >
-                              <IonIcon icon={personOutline} />
-                              <span>
-                                <strong>
-                                  {selectedPaciente.tutor.nombre}{" "}
-                                  {selectedPaciente.tutor.apellido_paterno}{" "}
-                                  {selectedPaciente.tutor.apellido_materno}
-                                </strong>
-                              </span>
-                            </div>
-
-                            {/* RUT del tutor */}
-                            <div
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "8px",
-                              }}
-                            >
-                              <IonIcon icon={idCardOutline} />
-                              <span>
-                                <strong>RUT:</strong>{" "}
-                                {selectedPaciente.tutor.rut}
-                              </span>
-                            </div>
-
-                            {/* Teléfono (condicional) */}
-                            {selectedPaciente.tutor.telefono && (
-                              <div
-                                style={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: "8px",
-                                }}
-                              >
-                                <IonIcon icon={callOutline} />
-                                <span>
-                                  <strong>Teléfono:</strong>{" "}
-                                  {selectedPaciente.tutor.telefono}
-                                </span>
-                              </div>
-                            )}
-
-                            {/* Email (condicional) */}
-                            {selectedPaciente.tutor.email && (
-                              <div
-                                style={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: "8px",
-                                }}
-                              >
-                                <IonIcon icon={mailOutline} />
-                                <span>
-                                  <strong>Email:</strong>{" "}
-                                  {selectedPaciente.tutor.email != "NaN"
-                                    ? selectedPaciente.tutor.email
-                                    : "No asignado"}
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                        </IonText>
-                      </IonCardContent>
-                    </IonCard>
-                  </div>
-                ) : (
-                  <IonCard>
-                    <IonCardContent
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                      }}
-                    >
-                      <IonIcon
-                        icon={personOutline}
-                        style={{ marginRight: "8px" }}
-                      />
-                      <IonText>No se ha seleccionado ningún paciente.</IonText>
-                    </IonCardContent>
-                  </IonCard>
-                )}
-              </IonCol>
-            </IonRow>
-          </IonGrid>
-        )}
-
-        {/* Paso 2: Examen Físico */}
-        {currentStep === "fisico" && (
-          <IonList>
-            <IonGrid>
-              <IonRow>
-                <IonCol size="12" size-md="6">
-                  <IonItem>
-                    <IonInput
-                      label="Peso (kg)"
-                      type="number"
-                      labelPlacement="stacked"
-                      fill="outline"
-                      placeholder="Ej: 25.5"
-                      name="peso"
-                      value={formData.peso}
-                      min={0} // ← Solo permite valores positivos
-                      clearOnEdit={true}
-                      onIonChange={handleNumericChange}
-                    />
-                  </IonItem>
-                </IonCol>
-                <IonCol size="12" size-md="6">
-                  <IonItem>
-                    <IonInput
-                      label="Frecuencia cardíaca ( 1pm )"
-                      labelPlacement="stacked"
-                      fill="outline"
-                      placeholder="Ej: 80"
-                      type="number"
-                      name="frecuencia_cardiaca"
-                      value={formData.frecuencia_cardiaca}
-                      onIonChange={handleInputChange}
-                    />
-                  </IonItem>
-                </IonCol>
-                <IonCol size="12" size-md="6">
-                  <IonItem>
-                    <IonInput
-                      label="Frecuencia respiratoria ( rpm )"
-                      labelPlacement="stacked"
-                      fill="outline"
-                      placeholder="Ej: 20"
-                      type="number"
-                      name="frecuencia_respiratoria"
-                      value={formData.frecuencia_respiratoria}
-                      onIonChange={handleInputChange}
-                    />
-                  </IonItem>
-                </IonCol>
-                <IonCol size="12" size-md="6">
-                  <IonItem>
-                    <IonTextarea
-                      label="Condición corporal"
-                      labelPlacement="stacked"
-                      fill="outline"
-                      placeholder="Valores de 3-5"
-                      rows={3}
-                      name="condicion_corporal"
-                      value={formData.condicion_corporal}
-                      onIonChange={handleInputChange}
-                    />
-                  </IonItem>
-                </IonCol>
-              </IonRow>
-              <IonRow>
-                <IonCol size="12" size-md="6">
-                  <IonItem>
-                    <IonTextarea
-                      label="Estado de la piel"
-                      labelPlacement="stacked"
-                      fill="outline"
-                      placeholder="Describa el estado de la piel"
-                      rows={3}
-                      name="estado_piel"
-                      value={formData.estado_piel}
-                      onIonChange={handleInputChange}
-                    />
-                  </IonItem>
-                </IonCol>
-                <IonCol size="12" size-md="6">
-                  <IonItem>
-                    <IonTextarea
-                      label="Estado del pelaje"
-                      labelPlacement="stacked"
-                      fill="outline"
-                      placeholder="Describa el estado del pelaje"
-                      rows={3}
-                      name="estado_pelaje"
-                      value={formData.estado_pelaje}
-                      onIonChange={handleInputChange}
-                    />
-                  </IonItem>
-                </IonCol>
-                <IonCol size="12" size-md="6">
-                  <IonItem>
-                    <IonTextarea
-                      label="Mucosas"
-                      labelPlacement="stacked"
-                      fill="outline"
-                      placeholder="Rosadas y brillantes"
-                      rows={3}
-                      name="mucosas"
-                      value={formData.mucosas}
-                      onIonChange={handleInputChange}
-                    />
-                  </IonItem>
-                </IonCol>
-              </IonRow>
-              <IonRow>
-                <IonCol size="12">
-                  <IonItem>
-                    <IonTextarea
-                      label="Nódulos Linfáticos"
-                      labelPlacement="stacked"
-                      fill="outline"
-                      placeholder="Describa el estado de los nódulos linfáticos"
-                      rows={3}
-                      name="nodulos_linfaticos"
-                      value={formData.nodulos_linfaticos}
-                      onIonChange={handleInputChange}
-                    />
-                  </IonItem>
-                </IonCol>
-              </IonRow>
-            </IonGrid>
-          </IonList>
-        )}
-
-        {/* Paso 3: Examen Clínico */}
-        {currentStep === "clinico" && (
-          <IonList>
-            <IonGrid>
-              <IonRow>
-                <IonCol size="12" size-md="6">
-                  <IonItem>
-                    <IonInput
-                      label="Temperatura (°C)"
-                      labelPlacement="stacked"
-                      fill="outline"
-                      placeholder="Describa el estado del pelaje"
-                      type="number"
-                      name="temperatura"
-                      value={formData.temperatura}
-                      onIonChange={handleInputChange}
-                    />
-                  </IonItem>
-                </IonCol>
-                <IonCol size="12" size-md="6">
-                  <IonItem>
-                    <IonInput
-                      label="Deshidtratación (%)"
-                      labelPlacement="stacked"
-                      fill="outline"
-                      placeholder="Describa el estado del pelaje"
-                      type="number"
-                      name="deshidratacion"
-                      value={formData.deshidratacion}
-                      onIonChange={handleInputChange}
-                    />
-                  </IonItem>
-                </IonCol>
-                <IonCol size="12" size-md="6">
-                  <IonItem>
-                    <IonInput
-                      label="TLLC - Tiempo de Llenado Capilar (seg)"
-                      labelPlacement="stacked"
-                      fill="outline"
-                      placeholder="Ej: 2"
-                      type="number"
-                      name="tllc"
-                      value={formData.tllc}
-                      onIonChange={handleNumericChange}
-                      step="0.1"
-                      min="0"
-                    />
-                  </IonItem>
-                </IonCol>
-              </IonRow>
-              <IonRow>
-                <IonCol size="12">
-                  <IonItem>
-                    <IonTextarea
-                      label="Examen clínico"
-                      labelPlacement="stacked"
-                      fill="outline"
-                      placeholder="Describa el examen clínico realizado"
-                      rows={4}
-                      name="diagnostico"
-                      value={formData.diagnostico}
-                      onIonChange={handleInputChange}
-                    />
-                  </IonItem>
-                </IonCol>
-              </IonRow>
-              <IonRow>
-                <IonCol size="12">
-                  <IonItem>
-                    <IonTextarea
-                      label="Pre diagnósticos"
-                      labelPlacement="stacked"
-                      fill="outline"
-                      placeholder="Describa los pre diagnósticos realizados"
-                      rows={4}
-                      name="observaciones"
-                      value={formData.observaciones}
-                      onIonChange={handleInputChange}
-                    />
-                  </IonItem>
-                </IonCol>
-              </IonRow>
-              <IonRow>
-                <IonCol size="12">
-                  <IonCard>
-                    <IonCardHeader>
-                      <IonCardTitle>Vacunas administradas</IonCardTitle>
-                    </IonCardHeader>
-                    <IonCardContent>
-                      <IonGrid>
-                        <IonRow>
-                          <IonCol size="12" size-md="6">
-                            <IonItem>
-                              <IonSelect
-                                label="Nombre de vacuna"
-                                labelPlacement="stacked"
-                                fill="outline"
-                                name="nombre_vacuna"
-                                value={vacunasData.nombre_vacuna}
-                                onIonChange={handleVacunasChange}
-                              >
-                                <IonSelectOption value="Sextuple">
-                                  Sextuple
-                                </IonSelectOption>
-                                <IonSelectOption value="KC triple Felina">
-                                  KC triple Felina
-                                </IonSelectOption>
-                                <IonSelectOption value="Antirrábica">
-                                  Leucemia y Antirrábica
-                                </IonSelectOption>
-                              </IonSelect>
-                            </IonItem>
-                          </IonCol>
-                          <IonCol size="12" size-md="6">
-                            <IonItem>
-                              <IonInput
-                                label="Marca"
-                                labelPlacement="stacked"
-                                fill="outline"
-                                placeholder="Marca del producto"
-                                name="marca"
-                                value={vacunasData.marca}
-                                onIonChange={handleVacunasChange}
-                              />
-                            </IonItem>
-                          </IonCol>
-                        </IonRow>
-                        <IonRow>
-                          <IonCol size="12" size-md="4">
-                            <IonItem>
-                              <IonInput
-                                label="Número de serie / cert."
-                                labelPlacement="stacked"
-                                fill="outline"
-                                placeholder="Número de serie o certificado"
-                                name="numero_de_serie"
-                                value={vacunasData.numero_de_serie}
-                                onIonChange={handleVacunasChange}
-                              />
-                            </IonItem>
-                          </IonCol>
-
-                          <IonCol size="12" size-md="4">
-                            <IonItem>
-                              <IonInput
-                                label="Fecha vacunación"
-                                labelPlacement="stacked"
-                                fill="outline"
-                                type="date"
-                                name="fecha_vacunacion"
-                                value={vacunasData.fecha_vacunacion}
-                                onIonChange={handleVacunasChange}
-                              />
-                            </IonItem>
-                          </IonCol>
-
-                          <IonCol size="12" size-md="4">
-                            <IonItem lines="none">
-                              <IonLabel>Requiere próxima dosis</IonLabel>
-                              <IonToggle
-                                name="requiere_proxima"
-                                checked={vacunasData.requiere_proxima}
-                                onIonChange={handleVacunaToggle}
-                              />
-                            </IonItem>
-                          </IonCol>
-
-                          {vacunasData.requiere_proxima && (
-                            <IonCol size="12" size-md="4">
-                              <IonItem>
-                                <IonInput
-                                  label="Próxima dosis"
-                                  labelPlacement="stacked"
-                                  fill="outline"
-                                  type="date"
-                                  name="proxima_dosis"
-                                  value={vacunasData.proxima_dosis}
-                                  onIonChange={handleVacunasChange}
-                                />
-                              </IonItem>
-                            </IonCol>
-                          )}
-                        </IonRow>
-
-                        <IonRow>
-                          <IonCol size="12" className="ion-text-end">
-                            <IonButton
-                              size="small"
-                              onClick={handleAgregarVacuna}
-                            >
-                              Agregar vacuna
-                            </IonButton>
-                          </IonCol>
-                        </IonRow>
-
-                        {/* Listado de vacunas añadidas */}
-                        {(formData.vacunas_inoculadas || []).length > 0 && (
-                          <>
-                            <IonRow>
-                              <IonCol size="12">
-                                <IonList>
-                                  {(formData.vacunas_inoculadas || []).map(
-                                    (v: any, idx: number) => (
-                                      <IonItem key={idx}>
-                                        <IonLabel>
-                                          <h3>{v.nombre_vacuna}</h3>
-                                          <p>
-                                            {v.marca ? `${v.marca} · ` : ""}
-                                            {v.numero_de_serie
-                                              ? `N° ${v.numero_de_serie} · `
-                                              : ""}
-                                            Fecha: {v.fecha_vacunacion} · Próx:{" "}
-                                            {v.proxima_dosis}
-                                          </p>
-                                        </IonLabel>
-                                        <IonButtons slot="end">
-                                          <IonButton
-                                            fill="clear"
-                                            color="danger"
-                                            onClick={() =>
-                                              handleEliminarVacuna(idx)
-                                            }
-                                          >
-                                            Eliminar
-                                          </IonButton>
-                                        </IonButtons>
-                                      </IonItem>
-                                    )
-                                  )}
-                                </IonList>
-                              </IonCol>
-                            </IonRow>
-                          </>
-                        )}
-                      </IonGrid>
-                    </IonCardContent>
-                  </IonCard>
-                </IonCol>
-              </IonRow>
-
-              {/* Sección Desparasitación Interna */}
-              <IonRow>
-                <IonCol size="12">
-                  <CajaDesparasitacion
-                    titulo="Desparasitación Interna (Opcional)"
-                    tipo="interna"
-                    datos={desparasitacionInternaData}
-                    setDatos={setDesparasitacionInternaData}
-                    onAgregar={handleAgregarDesparasitacionInterna}
-                    datoGuardado={formData.desparasitacion_interna}
-                  />
-                </IonCol>
-              </IonRow>
-
-              {/* Sección Desparasitación Externa */}
-              <IonRow>
-                <IonCol size="12">
-                  <CajaDesparasitacion
-                    titulo="Desparasitación Externa (Opcional)"
-                    tipo="externa"
-                    datos={desparasitacionExternaData}
-                    setDatos={setDesparasitacionExternaData}
-                    onAgregar={handleAgregarDesparasitacionExterna}
-                    datoGuardado={formData.desparasitacion_externa}
-                  />
-                </IonCol>
-              </IonRow>
-
-              <IonRow>
-                <IonCol size="12">
-                  <IonItem>
-                    <IonTextarea
-                      label="Diagnóstico"
-                      labelPlacement="stacked"
-                      fill="outline"
-                      placeholder="Describa el diagnóstico realizado"
-                      rows={4}
-                      name="diagnostico"
-                      value={formData.diagnostico}
-                      onIonChange={handleInputChange}
-                    />
-                  </IonItem>
-                </IonCol>
-              </IonRow>
-              <IonRow>
-                <IonCol size="12">
-                  <IonItem>
-                    <IonSelect
-                      label="Pronóstico"
-                      labelPlacement="stacked"
-                      fill="outline"
-                      placeholder="Seleccione un pronóstico"
-                      name="pronostico"
-                      value={formData.pronostico}
-                      onIonChange={handleInputChange}
-                    >
-                      <IonSelectOption value="favorable">
-                        Favorable
-                      </IonSelectOption>
-                      <IonSelectOption value="desfavorable">
-                        Desfavorable
-                      </IonSelectOption>
-                      <IonSelectOption value="reservado">
-                        Reservado
-                      </IonSelectOption>
-                    </IonSelect>
-                  </IonItem>
-                </IonCol>
-              </IonRow>
-            </IonGrid>
-          </IonList>
-        )}
-
-        {/* Paso 4: post pronostico */}
-        {currentStep === "post_pronostico" && (
-          <IonList>
-            <IonGrid>
-              <IonRow>
-                <IonCol size="12" size-md="6">
-                  <IonItem>
-                    <IonInput
-                      label="Indicaciones generales"
-                      labelPlacement="stacked"
-                      fill="outline"
-                      placeholder="Describa las indicaciones generales realizadas"
-                      type="text"
-                      name="indicaciones_generales"
-                      value={formData.indicaciones_generales}
-                      onIonChange={handleInputChange}
-                    />
-                  </IonItem>
-                </IonCol>
-                <IonCol size="12" size-md="6">
-                  <IonItem>
-                    <IonInput
-                      label="Orden de exámenes"
-                      labelPlacement="stacked"
-                      fill="outline"
-                      placeholder="Describa la orden de examenes realizados"
-                      type="text"
-                      name="orden_de_examenes"
-                      value={formData.orden_de_examenes}
-                      onIonChange={handleInputChange}
-                    />
-                  </IonItem>
-                </IonCol>
-              </IonRow>
-              <IonRow>
-                <IonCol size="12">
-                  <IonItem>
-                    <IonTextarea
-                      label="Pre diagnósticos"
-                      labelPlacement="stacked"
-                      fill="outline"
-                      placeholder="Describa los pre diagnósticos realizados"
-                      rows={4}
-                      name="observaciones"
-                      value={formData.observaciones}
-                      onIonChange={handleInputChange}
-                    />
-                  </IonItem>
-                </IonCol>
-              </IonRow>
-              <IonRow>
-                <IonCol size="12">
-                  <IonItem>
-                    <IonTextarea
-                      label="Diagnóstico"
-                      labelPlacement="stacked"
-                      fill="outline"
-                      placeholder="Describa el diagnóstico realizado"
-                      rows={4}
-                      name="diagnostico"
-                      value={formData.diagnostico}
-                      onIonChange={handleInputChange}
-                    />
-                  </IonItem>
-                </IonCol>
-              </IonRow>
-            </IonGrid>
-          </IonList>
-        )}
-
-        {/* Paso 5: receta médica */}
-        {currentStep === "receta_medica" && (
-          <CajaRecetas
-            recetas={recetaMedicaData}
-            setRecetas={setRecetaMedicaData}
+        {/* Banner de Paciente */}
+        {!selectedPaciente ? (
+          <IonCard>
+            <IonCardContent>
+              <IonText
+                color="medium"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  justifyContent: "center",
+                }}
+              >
+                <IonIcon icon={pawOutline} />
+                <span>No se ha seleccionado ningún paciente</span>
+              </IonText>
+              <IonButton
+                expand="block"
+                fill="outline"
+                onClick={() => setShowModalPacientes(true)}
+                style={{ marginTop: "12px" }}
+              >
+                Seleccionar Paciente
+              </IonButton>
+            </IonCardContent>
+          </IonCard>
+        ) : (
+          <PatientHeader
+            paciente={selectedPaciente}
+            motivo={formData.motivo}
+            onChangePaciente={() => setShowModalPacientes(true)}
           />
         )}
 
-        {/* Espaciado para el footer */}
-        <div style={{ height: "80px" }}></div>
-      </IonContent>
-
-      {/* Footer con botones de navegación */}
-      <IonFooter>
-        <IonToolbar>
-          <IonGrid>
-            <IonRow className="ion-align-items-center">
-              {currentStep === "general" ? (
-                <>
-                  <IonCol size="6" className="ion-text-start">
-                    <IonText color="medium">
-                      <small>Paso 1 de 5</small>
-                    </IonText>
-                  </IonCol>
-                  <IonCol size="6" className="ion-text-end">
-                    <IonButton
-                      fill="solid"
-                      onClick={navegarSiguiente}
-                      disabled={!puedeAvanzar()}
-                    >
-                      Siguiente
-                      <IonIcon icon={chevronForwardOutline} slot="end" />
-                    </IonButton>
-                  </IonCol>
-                </>
-              ) : currentStep === "fisico" ? (
-                <>
-                  <IonCol size="4" className="ion-text-start">
-                    <IonButton fill="outline" onClick={navegarAnterior}>
-                      <IonIcon icon={chevronBackOutline} slot="start" />
-                      Anterior
-                    </IonButton>
-                  </IonCol>
-                  <IonCol size="4" className="ion-text-center">
-                    <IonText color="medium">
-                      <small>Paso 2 de 5</small>
-                    </IonText>
-                  </IonCol>
-                  <IonCol size="4" className="ion-text-end">
-                    <IonButton fill="solid" onClick={navegarSiguiente}>
-                      Siguiente
-                      <IonIcon icon={chevronForwardOutline} slot="end" />
-                    </IonButton>
-                  </IonCol>
-                </>
-              ) : currentStep === "clinico" ? (
-                <>
-                  <IonCol size="4" className="ion-text-start">
-                    <IonButton fill="outline" onClick={navegarAnterior}>
-                      <IonIcon icon={chevronBackOutline} slot="start" />
-                      Anterior
-                    </IonButton>
-                  </IonCol>
-                  <IonCol size="4" className="ion-text-center">
-                    <IonText color="medium">
-                      <small>Paso 3 de 5</small>
-                    </IonText>
-                  </IonCol>
-                  <IonCol size="4" className="ion-text-end">
-                    <IonButton fill="solid" onClick={navegarSiguiente}>
-                      Siguiente
-                      <IonIcon icon={chevronForwardOutline} slot="end" />
-                    </IonButton>
-                  </IonCol>
-                </>
-              ) : currentStep === "post_pronostico" ? (
-                <>
-                  <IonCol size="4" className="ion-text-start">
-                    <IonButton fill="outline" onClick={navegarAnterior}>
-                      <IonIcon icon={chevronBackOutline} slot="start" />
-                      Anterior
-                    </IonButton>
-                  </IonCol>
-                  <IonCol size="4" className="ion-text-center">
-                    <IonText color="medium">
-                      <small>Paso 4 de 5</small>
-                    </IonText>
-                  </IonCol>
-                  <IonCol size="4" className="ion-text-end">
-                    <IonButton fill="solid" onClick={navegarSiguiente}>
-                      Siguiente
-                      <IonIcon icon={chevronForwardOutline} slot="end" />
-                    </IonButton>
-                  </IonCol>
-                </>
-              ) : (
-                <>
-                  <IonCol size="4" className="ion-text-start">
-                    <IonButton fill="outline" onClick={navegarAnterior}>
-                      <IonIcon icon={chevronBackOutline} slot="start" />
-                      Anterior
-                    </IonButton>
-                  </IonCol>
-                  <IonCol size="4" className="ion-text-center">
-                    <IonText color="medium">
-                      <small>Paso 5 de 5</small>
-                    </IonText>
-                  </IonCol>
-                  <IonCol size="4" className="ion-text-end">
-                    <IonButton
-                      fill="solid"
-                      color="success"
-                      onClick={guardarFicha}
-                      disabled={isLoading}
-                    >
-                      <IonIcon icon={saveOutline} slot="start" />
-                      {isLoading ? "Guardando..." : "Guardar"}
-                    </IonButton>
-                  </IonCol>
-                </>
-              )}
+        {/* Dashboard Grid - 6 Módulos */}
+        {selectedPaciente && (
+          <IonGrid fixed style={{ padding: "12px", maxWidth: "1200px" }}>
+            <IonRow>
+              <IonCol size="6" sizeMd="4" sizeLg="3">
+                <ModuleCard
+                  icon={pulseOutline}
+                  title="Constantes Vitales"
+                  status={getModuleStatus("constantes")}
+                  onClick={() => openModule("constantes")}
+                />
+              </IonCol>
+              <IonCol size="6" sizeMd="4" sizeLg="3">
+                <ModuleCard
+                  icon={bodyOutline}
+                  title="Examen Físico"
+                  status={getModuleStatus("examen_fisico")}
+                  onClick={() => openModule("examen_fisico")}
+                />
+              </IonCol>
+              <IonCol size="6" sizeMd="4" sizeLg="3">
+                <ModuleCard
+                  icon={clipboardOutline}
+                  title="Diagnóstico Clínico"
+                  status={getModuleStatus("diagnostico")}
+                  onClick={() => openModule("diagnostico")}
+                />
+              </IonCol>
+              <IonCol size="6" sizeMd="4" sizeLg="3">
+                <ModuleCard
+                  icon="/vaccine.svg"
+                  iconType="svg"
+                  title="Vacunación"
+                  status={getModuleStatus("vacunacion")}
+                  onClick={() => openModule("vacunacion")}
+                />
+              </IonCol>
+              <IonCol size="6" sizeMd="4" sizeLg="3">
+                <ModuleCard
+                  icon="/pills.svg"
+                  iconType="svg"
+                  title="Antiparasitarios"
+                  status={getModuleStatus("antiparasitarios")}
+                  onClick={() => openModule("antiparasitarios")}
+                />
+              </IonCol>
+              <IonCol size="6" sizeMd="4" sizeLg="3">
+                <ModuleCard
+                  icon={documentTextOutline}
+                  title="Plan y Tratamiento"
+                  status={getModuleStatus("plan_tratamiento")}
+                  onClick={() => openModule("plan_tratamiento")}
+                />
+              </IonCol>
             </IonRow>
           </IonGrid>
-        </IonToolbar>
-      </IonFooter>
+        )}
 
-      {/* Botón flotante para agregar nueva ficha rápidamente */}
-      {currentStep === "general" && !selectedPaciente && (
-        <div
-          style={{
-            position: "fixed",
-            bottom: "100px",
-            right: "16px",
-            zIndex: 999,
-          }}
+        {/* MODAL 1: Constantes Vitales */}
+        <IonModal
+          className="module-modal"
+          isOpen={activeModule === "constantes"}
+          onDidDismiss={() => setActiveModule(null)}
         >
-          <IonButton
-            fill="solid"
-            shape="round"
-            onClick={() => setShowModalPacientes(true)}
-            style={{ width: "56px", height: "56px" }}
-          >
-            <IonIcon icon={saveOutline} style={{ fontSize: "24px" }} />
-          </IonButton>
-        </div>
+          <IonHeader>
+            <IonToolbar>
+              <IonTitle>Constantes Vitales</IonTitle>
+              <IonButtons slot="end">
+                <IonButton onClick={() => setActiveModule(null)}>
+                  <IonIcon icon={closeOutline} />
+                </IonButton>
+              </IonButtons>
+            </IonToolbar>
+          </IonHeader>
+          <IonContent className="ion-padding">
+            <IonList>
+              <IonItem>
+                <IonInput
+                  label="Peso (kg)"
+                  labelPlacement="stacked"
+                  fill="outline"
+                  type="number"
+                  step="0.1"
+                  name="peso"
+                  value={formData.peso}
+                  onIonChange={handleNumericChange}
+                />
+              </IonItem>
+              <IonItem>
+                <IonInput
+                  label="Temperatura (°C)"
+                  labelPlacement="stacked"
+                  fill="outline"
+                  type="number"
+                  step="0.1"
+                  name="temperatura"
+                  value={formData.temperatura}
+                  onIonChange={handleNumericChange}
+                />
+              </IonItem>
+              <IonItem>
+                <IonInput
+                  label="Frecuencia Cardíaca (lpm)"
+                  labelPlacement="stacked"
+                  fill="outline"
+                  type="number"
+                  name="frecuencia_cardiaca"
+                  value={formData.frecuencia_cardiaca}
+                  onIonChange={handleNumericChange}
+                />
+              </IonItem>
+              <IonItem>
+                <IonInput
+                  label="Frecuencia Respiratoria (rpm)"
+                  labelPlacement="stacked"
+                  fill="outline"
+                  type="number"
+                  name="frecuencia_respiratoria"
+                  value={formData.frecuencia_respiratoria}
+                  onIonChange={handleNumericChange}
+                />
+              </IonItem>
+              <IonItem>
+                <IonInput
+                  label="TLLC - Tiempo de Llenado Capilar (seg)"
+                  labelPlacement="stacked"
+                  fill="outline"
+                  type="number"
+                  step="0.1"
+                  name="tllc"
+                  value={formData.tllc}
+                  onIonChange={handleNumericChange}
+                />
+              </IonItem>
+              <IonItem>
+                <IonInput
+                  label="Deshidratación (%)"
+                  labelPlacement="stacked"
+                  fill="outline"
+                  type="number"
+                  step="0.1"
+                  name="deshidratacion"
+                  value={formData.deshidratacion}
+                  onIonChange={handleNumericChange}
+                />
+              </IonItem>
+            </IonList>
+            <IonButton
+              expand="block"
+              className="modal-close-button"
+              onClick={() => setActiveModule(null)}
+            >
+              Cerrar
+            </IonButton>
+          </IonContent>
+        </IonModal>
+
+        {/* MODAL 2: Examen Físico */}
+        <IonModal
+          className="module-modal"
+          isOpen={activeModule === "examen_fisico"}
+          onDidDismiss={() => setActiveModule(null)}
+        >
+          <IonHeader>
+            <IonToolbar>
+              <IonTitle>Examen Físico</IonTitle>
+              <IonButtons slot="end">
+                <IonButton onClick={() => setActiveModule(null)}>
+                  <IonIcon icon={closeOutline} />
+                </IonButton>
+              </IonButtons>
+            </IonToolbar>
+          </IonHeader>
+          <IonContent className="ion-padding">
+            <IonList>
+              <IonItem>
+                <IonSelect
+                  label="Mucosas"
+                  labelPlacement="stacked"
+                  fill="outline"
+                  interface="action-sheet"
+                  name="mucosas"
+                  value={formData.mucosas}
+                  onIonChange={handleInputChange}
+                >
+                  <IonSelectOption value="Rosadas y brillantes">
+                    Rosadas y brillantes
+                  </IonSelectOption>
+                  <IonSelectOption value="Pálidas">Pálidas</IonSelectOption>
+                  <IonSelectOption value="Cianóticas">
+                    Cianóticas
+                  </IonSelectOption>
+                  <IonSelectOption value="Ictéricas">Ictéricas</IonSelectOption>
+                  <IonSelectOption value="Congestivas">
+                    Congestivas
+                  </IonSelectOption>
+                </IonSelect>
+              </IonItem>
+              <IonItem>
+                <IonSelect
+                  label="Condición Corporal"
+                  labelPlacement="stacked"
+                  fill="outline"
+                  interface="action-sheet"
+                  name="condicion_corporal"
+                  value={formData.condicion_corporal}
+                  onIonChange={handleInputChange}
+                >
+                  <IonSelectOption value="Muy delgado">
+                    Muy delgado
+                  </IonSelectOption>
+                  <IonSelectOption value="Delgado">Delgado</IonSelectOption>
+                  <IonSelectOption value="Normal">Normal</IonSelectOption>
+                  <IonSelectOption value="Sobrepeso">Sobrepeso</IonSelectOption>
+                  <IonSelectOption value="Obeso">Obeso</IonSelectOption>
+                </IonSelect>
+              </IonItem>
+              <IonItem>
+                <IonSelect
+                  label="Estado del Pelaje"
+                  labelPlacement="stacked"
+                  fill="outline"
+                  interface="action-sheet"
+                  name="estado_pelaje"
+                  value={formData.estado_pelaje}
+                  onIonChange={handleInputChange}
+                >
+                  <IonSelectOption value="Muy bueno">Muy bueno</IonSelectOption>
+                  <IonSelectOption value="Bueno">Bueno</IonSelectOption>
+                  <IonSelectOption value="Regular">Regular</IonSelectOption>
+                  <IonSelectOption value="Malo">Malo</IonSelectOption>
+                  <IonSelectOption value="Muy malo">Muy malo</IonSelectOption>
+                </IonSelect>
+              </IonItem>
+              <IonItem>
+                <IonSelect
+                  label="Estado de la Piel"
+                  labelPlacement="stacked"
+                  fill="outline"
+                  interface="action-sheet"
+                  name="estado_piel"
+                  value={formData.estado_piel}
+                  onIonChange={handleInputChange}
+                >
+                  <IonSelectOption value="Muy bueno">Muy bueno</IonSelectOption>
+                  <IonSelectOption value="Bueno">Bueno</IonSelectOption>
+                  <IonSelectOption value="Regular">Regular</IonSelectOption>
+                  <IonSelectOption value="Malo">Malo</IonSelectOption>
+                  <IonSelectOption value="Muy malo">Muy malo</IonSelectOption>
+                </IonSelect>
+              </IonItem>
+              <IonItem>
+                <IonTextarea
+                  label="Nódulos Linfáticos"
+                  labelPlacement="stacked"
+                  fill="outline"
+                  placeholder="Describa el estado de los nódulos linfáticos"
+                  rows={3}
+                  name="nodulos_linfaticos"
+                  value={formData.nodulos_linfaticos}
+                  onIonChange={handleInputChange}
+                />
+              </IonItem>
+            </IonList>
+            <IonButton
+              expand="block"
+              className="modal-close-button"
+              onClick={() => setActiveModule(null)}
+            >
+              Cerrar
+            </IonButton>
+          </IonContent>
+        </IonModal>
+
+        {/* MODAL 3: Diagnóstico Clínico */}
+        <IonModal
+          className="module-modal"
+          isOpen={activeModule === "diagnostico"}
+          onDidDismiss={() => setActiveModule(null)}
+        >
+          <IonHeader>
+            <IonToolbar>
+              <IonTitle>Diagnóstico Clínico</IonTitle>
+              <IonButtons slot="end">
+                <IonButton onClick={() => setActiveModule(null)}>
+                  <IonIcon icon={closeOutline} />
+                </IonButton>
+              </IonButtons>
+            </IonToolbar>
+          </IonHeader>
+          <IonContent className="ion-padding">
+            <IonList>
+              <IonItem>
+                <IonTextarea
+                  label="Examen Clínico"
+                  labelPlacement="stacked"
+                  fill="outline"
+                  placeholder="Describa el examen clínico realizado"
+                  rows={4}
+                  name="examen_clinico"
+                  value={formData.examen_clinico}
+                  onIonChange={handleInputChange}
+                />
+              </IonItem>
+              <IonItem>
+                <IonTextarea
+                  label="Observaciones"
+                  labelPlacement="stacked"
+                  fill="outline"
+                  placeholder="Observaciones adicionales"
+                  rows={3}
+                  name="observaciones"
+                  value={formData.observaciones}
+                  onIonChange={handleInputChange}
+                />
+              </IonItem>
+              <IonItem>
+                <IonTextarea
+                  label="Diagnóstico"
+                  labelPlacement="stacked"
+                  fill="outline"
+                  placeholder="Diagnóstico final"
+                  rows={4}
+                  name="diagnostico"
+                  value={formData.diagnostico}
+                  onIonChange={handleInputChange}
+                />
+              </IonItem>
+              <IonItem>
+                <IonToggle
+                  checked={requiereProximaConsulta}
+                  onIonChange={(e) => {
+                    const checked = e.detail.checked;
+                    setRequiereProximaConsulta(checked);
+                    if (!checked) {
+                      setFormData((prev) => ({
+                        ...prev,
+                        proxima_consulta: "",
+                      }));
+                    }
+                  }}
+                >
+                  <IonLabel>
+                    <h3>Requiere Próxima Consulta</h3>
+                    <p>Activar para programar una próxima cita</p>
+                  </IonLabel>
+                </IonToggle>
+              </IonItem>
+              {requiereProximaConsulta && (
+                <IonItem>
+                  <IonInput
+                    label="Fecha de Próxima Consulta"
+                    labelPlacement="stacked"
+                    fill="outline"
+                    type="date"
+                    name="proxima_consulta"
+                    value={formData.proxima_consulta}
+                    onIonChange={handleInputChange}
+                  />
+                </IonItem>
+              )}
+            </IonList>
+            <IonButton
+              expand="block"
+              className="modal-close-button"
+              onClick={() => setActiveModule(null)}
+            >
+              Cerrar
+            </IonButton>
+          </IonContent>
+        </IonModal>
+
+        {/* MODAL 4: Vacunación */}
+        <IonModal
+          className="module-modal"
+          isOpen={activeModule === "vacunacion"}
+          onDidDismiss={() => setActiveModule(null)}
+        >
+          <IonHeader>
+            <IonToolbar>
+              <IonTitle>Vacunación</IonTitle>
+              <IonButtons slot="end">
+                <IonButton onClick={() => setActiveModule(null)}>
+                  <IonIcon icon={closeOutline} />
+                </IonButton>
+              </IonButtons>
+            </IonToolbar>
+          </IonHeader>
+          <IonContent className="ion-padding">
+            <IonCard>
+              <IonCardHeader>
+                <IonCardTitle>Agregar Vacuna</IonCardTitle>
+              </IonCardHeader>
+              <IonCardContent>
+                <IonList>
+                  <IonItem>
+                    <IonSelect
+                      label="Nombre de la Vacuna"
+                      labelPlacement="stacked"
+                      fill="outline"
+                      interface="action-sheet"
+                      name="nombre_vacuna"
+                      value={vacunasData.nombre_vacuna}
+                      onIonChange={handleVacunasChange}
+                    >
+                      <IonSelectOption value="Antirrábica">
+                        Antirrábica
+                      </IonSelectOption>
+                      <IonSelectOption value="Triple Felina">
+                        Triple Felina
+                      </IonSelectOption>
+                      <IonSelectOption value="Quíntuple Canina">
+                        Quíntuple Canina
+                      </IonSelectOption>
+                      <IonSelectOption value="Séxtuple Canina">
+                        Séxtuple Canina
+                      </IonSelectOption>
+                      <IonSelectOption value="Octuple Canina">
+                        Octuple Canina
+                      </IonSelectOption>
+                      <IonSelectOption value="Traqueobronquitis">
+                        Traqueobronquitis
+                      </IonSelectOption>
+                      <IonSelectOption value="Leucemia Felina">
+                        Leucemia Felina
+                      </IonSelectOption>
+                    </IonSelect>
+                  </IonItem>
+                  <IonItem>
+                    <IonInput
+                      label="Fecha de Vacunación"
+                      labelPlacement="stacked"
+                      fill="outline"
+                      type="date"
+                      name="fecha_vacunacion"
+                      value={vacunasData.fecha_vacunacion}
+                      onIonChange={handleVacunasChange}
+                    />
+                  </IonItem>
+                  <IonItem>
+                    <IonInput
+                      label="Marca"
+                      labelPlacement="stacked"
+                      fill="outline"
+                      placeholder="Marca de la vacuna"
+                      name="marca"
+                      value={vacunasData.marca}
+                      onIonChange={handleVacunasChange}
+                    />
+                  </IonItem>
+                  {vacunasData.nombre_vacuna === "Antirrábica" && (
+                    <IonItem>
+                      <IonInput
+                        label="N° Certificado"
+                        labelPlacement="stacked"
+                        fill="outline"
+                        placeholder="Número de certificado"
+                        name="numero_de_serie"
+                        value={vacunasData.numero_de_serie}
+                        onIonChange={handleVacunasChange}
+                      />
+                    </IonItem>
+                  )}
+                  <IonItem>
+                    <IonToggle
+                      checked={vacunasData.requiere_proxima}
+                      onIonChange={handleVacunaToggle}
+                    >
+                      Requiere próxima dosis
+                    </IonToggle>
+                  </IonItem>
+                  {vacunasData.requiere_proxima && (
+                    <IonItem>
+                      <IonInput
+                        label="Fecha de Próxima Dosis"
+                        labelPlacement="stacked"
+                        fill="outline"
+                        type="date"
+                        name="proxima_dosis"
+                        value={vacunasData.proxima_dosis}
+                        onIonChange={handleVacunasChange}
+                      />
+                    </IonItem>
+                  )}
+                </IonList>
+                <IonButton
+                  expand="block"
+                  onClick={handleAgregarVacuna}
+                  style={{ marginTop: "16px" }}
+                >
+                  Agregar Vacuna
+                </IonButton>
+              </IonCardContent>
+            </IonCard>
+
+            {/* Lista de Vacunas Agregadas */}
+            {formData.vacunas_inoculadas &&
+              formData.vacunas_inoculadas.length > 0 && (
+                <IonCard style={{ marginTop: "16px" }}>
+                  <IonCardHeader>
+                    <IonCardTitle>Vacunas Registradas</IonCardTitle>
+                  </IonCardHeader>
+                  <IonCardContent>
+                    <IonList>
+                      {formData.vacunas_inoculadas.map((vacuna, index) => (
+                        <IonItem key={index}>
+                          <IonLabel>
+                            <h3>{vacuna.nombre_vacuna}</h3>
+                            <p>Fecha: {vacuna.fecha_vacunacion}</p>
+                            {vacuna.marca && <p>Marca: {vacuna.marca}</p>}
+                            {vacuna.requiere_proxima &&
+                              vacuna.proxima_dosis && (
+                                <p>Próxima dosis: {vacuna.proxima_dosis}</p>
+                              )}
+                          </IonLabel>
+                          <IonButton
+                            slot="end"
+                            color="danger"
+                            fill="clear"
+                            onClick={() => handleEliminarVacuna(index)}
+                          >
+                            Eliminar
+                          </IonButton>
+                        </IonItem>
+                      ))}
+                    </IonList>
+                  </IonCardContent>
+                </IonCard>
+              )}
+
+            <IonButton
+              expand="block"
+              className="modal-close-button"
+              onClick={() => setActiveModule(null)}
+            >
+              Cerrar
+            </IonButton>
+          </IonContent>
+        </IonModal>
+
+        {/* MODAL 5: Antiparasitarios */}
+        <IonModal
+          className="module-modal"
+          isOpen={activeModule === "antiparasitarios"}
+          onDidDismiss={() => setActiveModule(null)}
+        >
+          <IonHeader>
+            <IonToolbar>
+              <IonTitle>Antiparasitarios</IonTitle>
+              <IonButtons slot="end">
+                <IonButton onClick={() => setActiveModule(null)}>
+                  <IonIcon icon={closeOutline} />
+                </IonButton>
+              </IonButtons>
+            </IonToolbar>
+          </IonHeader>
+          <IonContent className="ion-padding">
+            <CajaDesparasitacion
+              titulo="Desparasitación Interna"
+              tipo="interna"
+              datos={desparasitacionInternaData}
+              setDatos={setDesparasitacionInternaData}
+              onAgregar={handleAgregarDesparasitacionInterna}
+              datoGuardado={formData.desparasitacion_interna ?? null}
+            />
+
+            <CajaDesparasitacion
+              titulo="Desparasitación Externa"
+              tipo="externa"
+              datos={desparasitacionExternaData}
+              setDatos={setDesparasitacionExternaData}
+              onAgregar={handleAgregarDesparasitacionExterna}
+              datoGuardado={formData.desparasitacion_externa ?? null}
+            />
+
+            <IonButton
+              expand="block"
+              className="modal-close-button"
+              onClick={() => setActiveModule(null)}
+            >
+              Cerrar
+            </IonButton>
+          </IonContent>
+        </IonModal>
+
+        {/* MODAL 6: Plan y Tratamiento */}
+        <IonModal
+          className="module-modal"
+          isOpen={activeModule === "plan_tratamiento"}
+          onDidDismiss={() => setActiveModule(null)}
+        >
+          <IonHeader>
+            <IonToolbar>
+              <IonTitle>Plan y Tratamiento</IonTitle>
+              <IonButtons slot="end">
+                <IonButton onClick={() => setActiveModule(null)}>
+                  <IonIcon icon={closeOutline} />
+                </IonButton>
+              </IonButtons>
+            </IonToolbar>
+          </IonHeader>
+          <IonContent className="ion-padding">
+            <CajaRecetas
+              recetas={recetaMedicaData}
+              setRecetas={setRecetaMedicaData}
+            />
+
+            <IonList style={{ marginTop: "24px" }}>
+              <IonItem>
+                <IonTextarea
+                  label="Indicaciones Generales"
+                  labelPlacement="stacked"
+                  fill="outline"
+                  placeholder="Indicaciones para el tutor"
+                  rows={4}
+                  name="indicaciones_generales"
+                  value={formData.indicaciones_generales}
+                  onIonChange={handleInputChange}
+                />
+              </IonItem>
+              <IonItem>
+                <IonTextarea
+                  label="Orden de Exámenes"
+                  labelPlacement="stacked"
+                  fill="outline"
+                  placeholder="Exámenes solicitados"
+                  rows={3}
+                  name="orden_de_examenes"
+                  value={formData.orden_de_examenes}
+                  onIonChange={handleInputChange}
+                />
+              </IonItem>
+            </IonList>
+
+            <IonButton
+              expand="block"
+              className="modal-close-button"
+              onClick={() => setActiveModule(null)}
+            >
+              Cerrar
+            </IonButton>
+          </IonContent>
+        </IonModal>
+      </IonContent>
+
+      {/* Footer Fijo con Botones */}
+      {selectedPaciente && (
+        <IonFooter className="ficha-footer">
+          <IonToolbar>
+            <div className="footer-buttons-container">
+              <IonButton
+                className="cancel-button"
+                fill="outline"
+                onClick={() => setShowCancelAlert(true)}
+                disabled={isLoading}
+              >
+                <IonIcon icon={closeCircleOutline} slot="start" />
+                Cancelar
+              </IonButton>
+              <IonButton
+                className="save-button"
+                expand="block"
+                onClick={guardarFicha}
+                disabled={isLoading}
+              >
+                <IonIcon icon={saveOutline} slot="start" />
+                {isLoading ? "Guardando..." : "Guardar"}
+              </IonButton>
+            </div>
+          </IonToolbar>
+        </IonFooter>
       )}
 
       {/* Modal para escoger paciente */}
       <ModalEscogerPaciente
         isOpen={showModalPacientes}
         onDidDismiss={() => setShowModalPacientes(false)}
-        onPacienteSelected={handlePacienteSelected} // Función corregida
+        onPacienteSelected={handlePacienteSelected}
+        motivoConsulta={formData.motivo}
+        onMotivoChange={(motivo) =>
+          setFormData((prev) => ({ ...prev, motivo }))
+        }
+      />
+
+      {/* Alert de confirmación para cancelar */}
+      <IonAlert
+        isOpen={showCancelAlert}
+        onDidDismiss={() => setShowCancelAlert(false)}
+        header="¿Cancelar ficha?"
+        message="Se perderán todos los datos ingresados. ¿Estás seguro?"
+        buttons={[
+          {
+            text: "No",
+            role: "cancel",
+            cssClass: "alert-button-cancel",
+          },
+          {
+            text: "Sí, cancelar",
+            role: "destructive",
+            cssClass: "alert-button-confirm",
+            handler: handleCancelar,
+          },
+        ]}
       />
 
       <IonToast
