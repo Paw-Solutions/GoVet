@@ -112,6 +112,22 @@ class Consulta(Base):
     paciente = relationship("Paciente", back_populates="consultas")
     tutor = relationship("Tutor", back_populates="consultas")
     tratamientos = relationship("ConsultaTratamiento", back_populates="consulta")
+    recetas = relationship("Receta", back_populates="consulta")
+
+class Receta(Base):
+    __tablename__ = "receta_medica"
+    __table_args__ = {'schema': 'govet'}
+    
+    id_receta = Column(BigInteger, primary_key=True)
+    id_consulta = Column(BigInteger, ForeignKey('govet.consulta.id_consulta'), nullable=False)
+    medicamento = Column(String, nullable=False)
+    dosis = Column(String, nullable=False)
+    frecuencia = Column(Integer, nullable=False)  # en horas
+    duracion = Column(Integer, nullable=False)  # en días
+    numero_serie = Column(String)
+    
+    # Relaciones
+    consulta = relationship("Consulta", back_populates="recetas")
 
 class ConsultaTratamiento(Base):
     __tablename__ = "consulta_tratamiento"

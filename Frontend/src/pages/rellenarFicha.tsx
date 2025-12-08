@@ -142,15 +142,12 @@ const RellenarFicha: React.FC = () => {
     temperatura: 0,
     frecuencia_cardiaca: 0,
     frecuencia_respiratoria: 0,
-    deshidratacion: 0,
     vacunas_inoculadas: undefined,
     desparasitacion_interna: undefined,
     desparasitacion_externa: undefined,
     examen_clinico: "",
     indicaciones_generales: "",
-    orden_de_examenes: "",
     receta_medica: undefined,
-    proxima_consulta: "",
     tllc: 0,
 
     // Información relacionada del paciente
@@ -500,8 +497,85 @@ const RellenarFicha: React.FC = () => {
           recetaMedicaData.length > 0 ? recetaMedicaData : undefined,
       };
 
-      console.log("Guardando ficha:", dataToSend);
+      console.log("=== INICIO LOG GUARDADO FICHA ===");
+      console.log(
+        "📋 Datos completos a enviar:",
+        JSON.stringify(dataToSend, null, 2)
+      );
+      console.log("\n🐾 Paciente:", {
+        id: dataToSend.id_paciente,
+        nombre: dataToSend.paciente?.nombre,
+        especie: dataToSend.paciente?.especie,
+        raza: dataToSend.paciente?.raza,
+      });
+      console.log("\n👤 Tutor:", {
+        rut: dataToSend.rut,
+        nombre: dataToSend.tutor?.nombre,
+      });
+      console.log("\n🩺 Constantes Vitales:", {
+        peso: dataToSend.peso,
+        temperatura: dataToSend.temperatura,
+        fc: dataToSend.frecuencia_cardiaca,
+        fr: dataToSend.frecuencia_respiratoria,
+        tllc: dataToSend.tllc,
+      });
+      console.log("\n🔬 Examen Físico:", {
+        mucosas: dataToSend.mucosas,
+        condicion_corporal: dataToSend.condicion_corporal,
+        estado_pelaje: dataToSend.estado_pelaje,
+        estado_piel: dataToSend.estado_piel,
+        nodulos_linfaticos: dataToSend.nodulos_linfaticos?.substring(0, 50),
+      });
+      console.log("\n📝 Diagnóstico:", {
+        motivo: dataToSend.motivo,
+        examen_clinico: dataToSend.examen_clinico?.substring(0, 50),
+        diagnostico: dataToSend.diagnostico?.substring(0, 50),
+        observaciones: dataToSend.observaciones?.substring(0, 50),
+      });
+      console.log(
+        "\n💉 Vacunas:",
+        dataToSend.vacunas_inoculadas?.length || 0,
+        "registradas"
+      );
+      if (dataToSend.vacunas_inoculadas) {
+        dataToSend.vacunas_inoculadas.forEach((v, i) =>
+          console.log(`  ${i + 1}. ${v.nombre_vacuna} - ${v.fecha_vacunacion}`)
+        );
+      }
+      console.log("\n🐛 Desparasitación:");
+      console.log(
+        "  Interna:",
+        dataToSend.desparasitacion_interna?.nombre_desparasitante ||
+          "No registrada"
+      );
+      console.log(
+        "  Externa:",
+        dataToSend.desparasitacion_externa?.nombre_desparasitante ||
+          "No registrada"
+      );
+      console.log(
+        "\n💊 Recetas Médicas:",
+        dataToSend.receta_medica?.length || 0,
+        "registradas"
+      );
+      if (dataToSend.receta_medica) {
+        dataToSend.receta_medica.forEach((r, i) =>
+          console.log(
+            `  ${i + 1}. ${r.medicamento} - ${r.dosis} cada ${
+              r.frecuencia
+            } por ${r.duracion}`
+          )
+        );
+      }
+      console.log(
+        "\n📅 Indicaciones:",
+        dataToSend.indicaciones_generales?.substring(0, 50) ||
+          "Sin indicaciones"
+      );
+      console.log("=== FIN LOG GUARDADO FICHA ===\n");
+
       const response = await crearConsulta(dataToSend);
+      console.log("✅ Respuesta del servidor:", response);
       setToastMessage("Ficha veterinaria guardada exitosamente");
 
       // Limpiar formulario después de guardar
@@ -523,15 +597,12 @@ const RellenarFicha: React.FC = () => {
         temperatura: 0,
         frecuencia_cardiaca: 0,
         frecuencia_respiratoria: 0,
-        deshidratacion: 0,
         vacunas_inoculadas: undefined,
         desparasitacion_interna: undefined,
         desparasitacion_externa: undefined,
         examen_clinico: "",
         indicaciones_generales: "",
-        orden_de_examenes: "",
         receta_medica: [],
-        proxima_consulta: "",
         tllc: 0,
 
         // Información relacionada del paciente
@@ -589,15 +660,12 @@ const RellenarFicha: React.FC = () => {
       temperatura: 0,
       frecuencia_cardiaca: 0,
       frecuencia_respiratoria: 0,
-      deshidratacion: 0,
       vacunas_inoculadas: undefined,
       desparasitacion_interna: undefined,
       desparasitacion_externa: undefined,
       examen_clinico: "",
       indicaciones_generales: "",
-      orden_de_examenes: "",
       receta_medica: [],
-      proxima_consulta: "",
       tllc: 0,
       paciente: {
         id_paciente: 0,
@@ -811,18 +879,6 @@ const RellenarFicha: React.FC = () => {
                   onIonChange={handleNumericChange}
                 />
               </IonItem>
-              <IonItem>
-                <IonInput
-                  label="Deshidratación (%)"
-                  labelPlacement="stacked"
-                  fill="outline"
-                  type="number"
-                  step="0.1"
-                  name="deshidratacion"
-                  value={formData.deshidratacion}
-                  onIonChange={handleNumericChange}
-                />
-              </IonItem>
             </IonList>
             <IonButton
               expand="block"
@@ -1005,39 +1061,6 @@ const RellenarFicha: React.FC = () => {
                   onIonChange={handleInputChange}
                 />
               </IonItem>
-              <IonItem>
-                <IonToggle
-                  checked={requiereProximaConsulta}
-                  onIonChange={(e) => {
-                    const checked = e.detail.checked;
-                    setRequiereProximaConsulta(checked);
-                    if (!checked) {
-                      setFormData((prev) => ({
-                        ...prev,
-                        proxima_consulta: "",
-                      }));
-                    }
-                  }}
-                >
-                  <IonLabel>
-                    <h3>Requiere Próxima Consulta</h3>
-                    <p>Activar para programar una próxima cita</p>
-                  </IonLabel>
-                </IonToggle>
-              </IonItem>
-              {requiereProximaConsulta && (
-                <IonItem>
-                  <IonInput
-                    label="Fecha de Próxima Consulta"
-                    labelPlacement="stacked"
-                    fill="outline"
-                    type="date"
-                    name="proxima_consulta"
-                    value={formData.proxima_consulta}
-                    onIonChange={handleInputChange}
-                  />
-                </IonItem>
-              )}
             </IonList>
             <IonButton
               expand="block"
@@ -1294,18 +1317,6 @@ const RellenarFicha: React.FC = () => {
                   rows={4}
                   name="indicaciones_generales"
                   value={formData.indicaciones_generales}
-                  onIonChange={handleInputChange}
-                />
-              </IonItem>
-              <IonItem>
-                <IonTextarea
-                  label="Orden de Exámenes"
-                  labelPlacement="stacked"
-                  fill="outline"
-                  placeholder="Exámenes solicitados"
-                  rows={3}
-                  name="orden_de_examenes"
-                  value={formData.orden_de_examenes}
                   onIonChange={handleInputChange}
                 />
               </IonItem>

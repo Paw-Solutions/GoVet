@@ -23,6 +23,8 @@ import {
   IonRow,
   IonCol,
   IonNote,
+  IonAccordion,
+  IonAccordionGroup,
 } from "@ionic/react";
 import {
   closeOutline,
@@ -42,11 +44,11 @@ import {
   maleOutline,
   banOutline,
   thermometerOutline,
-  waterOutline,
   timeOutline,
-  shieldOutline,
   documentTextOutline,
   medkitOutline,
+  colorWandOutline,
+  waterOutline,
 } from "ionicons/icons";
 import "../../styles/infoFicha.css";
 import { ConsultaData, calcularEdadPaciente } from "../../api/fichas";
@@ -206,450 +208,542 @@ const ModalInfoFicha: React.FC<ModalInfoFichaProps> = ({
           )}
         </div>
 
-        {/* 1. Constantes Vitales (Grilla 3x2) */}
-        <div className="ion-margin-bottom">
-          <h3
-            style={{ marginBottom: "12px", color: "var(--ion-color-primary)" }}
-          >
-            Constantes Vitales
-          </h3>
-          <IonGrid className="ion-no-padding">
-            <IonRow>
-              <IonCol size="4" className="ion-text-center">
-                <IonIcon
-                  icon={scaleOutline}
-                  color="medium"
-                  style={{ fontSize: "24px" }}
-                />
-                <div
+        {/* Acordeón para todas las secciones */}
+        <IonAccordionGroup
+          expand="inset"
+          multiple={true}
+          value={["constantes", "examen", "diagnostico", "tratamientos"]}
+        >
+          {/* 1. Constantes Vitales */}
+          <IonAccordion value="constantes">
+            <IonItem slot="header" color="light">
+              <IonIcon
+                icon={pulseOutline}
+                slot="start"
+                color="primary"
+                style={{ fontSize: "24px" }}
+              />
+              <IonLabel>
+                <h2
                   style={{
-                    fontSize: "24px",
-                    fontWeight: "bold",
-                    margin: "4px 0",
+                    fontWeight: "600",
+                    color: "var(--ion-color-primary)",
                   }}
                 >
-                  {consulta.peso || "--"}
-                </div>
-                <small style={{ color: "var(--ion-color-medium)" }}>kg</small>
-              </IonCol>
-              <IonCol size="4" className="ion-text-center">
+                  Constantes Vitales
+                </h2>
+              </IonLabel>
+            </IonItem>
+            <div slot="content" className="ion-padding">
+              <IonGrid className="ion-no-padding">
+                <IonRow>
+                  <IonCol size="6" className="ion-text-center">
+                    <IonIcon
+                      icon={scaleOutline}
+                      color="primary"
+                      style={{ fontSize: "28px" }}
+                    />
+                    <div
+                      style={{
+                        fontSize: "28px",
+                        fontWeight: "bold",
+                        margin: "8px 0 4px 0",
+                        color: "var(--ion-color-primary)",
+                      }}
+                    >
+                      {consulta.peso || "--"}
+                    </div>
+                    <small style={{ color: "var(--ion-color-medium)" }}>
+                      Peso (kg)
+                    </small>
+                  </IonCol>
+                  <IonCol size="6" className="ion-text-center">
+                    <IonIcon
+                      icon={thermometerOutline}
+                      color="danger"
+                      style={{ fontSize: "28px" }}
+                    />
+                    <div
+                      style={{
+                        fontSize: "28px",
+                        fontWeight: "bold",
+                        margin: "8px 0 4px 0",
+                        color: "var(--ion-color-danger)",
+                      }}
+                    >
+                      {consulta.temperatura || "--"}
+                    </div>
+                    <small style={{ color: "var(--ion-color-medium)" }}>
+                      Temp (°C)
+                    </small>
+                  </IonCol>
+                </IonRow>
+                <IonRow style={{ marginTop: "16px" }}>
+                  <IonCol size="6" className="ion-text-center">
+                    <IonIcon
+                      icon={heartOutline}
+                      color="danger"
+                      style={{ fontSize: "28px" }}
+                    />
+                    <div
+                      style={{
+                        fontSize: "28px",
+                        fontWeight: "bold",
+                        margin: "8px 0 4px 0",
+                        color: "var(--ion-color-danger)",
+                      }}
+                    >
+                      {consulta.frecuencia_cardiaca || "--"}
+                    </div>
+                    <small style={{ color: "var(--ion-color-medium)" }}>
+                      FC (LPM)
+                    </small>
+                  </IonCol>
+                  <IonCol size="6" className="ion-text-center">
+                    <IonIcon
+                      icon={pulseOutline}
+                      color="primary"
+                      style={{ fontSize: "28px" }}
+                    />
+                    <div
+                      style={{
+                        fontSize: "28px",
+                        fontWeight: "bold",
+                        margin: "8px 0 4px 0",
+                        color: "var(--ion-color-primary)",
+                      }}
+                    >
+                      {consulta.frecuencia_respiratoria || "--"}
+                    </div>
+                    <small style={{ color: "var(--ion-color-medium)" }}>
+                      FR (RPM)
+                    </small>
+                  </IonCol>
+                </IonRow>
+                <IonRow style={{ marginTop: "16px" }}>
+                  <IonCol size="6" className="ion-text-center">
+                    <IonIcon
+                      icon={timeOutline}
+                      color="warning"
+                      style={{ fontSize: "28px" }}
+                    />
+                    <div
+                      style={{
+                        fontSize: "28px",
+                        fontWeight: "bold",
+                        margin: "8px 0 4px 0",
+                        color: "var(--ion-color-warning)",
+                      }}
+                    >
+                      {consulta.tllc || "--"}
+                    </div>
+                    <small style={{ color: "var(--ion-color-medium)" }}>
+                      TLLC (seg)
+                    </small>
+                  </IonCol>
+                  <IonCol size="6" className="ion-text-center">
+                    <IonIcon
+                      icon={waterOutline}
+                      color="tertiary"
+                      style={{ fontSize: "28px" }}
+                    />
+                    <div
+                      style={{
+                        fontSize: "28px",
+                        fontWeight: "bold",
+                        margin: "8px 0 4px 0",
+                        color: "var(--ion-color-tertiary)",
+                      }}
+                    >
+                      {consulta.dht ? `${consulta.dht}%` : "--"}
+                    </div>
+                    <small style={{ color: "var(--ion-color-medium)" }}>
+                      DHT (%)
+                    </small>
+                  </IonCol>
+                </IonRow>
+              </IonGrid>
+            </div>
+          </IonAccordion>
+
+          {/* 2. Examen Físico */}
+          {(consulta.mucosas ||
+            consulta.condicion_corporal ||
+            consulta.estado_pelaje ||
+            consulta.estado_piel ||
+            consulta.nodulos_linfaticos ||
+            consulta.examen_clinico) && (
+            <IonAccordion value="examen">
+              <IonItem slot="header" color="light">
                 <IonIcon
-                  icon={thermometerOutline}
-                  color="danger"
-                  style={{ fontSize: "24px" }}
-                />
-                <div
-                  style={{
-                    fontSize: "24px",
-                    fontWeight: "bold",
-                    margin: "4px 0",
-                  }}
-                >
-                  {consulta.temperatura || "--"}
-                </div>
-                <small style={{ color: "var(--ion-color-medium)" }}>°C</small>
-              </IonCol>
-              <IonCol size="4" className="ion-text-center">
-                <IonIcon
-                  icon={heartOutline}
-                  color="danger"
-                  style={{ fontSize: "24px" }}
-                />
-                <div
-                  style={{
-                    fontSize: "24px",
-                    fontWeight: "bold",
-                    margin: "4px 0",
-                  }}
-                >
-                  {consulta.frecuencia_cardiaca || "--"}
-                </div>
-                <small style={{ color: "var(--ion-color-medium)" }}>LPM</small>
-              </IonCol>
-            </IonRow>
-            <IonRow style={{ marginTop: "12px" }}>
-              <IonCol size="4" className="ion-text-center">
-                <IonIcon
-                  icon={pulseOutline}
-                  color="primary"
-                  style={{ fontSize: "24px" }}
-                />
-                <div
-                  style={{
-                    fontSize: "24px",
-                    fontWeight: "bold",
-                    margin: "4px 0",
-                  }}
-                >
-                  {consulta.frecuencia_respiratoria || "--"}
-                </div>
-                <small style={{ color: "var(--ion-color-medium)" }}>RPM</small>
-              </IonCol>
-              <IonCol size="4" className="ion-text-center">
-                <IonIcon
-                  icon={timeOutline}
-                  color="warning"
-                  style={{ fontSize: "24px" }}
-                />
-                <div
-                  style={{
-                    fontSize: "24px",
-                    fontWeight: "bold",
-                    margin: "4px 0",
-                  }}
-                >
-                  {consulta.tllc || "--"}
-                </div>
-                <small style={{ color: "var(--ion-color-medium)" }}>
-                  seg TLLC
-                </small>
-              </IonCol>
-              <IonCol size="4" className="ion-text-center">
-                <IonIcon
-                  icon={waterOutline}
+                  icon={bodyOutline}
+                  slot="start"
                   color="tertiary"
                   style={{ fontSize: "24px" }}
                 />
-                <div
+                <IonLabel>
+                  <h2
+                    style={{
+                      fontWeight: "600",
+                      color: "var(--ion-color-tertiary)",
+                    }}
+                  >
+                    Examen Físico
+                  </h2>
+                </IonLabel>
+              </IonItem>
+              <div slot="content" className="ion-padding">
+                {/* Chips para datos estructurados */}
+                {(consulta.mucosas ||
+                  consulta.condicion_corporal ||
+                  consulta.estado_pelaje ||
+                  consulta.estado_piel) && (
+                  <div className="ion-margin-bottom">
+                    {consulta.mucosas && (
+                      <IonChip outline={true} color="tertiary">
+                        <IonLabel>Mucosas: {consulta.mucosas}</IonLabel>
+                      </IonChip>
+                    )}
+                    {consulta.condicion_corporal && (
+                      <IonChip outline={true} color="tertiary">
+                        <IonLabel>
+                          Condición: {consulta.condicion_corporal}
+                        </IonLabel>
+                      </IonChip>
+                    )}
+                    {consulta.estado_pelaje && (
+                      <IonChip outline={true} color="tertiary">
+                        <IonLabel>Pelaje: {consulta.estado_pelaje}</IonLabel>
+                      </IonChip>
+                    )}
+                    {consulta.estado_piel && (
+                      <IonChip outline={true} color="tertiary">
+                        <IonLabel>Piel: {consulta.estado_piel}</IonLabel>
+                      </IonChip>
+                    )}
+                  </div>
+                )}
+
+                {/* Examen clínico detallado */}
+                {consulta.examen_clinico && (
+                  <div className="ion-margin-bottom">
+                    <p
+                      style={{
+                        marginBottom: "6px",
+                        fontWeight: "600",
+                        fontSize: "14px",
+                      }}
+                    >
+                      Examen Clínico:
+                    </p>
+                    <p style={{ fontSize: "14px", lineHeight: "1.5" }}>
+                      {consulta.examen_clinico}
+                    </p>
+                  </div>
+                )}
+
+                {/* Nódulos linfáticos */}
+                {consulta.nodulos_linfaticos && (
+                  <div>
+                    <p
+                      style={{
+                        marginBottom: "6px",
+                        fontWeight: "600",
+                        fontSize: "14px",
+                      }}
+                    >
+                      Nódulos Linfáticos:
+                    </p>
+                    <p style={{ fontSize: "14px", lineHeight: "1.5" }}>
+                      {consulta.nodulos_linfaticos}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </IonAccordion>
+          )}
+
+          {/* 3. Diagnóstico */}
+          <IonAccordion value="diagnostico">
+            <IonItem slot="header" color="light">
+              <IonIcon
+                icon={medicalOutline}
+                slot="start"
+                color="secondary"
+                style={{ fontSize: "24px" }}
+              />
+              <IonLabel>
+                <h2
                   style={{
-                    fontSize: "24px",
-                    fontWeight: "bold",
-                    margin: "4px 0",
+                    fontWeight: "600",
+                    color: "var(--ion-color-secondary)",
                   }}
                 >
-                  {consulta.deshidratacion || "--"}
+                  Diagnóstico
+                </h2>
+              </IonLabel>
+            </IonItem>
+            <div slot="content" className="ion-padding">
+              <p style={{ fontSize: "16px", lineHeight: "1.6", margin: 0 }}>
+                {consulta.diagnostico || "No registrado"}
+              </p>
+
+              {consulta.observaciones && (
+                <div className="ion-margin-top">
+                  <p
+                    style={{
+                      marginBottom: "6px",
+                      fontWeight: "600",
+                      fontSize: "14px",
+                    }}
+                  >
+                    Observaciones:
+                  </p>
+                  <p style={{ fontSize: "14px", lineHeight: "1.5" }}>
+                    {consulta.observaciones}
+                  </p>
                 </div>
-                <small style={{ color: "var(--ion-color-medium)" }}>
-                  % Desh.
-                </small>
-              </IonCol>
-            </IonRow>
-          </IonGrid>
-        </div>
+              )}
+            </div>
+          </IonAccordion>
 
-        {/* 2. Diagnóstico y Examen (Card Principal) */}
-        <IonCard
-          className="ion-no-margin ion-margin-bottom"
-          style={{ borderLeft: "4px solid var(--ion-color-primary)" }}
-        >
-          <IonCardContent>
-            <h3 style={{ color: "var(--ion-color-primary)", marginTop: 0 }}>
-              Diagnóstico
-            </h3>
-            <p style={{ fontSize: "16px", lineHeight: "1.6" }}>
-              {consulta.diagnostico || "No registrado"}
-            </p>
-
-            {(consulta.mucosas ||
-              consulta.condicion_corporal ||
-              consulta.estado_pelaje ||
-              consulta.estado_piel) && (
-              <div className="ion-margin-top">
-                {consulta.mucosas && (
-                  <IonChip outline={true} color="secondary">
-                    <IonLabel>Mucosas: {consulta.mucosas}</IonLabel>
-                  </IonChip>
-                )}
-                {consulta.condicion_corporal && (
-                  <IonChip outline={true} color="secondary">
-                    <IonLabel>
-                      Condición: {consulta.condicion_corporal}
-                    </IonLabel>
-                  </IonChip>
-                )}
-                {consulta.estado_pelaje && (
-                  <IonChip outline={true} color="tertiary">
-                    <IonLabel>Pelaje: {consulta.estado_pelaje}</IonLabel>
-                  </IonChip>
-                )}
-                {consulta.estado_piel && (
-                  <IonChip outline={true} color="tertiary">
-                    <IonLabel>Piel: {consulta.estado_piel}</IonLabel>
-                  </IonChip>
-                )}
-              </div>
-            )}
-
-            {consulta.examen_clinico && (
-              <div className="ion-margin-top">
-                <p style={{ marginBottom: "4px" }}>
-                  <strong>Examen Clínico:</strong>
-                </p>
-                <p style={{ fontSize: "14px" }}>{consulta.examen_clinico}</p>
-              </div>
-            )}
-
-            {consulta.observaciones && (
-              <div className="ion-margin-top">
-                <p style={{ marginBottom: "4px" }}>
-                  <strong>Observaciones:</strong>
-                </p>
-                <p style={{ fontSize: "14px" }}>{consulta.observaciones}</p>
-              </div>
-            )}
-
-            {consulta.nodulos_linfaticos && (
-              <div className="ion-margin-top">
-                <p style={{ marginBottom: "4px" }}>
-                  <strong>Nódulos Linfáticos:</strong>
-                </p>
-                <p style={{ fontSize: "14px" }}>
-                  {consulta.nodulos_linfaticos}
-                </p>
-              </div>
-            )}
-          </IonCardContent>
-        </IonCard>
-
-        {/* 3. Tratamientos (Listas) */}
-        {(consulta.receta_medica?.length ||
-          consulta.vacunas_inoculadas?.length ||
-          consulta.desparasitacion_interna ||
-          consulta.desparasitacion_externa) && (
-          <IonList inset={true} className="ion-margin-bottom">
-            <IonListHeader>
-              <IonLabel>Plan y Tratamiento</IonLabel>
-            </IonListHeader>
-
-            {/* Recetas Médicas */}
-            {consulta.receta_medica && consulta.receta_medica.length > 0 && (
-              <>
-                <IonItem lines="none" color="light">
-                  <IonLabel>
-                    <h3 style={{ fontWeight: "600", margin: "8px 0" }}>
-                      Receta Médica
-                    </h3>
-                  </IonLabel>
-                </IonItem>
-                {consulta.receta_medica.map((receta, index) => (
-                  <IonItem key={`receta-${index}`} lines="full">
-                    <IonIcon
-                      icon={documentTextOutline}
-                      slot="start"
-                      color="primary"
-                    />
-                    <IonLabel>
-                      <h2 style={{ fontWeight: "600" }}>
-                        {receta.medicamento}
-                      </h2>
-                      <p style={{ fontSize: "13px", marginTop: "4px" }}>
-                        {receta.frecuencia} por {receta.duracion}
-                      </p>
-                    </IonLabel>
-                    <IonNote slot="end" color="dark">
-                      {receta.dosis}
-                    </IonNote>
-                  </IonItem>
-                ))}
-              </>
-            )}
-
-            {/* Vacunas */}
-            {consulta.vacunas_inoculadas &&
-              consulta.vacunas_inoculadas.length > 0 && (
-                <>
-                  <IonItem lines="none" color="light">
-                    <IonLabel>
-                      <h3 style={{ fontWeight: "600", margin: "8px 0" }}>
-                        Vacunas Administradas
-                      </h3>
-                    </IonLabel>
-                  </IonItem>
-                  {consulta.vacunas_inoculadas.map((vacuna, index) => (
-                    <IonItem key={`vacuna-${index}`} lines="full">
-                      <IonIcon
-                        icon={shieldOutline}
-                        slot="start"
-                        color="success"
-                      />
-                      <IonLabel>
-                        <h2 style={{ fontWeight: "600" }}>
-                          {vacuna.nombre_vacuna}
-                        </h2>
-                        <p style={{ fontSize: "13px", marginTop: "4px" }}>
-                          Fecha: {formatShortDate(vacuna.fecha_vacunacion)}
-                          {vacuna.marca && ` • Marca: ${vacuna.marca}`}
-                        </p>
-                        {vacuna.proxima_dosis && (
-                          <p
+          {/* 4. Tratamientos */}
+          {(consulta.recetas?.length ||
+            consulta.tratamientos?.length ||
+            consulta.indicaciones_generales) && (
+            <IonAccordion value="tratamientos">
+              <IonItem slot="header" color="light">
+                <IonIcon
+                  icon={medkitOutline}
+                  slot="start"
+                  color="warning"
+                  style={{ fontSize: "24px" }}
+                />
+                <IonLabel>
+                  <h2
+                    style={{
+                      fontWeight: "600",
+                      color: "var(--ion-color-warning)",
+                    }}
+                  >
+                    Plan y Tratamiento
+                  </h2>
+                </IonLabel>
+              </IonItem>
+              <div slot="content">
+                <IonList lines="full" className="ion-no-margin ion-no-padding">
+                  {/* Recetas Médicas */}
+                  {consulta.recetas && consulta.recetas.length > 0 && (
+                    <>
+                      <IonItem lines="none" color="light">
+                        <IonLabel>
+                          <h3
                             style={{
-                              fontSize: "13px",
+                              fontWeight: "600",
+                              margin: "8px 0",
                               color: "var(--ion-color-warning)",
                             }}
                           >
-                            Próxima dosis:{" "}
-                            {formatShortDate(vacuna.proxima_dosis)}
+                            Receta Médica
+                          </h3>
+                        </IonLabel>
+                      </IonItem>
+                      {consulta.recetas.map((receta, index) => (
+                        <IonItem key={`receta-${index}`} lines="full">
+                          <IonIcon
+                            icon={documentTextOutline}
+                            slot="start"
+                            color="warning"
+                            style={{ fontSize: "24px" }}
+                          />
+                          <IonLabel>
+                            <h2 style={{ fontWeight: "600", fontSize: "15px" }}>
+                              {receta.medicamento}
+                            </h2>
+                            <p
+                              style={{
+                                fontSize: "14px",
+                                marginTop: "4px",
+                                color: "var(--ion-color-dark)",
+                              }}
+                            >
+                              Dosis: {receta.dosis}
+                            </p>
+                            <p
+                              style={{
+                                fontSize: "13px",
+                                marginTop: "2px",
+                                color: "var(--ion-color-medium)",
+                              }}
+                            >
+                              Cada {receta.frecuencia}h · Por {receta.duracion}{" "}
+                              días
+                            </p>
+                            {receta.numero_serie && (
+                              <p
+                                style={{
+                                  fontSize: "12px",
+                                  color: "var(--ion-color-medium)",
+                                  marginTop: "2px",
+                                }}
+                              >
+                                Serie: {receta.numero_serie}
+                              </p>
+                            )}
+                          </IonLabel>
+                        </IonItem>
+                      ))}
+                    </>
+                  )}
+
+                  {/* Procedimientos (Vacunas/Antiparasitarios) */}
+                  {consulta.tratamientos &&
+                    consulta.tratamientos.length > 0 && (
+                      <>
+                        <IonItem lines="none" color="light">
+                          <IonLabel>
+                            <h3
+                              style={{
+                                fontWeight: "600",
+                                margin: "8px 0",
+                                color: "var(--ion-color-success)",
+                              }}
+                            >
+                              Procedimientos Aplicados
+                            </h3>
+                          </IonLabel>
+                        </IonItem>
+                        {consulta.tratamientos.map((tratamiento, index) => {
+                          // Determinar icono según tipo de tratamiento
+                          let iconColor = "success";
+                          let icon = medkitOutline;
+
+                          if (
+                            tratamiento.tipo_tratamiento
+                              ?.toLowerCase()
+                              .includes("vacuna") ||
+                            tratamiento.nombre_tratamiento
+                              ?.toLowerCase()
+                              .includes("vacuna")
+                          ) {
+                            icon = colorWandOutline;
+                            iconColor = "success";
+                          } else if (
+                            tratamiento.tipo_tratamiento
+                              ?.toLowerCase()
+                              .includes("antiparasitario")
+                          ) {
+                            icon = medkitOutline;
+                            iconColor = "success";
+                          }
+
+                          return (
+                            <IonItem key={`tratamiento-${index}`} lines="full">
+                              <IonIcon
+                                icon={icon}
+                                slot="start"
+                                color={iconColor}
+                                style={{ fontSize: "24px" }}
+                              />
+                              <IonLabel>
+                                <h2
+                                  style={{
+                                    fontWeight: "600",
+                                    fontSize: "15px",
+                                  }}
+                                >
+                                  {tratamiento.nombre_tratamiento}
+                                </h2>
+                                <p
+                                  style={{
+                                    fontSize: "14px",
+                                    marginTop: "4px",
+                                    color: "var(--ion-color-dark)",
+                                  }}
+                                >
+                                  {tratamiento.fecha_tratamiento &&
+                                    `Fecha: ${formatShortDate(
+                                      tratamiento.fecha_tratamiento
+                                    )}`}
+                                  {tratamiento.dosis &&
+                                    (tratamiento.fecha_tratamiento
+                                      ? " · "
+                                      : "") + `Dosis: ${tratamiento.dosis}`}
+                                </p>
+                                {(tratamiento.marca ||
+                                  tratamiento.numero_serial) && (
+                                  <p
+                                    style={{
+                                      fontSize: "12px",
+                                      color: "var(--ion-color-medium)",
+                                      marginTop: "2px",
+                                    }}
+                                  >
+                                    {tratamiento.marca &&
+                                      `Marca: ${tratamiento.marca}`}
+                                    {tratamiento.marca &&
+                                      tratamiento.numero_serial &&
+                                      " · "}
+                                    {tratamiento.numero_serial &&
+                                      `Serie: ${tratamiento.numero_serial}`}
+                                  </p>
+                                )}
+                                {tratamiento.proxima_dosis && (
+                                  <p
+                                    style={{
+                                      fontSize: "12px",
+                                      color: "var(--ion-color-warning)",
+                                      marginTop: "4px",
+                                      fontWeight: "600",
+                                    }}
+                                  >
+                                    Próxima dosis:{" "}
+                                    {formatShortDate(tratamiento.proxima_dosis)}
+                                  </p>
+                                )}
+                              </IonLabel>
+                            </IonItem>
+                          );
+                        })}
+                      </>
+                    )}
+
+                  {/* Indicaciones Generales */}
+                  {consulta.indicaciones_generales && (
+                    <>
+                      <IonItem lines="none" color="light">
+                        <IonLabel>
+                          <h3
+                            style={{
+                              fontWeight: "600",
+                              margin: "8px 0",
+                              color: "var(--ion-color-medium)",
+                            }}
+                          >
+                            Indicaciones Generales
+                          </h3>
+                        </IonLabel>
+                      </IonItem>
+                      <IonItem lines="none">
+                        <IonIcon
+                          icon={clipboardOutline}
+                          slot="start"
+                          color="medium"
+                          style={{ fontSize: "24px" }}
+                        />
+                        <IonLabel className="ion-text-wrap">
+                          <p style={{ fontSize: "14px", lineHeight: "1.6" }}>
+                            {consulta.indicaciones_generales}
                           </p>
-                        )}
-                      </IonLabel>
-                    </IonItem>
-                  ))}
-                </>
-              )}
-
-            {/* Antiparasitarios Internos */}
-            {consulta.desparasitacion_interna && (
-              <>
-                <IonItem lines="none" color="light">
-                  <IonLabel>
-                    <h3 style={{ fontWeight: "600", margin: "8px 0" }}>
-                      Antiparasitario Interno
-                    </h3>
-                  </IonLabel>
-                </IonItem>
-                <IonItem lines="full">
-                  <IonIcon icon={medkitOutline} slot="start" color="tertiary" />
-                  <IonLabel>
-                    <h2 style={{ fontWeight: "600" }}>
-                      {consulta.desparasitacion_interna.nombre_desparasitante}
-                    </h2>
-                    <p style={{ fontSize: "13px", marginTop: "4px" }}>
-                      Fecha:{" "}
-                      {formatShortDate(
-                        consulta.desparasitacion_interna.fecha_administracion
-                      )}
-                      {consulta.desparasitacion_interna.marca &&
-                        ` • Marca: ${consulta.desparasitacion_interna.marca}`}
-                    </p>
-                    {consulta.desparasitacion_interna.proxima_dosis && (
-                      <p
-                        style={{
-                          fontSize: "13px",
-                          color: "var(--ion-color-warning)",
-                        }}
-                      >
-                        Próxima dosis:{" "}
-                        {formatShortDate(
-                          consulta.desparasitacion_interna.proxima_dosis
-                        )}
-                      </p>
-                    )}
-                  </IonLabel>
-                </IonItem>
-              </>
-            )}
-
-            {/* Antiparasitarios Externos */}
-            {consulta.desparasitacion_externa && (
-              <>
-                <IonItem lines="none" color="light">
-                  <IonLabel>
-                    <h3 style={{ fontWeight: "600", margin: "8px 0" }}>
-                      Antiparasitario Externo
-                    </h3>
-                  </IonLabel>
-                </IonItem>
-                <IonItem lines="full">
-                  <IonIcon
-                    icon={medkitOutline}
-                    slot="start"
-                    color="secondary"
-                  />
-                  <IonLabel>
-                    <h2 style={{ fontWeight: "600" }}>
-                      {consulta.desparasitacion_externa.nombre_desparasitante}
-                    </h2>
-                    <p style={{ fontSize: "13px", marginTop: "4px" }}>
-                      Fecha:{" "}
-                      {formatShortDate(
-                        consulta.desparasitacion_externa.fecha_administracion
-                      )}
-                      {consulta.desparasitacion_externa.marca &&
-                        ` • Marca: ${consulta.desparasitacion_externa.marca}`}
-                    </p>
-                    {consulta.desparasitacion_externa.proxima_dosis && (
-                      <p
-                        style={{
-                          fontSize: "13px",
-                          color: "var(--ion-color-warning)",
-                        }}
-                      >
-                        Próxima dosis:{" "}
-                        {formatShortDate(
-                          consulta.desparasitacion_externa.proxima_dosis
-                        )}
-                      </p>
-                    )}
-                  </IonLabel>
-                </IonItem>
-              </>
-            )}
-
-            {/* Indicaciones Generales */}
-            {consulta.indicaciones_generales && (
-              <>
-                <IonItem lines="none" color="light">
-                  <IonLabel>
-                    <h3 style={{ fontWeight: "600", margin: "8px 0" }}>
-                      Indicaciones Generales
-                    </h3>
-                  </IonLabel>
-                </IonItem>
-                <IonItem lines="none">
-                  <IonLabel className="ion-text-wrap">
-                    <p style={{ fontSize: "14px", lineHeight: "1.5" }}>
-                      {consulta.indicaciones_generales}
-                    </p>
-                  </IonLabel>
-                </IonItem>
-              </>
-            )}
-
-            {/* Orden de Exámenes */}
-            {consulta.orden_de_examenes && (
-              <>
-                <IonItem lines="none" color="light">
-                  <IonLabel>
-                    <h3 style={{ fontWeight: "600", margin: "8px 0" }}>
-                      Orden de Exámenes
-                    </h3>
-                  </IonLabel>
-                </IonItem>
-                <IonItem lines="none">
-                  <IonLabel className="ion-text-wrap">
-                    <p style={{ fontSize: "14px", lineHeight: "1.5" }}>
-                      {consulta.orden_de_examenes}
-                    </p>
-                  </IonLabel>
-                </IonItem>
-              </>
-            )}
-          </IonList>
-        )}
-
-        {/* Próxima Consulta */}
-        {consulta.proxima_consulta && (
-          <IonCard
-            className="ion-margin-bottom"
-            style={{ backgroundColor: "var(--ion-color-warning-tint)" }}
-          >
-            <IonCardContent>
-              <div
-                style={{ display: "flex", alignItems: "center", gap: "8px" }}
-              >
-                <IonIcon
-                  icon={calendarOutline}
-                  color="warning"
-                  style={{ fontSize: "20px" }}
-                />
-                <div>
-                  <p
-                    style={{
-                      margin: 0,
-                      fontSize: "12px",
-                      color: "var(--ion-color-medium)",
-                    }}
-                  >
-                    Próxima Consulta
-                  </p>
-                  <p style={{ margin: 0, fontSize: "16px", fontWeight: "600" }}>
-                    {formatDate(consulta.proxima_consulta)}
-                  </p>
-                </div>
+                        </IonLabel>
+                      </IonItem>
+                    </>
+                  )}
+                </IonList>
               </div>
-            </IonCardContent>
-          </IonCard>
-        )}
+            </IonAccordion>
+          )}
+        </IonAccordionGroup>
 
         {/* Información del Paciente y Tutor */}
         {(consulta.paciente || consulta.tutor) && (

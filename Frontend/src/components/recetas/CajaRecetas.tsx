@@ -21,8 +21,8 @@ import { medkitOutline, trashOutline } from "ionicons/icons";
 export interface Receta {
   medicamento: string;
   dosis: string;
-  frecuencia: string;
-  duracion: string;
+  frecuencia: number; // horas
+  duracion: number; // días
   numero_de_serie?: string;
 }
 
@@ -36,8 +36,8 @@ const CajaRecetas: React.FC<CajaRecetasProps> = ({ recetas, setRecetas }) => {
   const [tempReceta, setTempReceta] = useState<Receta>({
     medicamento: "",
     dosis: "",
-    frecuencia: "",
-    duracion: "",
+    frecuencia: 0,
+    duracion: 0,
     numero_de_serie: "",
   });
 
@@ -46,7 +46,13 @@ const CajaRecetas: React.FC<CajaRecetasProps> = ({ recetas, setRecetas }) => {
       name: e.detail?.name,
       value: e.detail?.value,
     };
-    const val = value ?? e.detail?.value ?? "";
+    let val = value ?? e.detail?.value ?? "";
+
+    // Convertir a número si es frecuencia o duracion
+    if (name === "frecuencia" || name === "duracion") {
+      val = val === "" ? 0 : parseInt(val, 10) || 0;
+    }
+
     setTempReceta((prev) => ({
       ...prev,
       [name]: val,
@@ -66,8 +72,8 @@ const CajaRecetas: React.FC<CajaRecetasProps> = ({ recetas, setRecetas }) => {
     setTempReceta({
       medicamento: "",
       dosis: "",
-      frecuencia: "",
-      duracion: "",
+      frecuencia: 0,
+      duracion: 0,
       numero_de_serie: "",
     });
   };
@@ -120,26 +126,30 @@ const CajaRecetas: React.FC<CajaRecetasProps> = ({ recetas, setRecetas }) => {
             <IonCol size="12" size-md="4">
               <IonItem>
                 <IonInput
-                  label="Frecuencia"
+                  type="number"
+                  label="Frecuencia (horas)"
                   labelPlacement="stacked"
                   fill="outline"
-                  placeholder="Ej: cada 8 horas"
+                  placeholder="Ej: 8"
                   name="frecuencia"
                   value={tempReceta.frecuencia}
                   onIonInput={handleChange}
+                  min="0"
                 />
               </IonItem>
             </IonCol>
             <IonCol size="12" size-md="4">
               <IonItem>
                 <IonInput
-                  label="Duración"
+                  type="number"
+                  label="Duración (días)"
                   labelPlacement="stacked"
                   fill="outline"
-                  placeholder="Ej: por 7 días"
+                  placeholder="Ej: 7"
                   name="duracion"
                   value={tempReceta.duracion}
                   onIonInput={handleChange}
+                  min="0"
                 />
               </IonItem>
             </IonCol>
@@ -177,8 +187,9 @@ const CajaRecetas: React.FC<CajaRecetasProps> = ({ recetas, setRecetas }) => {
                         <h3>{receta.medicamento}</h3>
                         <p>
                           {receta.dosis && `Dosis: ${receta.dosis} · `}
-                          {receta.frecuencia && `${receta.frecuencia} · `}
-                          {receta.duracion && receta.duracion}
+                          {receta.frecuencia > 0 &&
+                            `Cada ${receta.frecuencia}h · `}
+                          {receta.duracion > 0 && `Por ${receta.duracion} días`}
                           {receta.numero_de_serie &&
                             ` · N° ${receta.numero_de_serie}`}
                         </p>

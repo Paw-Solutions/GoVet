@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 from pydantic import BaseModel, EmailStr
 from datetime import date
 
@@ -189,6 +189,40 @@ class consultaTratamientoConDetallesResponse(BaseModel):
     class Config:
         from_attributes = True
 
+""" Esquema de datos para Receta Médica """
+class RecetaBase(BaseModel):
+    medicamento: str
+    dosis: str
+    frecuencia: int  # en horas
+    duracion: int  # en días
+    numero_serie: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+class RecetaCreate(RecetaBase):
+    id_consulta: int
+
+class RecetaResponse(RecetaBase):
+    id_receta: int
+    id_consulta: int
+
+    class Config:
+        from_attributes = True
+
+""" Esquema simplificado para Tratamiento Aplicado en Consulta """
+class TratamientoAplicadoResponse(BaseModel):
+    fecha_tratamiento: Optional[date] = None
+    dosis: Optional[str] = None
+    marca: Optional[str] = None
+    numero_serial: Optional[str] = None
+    proxima_dosis: Optional[date] = None
+    nombre_tratamiento: str
+    tipo_tratamiento: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
 """ Esquema de datos para la entidad consulta """
 class ConsultaBase(BaseModel):
     id_paciente: int
@@ -222,9 +256,57 @@ class ConsultaCreate(ConsultaBase):
 
 class ConsultaResponse(ConsultaBase):
     id_consulta: int
+    # Relaciones
+    recetas: List[RecetaResponse] = []
+    tratamientos: List[TratamientoAplicadoResponse] = []
 
     class Config:
         from_attributes = True
+    
+    @staticmethod
+    def from_orm_with_tratamientos(db_consulta):
+        """Convierte una Consulta ORM a ConsultaResponse transformando tratamientos"""
+        # Convertir tratamientos de ConsultaTratamiento a TratamientoAplicadoResponse
+        tratamientos_aplicados = []
+        for ct in db_consulta.tratamientos:
+            tratamientos_aplicados.append(TratamientoAplicadoResponse(
+                fecha_tratamiento=ct.fecha_tratamiento,
+                dosis=ct.dosis,
+                marca=ct.marca,
+                numero_serial=ct.numero_serial,
+                proxima_dosis=ct.proxima_dosis,
+                nombre_tratamiento=ct.tratamiento.nombre if ct.tratamiento else "Tratamiento",
+                tipo_tratamiento=ct.tratamiento.tipo_tratamiento if ct.tratamiento else None
+            ))
+        
+        # Crear el response con los datos transformados
+        return ConsultaResponse(
+            id_consulta=db_consulta.id_consulta,
+            id_paciente=db_consulta.id_paciente,
+            rut=db_consulta.rut,
+            fecha_consulta=db_consulta.fecha_consulta,
+            motivo=db_consulta.motivo,
+            diagnostico=db_consulta.diagnostico,
+            observaciones=db_consulta.observaciones,
+            dht=db_consulta.dht,
+            nodulos_linfaticos=db_consulta.nodulos_linfaticos,
+            mucosas=db_consulta.mucosas,
+            peso=db_consulta.peso,
+            auscultacion_cardiaca_toraxica=db_consulta.auscultacion_cardiaca_toraxica,
+            estado_pelaje=db_consulta.estado_pelaje,
+            condicion_corporal=db_consulta.condicion_corporal,
+            tllc=db_consulta.tllc,
+            estado_piel=db_consulta.estado_piel,
+            frecuencia_respiratoria=db_consulta.frecuencia_respiratoria,
+            frecuencia_cardiaca=db_consulta.frecuencia_cardiaca,
+            examen_clinico=db_consulta.examen_clinico,
+            prediagnostico=db_consulta.prediagnostico,
+            pronostico=db_consulta.pronostico,
+            indicaciones_generales=db_consulta.indicaciones_generales,
+            temperatura=db_consulta.temperatura,
+            recetas=[RecetaResponse.from_orm(r) for r in db_consulta.recetas],
+            tratamientos=tratamientos_aplicados
+        )
 
 """ Esquema de datos para el envío de correos electrónicos """
 class EmailSchema(BaseModel):

@@ -1,34 +1,72 @@
 // Componente: Gestor de fichas clínicas - Frontend
+
+// Receta Médica
+export interface RecetaData {
+  medicamento: string;
+  dosis: string;
+  frecuencia: number; // en horas
+  duracion: number; // en días
+  numero_serie?: string;
+}
+
+// Tratamiento Aplicado (Vacunas/Antiparasitarios)
+export interface TratamientoAplicadoData {
+  fecha_tratamiento?: string;
+  dosis?: string;
+  marca?: string;
+  numero_serial?: string;
+  proxima_dosis?: string;
+  nombre_tratamiento?: string;
+  tipo_tratamiento?: string;
+}
+
 // Ficha data interface
 export interface ConsultaData {
+  id_consulta: number;
   id_paciente: number;
   rut: string;
   fecha_consulta: string;
   motivo: string;
-  diagnostico: string;
-  observaciones: string;
-  nodulos_linfaticos: string;
-  mucosas: string;
-  peso: number;
-  estado_pelaje: string;
-  condicion_corporal: string;
-  id_consulta: number;
-  motivo_consulta?: string; // ← Agregar para compatibilidad con backend
-  estado_piel?: string;
+
+  // CONSTANTES VITALES
+  peso?: number;
   temperatura?: number;
   frecuencia_cardiaca?: number;
   frecuencia_respiratoria?: number;
-  deshidratacion?: number;
+  tllc?: number;
+  dht?: number; // Deshidratación (%)
+
+  // EXAMEN FÍSICO
+  mucosas?: string;
+  condicion_corporal?: string;
+  estado_pelaje?: string;
+  estado_piel?: string;
+  nodulos_linfaticos?: string;
+  auscultacion_cardiaca_toraxica?: string;
+
+  // DIAGNÓSTICO
+  examen_clinico?: string;
+  prediagnostico?: string;
+  diagnostico?: string;
+  pronostico?: string;
+  observaciones?: string;
+
+  // PLAN
+  indicaciones_generales?: string;
+
+  // RELACIONES
+  recetas?: RecetaData[];
+  tratamientos?: TratamientoAplicadoData[];
+
+  // CAMPOS LEGACY (compatibilidad)
+  motivo_consulta?: string;
   vacunas_inoculadas?: VacunasData[];
   desparasitacion_interna?: DesparasitacionData;
   desparasitacion_externa?: DesparasitacionData;
-  examen_clinico?: string;
-  indicaciones_generales?: string;
-  orden_de_examenes?: string;
   receta_medica?: RecetaMedicaData[];
-  proxima_consulta?: string;
-  tllc?: number; // Tiempo de Llenado Capilar (numérico en segundos)
-  pronostico?: string;
+  deshidratacion?: number; // DEPRECATED - No existe en BD
+  orden_de_examenes?: string; // DEPRECATED - No existe en BD
+  proxima_consulta?: string; // DEPRECATED - No existe en BD
 
   // Información relacionada del paciente
   paciente?: PacienteData;
