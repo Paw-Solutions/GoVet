@@ -48,6 +48,8 @@ from google_auth_oauthlib.flow import Flow
 from services.pdf_service import generar_pdf_consulta
 from fastapi.responses import Response
 
+# Para comunicar con microservicio whatsapp 
+from routers.whatsapp import router as whatsapp_router
 
 # Cargar variables de entorno desde el archivo .env
 load_dotenv()
@@ -1422,6 +1424,8 @@ async def envia(email: EmailSchema) -> None:
     fm = FastMail(conf)
     await fm.send_message(message)
 
+# HU 13: Como veterinaria quiero dejar alertas programadas que se envien al whatsApp de los dueños para hacerles recuerdos sobre citas
+app.include_router(whatsapp_router)
 
 # HU 14: Cómo dueño quiero recibir alertas programadas por correo para recordar cada consulta.
 @app.post("/email/{fecha_envio}")

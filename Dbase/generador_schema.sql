@@ -1,6 +1,6 @@
 -- DROP SCHEMA govet;
 
-CREATE SCHEMA govet AUTHORIZATION pg_database_owner;
+CREATE SCHEMA govet AUTHORIZATION pawsolutions;
 
 COMMENT ON SCHEMA govet IS 'standard public schema';
 
@@ -660,5 +660,5 @@ GRANT ALL ON TABLE govet.receta_medica TO pawsolutions;
 
 -- Permissions
 
-GRANT ALL ON SCHEMA govet TO pg_database_owner;
+GRANT ALL ON SCHEMA govet TO pawsolutions;
 GRANT USAGE ON SCHEMA govet TO public;

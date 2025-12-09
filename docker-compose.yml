@@ -12,6 +12,14 @@ services:
       - db_data:/var/lib/postgresql/data
       - ./Dbase/generador_schema.sql:/docker-entrypoint-initdb.d/generador_schema.sql
 
+  whatsapp-ms:
+    build:
+      context: ./whatsapp-ms
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    volumes:
+      - whatsapp_auth:/app/auth_info
+
   backend:
     build:
       context: ./Backend
@@ -42,3 +50,4 @@ services:
 
 volumes:
   db_data:
+  whatsapp_auth:
