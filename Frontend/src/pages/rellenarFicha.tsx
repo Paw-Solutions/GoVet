@@ -51,6 +51,7 @@ import {
   documentTextOutline,
   closeOutline,
   closeCircleOutline,
+  trashOutline,
 } from "ionicons/icons";
 import "../styles/rellenarFicha.css";
 import "../styles/variables.css";
@@ -59,6 +60,7 @@ import CajaDesparasitacion from "../components/desparasitacion/CajaDesparasitaci
 import CajaRecetas from "../components/recetas/CajaRecetas";
 import ModuleCard from "../components/rellenarFicha/ModuleCard";
 import PatientHeader from "../components/rellenarFicha/PatientHeader";
+import ModalAgendarTratamiento from "../components/calendario/ModalAgendarTratamiento";
 import { PacienteData } from "../api/pacientes";
 import { TutorData } from "../api/tutores";
 import {
@@ -68,6 +70,7 @@ import {
   RecetaMedicaData,
   DesparasitacionData,
 } from "../api/fichas";
+import { TratamientoInfo } from "../utils/notificationHelpers";
 
 // Componente: Dashboard con 6 módulos para gestionar consultas
 const RellenarFicha: React.FC = () => {
@@ -122,6 +125,19 @@ const RellenarFicha: React.FC = () => {
   const [recetaMedicaData, setRecetaMedicaData] = useState<RecetaMedicaData[]>(
     []
   );
+
+  // Estados para el sistema de agendamiento de vacunas
+  interface GrupoVacunas {
+    fecha: string;
+    vacunas: VacunasData[];
+  }
+
+  const [pendingVaccineAlerts, setPendingVaccineAlerts] = useState<
+    GrupoVacunas[]
+  >([]);
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [currentAlertIndex, setCurrentAlertIndex] = useState(0);
+  const [citasCreadas, setCitasCreadas] = useState(0);
 
   // Estado para los campos del formulario
   const [formData, setFormData] = useState<ConsultaData>({
@@ -350,6 +366,20 @@ const RellenarFicha: React.FC = () => {
     });
   };
 
+  const handleEliminarDesparasitacionInterna = () => {
+    setFormData((prev) => ({
+      ...prev,
+      desparasitacion_interna: undefined,
+    }));
+  };
+
+  const handleEliminarDesparasitacionExterna = () => {
+    setFormData((prev) => ({
+      ...prev,
+      desparasitacion_externa: undefined,
+    }));
+  };
+
   const handleNumericChange = (e: any) => {
     const { name, value } = e.target;
     const numValue = parseFloat(value);
@@ -399,10 +429,87 @@ const RellenarFicha: React.FC = () => {
         handlePacienteSelected(pacienteData);
         sessionStorage.removeItem("pacienteParaFicha");
       } catch (error) {
-        console.error("Error parsing paciente from sessionStorage:", error);
+        console.error("Error parsing paciente data:", error);
+      }
+    }
+
+    // Restaurar alertas pendientes de vacunas si existen
+    const pendingVaccinesStr = sessionStorage.getItem(
+      "vacunasPendientesAgendar"
+    );
+    if (pendingVaccinesStr) {
+      try {
+        const data = JSON.parse(pendingVaccinesStr);
+        if (data.grupos && data.paciente && data.tutor) {
+          setPendingVaccineAlerts(data.grupos);
+          setSelectedPaciente(data.paciente);
+          setFormData((prev) => ({
+            ...prev,
+            paciente: data.paciente.paciente || data.paciente,
+            tutor: data.tutor,
+          }));
+          setCurrentAlertIndex(data.currentIndex || 0);
+          setCitasCreadas(data.citasCreadas || 0);
+          setShowScheduleModal(true);
+        }
+      } catch (error) {
+        console.error("Error restoring pending vaccines:", error);
+        sessionStorage.removeItem("vacunasPendientesAgendar");
       }
     }
   }, []);
+
+  // Función para agrupar vacunas por fecha
+  const agruparVacunasPorFecha = (vacunas: VacunasData[]): GrupoVacunas[] => {
+    const grupos = new Map<string, VacunasData[]>();
+
+    vacunas.forEach((vacuna) => {
+      if (vacuna.proxima_dosis) {
+        const fecha = vacuna.proxima_dosis;
+        if (!grupos.has(fecha)) {
+          grupos.set(fecha, []);
+        }
+        grupos.get(fecha)!.push(vacuna);
+      }
+    });
+
+    // Convertir a array y ordenar por fecha
+    return Array.from(grupos.entries())
+      .map(([fecha, vacunas]) => ({ fecha, vacunas }))
+      .sort(
+        (a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime()
+      );
+  };
+
+  // Función para procesar vacunas y comenzar flujo de agendamiento
+  const procesarVacunasParaAgendar = (vacunas: VacunasData[]) => {
+    const vacunasConProxima = vacunas.filter(
+      (v) => v.requiere_proxima && v.proxima_dosis
+    );
+
+    if (vacunasConProxima.length === 0) {
+      return;
+    }
+
+    const grupos = agruparVacunasPorFecha(vacunasConProxima);
+
+    // Guardar en sessionStorage
+    sessionStorage.setItem(
+      "vacunasPendientesAgendar",
+      JSON.stringify({
+        grupos,
+        paciente: selectedPaciente,
+        tutor: formData.tutor,
+        currentIndex: 0,
+        citasCreadas: 0,
+      })
+    );
+
+    setPendingVaccineAlerts(grupos);
+    setCurrentAlertIndex(0);
+    setCitasCreadas(0);
+    setShowScheduleModal(true);
+  };
 
   // Función para abrir módulo y marcarlo como tocado
   const openModule = (moduleId: string) => {
@@ -576,7 +683,19 @@ const RellenarFicha: React.FC = () => {
 
       const response = await crearConsulta(dataToSend);
       console.log("✅ Respuesta del servidor:", response);
-      setToastMessage("Ficha veterinaria guardada exitosamente");
+
+      // Verificar si hay vacunas con próxima dosis para agendar
+      const tieneVacunasParaAgendar =
+        dataToSend.vacunas_inoculadas &&
+        dataToSend.vacunas_inoculadas.some(
+          (v) => v.requiere_proxima && v.proxima_dosis
+        );
+
+      // Solo mostrar toast si NO hay vacunas para agendar
+      // (si hay vacunas, el toast se mostrará después del flujo de agendamiento)
+      if (!tieneVacunasParaAgendar) {
+        setToastMessage("Ficha veterinaria guardada exitosamente");
+      }
 
       // Limpiar formulario después de guardar
       setFormData({
@@ -628,9 +747,21 @@ const RellenarFicha: React.FC = () => {
         },
       });
 
-      setSelectedPaciente(null);
       setRecetaMedicaData([]);
       setActiveModule(null);
+
+      // NO limpiar selectedPaciente todavía si hay vacunas para agendar
+      if (!tieneVacunasParaAgendar) {
+        setSelectedPaciente(null);
+      }
+
+      // Procesar vacunas con próxima dosis para agendar (al final)
+      if (
+        dataToSend.vacunas_inoculadas &&
+        dataToSend.vacunas_inoculadas.length > 0
+      ) {
+        procesarVacunasParaAgendar(dataToSend.vacunas_inoculadas);
+      }
     } catch (error) {
       console.error("Error al guardar ficha:", error);
       setToastMessage("Error al guardar la ficha");
@@ -694,6 +825,98 @@ const RellenarFicha: React.FC = () => {
     setShowCancelAlert(false);
     setToastMessage("Formulario cancelado");
     setShowToast(true);
+  };
+
+  // Handlers para el flujo de agendamiento de vacunas
+  const handleCitaCreada = () => {
+    const newCitasCreadas = citasCreadas + 1;
+    setCitasCreadas(newCitasCreadas);
+
+    const nextIndex = currentAlertIndex + 1;
+
+    // Actualizar sessionStorage
+    if (nextIndex < pendingVaccineAlerts.length) {
+      sessionStorage.setItem(
+        "vacunasPendientesAgendar",
+        JSON.stringify({
+          grupos: pendingVaccineAlerts,
+          paciente: selectedPaciente,
+          tutor: formData.tutor,
+          currentIndex: nextIndex,
+          citasCreadas: newCitasCreadas,
+        })
+      );
+      setCurrentAlertIndex(nextIndex);
+    } else {
+      // Es la última alerta, limpiar y mostrar resumen
+      sessionStorage.removeItem("vacunasPendientesAgendar");
+      setShowScheduleModal(false);
+      setToastMessage(
+        `Ficha guardada. ${newCitasCreadas} cita(s) de vacunación agendada(s) exitosamente`
+      );
+      setShowToast(true);
+      setPendingVaccineAlerts([]);
+      setCurrentAlertIndex(0);
+      setCitasCreadas(0);
+      // Ahora sí limpiar el paciente seleccionado
+      setSelectedPaciente(null);
+    }
+  };
+
+  const handleAgendarDespues = () => {
+    const nextIndex = currentAlertIndex + 1;
+
+    if (nextIndex < pendingVaccineAlerts.length) {
+      // Actualizar sessionStorage
+      sessionStorage.setItem(
+        "vacunasPendientesAgendar",
+        JSON.stringify({
+          grupos: pendingVaccineAlerts,
+          paciente: selectedPaciente,
+          tutor: formData.tutor,
+          currentIndex: nextIndex,
+          citasCreadas,
+        })
+      );
+      setCurrentAlertIndex(nextIndex);
+    } else {
+      // Es la última, cerrar y limpiar
+      sessionStorage.removeItem("vacunasPendientesAgendar");
+      setShowScheduleModal(false);
+      if (citasCreadas > 0) {
+        setToastMessage(
+          `Ficha guardada. ${citasCreadas} cita(s) de vacunación agendada(s) exitosamente`
+        );
+        setShowToast(true);
+      } else {
+        setToastMessage("Ficha veterinaria guardada exitosamente");
+        setShowToast(true);
+      }
+      setPendingVaccineAlerts([]);
+      setCurrentAlertIndex(0);
+      setCitasCreadas(0);
+      // Ahora sí limpiar el paciente seleccionado
+      setSelectedPaciente(null);
+    }
+  };
+
+  const handleCancelarAgendamiento = () => {
+    sessionStorage.removeItem("vacunasPendientesAgendar");
+    setShowScheduleModal(false);
+    setPendingVaccineAlerts([]);
+    setCurrentAlertIndex(0);
+    if (citasCreadas > 0) {
+      setToastMessage(
+        `Ficha guardada. ${citasCreadas} cita(s) de vacunación agendada(s) antes de cancelar`
+      );
+      setShowToast(true);
+    } else {
+      setToastMessage("Ficha veterinaria guardada exitosamente");
+      setShowToast(true);
+    }
+    setCitasCreadas(0);
+    // Limpiar el paciente seleccionado después de cancelar
+    setSelectedPaciente(null);
   };
 
   return (
@@ -1215,14 +1438,15 @@ const RellenarFicha: React.FC = () => {
                                 <p>Próxima dosis: {vacuna.proxima_dosis}</p>
                               )}
                           </IonLabel>
-                          <IonButton
-                            slot="end"
-                            color="danger"
-                            fill="clear"
-                            onClick={() => handleEliminarVacuna(index)}
-                          >
-                            Eliminar
-                          </IonButton>
+                          <IonButtons slot="end">
+                            <IonButton
+                              fill="clear"
+                              color="danger"
+                              onClick={() => handleEliminarVacuna(index)}
+                            >
+                              <IonIcon slot="icon-only" icon={trashOutline} />
+                            </IonButton>
+                          </IonButtons>
                         </IonItem>
                       ))}
                     </IonList>
@@ -1263,6 +1487,7 @@ const RellenarFicha: React.FC = () => {
               datos={desparasitacionInternaData}
               setDatos={setDesparasitacionInternaData}
               onAgregar={handleAgregarDesparasitacionInterna}
+              onEliminar={handleEliminarDesparasitacionInterna}
               datoGuardado={formData.desparasitacion_interna ?? null}
             />
 
@@ -1272,6 +1497,7 @@ const RellenarFicha: React.FC = () => {
               datos={desparasitacionExternaData}
               setDatos={setDesparasitacionExternaData}
               onAgregar={handleAgregarDesparasitacionExterna}
+              onEliminar={handleEliminarDesparasitacionExterna}
               datoGuardado={formData.desparasitacion_externa ?? null}
             />
 
@@ -1400,6 +1626,47 @@ const RellenarFicha: React.FC = () => {
         duration={3000}
         position="bottom"
       />
+
+      {/* Modal para agendar tratamientos (vacunas) */}
+      {showScheduleModal &&
+        pendingVaccineAlerts.length > 0 &&
+        currentAlertIndex < pendingVaccineAlerts.length &&
+        selectedPaciente && (
+          <ModalAgendarTratamiento
+            isOpen={showScheduleModal}
+            onClose={() => setShowScheduleModal(false)}
+            tratamientos={pendingVaccineAlerts[currentAlertIndex].vacunas.map(
+              (v) => ({
+                nombre: v.nombre_vacuna,
+                marca: v.marca,
+                numero_de_serie: v.numero_de_serie,
+              })
+            )}
+            paciente={selectedPaciente}
+            tutor={{
+              nombre: selectedPaciente.tutor?.nombre || "",
+              apellido_paterno: selectedPaciente.tutor?.apellido_paterno || "",
+              apellido_materno: selectedPaciente.tutor?.apellido_materno || "",
+              rut: selectedPaciente.tutor?.rut || "",
+              telefono: selectedPaciente.tutor?.telefono || 0,
+              telefono2: 0,
+              comuna: "",
+              region: "",
+              celular: 0,
+              celular2: 0,
+              email: selectedPaciente.tutor?.email || "",
+              observacion: "",
+              direccion: "",
+            }}
+            fechaProxima={pendingVaccineAlerts[currentAlertIndex].fecha}
+            tipoTratamiento="vacuna"
+            onCitaCreada={handleCitaCreada}
+            totalAlertas={pendingVaccineAlerts.length}
+            alertaActual={currentAlertIndex + 1}
+            onAgendarDespues={handleAgendarDespues}
+            onCancelar={handleCancelarAgendamiento}
+          />
+        )}
     </IonPage>
   );
 };

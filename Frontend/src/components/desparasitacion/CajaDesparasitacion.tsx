@@ -14,7 +14,10 @@ import {
   IonSelect,
   IonSelectOption,
   IonToggle,
+  IonIcon,
+  IonButtons,
 } from "@ionic/react";
+import { trashOutline } from "ionicons/icons";
 
 interface DesparasitacionProps {
   titulo: string;
@@ -29,6 +32,7 @@ interface DesparasitacionProps {
   };
   setDatos: (datos: any) => void;
   onAgregar: () => void;
+  onEliminar?: () => void;
   datoGuardado?: {
     nombre_desparasitante: string;
     marca: string;
@@ -45,6 +49,7 @@ const CajaDesparasitacion: React.FC<DesparasitacionProps> = ({
   datos,
   setDatos,
   onAgregar,
+  onEliminar,
   datoGuardado,
 }) => {
   const handleChange = (e: any) => {
@@ -215,6 +220,17 @@ const CajaDesparasitacion: React.FC<DesparasitacionProps> = ({
                         ` · Próx: ${datoGuardado.proxima_dosis}`}
                     </p>
                   </IonLabel>
+                  {onEliminar && (
+                    <IonButtons slot="end">
+                      <IonButton
+                        fill="clear"
+                        color="danger"
+                        onClick={onEliminar}
+                      >
+                        <IonIcon slot="icon-only" icon={trashOutline} />
+                      </IonButton>
+                    </IonButtons>
+                  )}
                 </IonItem>
               </IonCol>
             </IonRow>
