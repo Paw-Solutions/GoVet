@@ -57,7 +57,7 @@ import "../styles/rellenarFicha.css";
 import "../styles/variables.css";
 import ModalEscogerPaciente from "../components/rellenarFicha/modalEscogerPaciente";
 import CajaDesparasitacion from "../components/desparasitacion/CajaDesparasitacion";
-import CajaRecetas from "../components/recetas/CajaRecetas";
+import CajaRecetas, { Receta } from "../components/recetas/CajaRecetas";
 import ModuleCard from "../components/rellenarFicha/ModuleCard";
 import PatientHeader from "../components/rellenarFicha/PatientHeader";
 import ModalAgendarTratamiento from "../components/calendario/ModalAgendarTratamiento";
@@ -71,6 +71,38 @@ import {
   DesparasitacionData,
 } from "../api/fichas";
 import { TratamientoInfo } from "../utils/notificationHelpers";
+
+// ==================== FUNCIONES DE MAPEO DE DATOS ====================
+
+/**
+ * Convierte RecetaMedicaData[] (de la API) a Receta[] (formato interno del componente)
+ * Maneja la conversión de frecuencia y duración de string a number
+ */
+const mapRecetaMedicaDataToReceta = (data: RecetaMedicaData[]): Receta[] => {
+  return data.map((recetaData) => ({
+    medicamento: recetaData.medicamento,
+    dosis: recetaData.dosis,
+    frecuencia: parseInt(recetaData.frecuencia, 10) || 0,
+    duracion: parseInt(recetaData.duracion, 10) || 0,
+    numero_de_serie: recetaData.numero_de_serie,
+  }));
+};
+
+/**
+ * Convierte Receta[] (formato interno) a RecetaMedicaData[] (para enviar a la API)
+ * Maneja la conversión de frecuencia y duración de number a string
+ */
+const mapRecetaToRecetaMedicaData = (recetas: Receta[]): RecetaMedicaData[] => {
+  return recetas.map((receta) => ({
+    medicamento: receta.medicamento,
+    dosis: receta.dosis,
+    frecuencia: receta.frecuencia.toString(),
+    duracion: receta.duracion.toString(),
+    numero_de_serie: receta.numero_de_serie,
+  }));
+};
+
+// ==================== COMPONENTE ====================
 
 // Componente: Dashboard con 6 módulos para gestionar consultas
 const RellenarFicha: React.FC = () => {
@@ -121,10 +153,8 @@ const RellenarFicha: React.FC = () => {
       requiere_proxima: true,
     });
 
-  // Estado para recetas médicas como array
-  const [recetaMedicaData, setRecetaMedicaData] = useState<RecetaMedicaData[]>(
-    []
-  );
+  // Estado para recetas médicas como array (ahora usa el tipo Receta del componente)
+  const [recetaMedicaData, setRecetaMedicaData] = useState<Receta[]>([]);
 
   // Estados para el sistema de agendamiento de vacunas
   interface GrupoVacunas {
@@ -530,9 +560,9 @@ const RellenarFicha: React.FC = () => {
 
       case "constantes":
         const hasAllConstantes =
-          formData.peso > 0 && (formData.temperatura ?? 0) > 0;
+          (formData.peso ?? 0) > 0 && (formData.temperatura ?? 0) > 0;
         const hasSomeConstantes =
-          formData.peso > 0 ||
+          (formData.peso ?? 0) > 0 ||
           (formData.temperatura ?? 0) > 0 ||
           (formData.frecuencia_cardiaca ?? 0) > 0 ||
           (formData.frecuencia_respiratoria ?? 0) > 0;
@@ -557,7 +587,7 @@ const RellenarFicha: React.FC = () => {
         return "empty";
 
       case "diagnostico":
-        if (formData.diagnostico.trim()) return "complete";
+        if ((formData.diagnostico ?? "").trim()) return "complete";
         if (formData.examen_clinico?.trim() || formData.observaciones?.trim())
           return "incomplete";
         if (isTouched) return "visited";
@@ -597,11 +627,13 @@ const RellenarFicha: React.FC = () => {
   const guardarFicha = async () => {
     setIsLoading(true);
     try {
-      // Preparar datos con recetas médicas
+      // Preparar datos con recetas médicas, convirtiendo de Receta[] a RecetaMedicaData[]
       const dataToSend = {
         ...formData,
         receta_medica:
-          recetaMedicaData.length > 0 ? recetaMedicaData : undefined,
+          recetaMedicaData.length > 0
+            ? mapRecetaToRecetaMedicaData(recetaMedicaData)
+            : undefined,
       };
 
       console.log("=== INICIO LOG GUARDADO FICHA ===");
