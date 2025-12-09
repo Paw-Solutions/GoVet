@@ -14,7 +14,7 @@ services:
 
   whatsapp-ms:
     build:
-      context: ./whatsapp-ms
+      context: ./Whatsapp-ms
       dockerfile: Dockerfile
     restart: unless-stopped
     volumes:
