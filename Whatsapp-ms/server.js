@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import { iniciarWhatsapp, ultimoQR, getSocket } from "./whatsapp.js";
+import { iniciarWhatsapp, ultimoQR, getSocket, cerrarSesion, desvincular } from "./whatsapp.js";
 
 const app = express();
 app.use(cors());
@@ -47,6 +47,37 @@ app.get("/notificar", async (req, res) => {
     res.json({ ok: true, mensaje: "Enviado correctamente" });
   } catch (e) {
     res.status(500).json({ error: "No se pudo enviar" });
+  }
+});
+
+// ---- Control de sesión ----
+// Cerrar sesión: desconectar el socket sin borrar credenciales
+app.post("/cerrar-sesion", async (req, res) => {
+  try {
+    await cerrarSesion();
+    res.json({ ok: true, mensaje: "Sesión cerrada (socket desconectado). Puedes reconectar con /iniciar." });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: "Error al cerrar sesión" });
+  }
+});
+
+// Desvincular: logout y borrar credenciales locales
+app.post("/desvincular", async (req, res) => {
+  try {
+    await desvincular();
+    res.json({ ok: true, mensaje: "Desvinculación completa. Se requerirá escanear un nuevo QR al iniciar." });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: "Error al desvincular" });
+  }
+});
+
+// Iniciar / Reconectar manualmente
+app.post("/iniciar", async (req, res) => {
+  try {
+    await iniciarWhatsapp();
+    res.json({ ok: true, mensaje: "Inicio/reconexión solicitada." });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: "Error al iniciar/reconectar" });
   }
 });
 

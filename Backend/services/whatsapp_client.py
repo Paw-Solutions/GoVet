@@ -76,6 +76,60 @@ async def notificar(
     return _parse_json_or_raise(resp)
 
 
+# --- Nuevas acciones de control de sesión ---
+
+
+async def cerrar_sesion() -> Dict[str, Any]:
+    """
+    POST /cerrar-sesion -> desconecta el socket sin borrar credenciales.
+    Respuesta esperada: { ok: bool, mensaje: string }
+    """
+    url = f"{WHATSAPP_MS_BASE_URL}/cerrar-sesion"
+    try:
+        async with httpx.AsyncClient(timeout=DEFAULT_TIMEOUT) as client:
+            resp = await client.post(url)
+    except httpx.RequestError as e:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"WhatsApp service unavailable: {str(e)}",
+        )
+    return _parse_json_or_raise(resp)
+
+
+async def desvincular() -> Dict[str, Any]:
+    """
+    POST /desvincular -> logout + borra credenciales locales.
+    Respuesta esperada: { ok: bool, mensaje: string }
+    """
+    url = f"{WHATSAPP_MS_BASE_URL}/desvincular"
+    try:
+        async with httpx.AsyncClient(timeout=DEFAULT_TIMEOUT) as client:
+            resp = await client.post(url)
+    except httpx.RequestError as e:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"WhatsApp service unavailable: {str(e)}",
+        )
+    return _parse_json_or_raise(resp)
+
+
+async def iniciar() -> Dict[str, Any]:
+    """
+    POST /iniciar -> inicia/reconecta la sesión en el microservicio.
+    Respuesta esperada: { ok: bool, mensaje: string }
+    """
+    url = f"{WHATSAPP_MS_BASE_URL}/iniciar"
+    try:
+        async with httpx.AsyncClient(timeout=DEFAULT_TIMEOUT) as client:
+            resp = await client.post(url)
+    except httpx.RequestError as e:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"WhatsApp service unavailable: {str(e)}",
+        )
+    return _parse_json_or_raise(resp)
+
+
 def _parse_json_or_raise(resp: httpx.Response) -> Dict[str, Any]:
     """
     Propaga errores 4xx/5xx del microservicio y valida que la respuesta sea JSON.
