@@ -46,7 +46,7 @@ const HistorialConsultas: React.FC<HistorialConsultasProps> = ({
   // Cargar consultas cuando se abre el modal
   useEffect(() => {
     console.log(
-      "📊 HistorialConsultas useEffect - isOpen:",
+      "HistorialConsultas useEffect - isOpen:",
       isOpen,
       "paciente:",
       paciente
@@ -60,7 +60,7 @@ const HistorialConsultas: React.FC<HistorialConsultasProps> = ({
     if (!paciente) return;
 
     console.log(
-      "🔄 Cargando consultas para paciente ID:",
+      "Cargando consultas para paciente ID:",
       paciente.id_paciente
     );
     setLoading(true);
@@ -84,7 +84,7 @@ const HistorialConsultas: React.FC<HistorialConsultasProps> = ({
       }
 
       const data = await response.json();
-      console.log("✅ Consultas recibidas:", data);
+      console.log("Consultas recibidas:", data);
 
       // Ordenar consultas por fecha (más recientes primero)
       const consultasOrdenadas = data.sort(
@@ -97,7 +97,7 @@ const HistorialConsultas: React.FC<HistorialConsultasProps> = ({
 
       setConsultas(consultasOrdenadas);
     } catch (err) {
-      console.error("❌ Error cargando consultas:", err);
+      console.error("Error cargando consultas:", err);
       setError("No se pudieron cargar las consultas del paciente");
     } finally {
       setLoading(false);

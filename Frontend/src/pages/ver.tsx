@@ -122,7 +122,7 @@ const Ver: React.FC = () => {
               onLoadMore={consultas.loadMore}
               onViewConsulta={consultas.viewConsulta}
               onEditConsulta={consultas.editConsulta}
-              onExportConsulta={consultas.exportConsulta}
+              onExportConsulta={consultas.handleShare} // antes .exportConsulta
               onRetry={consultas.retry}
             />
           )}

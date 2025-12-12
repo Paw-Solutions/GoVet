@@ -131,6 +131,7 @@ interface ConsultasActions {
   viewConsulta: (consulta: ConsultaData) => void;
   editConsulta: (consulta: ConsultaData) => void;
   exportConsulta: (consulta: ConsultaData) => void;
+  handleShare: (consulta: ConsultaData) => Promise<void>;
   closeConsultaInfo: () => void;
   retry: () => void;
   handleSortOrderChange: (newOrder: "desc" | "asc") => void;
@@ -659,6 +660,55 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
     // Aqui va la logica d edicion k aun no se implementa ups
   }, []);
 
+  const handleShare = useCallback(async (consulta: ConsultaData) => {
+    try {
+      console.log("Obteniendo PDF para compartir...");
+      
+      // Llamar al endpoint que ya existe en el backend
+      const blob = await descargarPdfConsulta(consulta.id_consulta);
+
+      // Verificar que el blob tenga contenido
+      if (!blob || blob.size === 0) {
+        throw new Error("El PDF descargado está vacío");
+      }
+      
+      console.log("Blob descargado, tamaño:", blob.size, "bytes", "tipo:", blob.type);
+
+      // Nombre del archivo
+      const fecha = consulta.fecha_consulta
+        ? new Date(consulta.fecha_consulta).toISOString().split("T")[0]
+        : new Date().toISOString().split("T")[0];
+      const nombrePaciente = consulta.paciente?.nombre || "paciente";
+      
+      const nombreSeguro = nombrePaciente
+          .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Quita tildes
+          .replace(/[^a-zA-Z0-9]/g, "_"); // Reemplaza no alfanuméricos por _
+
+      const fileName = `consulta_${nombreSeguro}_${fecha}.pdf`;
+
+      const file = new File([blob], fileName, { 
+              type: "application/pdf",
+              lastModified: Date.now()
+            });
+            
+      // Verificar si el navegador soporta compartir archivos
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        console.log("Iniciando share...");
+        await navigator.share({
+          title: "Resumen consulta Veterinaria - GoVet",
+          text: "Te comparto el resumen de la consulta veterinaria.",
+          files: [file],
+        });
+        console.log("PDF compartido exitosamente");
+      } else {
+        alert("Tu navegador no soporta compartir archivos. Intenta descargar el PDF en su lugar.");
+      }
+    } catch (err) {
+      console.error("Error al compartir:", err);
+      alert(`Error al compartir el PDF: ${err instanceof Error ? err.message : err}`);
+    }
+  }, [])
+  
   const exportConsulta = useCallback(async (consulta: ConsultaData) => {
     try {
       console.log("Descargando PDF de consulta:", consulta.id_consulta);
@@ -688,9 +738,9 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
 
-      console.log("✅ PDF descargado exitosamente");
+      console.log("PDF descargado exitosamente");
     } catch (error) {
-      console.error("❌ Error exportando consulta:", error);
+      console.error("Error exportando consulta:", error);
       alert("Error al descargar el PDF. Por favor, intente nuevamente.");
     }
   }, []);
@@ -771,6 +821,7 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
     viewConsulta,
     editConsulta,
     exportConsulta,
+    handleShare,
     closeConsultaInfo,
     retry: retryConsultas,
     handleSortOrderChange,
