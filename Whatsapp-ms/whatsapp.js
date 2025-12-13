@@ -10,7 +10,15 @@ let socketGlobal = null; // guardamos la conexión para otras rutas
 // Se desactiva temporalmente cuando cerramos sesión manualmente o desvinculamos.
 let shouldAutoReconnect = true;
 
+// Bandera adicional para bloquear reconexiones después de desvinculación explícita
+// Solo se resetea cuando se llama manualmente a iniciarWhatsapp() desde /iniciar
+let isDeliberateDisconnect = false;
+
 export async function iniciarWhatsapp() {
+  // Resetear las banderas de desconexión
+  isDeliberateDisconnect = false;
+  shouldAutoReconnect = true;
+
   //Crea el archivo para las credenciales y que no se pierdan de una
   const { state, saveCreds } = await useMultiFileAuthState("./auth_info");
 
@@ -25,22 +33,29 @@ export async function iniciarWhatsapp() {
     if (qr) {
       ultimoQR = qr;
       qrcode.generate(qr, { small: true });
+      console.log("QR code generated");
     }
 
     if (connection === "open") {
       ultimoQR = null;
-      shouldAutoReconnect = true; // si se abre correctamente, permitimos reconexión futura
-      console.log("Conectado a WhatsApp");
+
+      // Solo permitir reconexión si NO fue una desvinculación deliberada
+      if (!isDeliberateDisconnect) {
+        shouldAutoReconnect = true;
+        console.log("WhatsApp connected successfully");
+      } else {
+        // Cerrar inmediatamente esta conexión no deseada
+        if (sock.ws && sock.ws.close) {
+          sock.ws.close();
+        }
+      }
     }
 
     if (connection === "close") {
-      console.log("Conexión cerrada");
       // Solo reconectar automáticamente si no fue un cierre manual (cerrarSesion/desvincular)
       if (shouldAutoReconnect) {
-        console.log("Reconectando...");
+        console.log("Connection closed, reconnecting...");
         iniciarWhatsapp();
-      } else {
-        console.log("Reconexión automática desactivada por cierre manual");
       }
     }
   });
@@ -77,7 +92,9 @@ export async function cerrarSesion() {
 // Desvincula completamente: invalida el dispositivo en el servidor y borra credenciales locales.
 // La próxima vez que se inicie, se requerirá nuevo QR y se recreará ./auth_info.
 export async function desvincular() {
-  shouldAutoReconnect = false; // no reconectar automáticamente durante desvinculación
+  console.log("Starting WhatsApp unlinking process");
+  shouldAutoReconnect = false;
+  isDeliberateDisconnect = true; // BLOQUEO TOTAL de reconexiones
 
   // 1) Intentar logout para desvincular el dispositivo a nivel servidor
   if (socketGlobal) {
@@ -87,7 +104,7 @@ export async function desvincular() {
       }
     } catch (e) {
       // Si falla logout, igualmente continuamos con limpieza local
-      console.error("Error en logout (desvincular):", e);
+      console.error("Error during logout:", e);
     }
 
     // 2) Cerrar la conexión si sigue activa
@@ -98,25 +115,62 @@ export async function desvincular() {
         await socketGlobal.end();
       }
     } catch (e) {
-      console.error("Error al cerrar el socket tras logout:", e);
+      console.error("Error closing socket:", e);
     }
   }
 
-  // 3) Borrar la carpeta ./auth_info
-  try {
-    const authDir = path.resolve("./auth_info");
-    if (fs.existsSync(authDir)) {
-      // Eliminar recursivamente
-      fs.rmSync(authDir, { recursive: true, force: true });
+  // 3) Esperar a que se liberen los file handles
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+
+  // 4) Borrar la carpeta ./auth_info con reintentos
+  const authDir = path.resolve("./auth_info");
+
+  let deleteAttempts = 0;
+  let deleted = false;
+
+  while (deleteAttempts < 5 && !deleted) {
+    deleteAttempts++;
+
+    try {
+      if (fs.existsSync(authDir)) {
+        // Primero intentar borrar archivos individuales
+        const files = fs.readdirSync(authDir);
+
+        for (const file of files) {
+          const filePath = path.join(authDir, file);
+          try {
+            fs.unlinkSync(filePath);
+          } catch (e) {
+            console.warn(`Could not delete file ${file}:`, e.code);
+          }
+        }
+
+        // Luego borrar la carpeta
+        fs.rmdirSync(authDir);
+        deleted = true;
+      } else {
+        deleted = true;
+      }
+    } catch (e) {
+      console.error(`Deletion attempt ${deleteAttempts} failed:`, e.code);
+
+      if (deleteAttempts < 5) {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
     }
-  } catch (e) {
-    console.error("Error al borrar ./auth_info:", e);
   }
 
-  // 4) Limpiar referencias locales
+  if (!deleted) {
+    console.error(
+      "CRITICAL: Could not delete ./auth_info after 5 attempts - credentials not removed"
+    );
+  } else {
+    console.log("WhatsApp unlinked successfully - credentials removed");
+  }
+
+  // 5) Limpiar referencias locales
   socketGlobal = null;
   ultimoQR = null;
-  console.log("Desvinculación completa: credenciales borradas y dispositivo invalidado (si fue posible).");
 }
 
 export function getSocket() {

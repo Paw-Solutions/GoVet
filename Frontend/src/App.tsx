@@ -37,6 +37,7 @@ const RegistroPaciente = lazy(() => import("./pages/registroPaciente"));
 const Ver = lazy(() => import("./pages/ver"));
 const Calendario = lazy(() => import("./pages/calendario"));
 const RellenarFicha = lazy(() => import("./pages/rellenarFicha"));
+const Ajustes = lazy(() => import("./pages/Ajustes"));
 const ModalEscogerPaciente = lazy(
   () => import("./components/rellenarFicha/modalEscogerPaciente")
 );
@@ -118,6 +119,7 @@ const App: React.FC = () => {
                 component={RellenarFicha}
               ></Route>
               <Route exact path="/calendario" component={Calendario}></Route>
+              <Route exact path="/ajustes" component={Ajustes}></Route>
               <Route
                 exact
                 path="/test"

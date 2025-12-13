@@ -1,6 +1,12 @@
 import express from "express";
 import cors from "cors";
-import { iniciarWhatsapp, ultimoQR, getSocket, cerrarSesion, desvincular } from "./whatsapp.js";
+import {
+  iniciarWhatsapp,
+  ultimoQR,
+  getSocket,
+  cerrarSesion,
+  desvincular,
+} from "./whatsapp.js";
 
 const app = express();
 app.use(cors());
@@ -8,7 +14,19 @@ app.use(express.json());
 
 // ---- QR ----
 // Para enviar el qr a la parte principal
-app.get("/qr", (req, res) => {
+app.get("/qr", async (req, res) => {
+  // Si no hay socket activo, intentar iniciar (auto-recovery después de desvinculación)
+  const sock = getSocket();
+  if (!sock) {
+    try {
+      await iniciarWhatsapp();
+      // Esperar un poco para que se genere el QR
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    } catch (e) {
+      console.error("Error initializing WhatsApp:", e);
+    }
+  }
+
   res.json({ qr: ultimoQR });
 });
 
@@ -55,7 +73,11 @@ app.get("/notificar", async (req, res) => {
 app.post("/cerrar-sesion", async (req, res) => {
   try {
     await cerrarSesion();
-    res.json({ ok: true, mensaje: "Sesión cerrada (socket desconectado). Puedes reconectar con /iniciar." });
+    res.json({
+      ok: true,
+      mensaje:
+        "Sesión cerrada (socket desconectado). Puedes reconectar con /iniciar.",
+    });
   } catch (e) {
     res.status(500).json({ ok: false, error: "Error al cerrar sesión" });
   }
@@ -65,18 +87,27 @@ app.post("/cerrar-sesion", async (req, res) => {
 app.post("/desvincular", async (req, res) => {
   try {
     await desvincular();
-    res.json({ ok: true, mensaje: "Desvinculación completa. Se requerirá escanear un nuevo QR al iniciar." });
+    res.json({
+      ok: true,
+      mensaje:
+        "Desvinculación completa. Se requerirá escanear un nuevo QR al iniciar.",
+    });
   } catch (e) {
+    console.error("Error unlinking WhatsApp:", e);
     res.status(500).json({ ok: false, error: "Error al desvincular" });
   }
 });
 
 // Iniciar / Reconectar manualmente
 app.post("/iniciar", async (req, res) => {
+  console.log("[Microservicio Debug] POST /iniciar recibido");
   try {
+    console.log("[Microservicio Debug] Llamando a iniciarWhatsapp()...");
     await iniciarWhatsapp();
+    console.log("[Microservicio Debug] iniciarWhatsapp() completado");
     res.json({ ok: true, mensaje: "Inicio/reconexión solicitada." });
   } catch (e) {
+    console.error("[Microservicio Debug] ERROR en iniciarWhatsapp():", e);
     res.status(500).json({ ok: false, error: "Error al iniciar/reconectar" });
   }
 });

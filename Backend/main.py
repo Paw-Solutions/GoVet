@@ -73,6 +73,10 @@ app.add_middleware(
     allow_headers=["*"],  # Allows all headers
 )
 
+# Incluir routers
+from routers import whatsapp
+app.include_router(whatsapp.router)
+
 models.Base.metadata.create_all(bind=engine) # Crear tablas en la base de datos
 
 # Crear una sesión para cada solicitud
