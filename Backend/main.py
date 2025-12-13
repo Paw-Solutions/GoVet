@@ -9,7 +9,7 @@ except Exception:
     APSCHEDULER_AVAILABLE = False
 from datetime import datetime, timedelta, timezone, date
 from sqlalchemy import create_engine, between, or_, func, desc
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import Session, sessionmaker, selectinload
 from schemas import (
     PacienteBase, PacienteCreate, PacienteResponse,
     RazaBase, RazaCreate, RazaResponse,
@@ -48,6 +48,8 @@ from google_auth_oauthlib.flow import Flow
 from services.pdf_service import generar_pdf_consulta
 from fastapi.responses import Response
 
+# Para comunicar con microservicio whatsapp 
+from routers.whatsapp import router as whatsapp_router
 
 # Cargar variables de entorno desde el archivo .env
 load_dotenv()
@@ -965,18 +967,24 @@ def crear_consulta(consulta: ConsultaCreate, db: Session = Depends(get_db)):
 # Ruta GET para obtener una consulta por su ID
 @app.get("/consultas/{id_consulta}", response_model=ConsultaResponse)
 def obtener_consulta_por_id(id_consulta: int, db: Session = Depends(get_db)):
-    db_consulta = db.query(models.Consulta).filter(models.Consulta.id_consulta == id_consulta).first()
+    db_consulta = db.query(models.Consulta)\
+        .options(selectinload(models.Consulta.recetas))\
+        .options(selectinload(models.Consulta.tratamientos).selectinload(models.ConsultaTratamiento.tratamiento))\
+        .filter(models.Consulta.id_consulta == id_consulta).first()
     if not db_consulta:
         raise HTTPException(status_code=404, detail="Consulta no encontrada")
-    return db_consulta
+    return ConsultaResponse.from_orm_with_tratamientos(db_consulta)
 
 # Ruta GET para obtener todas las consultas
 @app.get("/consultas/", response_model=List[ConsultaResponse])
 def obtener_todas_las_consultas(db: Session = Depends(get_db)):
-    db_consultas = db.query(models.Consulta).order_by(desc(models.Consulta.fecha_consulta)).all()
+    db_consultas = db.query(models.Consulta)\
+        .options(selectinload(models.Consulta.recetas))\
+        .options(selectinload(models.Consulta.tratamientos).selectinload(models.ConsultaTratamiento.tratamiento))\
+        .order_by(desc(models.Consulta.fecha_consulta)).all()
     if not db_consultas:
         raise HTTPException(status_code=404, detail="No se encontraron consultas")
-    return db_consultas
+    return [ConsultaResponse.from_orm_with_tratamientos(c) for c in db_consultas]
 
 # Ruta GET para obtener consultas por ID de paciente
 @app.get("/consultas/paciente/id/{id_paciente}", response_model=List[ConsultaResponse])
@@ -987,25 +995,30 @@ def obtener_consultas_por_id_paciente(id_paciente: int, db: Session = Depends(ge
         raise HTTPException(status_code=404, detail="Paciente no encontrado")
     
     # Obtener todas las consultas del paciente ordenadas por fecha más reciente
-    db_consultas = db.query(models.Consulta).filter(
-        models.Consulta.id_paciente == id_paciente
-    ).order_by(desc(models.Consulta.fecha_consulta)).all()
+    db_consultas = db.query(models.Consulta)\
+        .options(selectinload(models.Consulta.recetas))\
+        .options(selectinload(models.Consulta.tratamientos).selectinload(models.ConsultaTratamiento.tratamiento))\
+        .filter(models.Consulta.id_paciente == id_paciente)\
+        .order_by(desc(models.Consulta.fecha_consulta)).all()
     
     if not db_consultas:
         raise HTTPException(status_code=404, detail="No se encontraron consultas para ese paciente")
     
-    return db_consultas
+    return [ConsultaResponse.from_orm_with_tratamientos(c) for c in db_consultas]
 
 # Ruta GET para obtener consultas por nombre de paciente
 @app.get("/consultas/paciente/{nombre_paciente}", response_model=List[ConsultaResponse])
 def obtener_consultas_por_nombre_paciente(nombre_paciente: str, db: Session = Depends(get_db)):
     # Normalizar búsqueda para mayor flexibilidad
-    db_consultas = db.query(models.Consulta).join(models.Paciente).filter(
+    db_consultas = db.query(models.Consulta)\
+        .options(selectinload(models.Consulta.recetas))\
+        .options(selectinload(models.Consulta.tratamientos).selectinload(models.ConsultaTratamiento.tratamiento))\
+        .join(models.Paciente).filter(
         models.Paciente.nombre.ilike(f"%{nombre_paciente}%")
     ).order_by(desc(models.Consulta.fecha_consulta)).all()
     if not db_consultas:
         raise HTTPException(status_code=404, detail="No se encontraron consultas para ese paciente")
-    return db_consultas
+    return [ConsultaResponse.from_orm_with_tratamientos(c) for c in db_consultas]
 
 @app.get("/consultas/paginated/")
 def obtener_consultas_paginadas(
@@ -1018,6 +1031,7 @@ def obtener_consultas_paginadas(
     offset = (page - 1) * limit
     
     # Query con joins para obtener información relacionada
+    # IMPORTANTE: Agregar selectinload para recetas y tratamientos
     query = db.query(
         models.Consulta,
         models.Paciente.nombre.label('paciente_nombre'),
@@ -1033,6 +1047,9 @@ def obtener_consultas_paginadas(
         models.Tutor.rut.label('tutor_rut'),
         models.Tutor.telefono.label('tutor_telefono'),
         models.Tutor.email.label('tutor_email')
+    ).options(
+        selectinload(models.Consulta.recetas),
+        selectinload(models.Consulta.tratamientos).selectinload(models.ConsultaTratamiento.tratamiento)
     ).join(
         models.Paciente, models.Consulta.id_paciente == models.Paciente.id_paciente, isouter=True
     ).join(
@@ -1102,17 +1119,60 @@ def obtener_consultas_paginadas(
             "id_consulta": consulta.id_consulta,
             "id_paciente": consulta.id_paciente,
             "rut": consulta.rut,
-            "diagnostico": consulta.diagnostico,
-            "estado_pelaje": consulta.estado_pelaje,
+            "fecha_consulta": consulta.fecha_consulta.isoformat() if consulta.fecha_consulta else None,
+            "motivo": consulta.motivo,
+            "motivo_consulta": consulta.motivo,  # Alias para compatibilidad
+            
+            # Constantes vitales
             "peso": consulta.peso,
-            "condicion_corporal": consulta.condicion_corporal,
-            "mucosas": consulta.mucosas,
+            "temperatura": consulta.temperatura,
+            "frecuencia_cardiaca": consulta.frecuencia_cardiaca,
+            "frecuencia_respiratoria": consulta.frecuencia_respiratoria,
+            "tllc": consulta.tllc,
             "dht": consulta.dht,
+            
+            # Examen físico
+            "mucosas": consulta.mucosas,
+            "condicion_corporal": consulta.condicion_corporal,
+            "estado_pelaje": consulta.estado_pelaje,
+            "estado_piel": consulta.estado_piel,
             "nodulos_linfaticos": consulta.nodulos_linfaticos,
             "auscultacion_cardiaca_toraxica": consulta.auscultacion_cardiaca_toraxica,
+            "examen_clinico": consulta.examen_clinico,
+            
+            # Diagnóstico
+            "prediagnostico": consulta.prediagnostico,
+            "diagnostico": consulta.diagnostico,
+            "pronostico": consulta.pronostico,
             "observaciones": consulta.observaciones,
-            "fecha_consulta": consulta.fecha_consulta.isoformat() if consulta.fecha_consulta else None,
-            "motivo_consulta": consulta.motivo,  # Renombrado para mayor claridad
+            
+            # Plan
+            "indicaciones_generales": consulta.indicaciones_generales,
+            
+            # Recetas médicas
+            "recetas": [
+                {
+                    "id_receta": r.id_receta,
+                    "medicamento": r.medicamento,
+                    "dosis": r.dosis,
+                    "frecuencia": r.frecuencia,
+                    "duracion": r.duracion,
+                    "numero_serie": r.numero_serie
+                } for r in consulta.recetas
+            ] if consulta.recetas else [],
+            
+            # Tratamientos aplicados (vacunas, antiparasitarios)
+            "tratamientos": [
+                {
+                    "fecha_tratamiento": ct.fecha_tratamiento.isoformat() if ct.fecha_tratamiento else None,
+                    "dosis": ct.dosis,
+                    "marca": ct.marca,
+                    "numero_serial": ct.numero_serial,
+                    "proxima_dosis": ct.proxima_dosis.isoformat() if ct.proxima_dosis else None,
+                    "nombre_tratamiento": ct.tratamiento.nombre if ct.tratamiento else "Tratamiento",
+                    "tipo_tratamiento": ct.tratamiento.tipo_tratamiento if ct.tratamiento else None
+                } for ct in consulta.tratamientos
+            ] if consulta.tratamientos else [],
             
             # Información del paciente
             "paciente": {
@@ -1368,6 +1428,8 @@ async def envia(email: EmailSchema) -> None:
     fm = FastMail(conf)
     await fm.send_message(message)
 
+# HU 13: Como veterinaria quiero dejar alertas programadas que se envien al whatsApp de los dueños para hacerles recuerdos sobre citas
+app.include_router(whatsapp_router)
 
 # HU 14: Cómo dueño quiero recibir alertas programadas por correo para recordar cada consulta.
 @app.post("/email/{fecha_envio}")
@@ -1414,4 +1476,3 @@ def descargar_pdf_consulta(id_consulta: int, db: Session = Depends(get_db)):
 #     fm = FastMail(conf)
 #     await fm.send_message(message)
 #     return JSONResponse(status_code=200, content={"message": "La notificación fue enviada correctamente"})
-

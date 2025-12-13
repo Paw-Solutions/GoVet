@@ -690,7 +690,7 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
               type: "application/pdf",
               lastModified: Date.now()
             });
-            
+
       // Verificar si el navegador soporta compartir archivos
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         console.log("Iniciando share...");
@@ -703,9 +703,21 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
       } else {
         alert("Tu navegador no soporta compartir archivos. Intenta descargar el PDF en su lugar.");
       }
-    } catch (err) {
+    } catch (err: any) {
+      // No mostrar error si el usuario simplemente canceló el share
+      if (err.name === 'AbortError') {
+        console.log("El usuario canceló el compartir");
+        return;
+      }
+      
+      // Para cualquier otro error, mostrar en consola pero no alertar al usuario
+      // ya que el share pudo haber sido exitoso
       console.error("Error al compartir:", err);
-      alert(`Error al compartir el PDF: ${err instanceof Error ? err.message : err}`);
+      
+      // Solo mostrar alert si es un error crítico (no de permisos o red)
+      if (err.name !== 'NotAllowedError' && err.name !== 'TypeError') {
+        alert(`Error al compartir el PDF: ${err.message || err}`);
+      }
     }
   }, [])
   
