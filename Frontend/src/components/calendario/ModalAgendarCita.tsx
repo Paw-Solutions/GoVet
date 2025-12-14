@@ -21,12 +21,15 @@ import {
   useIonToast,
   IonList,
   IonPopover,
+  IonCheckbox,
+  IonAlert,
 } from "@ionic/react";
 import {
   closeOutline,
   checkmarkOutline,
   personOutline,
   pawOutline,
+  notificationsOutline,
 } from "ionicons/icons";
 // Componente: Interfaz para gestionar horas y vista calendario
 import { createEvent, type CalendarEventCreate } from "../../api/calendario";
@@ -86,8 +89,9 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
   // Datos del formulario - Paso 4: Motivo y Notas
   const [motivo, setMotivo] = useState("");
   const [notas, setNotas] = useState("");
-  const [notificacion, setNotificacion] = useState<string>("diaAnterior");
+  const [notificaciones, setNotificaciones] = useState<string[]>([]);
   const [fechaNotificacion, setFechaNotificacion] = useState<Date | null>(null);
+  const [showAlertNotificaciones, setShowAlertNotificaciones] = useState(false);
 
   const resetForm = () => {
     setPaso(1);
@@ -102,6 +106,7 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
     setUbicacion("");
     setMotivo("");
     setNotas("");
+    setNotificaciones([]);
   };
 
   // useEffect para pre-cargar datos cuando se pasan tutorInicial y/o pacienteInicial
@@ -247,10 +252,19 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
       fecha.setDate(fecha.getDate() - 7);
       return fecha;
     }
-    if (tipo === "minutos") {
-      // prueba
-      fecha.setMinutes(fecha.getMinutes() - 145);
-      // si la fecha resultante ya pasó, devolver ahora para envío inmediato
+    // Opciones de prueba (5 minutos de diferencia)
+    if (tipo === "test5min") {
+      fecha.setMinutes(fecha.getMinutes() - 5);
+      if (fecha < new Date()) return new Date();
+      return fecha;
+    }
+    if (tipo === "test10min") {
+      fecha.setMinutes(fecha.getMinutes() - 10);
+      if (fecha < new Date()) return new Date();
+      return fecha;
+    }
+    if (tipo === "test15min") {
+      fecha.setMinutes(fecha.getMinutes() - 15);
       if (fecha < new Date()) return new Date();
       return fecha;
     }
@@ -258,22 +272,10 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
     return new Date();
   };
 
-  // Si cambia la fecha o la notificación, se actualiza el estado fechaNotificacion
-  const handleNotificacion = useCallback(() => {
-    if (!fechaHora) return;
-    const fecha = calcularFechaNotificacion(notificacion, fechaHora);
-    setFechaNotificacion(fecha);
-  }, [notificacion, fechaHora]);
-
-  // Ejecutar la función cuando cambie la selección de notificación o la fecha/hora
-  useEffect(() => {
-    handleNotificacion();
-  }, [handleNotificacion]);
-
-  // Si el tutor no tiene email válido, forzar "noNotificar"
+  // Si el tutor no tiene email válido, limpiar notificaciones
   useEffect(() => {
     if (tutorSeleccionado && !isValidEmail(tutorSeleccionado.email)) {
-      setNotificacion("noNotificar");
+      setNotificaciones([]);
     }
   }, [tutorSeleccionado]);
 
@@ -441,6 +443,31 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email.trim());
   };
+
+  const toggleNotificacion = (valor: string) => {
+    if (valor === "noNotificar") {
+      // Si se selecciona "No notificar", limpiar todas las demás
+      if (notificaciones.includes("noNotificar")) {
+        setNotificaciones([]);
+      } else {
+        setNotificaciones(["noNotificar"]);
+      }
+    } else {
+      // Si se selecciona otra opción, quitar "noNotificar" si existe
+      const sinNoNotificar = notificaciones.filter((n) => n !== "noNotificar");
+      if (notificaciones.includes(valor)) {
+        // Si se está deseleccionando y es la última opción, activar "noNotificar"
+        const nuevasNotificaciones = sinNoNotificar.filter((n) => n !== valor);
+        if (nuevasNotificaciones.length === 0) {
+          setNotificaciones(["noNotificar"]);
+        } else {
+          setNotificaciones(nuevasNotificaciones);
+        }
+      } else {
+        setNotificaciones([...sinNoNotificar, valor]);
+      }
+    }
+  };
   const handleCrearCita = async () => {
     setLoading(true);
     try {
@@ -479,8 +506,12 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
         icon: checkmarkOutline,
       });
 
-      // Solo enviar notificación si no es "noNotificar"
-      if (notificacion !== "noNotificar") {
+      // Solo enviar notificaciones si hay alguna seleccionada y no es "noNotificar"
+      const notificacionesActivas = notificaciones.filter(
+        (n) => n !== "noNotificar"
+      );
+
+      if (notificacionesActivas.length > 0) {
         // Validar que el tutor tenga un email válido
         if (!tutorSeleccionado || !isValidEmail(tutorSeleccionado?.email)) {
           console.log(
@@ -493,108 +524,121 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
             color: "warning",
           });
         } else {
-          try {
-            console.log(
-              "Enviando notificación al email:",
-              tutorSeleccionado.email
-            );
+          // Preparar datos comunes del email
+          const nombreCompleto = `${tutorSeleccionado.nombre} ${tutorSeleccionado.apellido_paterno}`;
+          const fechaInicio = new Date(fechaHora);
+          const fechaTermino = new Date(fechaHoraTermino);
 
-            const nombreCompleto = `${tutorSeleccionado.nombre} ${tutorSeleccionado.apellido_paterno}`;
+          const fechaFormateada = fechaInicio.toLocaleDateString("es-CL", {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          });
 
-            // Formatear fecha y hora
-            const fechaInicio = new Date(fechaHora);
-            const fechaTermino = new Date(fechaHoraTermino);
+          const horaInicioFormateada = fechaInicio.toLocaleTimeString("es-CL", {
+            hour: "2-digit",
+            minute: "2-digit",
+          });
 
-            const fechaFormateada = fechaInicio.toLocaleDateString("es-CL", {
-              weekday: "long",
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            });
+          const horaTerminoFormateada = fechaTermino.toLocaleTimeString(
+            "es-CL",
+            {
+              hour: "2-digit",
+              minute: "2-digit",
+            }
+          );
 
-            const horaInicioFormateada = fechaInicio.toLocaleTimeString(
-              "es-CL",
-              {
-                hour: "2-digit",
-                minute: "2-digit",
-              }
-            );
+          const nombresPacientes = pacientesDisponibles
+            .filter((p) => pacientesSeleccionados.includes(p.id_paciente))
+            .map((p) => p.nombre)
+            .join(", ");
 
-            const horaTerminoFormateada = fechaTermino.toLocaleTimeString(
-              "es-CL",
-              {
-                hour: "2-digit",
-                minute: "2-digit",
-              }
-            );
-
-            // Obtener nombres de los pacientes seleccionados
-            const nombresPacientes = pacientesDisponibles
-              .filter((p) => pacientesSeleccionados.includes(p.id_paciente))
-              .map((p) => p.nombre)
-              .join(", ");
-
-            const cuerpo = `
-              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                <h2 style="color: #2563eb;">Confirmación de Cita - GoVet</h2>
-                <p>Hola <strong>${nombreCompleto}</strong>,</p>
-                <p>Tu cita ha sido agendada exitosamente con los siguientes detalles:</p>
-                
-                <div style="background-color: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
-                  <p><strong>📅 Fecha:</strong> ${fechaFormateada}</p>
-                  <p><strong>🕐 Horario:</strong> ${horaInicioFormateada} - ${horaTerminoFormateada}</p>
-                  <p><strong>🐾 Paciente(s):</strong> ${nombresPacientes}</p>
-                  ${
-                    ubicacion
-                      ? `<p><strong>📍 Ubicación:</strong> ${ubicacion}</p>`
-                      : ""
-                  }
-                  ${
-                    motivo ? `<p><strong>📋 Motivo:</strong> ${motivo}</p>` : ""
-                  }
-                </div>
-                
-                <p>Si necesitas cancelar o reprogramar, por favor contáctanos con anticipación.</p>
-                <p style="color: #6b7280; font-size: 14px; margin-top: 30px;">
-                  Este es un correo automático, por favor no respondas a este mensaje.
-                </p>
+          const cuerpo = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #2563eb;">Confirmación de Cita - GoVet</h2>
+              <p>Hola <strong>${nombreCompleto}</strong>,</p>
+              <p>Tu cita ha sido agendada exitosamente con los siguientes detalles:</p>
+              
+              <div style="background-color: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                <p><strong>📅 Fecha:</strong> ${fechaFormateada}</p>
+                <p><strong>🕐 Horario:</strong> ${horaInicioFormateada} - ${horaTerminoFormateada}</p>
+                <p><strong>🐾 Paciente(s):</strong> ${nombresPacientes}</p>
+                ${
+                  ubicacion
+                    ? `<p><strong>📍 Ubicación:</strong> ${ubicacion}</p>`
+                    : ""
+                }
+                ${motivo ? `<p><strong>📋 Motivo:</strong> ${motivo}</p>` : ""}
               </div>
-            `;
+              
+              <p>Si necesitas cancelar o reprogramar, por favor contáctanos con anticipación.</p>
+              <p style="color: #6b7280; font-size: 14px; margin-top: 30px;">
+                Este es un correo automático, por favor no respondas a este mensaje.
+              </p>
+            </div>
+          `;
 
-            const fechaEnvioDate = calcularFechaNotificacion(
-              notificacion,
-              fechaHora
-            );
-            const fechaEnvioIso = fechaEnvioDate.toISOString();
+          // Enviar una notificación por cada momento seleccionado
+          let notificacionesExitosas = 0;
+          let notificacionesFallidas = 0;
 
-            setFechaNotificacion(fechaEnvioDate);
+          for (const tipoNotificacion of notificacionesActivas) {
+            try {
+              const fechaEnvioDate = calcularFechaNotificacion(
+                tipoNotificacion,
+                fechaHora
+              );
+              const fechaEnvioIso = fechaEnvioDate.toISOString();
 
-            await enviarNotificacion(
-              {
-                email: tutorSeleccionado.email,
-                asunto: "Confirmación de cita - GoVet",
-                cuerpo,
-              },
-              fechaEnvioIso
-            );
+              console.log(
+                `Programando notificación (${tipoNotificacion}) para ${tutorSeleccionado.email} en ${fechaEnvioIso}`
+              );
 
+              await enviarNotificacion(
+                {
+                  email: tutorSeleccionado.email,
+                  asunto: "Confirmación de cita - GoVet",
+                  cuerpo,
+                },
+                fechaEnvioIso
+              );
+
+              notificacionesExitosas++;
+            } catch (emailError) {
+              console.error(
+                `Error enviando notificación (${tipoNotificacion}):`,
+                emailError
+              );
+              notificacionesFallidas++;
+            }
+          }
+
+          // Mostrar mensaje según resultados
+          if (notificacionesExitosas > 0 && notificacionesFallidas === 0) {
             present({
-              message: "Correo de confirmación enviado exitosamente",
+              message: `${notificacionesExitosas} notificación(es) programada(s) exitosamente`,
               duration: 2500,
               color: "success",
             });
-          } catch (emailError) {
-            console.error("Error enviando notificación:", emailError);
+          } else if (notificacionesExitosas > 0 && notificacionesFallidas > 0) {
             present({
-              message:
-                "Cita agendada exitosamente, pero falló el envío del correo",
-              duration: 4000,
+              message: `${notificacionesExitosas} notificación(es) programada(s), ${notificacionesFallidas} fallida(s)`,
+              duration: 3000,
               color: "warning",
+            });
+          } else {
+            present({
+              message: "Error al programar las notificaciones",
+              duration: 3000,
+              color: "danger",
             });
           }
         }
       } else {
-        console.log("Notificación deshabilitada por el usuario");
+        console.log(
+          "No se seleccionaron notificaciones o se eligió 'No notificar'"
+        );
       }
 
       onCitaCreada();
@@ -806,8 +850,11 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
             onIonChange={(e) => handleCambioFecha(e.detail.value as string)}
             presentation="date"
             locale="es-CL"
-            min={new Date().toISOString()}
+            preferWheel={false}
+            size="cover"
+            min={new Date(new Date().setHours(0, 0, 0, 0)).toISOString()}
             max={new Date(new Date().getFullYear() + 5, 11, 31).toISOString()}
+            firstDayOfWeek={1}
           />
         </IonItem>
 
@@ -932,31 +979,97 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
           />
         </IonItem>
 
-        <IonItem className="mt-3">
-          <IonLabel position="stacked">¿Cuándo notificar al tutor?</IonLabel>
-          <IonSelect
-            aria-label="notificacion"
-            placeholder="Selecciona cuándo notificar..."
-            value={notificacion}
-            onIonChange={(e) => setNotificacion(e.detail.value as string)}
-            disabled={!isValidEmail(tutorSeleccionado?.email)}
-            interface="popover"
-          >
-            <IonSelectOption value="noNotificar">No notificar</IonSelectOption>
-            <IonSelectOption value="diaAnterior">Día anterior</IonSelectOption>
-            <IonSelectOption value="semanaAntes">
-              Una semana antes
-            </IonSelectOption>
-            <IonSelectOption value="ahora">Ahora</IonSelectOption>
-            <IonSelectOption value="minutos">2h 40min antes</IonSelectOption>
-          </IonSelect>
+        <div className="mt-3">
+          <IonItem>
+            <IonIcon icon={notificationsOutline} slot="start" />
+            <IonLabel>
+              <h3>Notificaciones</h3>
+              <p>
+                {notificaciones.length === 0 ||
+                notificaciones.includes("noNotificar")
+                  ? "No notificar"
+                  : `${notificaciones.length} ${
+                      notificaciones.length === 1
+                        ? "notificación seleccionada"
+                        : "notificaciones seleccionadas"
+                    }`}
+              </p>
+            </IonLabel>
+            <IonButton
+              slot="end"
+              fill="outline"
+              onClick={() => setShowAlertNotificaciones(true)}
+              disabled={!isValidEmail(tutorSeleccionado?.email)}
+            >
+              Configurar
+            </IonButton>
+          </IonItem>
           {!isValidEmail(tutorSeleccionado?.email) && (
-            <IonNote color="warning" slot="helper">
+            <IonNote
+              color="warning"
+              className="ion-padding-start ion-padding-end"
+            >
               ⚠️ El tutor no tiene un email válido. No se pueden enviar
               notificaciones.
             </IonNote>
           )}
-        </IonItem>
+        </div>
+
+        <IonAlert
+          isOpen={showAlertNotificaciones}
+          onDidDismiss={() => setShowAlertNotificaciones(false)}
+          header="¿Cuándo notificar al tutor?"
+          inputs={[
+            {
+              label: "No notificar",
+              type: "checkbox",
+              value: "noNotificar",
+              checked: notificaciones.includes("noNotificar"),
+            },
+            {
+              label: "Ahora",
+              type: "checkbox",
+              value: "ahora",
+              checked: notificaciones.includes("ahora"),
+            },
+            {
+              label: "Una hora antes",
+              type: "checkbox",
+              value: "unaHoraAntes",
+              checked: notificaciones.includes("unaHoraAntes"),
+            },
+            {
+              label: "Día anterior",
+              type: "checkbox",
+              value: "diaAnterior",
+              checked: notificaciones.includes("diaAnterior"),
+            },
+            {
+              label: "Una semana antes",
+              type: "checkbox",
+              value: "semanaAntes",
+              checked: notificaciones.includes("semanaAntes"),
+            },
+          ]}
+          buttons={[
+            {
+              text: "Cancelar",
+              role: "cancel",
+            },
+            {
+              text: "Confirmar",
+              handler: (selectedValues) => {
+                if (!selectedValues || selectedValues.length === 0) {
+                  setNotificaciones(["noNotificar"]);
+                } else if (selectedValues.includes("noNotificar")) {
+                  setNotificaciones(["noNotificar"]);
+                } else {
+                  setNotificaciones(selectedValues);
+                }
+              },
+            },
+          ]}
+        />
 
         <IonItem className="mt-3">
           <IonLabel position="stacked">Notas adicionales (opcional)</IonLabel>
@@ -1007,18 +1120,24 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
             <strong>Motivo:</strong> {motivo || "(Por completar)"}
           </div>
           <div className="resumen-item">
-            <strong>Notificación:</strong>{" "}
-            {notificacion === "noNotificar"
+            <strong>Notificaciones:</strong>{" "}
+            {notificaciones.length === 0 ||
+            notificaciones.includes("noNotificar")
               ? "No notificar"
-              : notificacion === "diaAnterior"
-              ? "Día anterior"
-              : notificacion === "semanaAntes"
-              ? "Una semana antes"
-              : notificacion === "minutos"
-              ? "2h 40min antes (test)"
-              : notificacion === "ahora"
-              ? "Ahora (test)"
-              : "-"}
+              : notificaciones
+                  .map((n) => {
+                    switch (n) {
+                      case "diaAnterior":
+                        return "Día anterior";
+                      case "semanaAntes":
+                        return "Una semana antes";
+                      case "ahora":
+                        return "Ahora";
+                      case "unaHoraAntes":
+                        return "Una hora antes";
+                    }
+                  })
+                  .join(", ")}
           </div>
         </div>
       </div>
