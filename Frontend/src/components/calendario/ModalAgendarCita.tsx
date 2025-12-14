@@ -34,6 +34,7 @@ import {
 // Componente: Interfaz para gestionar horas y vista calendario
 import { createEvent, type CalendarEventCreate } from "../../api/calendario";
 import { enviarNotificacion } from "../../api/notificacion";
+import { sendWhatsAppNotification } from "../../api/whatsapp";
 import { obtenerTutoresPaginados, type TutorData } from "../../api/tutores";
 import {
   obtenerPacientesPorTutor,
@@ -512,49 +513,43 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
       );
 
       if (notificacionesActivas.length > 0) {
-        // Validar que el tutor tenga un email válido
-        if (!tutorSeleccionado || !isValidEmail(tutorSeleccionado?.email)) {
-          console.log(
-            "El tutor no tiene un email válido; se omite el envío de notificación."
-          );
-          present({
-            message:
-              "Cita agendada. No se envió correo (tutor sin email válido)",
-            duration: 3000,
-            color: "warning",
-          });
-        } else {
-          // Preparar datos comunes del email
-          const nombreCompleto = `${tutorSeleccionado.nombre} ${tutorSeleccionado.apellido_paterno}`;
-          const fechaInicio = new Date(fechaHora);
-          const fechaTermino = new Date(fechaHoraTermino);
+        // Preparar datos comunes para las notificaciones
+        const nombreCompleto = `${tutorSeleccionado!.nombre} ${
+          tutorSeleccionado!.apellido_paterno
+        }`;
+        const fechaInicio = new Date(fechaHora);
+        const fechaTermino = new Date(fechaHoraTermino);
 
-          const fechaFormateada = fechaInicio.toLocaleDateString("es-CL", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          });
+        const fechaFormateada = fechaInicio.toLocaleDateString("es-CL", {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        });
 
-          const horaInicioFormateada = fechaInicio.toLocaleTimeString("es-CL", {
-            hour: "2-digit",
-            minute: "2-digit",
-          });
+        const horaInicioFormateada = fechaInicio.toLocaleTimeString("es-CL", {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
 
-          const horaTerminoFormateada = fechaTermino.toLocaleTimeString(
-            "es-CL",
-            {
-              hour: "2-digit",
-              minute: "2-digit",
-            }
-          );
+        const horaTerminoFormateada = fechaTermino.toLocaleTimeString("es-CL", {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
 
-          const nombresPacientes = pacientesDisponibles
-            .filter((p) => pacientesSeleccionados.includes(p.id_paciente))
-            .map((p) => p.nombre)
-            .join(", ");
+        const nombresPacientes = pacientesDisponibles
+          .filter((p) => pacientesSeleccionados.includes(p.id_paciente))
+          .map((p) => p.nombre)
+          .join(", ");
 
-          const cuerpo = `
+        let notificacionesEmailExitosas = 0;
+        let notificacionesEmailFallidas = 0;
+        let notificacionesWhatsAppExitosas = 0;
+        let notificacionesWhatsAppFallidas = 0;
+
+        // Enviar notificaciones por EMAIL
+        if (tutorSeleccionado && isValidEmail(tutorSeleccionado?.email)) {
+          const cuerpoEmail = `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
               <h2 style="color: #2563eb;">Confirmación de Cita - GoVet</h2>
               <p>Hola <strong>${nombreCompleto}</strong>,</p>
@@ -579,10 +574,6 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
             </div>
           `;
 
-          // Enviar una notificación por cada momento seleccionado
-          let notificacionesExitosas = 0;
-          let notificacionesFallidas = 0;
-
           for (const tipoNotificacion of notificacionesActivas) {
             try {
               const fechaEnvioDate = calcularFechaNotificacion(
@@ -592,48 +583,142 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
               const fechaEnvioIso = fechaEnvioDate.toISOString();
 
               console.log(
-                `Programando notificación (${tipoNotificacion}) para ${tutorSeleccionado.email} en ${fechaEnvioIso}`
+                `Programando notificación EMAIL (${tipoNotificacion}) para ${tutorSeleccionado.email} en ${fechaEnvioIso}`
               );
 
               await enviarNotificacion(
                 {
                   email: tutorSeleccionado.email,
                   asunto: "Confirmación de cita - GoVet",
-                  cuerpo,
+                  cuerpo: cuerpoEmail,
                 },
                 fechaEnvioIso
               );
 
-              notificacionesExitosas++;
+              notificacionesEmailExitosas++;
             } catch (emailError) {
               console.error(
-                `Error enviando notificación (${tipoNotificacion}):`,
+                `Error enviando notificación EMAIL (${tipoNotificacion}):`,
                 emailError
               );
-              notificacionesFallidas++;
+              notificacionesEmailFallidas++;
+            }
+          }
+        } else {
+          console.log(
+            "El tutor no tiene un email válido; se omite el envío de notificación por correo."
+          );
+        }
+
+        // Enviar notificaciones por WHATSAPP
+        const numeroWhatsApp =
+          tutorSeleccionado?.celular || tutorSeleccionado?.telefono;
+        if (numeroWhatsApp) {
+          // Formatear número para WhatsApp (debe empezar con 569)
+          let numeroFormateado = String(numeroWhatsApp).replace(/\D/g, ""); // Quitar caracteres no numéricos
+
+          // Si el número no comienza con 569, intentar formatearlo
+          if (!numeroFormateado.startsWith("569")) {
+            // Si comienza con 9 (formato móvil chileno), agregar 56
+            if (
+              numeroFormateado.startsWith("9") &&
+              numeroFormateado.length === 9
+            ) {
+              numeroFormateado = "56" + numeroFormateado;
+            }
+            // Si tiene 8 dígitos y no comienza con 9, agregar 569
+            else if (numeroFormateado.length === 8) {
+              numeroFormateado = "569" + numeroFormateado;
+            }
+            // Si comienza con 56 pero no con 569, verificar
+            else if (
+              numeroFormateado.startsWith("56") &&
+              !numeroFormateado.startsWith("569")
+            ) {
+              numeroFormateado = "569" + numeroFormateado.substring(2);
             }
           }
 
-          // Mostrar mensaje según resultados
-          if (notificacionesExitosas > 0 && notificacionesFallidas === 0) {
-            present({
-              message: `${notificacionesExitosas} notificación(es) programada(s) exitosamente`,
-              duration: 2500,
-              color: "success",
-            });
-          } else if (notificacionesExitosas > 0 && notificacionesFallidas > 0) {
-            present({
-              message: `${notificacionesExitosas} notificación(es) programada(s), ${notificacionesFallidas} fallida(s)`,
-              duration: 3000,
-              color: "warning",
-            });
+          // Validar que el número tenga el formato correcto
+          const esNumeroValido =
+            numeroFormateado.startsWith("569") &&
+            (numeroFormateado.length === 11 || numeroFormateado.length === 12);
+
+          if (esNumeroValido) {
+            for (const tipoNotificacion of notificacionesActivas) {
+              try {
+                // Para WhatsApp, solo enviamos si es "ahora" ya que la API actual no soporta programación
+                if (tipoNotificacion === "ahora") {
+                  console.log(
+                    `Enviando notificación WhatsApp para ${numeroFormateado}`
+                  );
+
+                  await sendWhatsAppNotification({
+                    numero: numeroFormateado,
+                    nombre: nombreCompleto,
+                    paciente: nombresPacientes,
+                    fecha: fechaFormateada,
+                    hora: `${horaInicioFormateada} - ${horaTerminoFormateada}`,
+                  });
+
+                  notificacionesWhatsAppExitosas++;
+                }
+              } catch (whatsappError) {
+                console.error(
+                  `Error enviando notificación WhatsApp (${tipoNotificacion}):`,
+                  whatsappError
+                );
+                notificacionesWhatsAppFallidas++;
+              }
+            }
           } else {
-            present({
-              message: "Error al programar las notificaciones",
-              duration: 3000,
-              color: "danger",
-            });
+            console.log(
+              `El número ${numeroWhatsApp} no tiene un formato válido para WhatsApp (debe ser +569XXXXXXXX). Se omite el envío.`
+            );
           }
+        } else {
+          console.log(
+            "El tutor no tiene teléfono/celular registrado; se omite el envío de notificación por WhatsApp."
+          );
+        }
+
+        // Mostrar mensaje según resultados
+        const totalExitosas =
+          notificacionesEmailExitosas + notificacionesWhatsAppExitosas;
+        const totalFallidas =
+          notificacionesEmailFallidas + notificacionesWhatsAppFallidas;
+
+        if (totalExitosas > 0 && totalFallidas === 0) {
+          const detalles = [];
+          if (notificacionesEmailExitosas > 0)
+            detalles.push(`${notificacionesEmailExitosas} email`);
+          if (notificacionesWhatsAppExitosas > 0)
+            detalles.push(`${notificacionesWhatsAppExitosas} WhatsApp`);
+
+          present({
+            message: `Notificaciones programadas: ${detalles.join(", ")}`,
+            duration: 3000,
+            color: "success",
+          });
+        } else if (totalExitosas > 0 && totalFallidas > 0) {
+          present({
+            message: `${totalExitosas} notificación(es) enviada(s), ${totalFallidas} fallida(s)`,
+            duration: 3000,
+            color: "warning",
+          });
+        } else if (totalFallidas > 0) {
+          present({
+            message: "Error al programar las notificaciones",
+            duration: 3000,
+            color: "danger",
+          });
+        } else {
+          present({
+            message:
+              "Cita agendada. No se enviaron notificaciones (sin email o teléfono válidos)",
+            duration: 3000,
+            color: "warning",
+          });
         }
       } else {
         console.log(

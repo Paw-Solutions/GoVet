@@ -54,7 +54,21 @@ app.get("/notificar", async (req, res) => {
 
   if (!numero) return res.status(400).json({ error: "Falta número" });
 
-  const mensaje = `*RECORDATORIO*\n${nombre}, recuerda que tienes una consulta con ${paciente} el día ${fecha} a las ${hora}.`;
+  const mensaje = `*🐾 Confirmación de Cita - GoVet*
+
+Hola *${nombre}*,
+
+Tu cita ha sido agendada exitosamente con los siguientes detalles:
+
+━━━━━━━━━━━━━━━━━━━
+📅 *Fecha:* ${fecha}
+🕐 *Horario:* ${hora}
+🐾 *Paciente(s):* ${paciente}
+━━━━━━━━━━━━━━━━━━━
+
+Si necesitas cancelar o reprogramar, por favor contáctanos con anticipación.
+
+_Este es un mensaje automático._`;
 
   const sock = getSocket();
   if (!sock) return res.status(500).json({ error: "No conectado a WhatsApp" });
