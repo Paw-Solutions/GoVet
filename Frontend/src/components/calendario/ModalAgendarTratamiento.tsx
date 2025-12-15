@@ -63,7 +63,7 @@ const ModalAgendarTratamiento: React.FC<ModalAgendarTratamientoProps> = ({
   onAgendarDespues,
   onCancelar,
 }) => {
-  const {idToken} = useAuth();
+  const { idToken } = useAuth();
   const [present] = useIonToast();
   const [selectedTime, setSelectedTime] = useState("09:00");
   const [selectedNotification, setSelectedNotification] =
@@ -85,6 +85,7 @@ const ModalAgendarTratamiento: React.FC<ModalAgendarTratamientoProps> = ({
         message: "Por favor selecciona una hora para la cita",
         duration: 2000,
         color: "warning",
+        cssClass: "toast-warning",
       });
       return;
     }
@@ -161,6 +162,7 @@ const ModalAgendarTratamiento: React.FC<ModalAgendarTratamientoProps> = ({
               "Cita agendada pero no se pudo enviar la notificación por correo",
             duration: 3000,
             color: "warning",
+            cssClass: "toast-warning",
           });
         }
       }
@@ -169,6 +171,7 @@ const ModalAgendarTratamiento: React.FC<ModalAgendarTratamientoProps> = ({
         message: "Cita agendada correctamente",
         duration: 2000,
         color: "success",
+        cssClass: "toast-success",
       });
 
       onCitaCreada();
@@ -178,6 +181,7 @@ const ModalAgendarTratamiento: React.FC<ModalAgendarTratamientoProps> = ({
         message: "No se pudo agendar la cita. Intenta nuevamente",
         duration: 3000,
         color: "danger",
+        cssClass: "toast-error",
       });
     } finally {
       setLoading(false);

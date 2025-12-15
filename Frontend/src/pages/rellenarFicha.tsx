@@ -107,12 +107,15 @@ const mapRecetaToRecetaMedicaData = (recetas: Receta[]): RecetaMedicaData[] => {
 
 // Componente: Dashboard con 6 módulos para gestionar consultas
 const RellenarFicha: React.FC = () => {
-  const {idToken} = useAuth();
+  const { idToken } = useAuth();
   const [showModalPacientes, setShowModalPacientes] = useState(false);
   const [activeModule, setActiveModule] = useState<string | null>(null);
   const [touchedModules, setTouchedModules] = useState<Set<string>>(new Set());
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
+  const [toastColor, setToastColor] = useState<
+    "success" | "danger" | "warning"
+  >("success");
   const [isLoading, setIsLoading] = useState(false);
   const [showCancelAlert, setShowCancelAlert] = useState(false);
   const [requiereProximaConsulta, setRequiereProximaConsulta] = useState(false);
@@ -729,6 +732,7 @@ const RellenarFicha: React.FC = () => {
       // (si hay vacunas, el toast se mostrará después del flujo de agendamiento)
       if (!tieneVacunasParaAgendar) {
         setToastMessage("Ficha veterinaria guardada exitosamente");
+        setToastColor("success");
       }
 
       // Limpiar formulario después de guardar
@@ -799,6 +803,7 @@ const RellenarFicha: React.FC = () => {
     } catch (error) {
       console.error("Error al guardar ficha:", error);
       setToastMessage("Error al guardar la ficha");
+      setToastColor("danger");
     } finally {
       setIsLoading(false);
       setShowToast(true);
@@ -858,6 +863,7 @@ const RellenarFicha: React.FC = () => {
     setRequiereProximaConsulta(false);
     setShowCancelAlert(false);
     setToastMessage("Formulario cancelado");
+    setToastColor("warning");
     setShowToast(true);
   };
 
@@ -888,6 +894,7 @@ const RellenarFicha: React.FC = () => {
       setToastMessage(
         `Ficha guardada. ${newCitasCreadas} cita(s) de vacunación agendada(s) exitosamente`
       );
+      setToastColor("success");
       setShowToast(true);
       setPendingVaccineAlerts([]);
       setCurrentAlertIndex(0);
@@ -921,9 +928,11 @@ const RellenarFicha: React.FC = () => {
         setToastMessage(
           `Ficha guardada. ${citasCreadas} cita(s) de vacunación agendada(s) exitosamente`
         );
+        setToastColor("success");
         setShowToast(true);
       } else {
         setToastMessage("Ficha veterinaria guardada exitosamente");
+        setToastColor("success");
         setShowToast(true);
       }
       setPendingVaccineAlerts([]);
@@ -943,9 +952,11 @@ const RellenarFicha: React.FC = () => {
       setToastMessage(
         `Ficha guardada. ${citasCreadas} cita(s) de vacunación agendada(s) antes de cancelar`
       );
+      setToastColor("success");
       setShowToast(true);
     } else {
       setToastMessage("Ficha veterinaria guardada exitosamente");
+      setToastColor("success");
       setShowToast(true);
     }
     setCitasCreadas(0);
@@ -1659,6 +1670,14 @@ const RellenarFicha: React.FC = () => {
         message={toastMessage}
         duration={3000}
         position="bottom"
+        color={toastColor}
+        cssClass={
+          toastColor === "success"
+            ? "toast-success"
+            : toastColor === "danger"
+            ? "toast-error"
+            : "toast-warning"
+        }
       />
 
       {/* Modal para agendar tratamientos (vacunas) */}

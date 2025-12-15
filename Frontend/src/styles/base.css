@@ -323,6 +323,11 @@ ion-toast {
   font-weight: var(--font-weight-medium);
 }
 
+ion-toast.toast-primary {
+  --background: var(--color-primary);
+  --color: var(--color-primary-contrast);
+}
+
 ion-toast.toast-success {
   --background: var(--color-success);
   --color: var(--color-success-contrast);

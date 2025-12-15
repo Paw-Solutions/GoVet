@@ -118,6 +118,7 @@ const VinculacionWhatsApp: React.FC = () => {
         message: errorMessage,
         duration: 3000,
         color: "danger",
+        cssClass: "toast-error",
       });
     }
   };
@@ -166,6 +167,7 @@ const VinculacionWhatsApp: React.FC = () => {
             message: "¡WhatsApp conectado exitosamente!",
             duration: 3000,
             color: "success",
+            cssClass: "toast-success",
           });
         }
         // Si sigue desconectado, el QR ya está cargado (no recargar)
@@ -235,6 +237,7 @@ const VinculacionWhatsApp: React.FC = () => {
         message: "Dispositivo desvinculado. Generando nuevo QR...",
         duration: 5000,
         color: "success",
+        cssClass: "toast-success",
       });
 
       // Paso 4: Esperar inicial para que comience la limpieza
@@ -329,6 +332,7 @@ const VinculacionWhatsApp: React.FC = () => {
         message: errorMessage,
         duration: 3000,
         color: "danger",
+        cssClass: "toast-error",
       });
 
       // Intentar recargar el estado actual después de un error

@@ -52,6 +52,9 @@ interface RegistroTutorProps {
 const RegistroTutor: React.FC<RegistroTutorProps> = ({ onClose }) => {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
+  const [toastColor, setToastColor] = useState<
+    "success" | "danger" | "warning"
+  >("success");
   const [isLoading, setIsLoading] = useState(false);
 
   // Estados para regiones y comunas (similar a especies y razas)
@@ -96,6 +99,7 @@ const RegistroTutor: React.FC<RegistroTutorProps> = ({ onClose }) => {
       } catch (error) {
         console.error("❌ Error cargando regiones:", error);
         setToastMessage("Error al cargar regiones");
+        setToastColor("danger");
         setShowToast(true);
       } finally {
         setLoadingRegiones(false);
@@ -239,6 +243,7 @@ const RegistroTutor: React.FC<RegistroTutorProps> = ({ onClose }) => {
       !selectedComuna
     ) {
       setToastMessage("Complete todos los campos obligatorios");
+      setToastColor("warning");
       setShowToast(true);
       setIsLoading(false);
       return;
@@ -247,6 +252,7 @@ const RegistroTutor: React.FC<RegistroTutorProps> = ({ onClose }) => {
     // Validación de correo
     if (!emailRegex.test(formData.email)) {
       setToastMessage("Ingrese un correo válido");
+      setToastColor("warning");
       setShowToast(true);
       setIsLoading(false);
       return;
@@ -263,6 +269,7 @@ const RegistroTutor: React.FC<RegistroTutorProps> = ({ onClose }) => {
       const respuesta = await crearTutor(dataToSubmit);
       console.log("Tutor creado:", respuesta);
       setToastMessage("Tutor registrado exitosamente");
+      setToastColor("success");
 
       // Limpiar formulario
       setFormData({
@@ -294,6 +301,7 @@ const RegistroTutor: React.FC<RegistroTutorProps> = ({ onClose }) => {
     } catch (error) {
       console.error("Fallo al crear tutor:", error);
       setToastMessage("Error de conexión");
+      setToastColor("danger");
     } finally {
       setIsLoading(false);
       setShowToast(true);
@@ -484,6 +492,14 @@ const RegistroTutor: React.FC<RegistroTutorProps> = ({ onClose }) => {
           message={toastMessage}
           duration={3000}
           position="bottom"
+          color={toastColor}
+          cssClass={
+            toastColor === "success"
+              ? "toast-success"
+              : toastColor === "danger"
+              ? "toast-error"
+              : "toast-warning"
+          }
         />
       </IonContent>
     </IonPage>

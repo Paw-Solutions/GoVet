@@ -40,7 +40,7 @@ const ModalDetalleCita: React.FC<ModalDetalleCitaProps> = ({
   evento,
   onEventoActualizado,
 }) => {
-  const {idToken} = useAuth();
+  const { idToken } = useAuth();
   const [present] = useIonToast();
   const [mostrarAlertaEliminar, setMostrarAlertaEliminar] = useState(false);
 
@@ -79,6 +79,7 @@ const ModalDetalleCita: React.FC<ModalDetalleCitaProps> = ({
         message: "Evento eliminado exitosamente",
         duration: 3000,
         color: "success",
+        cssClass: "toast-success",
       });
 
       onEventoActualizado();
@@ -89,6 +90,7 @@ const ModalDetalleCita: React.FC<ModalDetalleCitaProps> = ({
         message: "Error al eliminar el evento",
         duration: 3000,
         color: "danger",
+        cssClass: "toast-error",
       });
     }
   };

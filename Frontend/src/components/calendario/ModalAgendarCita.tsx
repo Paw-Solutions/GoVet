@@ -59,7 +59,7 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
   tutorInicial,
   pacienteInicial,
 }) => {
-  const {idToken} = useAuth();
+  const { idToken } = useAuth();
   const [present] = useIonToast();
   const [paso, setPaso] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -145,6 +145,7 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
             message: "Error al cargar los datos iniciales",
             duration: 2000,
             color: "danger",
+            cssClass: "toast-error",
           });
         } finally {
           setCargandoPacientes(false);
@@ -179,6 +180,7 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
         message: "Error al buscar tutores",
         duration: 2000,
         color: "danger",
+        cssClass: "toast-error",
       });
     } finally {
       setBuscandoTutores(false);
@@ -197,6 +199,7 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
           "⚠️ Este tutor no tiene un correo electrónico registrado. Podrás agendar la cita pero no se enviará notificación por correo.",
         duration: 5000,
         color: "warning",
+        cssClass: "toast-warning",
       });
     }
 
@@ -220,6 +223,7 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
           message: "Este tutor no tiene pacientes registrados",
           duration: 3000,
           color: "warning",
+          cssClass: "toast-warning",
         });
       }
     } catch (error) {
@@ -228,6 +232,7 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
         message: "Error al cargar los pacientes del tutor",
         duration: 2000,
         color: "danger",
+        cssClass: "toast-error",
       });
       setPacientesDisponibles([]);
     } finally {
@@ -383,6 +388,7 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
         message: "Debes seleccionar un tutor primero",
         duration: 2000,
         color: "warning",
+        cssClass: "toast-warning",
       });
       return;
     }
@@ -393,12 +399,14 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
           message: "El tutor no tiene pacientes registrados",
           duration: 3000,
           color: "warning",
+          cssClass: "toast-warning",
         });
       } else {
         present({
           message: "Selecciona al menos un paciente",
           duration: 2000,
           color: "warning",
+          cssClass: "toast-warning",
         });
       }
       return;
@@ -414,6 +422,7 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
           message: "La hora de término debe ser después de la hora de inicio",
           duration: 2000,
           color: "warning",
+          cssClass: "toast-warning",
         });
         return;
       }
@@ -425,6 +434,7 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
           message: "Ingresa el motivo de la cita",
           duration: 2000,
           color: "warning",
+          cssClass: "toast-warning",
         });
         return;
       }
@@ -507,6 +517,7 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
         duration: 3000,
         color: "success",
         icon: checkmarkOutline,
+        cssClass: "toast-success",
       });
 
       // Solo enviar notificaciones si hay alguna seleccionada y no es "noNotificar"
@@ -701,18 +712,21 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
             message: `Notificaciones programadas: ${detalles.join(", ")}`,
             duration: 3000,
             color: "success",
+            cssClass: "toast-success",
           });
         } else if (totalExitosas > 0 && totalFallidas > 0) {
           present({
             message: `${totalExitosas} notificación(es) enviada(s), ${totalFallidas} fallida(s)`,
             duration: 3000,
             color: "warning",
+            cssClass: "toast-warning",
           });
         } else if (totalFallidas > 0) {
           present({
             message: "Error al programar las notificaciones",
             duration: 3000,
             color: "danger",
+            cssClass: "toast-error",
           });
         } else {
           present({
@@ -720,6 +734,7 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
               "Cita agendada. No se enviaron notificaciones (sin email o teléfono válidos)",
             duration: 3000,
             color: "warning",
+            cssClass: "toast-warning",
           });
         }
       } else {
@@ -736,6 +751,7 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
         message: "Error al agendar la cita",
         duration: 3000,
         color: "danger",
+        cssClass: "toast-error",
       });
     } finally {
       setLoading(false);

@@ -419,7 +419,8 @@ const RegistroPaciente: React.FC = () => {
           message={toastMessage}
           duration={3000}
           position="bottom"
-          className="custom-toast"
+          color="success"
+          cssClass="toast-success"
         />
       </IonContent>
     </IonPage>
