@@ -667,13 +667,15 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
                     `Enviando notificación WhatsApp para ${numeroFormateado}`
                   );
 
-                  await sendWhatsAppNotification({
+                  await sendWhatsAppNotification(
+                    {
                     numero: numeroFormateado,
                     nombre: nombreCompleto,
                     paciente: nombresPacientes,
                     fecha: fechaFormateada,
-                    hora: `${horaInicioFormateada} - ${horaTerminoFormateada}`,
-                  });
+                    hora: `${horaInicioFormateada} - ${horaTerminoFormateada}`,},
+                    idToken
+                  );
 
                   notificacionesWhatsAppExitosas++;
                 }

@@ -27,6 +27,7 @@ import {
   desvincularWhatsApp,
   WhatsAppStatus,
 } from "../../api/whatsapp";
+import { useAuth } from "../../hooks/useAuth";
 import "../../styles/VinculacionWhatsApp.css";
 
 /**
@@ -43,6 +44,7 @@ type ConnectionState = "loading" | "connected" | "disconnected" | "error";
  * Maneja los estados: loading, connected, disconnected, error
  */
 const VinculacionWhatsApp: React.FC = () => {
+  const {idToken} = useAuth();
   const [state, setState] = useState<ConnectionState>("loading");
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [status, setStatus] = useState<WhatsAppStatus>({ conectado: false });
@@ -77,7 +79,7 @@ const VinculacionWhatsApp: React.FC = () => {
       setError(null);
 
       // Verificar estado de conexión
-      const statusData = await getWhatsAppStatus();
+      const statusData = await getWhatsAppStatus(idToken);
 
       if (!isMountedRef.current) return;
 
@@ -90,7 +92,7 @@ const VinculacionWhatsApp: React.FC = () => {
         setQrTimestamp(null);
       } else {
         // Si no está conectado, obtener QR
-        const qrData = await getWhatsAppQR();
+        const qrData = await getWhatsAppQR(idToken);
 
         if (!isMountedRef.current) return;
 
@@ -145,7 +147,7 @@ const VinculacionWhatsApp: React.FC = () => {
     pollingIntervalRef.current = setInterval(async () => {
       try {
         // Solo verificar status (no obtener QR cada vez)
-        const statusData = await getWhatsAppStatus();
+        const statusData = await getWhatsAppStatus(idToken);
 
         if (!isMountedRef.current) {
           stopPolling();
@@ -216,7 +218,7 @@ const VinculacionWhatsApp: React.FC = () => {
       stopPolling();
 
       // Paso 2: Llamar API de desvinculación
-      const result = await desvincularWhatsApp();
+      const result = await desvincularWhatsApp(idToken);
 
       if (!isMountedRef.current) return;
 
@@ -254,7 +256,7 @@ const VinculacionWhatsApp: React.FC = () => {
       while (!isReallyDisconnected && attempts < maxAttempts) {
         attempts++;
 
-        const checkStatus = await getWhatsAppStatus();
+        const checkStatus = await getWhatsAppStatus(idToken);
 
         if (!checkStatus.conectado) {
           isReallyDisconnected = true;
@@ -285,7 +287,7 @@ const VinculacionWhatsApp: React.FC = () => {
         qrAttempts++;
 
         try {
-          const qrData = await getWhatsAppQR();
+          const qrData = await getWhatsAppQR(idToken);
 
           if (qrData.qr) {
             console.log(`QR code generated after ${qrAttempts} attempts`);

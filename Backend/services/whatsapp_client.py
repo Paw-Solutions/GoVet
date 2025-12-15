@@ -8,7 +8,8 @@ import os
 from typing import Any, Dict, Optional
 
 import httpx
-from fastapi import HTTPException, status
+from fastapi import HTTPException, status, Depends
+from auth import get_current_user
 
 # URL base del microservicio; configurable por env.
 WHATSAPP_MS_BASE_URL = os.getenv("WHATSAPP_MS_BASE_URL", "http://whatsapp-ms:3000")
@@ -17,7 +18,9 @@ WHATSAPP_MS_BASE_URL = os.getenv("WHATSAPP_MS_BASE_URL", "http://whatsapp-ms:300
 DEFAULT_TIMEOUT = httpx.Timeout(timeout=5.0, connect=3.0)
 
 
-async def get_qr() -> Dict[str, Any]:
+async def get_qr(
+    current_user: dict = Depends(get_current_user)
+) -> Dict[str, Any]:
     """
     GET /qr -> { "qr": string|null }
     """
@@ -33,7 +36,9 @@ async def get_qr() -> Dict[str, Any]:
     return _parse_json_or_raise(resp)
 
 
-async def get_status() -> Dict[str, Any]:
+async def get_status(
+    current_user: dict = Depends(get_current_user)
+) -> Dict[str, Any]:
     """
     GET /status -> { "conectado": bool }
     """
@@ -50,7 +55,8 @@ async def get_status() -> Dict[str, Any]:
 
 
 async def notificar(
-    numero: str, nombre: str, paciente: str, fecha: str, hora: Optional[str]
+    numero: str, nombre: str, paciente: str, fecha: str, hora: Optional[str],
+    current_user: dict = Depends(get_current_user)
 ) -> Dict[str, Any]:
     """
     GET /notificar con query params; reenvía la solicitud de notificación.
@@ -79,7 +85,9 @@ async def notificar(
 # --- Nuevas acciones de control de sesión ---
 
 
-async def cerrar_sesion() -> Dict[str, Any]:
+async def cerrar_sesion(
+    current_user: dict = Depends(get_current_user)
+) -> Dict[str, Any]:
     """
     POST /cerrar-sesion -> desconecta el socket sin borrar credenciales.
     Respuesta esperada: { ok: bool, mensaje: string }
@@ -96,7 +104,9 @@ async def cerrar_sesion() -> Dict[str, Any]:
     return _parse_json_or_raise(resp)
 
 
-async def desvincular() -> Dict[str, Any]:
+async def desvincular(
+    current_user: dict = Depends(get_current_user)
+) -> Dict[str, Any]:
     """
     POST /desvincular -> logout + borra credenciales locales.
     Respuesta esperada: { ok: bool, mensaje: string }
@@ -113,7 +123,9 @@ async def desvincular() -> Dict[str, Any]:
     return _parse_json_or_raise(resp)
 
 
-async def iniciar() -> Dict[str, Any]:
+async def iniciar(
+    current_user: dict = Depends(get_current_user)
+) -> Dict[str, Any]:
     """
     POST /iniciar -> inicia/reconecta la sesión en el microservicio.
     Respuesta esperada: { ok: bool, mensaje: string }
