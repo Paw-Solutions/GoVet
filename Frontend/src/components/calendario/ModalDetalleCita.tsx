@@ -330,16 +330,19 @@ const ModalDetalleCita: React.FC<ModalDetalleCitaProps> = ({
       <IonAlert
         isOpen={mostrarAlertaEliminar}
         onDidDismiss={() => setMostrarAlertaEliminar(false)}
+        cssClass="alert-danger"
         header="Eliminar Evento"
         message="¿Estás seguro de que deseas eliminar este evento? Esta acción no se puede deshacer."
         buttons={[
           {
             text: "Cancelar",
             role: "cancel",
+            cssClass: "alert-button-cancel",
           },
           {
             text: "Eliminar",
             role: "destructive",
+            cssClass: "alert-button-destructive",
             handler: handleEliminar,
           },
         ]}

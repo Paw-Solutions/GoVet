@@ -1121,6 +1121,7 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
         <IonAlert
           isOpen={showAlertNotificaciones}
           onDidDismiss={() => setShowAlertNotificaciones(false)}
+          cssClass="alert-info"
           header="¿Cuándo notificar al tutor?"
           inputs={[
             {
@@ -1158,9 +1159,11 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
             {
               text: "Cancelar",
               role: "cancel",
+              cssClass: "alert-button-cancel",
             },
             {
               text: "Confirmar",
+              cssClass: "alert-button-confirm",
               handler: (selectedValues) => {
                 if (!selectedValues || selectedValues.length === 0) {
                   setNotificaciones(["noNotificar"]);

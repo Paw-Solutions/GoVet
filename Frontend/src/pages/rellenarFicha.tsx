@@ -1647,6 +1647,7 @@ const RellenarFicha: React.FC = () => {
       <IonAlert
         isOpen={showCancelAlert}
         onDidDismiss={() => setShowCancelAlert(false)}
+        cssClass="alert-warning"
         header="¿Cancelar ficha?"
         message="Se perderán todos los datos ingresados. ¿Estás seguro?"
         buttons={[
@@ -1658,7 +1659,7 @@ const RellenarFicha: React.FC = () => {
           {
             text: "Sí, cancelar",
             role: "destructive",
-            cssClass: "alert-button-confirm",
+            cssClass: "alert-button-destructive",
             handler: handleCancelar,
           },
         ]}

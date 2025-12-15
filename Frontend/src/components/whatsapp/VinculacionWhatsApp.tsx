@@ -557,7 +557,7 @@ const VinculacionWhatsApp: React.FC = () => {
       <IonAlert
         isOpen={showAlert}
         onDidDismiss={() => setShowAlert(false)}
-        cssClass="whatsapp-unlink-alert"
+        cssClass="alert-warning"
         header="⚠️ Desvincular dispositivo"
         subHeader="Esta acción cerrará la sesión de WhatsApp"
         message="¿Estás seguro de que deseas desvincular este dispositivo? Deberás escanear un nuevo código QR para reconectar."
@@ -570,7 +570,7 @@ const VinculacionWhatsApp: React.FC = () => {
           {
             text: "Sí, desvincular",
             role: "confirm",
-            cssClass: "alert-button-confirm",
+            cssClass: "alert-button-destructive",
             handler: handleDesvincular,
           },
         ]}

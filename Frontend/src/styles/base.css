@@ -344,6 +344,110 @@ ion-toast.toast-warning {
 }
 
 /* ==========================================
+   ALERTS - Alert Styles
+   ========================================== */
+
+ion-alert {
+  --backdrop-opacity: 0.5;
+  --background: var(--background-color);
+  --max-width: 400px;
+  --border-radius: var(--radius-lg);
+  --box-shadow: var(--shadow-2xl);
+}
+
+/* Alert header */
+ion-alert::part(header) {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-color);
+  padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-sm);
+}
+
+/* Alert subheader */
+ion-alert::part(subheader) {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-color-secondary);
+  padding: 0 var(--spacing-lg) var(--spacing-sm);
+}
+
+/* Alert message */
+ion-alert::part(message) {
+  font-size: var(--font-size-base);
+  color: var(--text-color-secondary);
+  padding: var(--spacing-sm) var(--spacing-lg) var(--spacing-lg);
+  line-height: var(--line-height-relaxed);
+}
+
+/* Alert buttons */
+ion-alert .alert-button-group {
+  padding: var(--spacing-sm);
+  border-top: 1px solid var(--border-color-light);
+}
+
+ion-alert .alert-button {
+  border-radius: var(--radius-md);
+  font-weight: var(--font-weight-medium);
+  text-transform: none;
+  letter-spacing: 0.25px;
+  min-height: 44px;
+  transition: all var(--transition-fast);
+}
+
+ion-alert .alert-button:hover {
+  opacity: 0.8;
+}
+
+/* Button variants */
+ion-alert .alert-button-cancel {
+  color: var(--text-color-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+ion-alert .alert-button-confirm {
+  color: var(--color-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+ion-alert .alert-button-destructive {
+  color: var(--color-danger);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Alert variants por tipo */
+ion-alert.alert-info {
+  --background: var(--background-color);
+}
+
+ion-alert.alert-info::part(header) {
+  color: var(--color-primary);
+}
+
+ion-alert.alert-success {
+  --background: var(--background-color);
+}
+
+ion-alert.alert-success::part(header) {
+  color: var(--color-success);
+}
+
+ion-alert.alert-warning {
+  --background: var(--background-color);
+}
+
+ion-alert.alert-warning::part(header) {
+  color: var(--color-warning);
+}
+
+ion-alert.alert-danger {
+  --background: var(--background-color);
+}
+
+ion-alert.alert-danger::part(header) {
+  color: var(--color-danger);
+}
+
+/* ==========================================
    LOADING - Loading Styles
    ========================================== */
 

@@ -10,6 +10,17 @@
   margin: 0 auto;
 }
 
+/* Session Card */
+.session-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 16px;
+}
+
+.session-card ion-button {
+  margin-top: 8px;
+}
+
 /* WhatsApp Card */
 .whatsapp-card {
   border-radius: 12px;

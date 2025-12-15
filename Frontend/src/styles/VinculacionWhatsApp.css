@@ -252,28 +252,6 @@
   margin-top: 4px;
 }
 
-.whatsapp-unlink-alert .alert-message {
-  font-size: 15px;
-  line-height: 1.6;
-  padding: 12px 20px 20px;
-  color: var(--ion-text-color);
-}
-
-.whatsapp-unlink-alert .alert-button-group {
-  padding: 8px;
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-.whatsapp-unlink-alert .alert-button-cancel {
-  color: var(--ion-color-medium);
-  font-weight: 500;
-}
-
-.whatsapp-unlink-alert .alert-button-confirm {
-  color: var(--ion-color-danger);
-  font-weight: 600;
-}
-
 /* Responsive adjustments */
 @media (max-width: 576px) {
   .whatsapp-qr-code-wrapper {
