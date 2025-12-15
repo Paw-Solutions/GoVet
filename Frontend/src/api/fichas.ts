@@ -1,4 +1,5 @@
 // Componente: Gestor de fichas clínicas - Frontend
+import { fetchWithAuth } from "./http"; // ← añadido
 
 // Receta Médica
 export interface RecetaData {
@@ -138,16 +139,23 @@ export interface PaginatedResponse {
 const API_URL = import.meta.env.VITE_API_URL || "/api";
 
 // Ruta para crear una nueva consulta/ficha
-export async function crearConsulta(formData: ConsultaData) {
+export async function crearConsulta(
+  formData: ConsultaData,
+  idToken?: string | null 
+) {
   try {
     console.log("Enviando datos al servidor:", formData);
-    const response = await fetch(`${API_URL}/consultas/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    const response = await fetchWithAuth(
+      `${API_URL}/consultas/`, 
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
       },
-      body: JSON.stringify(formData),
-    });
+      idToken
+    );
 
     if (!response.ok) {
       throw new Error(`Error en la petición: ${response.status}`);
@@ -162,11 +170,13 @@ export async function crearConsulta(formData: ConsultaData) {
   }
 }
 
+
 export async function obtenerConsultasPaginadas(
   page: number = 1,
   limit: number = 50,
   search?: string,
-  sortOrder: "desc" | "asc" = "desc"
+  sortOrder: "desc" | "asc" = "desc",
+  idToken?: string | null 
 ): Promise<PaginatedResponse> {
   try {
     const params = new URLSearchParams({
@@ -180,12 +190,16 @@ export async function obtenerConsultasPaginadas(
     }
 
     console.log(`Obteniendo consultas página ${page}...`);
-    const response = await fetch(`${API_URL}/consultas/paginated/?${params}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
+    const response = await fetchWithAuth( 
+      `${API_URL}/consultas/paginated/?${params}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
       },
-    });
+      idToken 
+    );
 
     if (!response.ok) {
       throw new Error(`Error en la petición: ${response.status}`);
@@ -206,17 +220,21 @@ export async function obtenerConsultasPaginadas(
  * @returns Promise con la ficha específica
  */
 export async function obtenerConsultaPorId(
-  id_consulta: number
+  id_consulta: number,
+  idToken?: string | null
 ): Promise<ConsultaData> {
   try {
-    const url = `${API_URL}/consulta/${id_consulta}`;
 
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
+    const response = await fetchWithAuth(
+      `${API_URL}/consulta/${id_consulta}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
       },
-    });
+      idToken
+    );
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -239,13 +257,16 @@ export async function obtenerConsultaPorId(
  * @param searchParams - Parámetros de búsqueda
  * @returns Promise con las fichas que coinciden
  */
-export async function buscarFichas(searchParams: {
-  pacienteNombre?: string;
-  tutorRut?: string;
-  fechaDesde?: string;
-  fechaHasta?: string;
-  diagnostico?: string;
-}): Promise<ConsultaData[]> {
+export async function buscarFichas(
+  searchParams: {
+    pacienteNombre?: string;
+    tutorRut?: string;
+    fechaDesde?: string;
+    fechaHasta?: string;
+    diagnostico?: string;
+  },
+  idToken?: string | null
+): Promise<ConsultaData[]> {
   try {
     const params = new URLSearchParams();
 
@@ -255,14 +276,18 @@ export async function buscarFichas(searchParams: {
       }
     });
 
-    const url = `${API_URL}/consultas/search/?${params.toString()}`;
+    //const url = `${API_URL}/consultas/search/?${params.toString()}`;
 
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
+    const response = await fetchWithAuth(
+      `${API_URL}/consultas/search/?${params.toString()}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
       },
-    });
+      idToken
+    );
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -320,17 +345,19 @@ export function calcularEdadPaciente(fechaNacimiento?: string): string {
  * @returns Array de consultas del paciente
  */
 export async function obtenerConsultasPorPaciente(
-  idPaciente: number
+  idPaciente: number,
+  idToken?: string | null
 ): Promise<ConsultaData[]> {
   try {
-    const response = await fetch(
+    const response = await fetchWithAuth(
       `${API_URL}/consultas/paciente/${idPaciente}`,
       {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
-      }
+      },
+      idToken
     );
 
     if (!response.ok) {
@@ -349,14 +376,21 @@ export async function obtenerConsultasPorPaciente(
  * @param idConsulta - ID de la consulta
  * @returns Promise con el Blob del PDF
  */
-export async function descargarPdfConsulta(idConsulta: number): Promise<Blob> {
+export async function descargarPdfConsulta(
+  idConsulta: number,
+  idToken?: string | null
+): Promise<Blob> {
   try {
-    const response = await fetch(`${API_URL}/consultas/${idConsulta}/pdf`, {
-      method: "GET",
-      headers: {
-        Accept: "application/pdf",
+    const response = await fetchWithAuth(
+      `${API_URL}/consultas/${idConsulta}/pdf`,
+      {
+        method: "GET",
+        headers: {
+          Accept: "application/pdf",
+        },
       },
-    });
+      idToken
+    );
 
     if (!response.ok) {
       throw new Error(`Error al descargar PDF: ${response.status}`);

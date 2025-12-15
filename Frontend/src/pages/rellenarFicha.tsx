@@ -71,6 +71,7 @@ import {
   DesparasitacionData,
 } from "../api/fichas";
 import { TratamientoInfo } from "../utils/notificationHelpers";
+import { useAuth } from "../hooks/useAuth";
 
 // ==================== FUNCIONES DE MAPEO DE DATOS ====================
 
@@ -106,6 +107,7 @@ const mapRecetaToRecetaMedicaData = (recetas: Receta[]): RecetaMedicaData[] => {
 
 // Componente: Dashboard con 6 módulos para gestionar consultas
 const RellenarFicha: React.FC = () => {
+  const {idToken} = useAuth();
   const [showModalPacientes, setShowModalPacientes] = useState(false);
   const [activeModule, setActiveModule] = useState<string | null>(null);
   const [touchedModules, setTouchedModules] = useState<Set<string>>(new Set());
@@ -713,7 +715,7 @@ const RellenarFicha: React.FC = () => {
       );
       console.log("=== FIN LOG GUARDADO FICHA ===\n");
 
-      const response = await crearConsulta(dataToSend);
+      const response = await crearConsulta(dataToSend, idToken);
       console.log("✅ Respuesta del servidor:", response);
 
       // Verificar si hay vacunas con próxima dosis para agendar

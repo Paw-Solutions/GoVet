@@ -8,6 +8,7 @@ import {
   obtenerPacientePorId,
 } from "../api/pacientes";
 import { obtenerConsultasPaginadas, descargarPdfConsulta } from "../api/fichas";
+import { useAuth } from "./useAuth";
 
 interface PaginatedResponseTutores {
   tutores: TutorData[];
@@ -138,6 +139,9 @@ interface ConsultasActions {
 }
 
 export const useSegmentedData = (initialSegment: string = "tutores") => {
+  // idToken 
+  const { idToken } = useAuth();
+
   // Estados para tutores
   const [tutoresState, setTutoresState] = useState<TutoresState>({
     data: [],
@@ -544,7 +548,7 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
         const page = resetList ? 1 : consultasState.currentPage + 1;
         const order = sortOrder || consultasState.sortOrder;
         const data: PaginatedResponseConsultas =
-          await obtenerConsultasPaginadas(page, 50, search, order);
+          await obtenerConsultasPaginadas(page, 50, search, order, idToken);
 
         setConsultasState((prev) => ({
           ...prev,
@@ -665,7 +669,7 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
       console.log("Obteniendo PDF para compartir...");
       
       // Llamar al endpoint que ya existe en el backend
-      const blob = await descargarPdfConsulta(consulta.id_consulta);
+      const blob = await descargarPdfConsulta(consulta.id_consulta, idToken);
 
       // Verificar que el blob tenga contenido
       if (!blob || blob.size === 0) {
@@ -726,7 +730,7 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
       console.log("Descargando PDF de consulta:", consulta.id_consulta);
 
       // Llamar al endpoint que ya existe en el backend
-      const blob = await descargarPdfConsulta(consulta.id_consulta);
+      const blob = await descargarPdfConsulta(consulta.id_consulta, idToken);
 
       // Crear URL temporal para el blob
       const url = window.URL.createObjectURL(blob);

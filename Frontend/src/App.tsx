@@ -130,7 +130,7 @@ const App: React.FC = () => {
           <BottomTabs />
         </IonTabs>
         {/* Indicadores PWA: Offline, Actualizaciones */}
-        <PWAStatus />
+        <PWAStatus /> 
       </IonReactRouter>
     </IonApp>
   );

@@ -51,6 +51,9 @@ from fastapi.responses import Response
 # Para comunicar con microservicio whatsapp 
 from routers.whatsapp import router as whatsapp_router
 
+# Para Oauth
+from auth import get_current_user
+
 # Cargar variables de entorno desde el archivo .env
 load_dotenv()
 
@@ -188,7 +191,7 @@ def get_calendar_service():
         raise HTTPException(status_code=500, detail="Error de configuración del calendario")
     
 @app.get("/events")
-def list_events(max_results: int = 10):
+def list_events(max_results: int = 10, current_user: dict = Depends(get_current_user)):
     """Obtiene los próximos N eventos."""
     try:
         service = get_calendar_service()
@@ -209,7 +212,7 @@ def list_events(max_results: int = 10):
 
 
 @app.get("/events/day")
-def get_events_day(date: str):
+def get_events_day(date: str, current_user: dict = Depends(get_current_user)):
     """
     Obtiene eventos de un día específico.
     
@@ -248,7 +251,7 @@ def get_events_day(date: str):
 
 
 @app.get("/events/week")
-def get_events_week(start_date: str, end_date: str):
+def get_events_week(start_date: str, end_date: str, current_user: dict = Depends(get_current_user)):
     """
     Obtiene eventos de una semana (7 días) desde la fecha indicada.
     
@@ -290,7 +293,7 @@ def get_events_week(start_date: str, end_date: str):
 
 
 @app.get("/events/month")
-def get_events_month(year: int, month: int):
+def get_events_month(year: int, month: int, current_user: dict = Depends(get_current_user)):
     """
     Obtiene eventos de un mes específico.
     
@@ -325,7 +328,7 @@ def get_events_month(year: int, month: int):
 
 
 @app.post("/events")
-def create_event(event: EventCreate):
+def create_event(event: EventCreate, current_user: dict = Depends(get_current_user)):
     """Crea un nuevo evento en el calendario."""
     try:
         service = get_calendar_service()
@@ -366,7 +369,7 @@ def create_event(event: EventCreate):
         raise HTTPException(status_code=500, detail=str(error))
     
 @app.delete("/events/{event_id}")
-def delete_event(event_id: str):
+def delete_event(event_id: str, current_user: dict = Depends(get_current_user)):
     """
     Elimina un evento del calendario de Google.
     
@@ -957,7 +960,7 @@ def obtener_todas_las_especies(db: Session = Depends(get_db)):
 """ RUTAS PARA FICHAS DE PACIENTES (CONSULTAS) """
 # Ruta POST para añadir una consulta
 @app.post("/consultas/", response_model=ConsultaResponse)
-def crear_consulta(consulta: ConsultaCreate, db: Session = Depends(get_db)):
+def crear_consulta(consulta: ConsultaCreate, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
     db_consulta = models.Consulta(**consulta.dict())
     db.add(db_consulta)
     db.commit()
@@ -966,7 +969,7 @@ def crear_consulta(consulta: ConsultaCreate, db: Session = Depends(get_db)):
 
 # Ruta GET para obtener una consulta por su ID
 @app.get("/consultas/{id_consulta}", response_model=ConsultaResponse)
-def obtener_consulta_por_id(id_consulta: int, db: Session = Depends(get_db)):
+def obtener_consulta_por_id(id_consulta: int, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
     db_consulta = db.query(models.Consulta)\
         .options(selectinload(models.Consulta.recetas))\
         .options(selectinload(models.Consulta.tratamientos).selectinload(models.ConsultaTratamiento.tratamiento))\
@@ -977,7 +980,7 @@ def obtener_consulta_por_id(id_consulta: int, db: Session = Depends(get_db)):
 
 # Ruta GET para obtener todas las consultas
 @app.get("/consultas/", response_model=List[ConsultaResponse])
-def obtener_todas_las_consultas(db: Session = Depends(get_db)):
+def obtener_todas_las_consultas(db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
     db_consultas = db.query(models.Consulta)\
         .options(selectinload(models.Consulta.recetas))\
         .options(selectinload(models.Consulta.tratamientos).selectinload(models.ConsultaTratamiento.tratamiento))\
@@ -988,7 +991,7 @@ def obtener_todas_las_consultas(db: Session = Depends(get_db)):
 
 # Ruta GET para obtener consultas por ID de paciente
 @app.get("/consultas/paciente/id/{id_paciente}", response_model=List[ConsultaResponse])
-def obtener_consultas_por_id_paciente(id_paciente: int, db: Session = Depends(get_db)):
+def obtener_consultas_por_id_paciente(id_paciente: int, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
     # Verificar que el paciente existe
     db_paciente = db.query(models.Paciente).filter(models.Paciente.id_paciente == id_paciente).first()
     if not db_paciente:
@@ -1008,7 +1011,7 @@ def obtener_consultas_por_id_paciente(id_paciente: int, db: Session = Depends(ge
 
 # Ruta GET para obtener consultas por nombre de paciente
 @app.get("/consultas/paciente/{nombre_paciente}", response_model=List[ConsultaResponse])
-def obtener_consultas_por_nombre_paciente(nombre_paciente: str, db: Session = Depends(get_db)):
+def obtener_consultas_por_nombre_paciente(nombre_paciente: str, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
     # Normalizar búsqueda para mayor flexibilidad
     db_consultas = db.query(models.Consulta)\
         .options(selectinload(models.Consulta.recetas))\
@@ -1026,7 +1029,8 @@ def obtener_consultas_paginadas(
     limit: int = Query(50, ge=1, le=100),
     search: Optional[str] = Query(None),
     sort_order: str = Query("desc", regex="^(asc|desc)$"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
 ):
     offset = (page - 1) * limit
     
@@ -1451,7 +1455,7 @@ async def programar_envio(email: EmailSchema, fecha_envio: datetime):
 
 # HU 16: Cómo veterinaria quiero generar resumenes de citas que pueda enviar a los dueños
 @app.get("/consultas/{id_consulta}/pdf")
-def descargar_pdf_consulta(id_consulta: int, db: Session = Depends(get_db)):
+def descargar_pdf_consulta(id_consulta: int, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
     # Cuerpo del endpoint, se encuentra en Backend/services/pdf_service.py y devuelve los bytes del pdf
     pdf = generar_pdf_consulta(db, id_consulta)
     # Respuesta cruda de fastApi, permite mejor control

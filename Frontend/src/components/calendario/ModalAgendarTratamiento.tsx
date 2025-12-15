@@ -32,6 +32,7 @@ import {
   formatearFechaHoraCompleta,
   TratamientoInfo,
 } from "../../utils/notificationHelpers";
+import { useAuth } from "../../hooks/useAuth";
 
 interface ModalAgendarTratamientoProps {
   isOpen: boolean;
@@ -62,6 +63,7 @@ const ModalAgendarTratamiento: React.FC<ModalAgendarTratamientoProps> = ({
   onAgendarDespues,
   onCancelar,
 }) => {
+  const {idToken} = useAuth();
   const [present] = useIonToast();
   const [selectedTime, setSelectedTime] = useState("09:00");
   const [selectedNotification, setSelectedNotification] =
@@ -126,7 +128,7 @@ const ModalAgendarTratamiento: React.FC<ModalAgendarTratamientoProps> = ({
       };
 
       // Crear el evento en el calendario
-      await createEvent(eventData);
+      await createEvent(eventData, idToken);
 
       // Enviar notificación si corresponde
       if (selectedNotification !== "noNotificar" && isValidEmail(tutor.email)) {

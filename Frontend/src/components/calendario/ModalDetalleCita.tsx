@@ -25,6 +25,7 @@ import {
 } from "ionicons/icons";
 import { deleteEvent } from "../../api/calendario";
 import { CalendarEvent } from "../../api/calendario";
+import { useAuth } from "../../hooks/useAuth";
 // Componente: Interfaz para gestionar horas y vista calendario
 interface ModalDetalleCitaProps {
   isOpen: boolean;
@@ -39,6 +40,7 @@ const ModalDetalleCita: React.FC<ModalDetalleCitaProps> = ({
   evento,
   onEventoActualizado,
 }) => {
+  const {idToken} = useAuth();
   const [present] = useIonToast();
   const [mostrarAlertaEliminar, setMostrarAlertaEliminar] = useState(false);
 
@@ -71,7 +73,7 @@ const ModalDetalleCita: React.FC<ModalDetalleCitaProps> = ({
     if (!evento || !evento.id) return;
 
     try {
-      await deleteEvent(evento.id);
+      await deleteEvent(evento.id, idToken);
 
       present({
         message: "Evento eliminado exitosamente",

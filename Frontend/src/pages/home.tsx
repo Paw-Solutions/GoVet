@@ -43,9 +43,17 @@ import { getEventsDay, CalendarEvent } from "../api/calendario";
 
 import "../styles/home.css";
 
+import { useAuth } from "../hooks/useAuth"; // ← añadido
+import { obtenerConsultasPaginadas } from "../api/fichas"; // ← añadido
+import { renderGoogleButton } from "../utils/googleAuth"; 
+
 const Home: React.FC = () => {
   const history = useHistory();
   const API_URL = import.meta.env.VITE_API_URL || "/api";
+
+  const { isAuthenticated, login, loginWithToken, logout, idToken } = useAuth(); // ← añadido
+  const [consultasPrueba, setConsultasPrueba] = useState<any>(null); // ← añadido
+  const [errorPrueba, setErrorPrueba] = useState<string | null>(null); // ← añadido
 
   // Estados para citas del día
   const [citasHoy, setCitasHoy] = useState<CalendarEvent[]>([]);
@@ -67,7 +75,7 @@ const Home: React.FC = () => {
       const hoy = new Date();
       const fechaHoy = hoy.toISOString().split("T")[0];
 
-      const eventos = await getEventsDay(fechaHoy);
+      const eventos = await getEventsDay(fechaHoy, idToken);
 
       // Ordenar por hora de inicio
       const eventosOrdenados = eventos.sort(
@@ -142,6 +150,24 @@ const Home: React.FC = () => {
     return "Sin motivo especificado";
   };
 
+  // Prueba de consultas protegidas (HU 7) con login
+  useEffect(() => {
+    const cargarConsultasProtegidas = async () => {
+      if (!isAuthenticated) {
+        setConsultasPrueba(null);
+        return;
+      }
+      setErrorPrueba(null);
+      try {
+        const data = await obtenerConsultasPaginadas(1, 10, undefined, "desc", idToken);
+        setConsultasPrueba(data);
+      } catch (e: any) {
+        setErrorPrueba(e?.message || "Error cargando consultas protegidas");
+      }
+    };
+    cargarConsultasProtegidas();
+  }, [isAuthenticated, idToken]);
+
   return (
     <IonPage>
       <IonHeader translucent={true}>
@@ -155,6 +181,34 @@ const Home: React.FC = () => {
             <IonTitle size="large">Inicio</IonTitle>
           </IonToolbar>
         </IonHeader>
+
+        {/* Bloque de autenticación y prueba de endpoint protegido */}
+        <div style={{ padding: "12px" }}>
+          {!isAuthenticated ? (
+            <>
+              <IonButton
+                onClick={async () => {
+                  try {
+                    await renderGoogleButton("gsi-login-container", (token) => {
+                      // Persistir el token en el contexto
+                      loginWithToken(token);
+                    });
+                  } catch (e: any) {
+                    setErrorPrueba(e?.message || "Error inicializando Google Sign-In");
+                  }
+                }}
+              >
+                Iniciar sesión con Google
+              </IonButton>
+              <div id="gsi-login-container" style={{ marginTop: 8 }} />
+            </>
+          ) : (
+            <IonButton color="medium" onClick={logout}>Cerrar sesión</IonButton>
+          )}
+        </div>
+
+        {/* ... resto de tu Home sin cambios ... */}
+
         <IonGrid>
           {/* Recuadro de citas del día */}
           <IonRow>

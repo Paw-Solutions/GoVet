@@ -19,6 +19,7 @@ import {
 } from "ionicons/icons";
 import { CalendarEvent, getEventsDay } from "../../api/calendario";
 import ModalDetalleCita from "./ModalDetalleCita";
+import { useAuth } from "../../hooks/useAuth";
 // Componente: Vista diaria de calendario
 interface VistaDiaProps {
   fecha: Date;
@@ -26,6 +27,7 @@ interface VistaDiaProps {
 }
 
 const VistaDia: React.FC<VistaDiaProps> = ({ fecha, onCambiarFecha }) => {
+  const { idToken } = useAuth();
   const [eventos, setEventos] = useState<CalendarEvent[]>([]);
   const [eventoSeleccionado, setEventoSeleccionado] =
     useState<CalendarEvent | null>(null);
@@ -35,14 +37,14 @@ const VistaDia: React.FC<VistaDiaProps> = ({ fecha, onCambiarFecha }) => {
 
   useEffect(() => {
     fetchEvents();
-  }, [fecha]);
+  }, [fecha, idToken]);
 
   const fetchEvents = async () => {
     setLoading(true);
     try {
       const fechaISO = new Date(fecha).toISOString();
       console.log(fechaISO);
-      const eventosDelDia = await getEventsDay(fechaISO);
+      const eventosDelDia = await getEventsDay(fechaISO, idToken);
       setEventos(eventosDelDia);
       console.log("Eventos del día obtenidos:", eventosDelDia);
     } catch (error) {

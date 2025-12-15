@@ -1,4 +1,6 @@
 // Componente: Gestor de citas
+import { fetchWithAuth } from "./http"; // Para proteger endpoints con Oauth
+
 export interface CalendarEvent {
   id: string; // ID único del evento
   summary: string; // Título del evento
@@ -25,14 +27,21 @@ export interface Attendee {
 const API_URL = import.meta.env.VITE_API_URL || "/api";
 
 // Eventos del día
-export async function getEventsDay(date: string): Promise<CalendarEvent[]> {
-  const response = await fetch(`${API_URL}/events/day?date=${date}`, {
-    method: "GET",
-    headers: { "Content-Type": "application/json" },
-  });
+export async function getEventsDay(
+  date: string, 
+  idToken?: string | null 
+): Promise<CalendarEvent[]> {
+  const response = await fetchWithAuth(
+    `${API_URL}/events/day?date=${date}`,
+    { 
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    }, 
+    idToken
+  );
 
   if (!response.ok) {
-    throw new Error("Error al obtener eventos del día");
+    throw new Error(`Error al obtener eventos del día ${response.status}`);
   }
   console.log("Get day events response:", response);
 
@@ -43,18 +52,20 @@ export async function getEventsDay(date: string): Promise<CalendarEvent[]> {
 // Eventos de la semana
 export async function getEventsWeek(
   startDate: string,
-  endDate: string
+  endDate: string,
+  idToken?: string | null 
 ): Promise<CalendarEvent[]> {
-  const response = await fetch(
+  const response = await fetchWithAuth(
     `${API_URL}/events/week?start_date=${startDate}&end_date=${endDate}`,
     {
       method: "GET",
       headers: { "Content-Type": "application/json" },
-    }
+    },
+    idToken
   );
 
   if (!response.ok) {
-    throw new Error("Error al obtener eventos de la semana");
+    throw new Error(`Error al obtener eventos de la semana ${response.status}`);
   }
   console.log("Get week events response:", response);
   const data = await response.json();
@@ -64,48 +75,62 @@ export async function getEventsWeek(
 // Eventos del mes
 export async function getEventsMonth(
   year: number,
-  month: number
+  month: number,
+  idToken?: string | null 
 ): Promise<CalendarEvent[]> {
-  const response = await fetch(
+  const response = await fetchWithAuth(
     `${API_URL}/events/month?year=${year}&month=${month}`,
     {
       method: "GET",
       headers: { "Content-Type": "application/json" },
-    }
+    },
+    idToken
   );
   console.log("Get month events response:", response);
   if (!response.ok) {
-    throw new Error("Error al obtener eventos del mes");
+    throw new Error(`Error al obtener eventos del mes ${response.status}`);
   }
 
   const data = await response.json();
   return data.events;
 }
 
-export async function deleteEvent(eventId: string): Promise<void> {
-  const response = await fetch(`${API_URL}/events/${eventId}`, {
-    method: "DELETE",
-    headers: { "Content-Type": "application/json" },
-  });
+export async function deleteEvent(
+  eventId: string,
+ idToken?: string | null 
+): Promise<void> {
+  const response = await fetchWithAuth(
+    `${API_URL}/events/${eventId}`, 
+    {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+    },
+  idToken
+  );
   console.log("Delete response:", response);
 
   if (!response.ok) {
-    throw new Error("Error al eliminar evento");
+    throw new Error(`Error al eliminar evento ${response.status}`);
   }
 }
 
 // Crear evento
 export async function createEvent(
-  event: CalendarEventCreate
+  event: CalendarEventCreate,
+  idToken?: string | null 
 ): Promise<CalendarEvent> {
-  const response = await fetch(`${API_URL}/events`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(event),
-  });
+  const response = await fetchWithAuth(
+    `${API_URL}/events`, 
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(event),
+    },
+    idToken
+  );
 
   if (!response.ok) {
-    throw new Error("Error al crear evento");
+    throw new Error(`Error al crear evento ${response.status}`);
   }
 
   return await response.json();

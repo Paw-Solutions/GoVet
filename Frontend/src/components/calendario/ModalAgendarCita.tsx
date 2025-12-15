@@ -40,6 +40,7 @@ import {
   obtenerPacientesPorTutor,
   type PacienteData,
 } from "../../api/pacientes";
+import { useAuth } from "../../hooks/useAuth";
 
 interface ModalAgendarCitaProps {
   isOpen: boolean;
@@ -58,6 +59,7 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
   tutorInicial,
   pacienteInicial,
 }) => {
+  const {idToken} = useAuth();
   const [present] = useIonToast();
   const [paso, setPaso] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -498,7 +500,7 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
         //: undefined,
       };
       console.log(nuevoEvento);
-      await createEvent(nuevoEvento);
+      await createEvent(nuevoEvento, idToken);
 
       present({
         message: "Cita agendada exitosamente",

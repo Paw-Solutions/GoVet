@@ -20,6 +20,7 @@ import {
 } from "ionicons/icons";
 import ModalDetalleCita from "./ModalDetalleCita";
 import { CalendarEvent, getEventsWeek } from "../../api/calendario";
+import { useAuth } from "../../hooks/useAuth";
 // Componente: Vista semanal de calendario
 interface VistaSemanaProps {
   fecha: Date;
@@ -32,6 +33,7 @@ const VistaSemana: React.FC<VistaSemanaProps> = ({
   onCambiarFecha,
   onSeleccionarDia,
 }) => {
+  const {idToken} = useAuth();
   const [loading, setLoading] = useState(true);
   const [eventoSeleccionado, setEventoSeleccionado] =
     useState<CalendarEvent | null>(null);
@@ -64,7 +66,7 @@ const VistaSemana: React.FC<VistaSemanaProps> = ({
       const startDate = inicioSemana.toISOString().split("T")[0];
       const endDate = finSemana.toISOString().split("T")[0];
       console.log("Cargando eventos de la semana:", startDate, "a", endDate);
-      const data = await getEventsWeek(startDate, endDate);
+      const data = await getEventsWeek(startDate, endDate, idToken);
       console.log("Eventos de la semana recibidos:", data);
 
       // Filtrar eventos que tengan la estructura correcta antes de ordenar
