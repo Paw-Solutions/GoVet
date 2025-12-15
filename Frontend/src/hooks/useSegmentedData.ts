@@ -195,7 +195,8 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
         const data: PaginatedResponseTutores = await obtenerTutoresPaginados(
           page,
           50,
-          search
+          search,
+          idToken
         );
 
         setTutoresState((prev) => ({
@@ -327,7 +328,7 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
       try {
         const page = resetList ? 1 : pacientesState.currentPage + 1;
         const data: PaginatedResponsePacientes =
-          await obtenerPacientesPaginados(page, 50, search);
+          await obtenerPacientesPaginados(page, 50, search, idToken);
 
         setPacientesState((prev) => ({
           ...prev,
@@ -464,7 +465,7 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
     setTimeout(async () => {
       try {
         // Fetch complete tutor data from API using RUT
-        const tutorCompleto = await obtenerTutorPorRut(tutorData.rut);
+        const tutorCompleto = await obtenerTutorPorRut(tutorData.rut, idToken);
         setTutoresState((prev) => ({
           ...prev,
           selectedTutor: tutorCompleto,
@@ -512,7 +513,8 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
     setTimeout(async () => {
       try {
         const pacienteCompleto = await obtenerPacientePorId(
-          pacienteData.id_paciente
+          pacienteData.id_paciente,
+          idToken
         );
         setPacientesState((prev) => ({
           ...prev,

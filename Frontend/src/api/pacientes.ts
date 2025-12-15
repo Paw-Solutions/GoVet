@@ -1,4 +1,5 @@
 // Componente: Gestor de pacientes - Frontend
+import { fetchWithAuth } from "./http";
 const API_URL = import.meta.env.VITE_API_URL || "/api";
 
 // Interfaz para crear un paciente (SIN rut_tutor)
@@ -48,16 +49,22 @@ export interface PaginatedResponse {
 }
 
 // Función para crear un paciente (paso 1)
-export async function crearPaciente(formData: PacienteCreate) {
+export async function crearPaciente(
+  formData: PacienteCreate,
+  idToken?: string | null) {
   try {
     console.log("Enviando datos del paciente al servidor:", formData);
-    const response = await fetch(`${API_URL}/pacientes/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    const response = await fetchWithAuth(
+      `${API_URL}/pacientes/`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
       },
-      body: JSON.stringify(formData),
-    });
+      idToken
+    );
 
     if (!response.ok) {
       const errorData = await response.text();
@@ -80,18 +87,20 @@ export async function crearPaciente(formData: PacienteCreate) {
 export async function asociarTutorAPaciente(
   rutTutor: string,
   idPaciente: number,
-  fecha: string = new Date().toISOString().split("T")[0]
+  fecha: string,
+  idToken?: string | null
 ) {
   try {
     console.log(`Asociando tutor ${rutTutor} al paciente ${idPaciente}`);
-    const response = await fetch(
+    const response = await fetchWithAuth(
       `${API_URL}/tutores/${rutTutor}/pacientes/${idPaciente}?fecha=${fecha}`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-      }
+      },
+      idToken
     );
 
     if (!response.ok) {
@@ -111,15 +120,21 @@ export async function asociarTutorAPaciente(
   }
 }
 
-export async function obtenerPacientes() {
+export async function obtenerPacientes(
+  idToken?: string | null
+) {
   try {
     console.log("Obteniendo pacientes...");
-    const response = await fetch(`${API_URL}/pacientes/`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
+    const response = await fetchWithAuth(
+      `${API_URL}/pacientes/`, 
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
       },
-    });
+      idToken
+    );
 
     if (!response.ok) {
       throw new Error(`Error en la petición: ${response.status}`);
@@ -137,7 +152,8 @@ export async function obtenerPacientes() {
 export async function obtenerPacientesPaginados(
   page: number = 1,
   limit: number = 50,
-  search?: string
+  search?: string,
+  idToken?: string | null
 ): Promise<PaginatedResponse> {
   try {
     const params = new URLSearchParams({
@@ -150,12 +166,16 @@ export async function obtenerPacientesPaginados(
     }
 
     console.log(`Obteniendo pacientes página ${page}...`);
-    const response = await fetch(`${API_URL}/pacientes/paginated/?${params}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
+    const response = await fetchWithAuth(
+      `${API_URL}/pacientes/paginated/?${params}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
       },
-    });
+      idToken
+    );
 
     if (!response.ok) {
       throw new Error(`Error en la petición: ${response.status}`);
@@ -172,18 +192,20 @@ export async function obtenerPacientesPaginados(
 
 // Función para obtener pacientes de un tutor específico
 export async function obtenerPacientesPorTutor(
-  rutTutor: string
+  rutTutor: string,
+  idToken?: string | null
 ): Promise<PacienteData[]> {
   try {
     console.log(`Obteniendo pacientes del tutor ${rutTutor}...`);
-    const response = await fetch(
+    const response = await fetchWithAuth(
       `${API_URL}/pacientes/tutor/${encodeURIComponent(rutTutor)}`,
       {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
-      }
+      },
+      idToken
     );
 
     if (!response.ok) {
@@ -205,16 +227,21 @@ export async function obtenerPacientesPorTutor(
 
 // Función para obtener un paciente específico por ID
 export async function obtenerPacientePorId(
-  idPaciente: number
+  idPaciente: number,
+  idToken?: string | null
 ): Promise<PacienteData> {
   try {
     console.log(`Obteniendo paciente con ID ${idPaciente}...`);
-    const response = await fetch(`${API_URL}/pacientes/${idPaciente}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
+    const response = await fetchWithAuth(
+      `${API_URL}/pacientes/${idPaciente}`, 
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
       },
-    });
+      idToken
+    );
 
     if (!response.ok) {
       throw new Error(`Error en la petición: ${response.status}`);
@@ -234,20 +261,24 @@ export async function obtenerPacientePorId(
 }
 export async function actualizarTutorDePaciente(
   idPaciente: number,
-  rutTutor: string
+  rutTutor: string,
+  idToken?: string | null
 ): Promise<PacienteData> {
-  const API_URL = import.meta.env.VITE_API_URL || "/api";
   try {
     const url = `${API_URL}/pacientes/${encodeURIComponent(
       idPaciente
     )}/tutor/${encodeURIComponent(rutTutor)}`;
 
-    const response = await fetch(url, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
+    const response = await fetchWithAuth(
+      url, 
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
       },
-    });
+      idToken
+    );
 
     if (!response.ok) {
       const errorText = await response.text().catch(() => "");
@@ -269,14 +300,19 @@ export async function actualizarTutorDePaciente(
 }
 export async function actualizarPaciente(
   idPaciente: number,
-  payload: PacienteCreate
+  payload: PacienteCreate,
+  idToken?: string | null
 ): Promise<PacienteData> {
   try {
-    const response = await fetch(`${API_URL}/pacientes/${idPaciente}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+    const response = await fetchWithAuth(
+      `${API_URL}/pacientes/${idPaciente}`, 
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      },
+      idToken
+    );
 
     if (!response.ok) {
       const errorText = await response.text().catch(() => "");

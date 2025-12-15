@@ -1,4 +1,6 @@
 // Componente: Gestor de próximas vacunas - Frontend
+import { fetchWithAuth } from "./http";
+
 export interface ConsultaTratamiento {
     id_consulta: number;
     id_tratamiento: number;
@@ -13,15 +15,21 @@ export interface ConsultaTratamiento {
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-export async function obtenerTratamientosProximos() {
+export async function obtenerTratamientosProximos(
+  idToken?: string | null
+) {
   try {
     console.log("Obteniendo tratamientos...");
-    const response = await fetch(`${API_URL}/consultas/tratamientos/vacunas/nombre/`, {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-        },
-    });
+    const response = await fetchWithAuth(
+      `${API_URL}/consultas/tratamientos/vacunas/nombre/`, 
+      {
+          method: "GET",
+          headers: {
+              "Content-Type": "application/json",
+          },
+      },
+      idToken
+    );
 
     if (!response.ok) {
       throw new Error(`Error al obtener tratamientos: ${response.status}`);
@@ -36,15 +44,23 @@ export async function obtenerTratamientosProximos() {
   }
 }
 
-export async function obtenerTratamientosPorPaciente(idPaciente: number): Promise<ConsultaTratamiento[]> {
+export async function obtenerTratamientosPorPaciente(
+  idPaciente: number,
+  idToken?: string | null
+): Promise<ConsultaTratamiento[]> {
   try {
     console.log(`Obteniendo tratamientos para el paciente ID: ${idPaciente}...`);
-    const response = await fetch(`${API_URL}/consultas/tratamientos/vacunas/paciente/${idPaciente}/proximas/`, {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-        },
-    });
+    const response = await fetchWithAuth(
+      `${API_URL}/consultas/tratamientos/vacunas/paciente/${idPaciente}/proximas/`, 
+      {
+          method: "GET",
+          headers: {
+              "Content-Type": "application/json",
+          },
+      },
+      idToken
+    );
+    
     if (!response.ok) {
       throw new Error(`Error al obtener tratamientos para el paciente: ${response.status}`);
     }

@@ -23,6 +23,8 @@ import {
 import { PacienteData } from "../../api/pacientes";
 import { ConsultaData } from "../../api/fichas";
 import FichaItem from "../items_ver/FichaItem";
+import { useAuth } from "../../hooks/useAuth";
+import { fetchWithAuth } from "../../api/http";
 
 interface HistorialConsultasProps {
   isOpen: boolean;
@@ -37,6 +39,7 @@ const HistorialConsultas: React.FC<HistorialConsultasProps> = ({
   paciente,
   onViewConsulta,
 }) => {
+  const {idToken} = useAuth();
   const [consultas, setConsultas] = useState<ConsultaData[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -67,14 +70,15 @@ const HistorialConsultas: React.FC<HistorialConsultasProps> = ({
     setError("");
 
     try {
-      const response = await fetch(
+      const response = await fetchWithAuth(
         `${API_URL}/consultas/paciente/id/${paciente.id_paciente}`,
         {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
+        idToken
       );
 
       console.log("📡 Response status:", response.status);

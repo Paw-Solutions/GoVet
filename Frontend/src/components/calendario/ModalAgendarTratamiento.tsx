@@ -153,7 +153,8 @@ const ModalAgendarTratamiento: React.FC<ModalAgendarTratamientoProps> = ({
               asunto: `Recordatorio de ${tipoTexto} - GoVet`,
               cuerpo: emailBody,
             },
-            fechaNotificacion.toISOString()
+            fechaNotificacion.toISOString(),
+            idToken
           );
         } catch (notifError) {
           console.error("Error al enviar notificación:", notifError);

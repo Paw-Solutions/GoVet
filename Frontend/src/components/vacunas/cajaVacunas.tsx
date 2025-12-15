@@ -19,12 +19,14 @@ import {
   radioButtonOnOutline,
 } from "ionicons/icons";
 import { obtenerTratamientosProximos, ConsultaTratamiento } from "../../api/tratamientos";
+import { useAuth } from "../../hooks/useAuth";
 // Componente: Visualizador de próximas vacunas
 interface CajaVacunasProps {
   limite?: number; // Número máximo de tratamientos a mostrar
 }
 
 const CajaVacunas: React.FC<CajaVacunasProps> = ({ limite = 5 }) => {
+  const {idToken} = useAuth();
   const [tratamientos, setTratamientos] = useState<ConsultaTratamiento[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -65,7 +67,7 @@ const CajaVacunas: React.FC<CajaVacunasProps> = ({ limite = 5 }) => {
     try {
       setLoading(true);
       setError("");
-      const data = await obtenerTratamientosProximos();
+      const data = await obtenerTratamientosProximos(idToken);
       
       // Filtrar y ordenar tratamientos próximos
       const tratamientosProximos = filtrarTratamientosProximos(data);

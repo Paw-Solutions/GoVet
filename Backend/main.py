@@ -434,7 +434,7 @@ def obtener_numero_romano(codigo_region: str) -> str:
 
 # Ruta POST para añadir un dueño
 @app.post("/tutores/", response_model=TutorResponse)
-def crear_tutor(tutor: TutorCreate, db: Session = Depends(get_db)):
+def crear_tutor(tutor: TutorCreate, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
     db_tutor = models.Tutor(**tutor.dict())
     db.add(db_tutor)
     db.commit()
@@ -443,7 +443,7 @@ def crear_tutor(tutor: TutorCreate, db: Session = Depends(get_db)):
 
 # Ruta GET para obtener un dueño por su RUT
 @app.get("/tutores/{rut}", response_model=TutorResponse)
-def obtener_tutor(rut: str, db: Session = Depends(get_db)):
+def obtener_tutor(rut: str, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
     db_tutor = db.query(models.Tutor).filter(
         models.Tutor.rut == rut,
         models.Tutor.activo == True
@@ -454,7 +454,7 @@ def obtener_tutor(rut: str, db: Session = Depends(get_db)):
 
 # Ruta GET para obtener todos los dueños
 @app.get("/tutores/", response_model=List[TutorResponse])
-def obtener_todos_los_tutores(db: Session = Depends(get_db)):
+def obtener_todos_los_tutores(db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
     db_tutores = db.query(models.Tutor).filter(models.Tutor.activo == True).all()
     if not db_tutores:
         raise HTTPException(status_code=404, detail="No se encontraron tutores")
@@ -479,7 +479,8 @@ def obtener_tutores_paginados(
     page: int = Query(1, ge=1),
     limit: int = Query(50, ge=1, le=100),
     search: Optional[str] = Query(None),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
 ):
     offset = (page - 1) * limit
     query = db.query(models.Tutor).filter(models.Tutor.activo == True)
@@ -539,7 +540,7 @@ def obtener_tutores_paginados(
 
 # Ruta para ver todas las mascotas de un tutor
 @app.get("/tutores/{rut}/pacientes/", response_model=List[PacienteResponse])
-def obtener_mascotas_de_tutor(rut: str, db: Session = Depends(get_db)):
+def obtener_mascotas_de_tutor(rut: str, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
     db_tutor = db.query(models.Tutor).filter(
         models.Tutor.rut == rut,
         models.Tutor.activo == True
@@ -556,7 +557,7 @@ def obtener_mascotas_de_tutor(rut: str, db: Session = Depends(get_db)):
 """ RUTAS PARA PACIENTES (mascotas) """
 # Ruta POST para añadir un paciente
 @app.post("/pacientes/", response_model=PacienteResponse)
-def crear_paciente(paciente: PacienteCreate, db: Session = Depends(get_db)):
+def crear_paciente(paciente: PacienteCreate, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
     db_paciente = models.Paciente(**paciente.dict())
     db.add(db_paciente)
     db.commit()
@@ -567,7 +568,7 @@ def crear_paciente(paciente: PacienteCreate, db: Session = Depends(get_db)):
 
 # Ruta GET para obtener un paciente por su ID
 @app.get("/pacientes/{id_paciente}", response_model=PacienteResponse)
-def obtener_paciente(id_paciente: int, db: Session = Depends(get_db)):
+def obtener_paciente(id_paciente: int, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
     db_paciente = db.query(models.Paciente).filter(
         models.Paciente.id_paciente == id_paciente,
         models.Paciente.activo == True
@@ -578,7 +579,7 @@ def obtener_paciente(id_paciente: int, db: Session = Depends(get_db)):
 
 # Ruta GET para obtener pacientes por su nombre
 @app.get("/pacientes/nombre/{nombre}", response_model=List[PacienteResponse])
-def obtener_pacientes_por_nombre(nombre: str, db: Session = Depends(get_db)):
+def obtener_pacientes_por_nombre(nombre: str, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
     db_pacientes = db.query(models.Paciente).filter(
         models.Paciente.nombre.ilike(f"%{nombre}%"),
         models.Paciente.activo == True
@@ -589,7 +590,7 @@ def obtener_pacientes_por_nombre(nombre: str, db: Session = Depends(get_db)):
 
 # Ruta GET para obtener pacientes por su raza (nombre de la raza)
 @app.get("/pacientes/raza/{nombre_raza}", response_model=List[PacienteResponse])
-def obtener_pacientes_por_raza(nombre_raza: str, db: Session = Depends(get_db)):
+def obtener_pacientes_por_raza(nombre_raza: str, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
     db_pacientes = db.query(models.Paciente).join(models.Raza).filter(
         models.Raza.nombre.ilike(f"%{nombre_raza}%"),
         models.Paciente.activo == True
@@ -600,7 +601,7 @@ def obtener_pacientes_por_raza(nombre_raza: str, db: Session = Depends(get_db)):
 
 # Ruta GET para obtener todos los pacientes
 @app.get("/pacientes/", response_model=List[PacienteResponse])
-def obtener_todos_los_pacientes(db: Session = Depends(get_db)):
+def obtener_todos_los_pacientes(db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
     db_pacientes = db.query(models.Paciente).filter(models.Paciente.activo == True).all()
     if not db_pacientes:
         raise HTTPException(status_code=404, detail="No se encontraron pacientes")
@@ -608,7 +609,7 @@ def obtener_todos_los_pacientes(db: Session = Depends(get_db)):
 
 # Rut GET para obtener todos los pacientes por rut de su tutor
 @app.get("/pacientes/tutor/{rut}", response_model=List[PacienteResponse])
-def obtener_pacientes_por_rut_tutor(rut: str, db: Session = Depends(get_db)):
+def obtener_pacientes_por_rut_tutor(rut: str, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
     # Hacer JOIN con Raza y Especie para obtener esa información
     pacientes_query = db.query(
         models.Paciente,
@@ -658,7 +659,8 @@ def obtener_pacientes_paginados(
     page: int = Query(1, ge=1),
     limit: int = Query(50, ge=1, le=100),
     search: Optional[str] = Query(None),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
 ):
     offset = (page - 1) * limit
     
@@ -772,7 +774,7 @@ def obtener_pacientes_paginados(
 
 # Ruta PUT para actualizar la información de un paciente
 @app.put("/pacientes/{id_paciente}", response_model=PacienteResponse)
-def actualizar_paciente(id_paciente: int, paciente: PacienteCreate, db: Session = Depends(get_db)):
+def actualizar_paciente(id_paciente: int, paciente: PacienteCreate, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
     db_paciente = db.query(models.Paciente).filter(models.Paciente.id_paciente == id_paciente).first()
     if not db_paciente:
         raise HTTPException(status_code=404, detail="Paciente no encontrado")
@@ -795,7 +797,7 @@ def actualizar_paciente(id_paciente: int, paciente: PacienteCreate, db: Session 
 
 # Ruta PUT para actualizar el tutor de un paciente
 @app.put("/pacientes/{id_paciente}/tutor/{rut_tutor}", response_model=PacienteResponse)
-def actualizar_tutor_paciente(id_paciente: int, rut_tutor: str, db: Session = Depends(get_db)):
+def actualizar_tutor_paciente(id_paciente: int, rut_tutor: str, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
     db_paciente = db.query(models.Paciente).filter(models.Paciente.id_paciente == id_paciente).first()
     db_tutor = db.query(models.Tutor).filter(
         models.Tutor.rut == rut_tutor,
@@ -828,7 +830,7 @@ def actualizar_tutor_paciente(id_paciente: int, rut_tutor: str, db: Session = De
 """ RUTAS PARA ASOCIAR TUTORES Y PACIENTES """
 # Ruta PUT para editar la asociación tutor_paciente
 @app.put("/tutores/{rut_tutor}/pacientes/{id_paciente}", response_model=TutorPacienteResponse)
-def editar_asociacion_tutor_paciente(rut_tutor: str, id_paciente: int, fecha: date, db: Session = Depends(get_db)):
+def editar_asociacion_tutor_paciente(rut_tutor: str, id_paciente: int, fecha: date, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
     db_tutor_paciente = db.query(models.TutorPaciente).filter(
         models.TutorPaciente.rut == rut_tutor,
         models.TutorPaciente.id_paciente == id_paciente
@@ -842,7 +844,7 @@ def editar_asociacion_tutor_paciente(rut_tutor: str, id_paciente: int, fecha: da
 
 # ruta put para editar la informacion de un tutor
 @app.put("/tutores/{rut}", response_model=TutorResponse)
-def editar_tutor(rut: str, tutor: TutorCreate, db: Session = Depends(get_db)):
+def editar_tutor(rut: str, tutor: TutorCreate, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
     db_tutor = db.query(models.Tutor).filter(
         models.Tutor.rut == rut,
         models.Tutor.activo == True
@@ -857,7 +859,7 @@ def editar_tutor(rut: str, tutor: TutorCreate, db: Session = Depends(get_db)):
 
 # Ruta POST para asociar un tutor a un paciente (tutor_paciente)
 @app.post("/tutores/{rut_tutor}/pacientes/{id_paciente}", response_model=TutorPacienteResponse)
-def asociar_tutor_a_paciente(rut_tutor: str, id_paciente: int, fecha: date, db: Session = Depends(get_db)):
+def asociar_tutor_a_paciente(rut_tutor: str, id_paciente: int, fecha: date, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
     db_tutor = db.query(models.Tutor).filter(
         models.Tutor.rut == rut_tutor,
         models.Tutor.activo == True
@@ -875,7 +877,7 @@ def asociar_tutor_a_paciente(rut_tutor: str, id_paciente: int, fecha: date, db: 
 
 # Ruta para ver mascotas asociadas a un tutor
 @app.get("/tutores/{rut}/pacientes/", response_model=List[PacienteResponse])
-def obtener_mascotas_por_tutor(rut: str, db: Session = Depends(get_db)):
+def obtener_mascotas_por_tutor(rut: str, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
     db_tutor = db.query(models.Tutor).filter(
         models.Tutor.rut == rut,
         models.Tutor.activo == True
@@ -1272,7 +1274,7 @@ def obtener_consultas_tratamiento_por_nombre_paciente(nombre_paciente: str, db: 
 
 # Ruta GET para obtener registros de consulta_tratamiento solo de vacunas con detalles
 @app.get("/consultas/tratamientos/vacunas/nombre/", response_model=List[consultaTratamientoConDetallesResponse])
-def obtener_vacunas_por_nombre(db: Session = Depends(get_db)):
+def obtener_vacunas_por_nombre(db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
     # Filtrar próximas vacunas en los próximos 30 días (1 mes)
     fecha_actual = datetime.now().date()
     fecha_limite = fecha_actual + timedelta(days=30)
@@ -1319,7 +1321,7 @@ def obtener_vacunas_por_nombre(db: Session = Depends(get_db)):
 
 # Ruta GET para obtener próximas vacunas por ID de paciente
 @app.get("/consultas/tratamientos/vacunas/paciente/{id_paciente}/proximas/", response_model=List[consultaTratamientoConDetallesResponse])
-def obtener_proximas_vacunas_por_paciente(id_paciente: int, db: Session = Depends(get_db)):
+def obtener_proximas_vacunas_por_paciente(id_paciente: int, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
     # Verificar que el paciente existe
     db_paciente = db.query(models.Paciente).filter(models.Paciente.id_paciente == id_paciente).first()
     if not db_paciente:
@@ -1437,7 +1439,7 @@ app.include_router(whatsapp_router)
 
 # HU 14: Cómo dueño quiero recibir alertas programadas por correo para recordar cada consulta.
 @app.post("/email/{fecha_envio}")
-async def programar_envio(email: EmailSchema, fecha_envio: datetime):
+async def programar_envio(email: EmailSchema, fecha_envio: datetime, current_user: dict = Depends(get_current_user)):
     """Programa el envío de un correo en la fecha indicada.
 
     Si APScheduler está disponible, se usa `scheduler.add_job`. Si no, se usa

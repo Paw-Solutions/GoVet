@@ -35,6 +35,7 @@ import {
   validarNombre,
   mensajesError,
 } from "../../utils/validaciones";
+import { useAuth } from "../../hooks/useAuth";
 
 // Componente: Editor de información de tutor
 interface ModalEditarTutorProps {
@@ -48,6 +49,7 @@ const ModalEditarTutor: React.FC<ModalEditarTutorProps> = ({
   onDismiss,
   tutor,
 }) => {
+  const {idToken} = useAuth();
   // Estados básicos del formulario
   const [nombre, setNombre] = useState("");
   const [apellidoPaterno, setApellidoPaterno] = useState("");
@@ -459,7 +461,7 @@ const ModalEditarTutor: React.FC<ModalEditarTutorProps> = ({
         observacion: observacion.trim() || undefined,
       };
 
-      await actualizarTutor(rutActual, payload);
+      await actualizarTutor(rutActual, payload, idToken);
 
       // Mostrar mensaje de éxito
       setToastMessage("Tutor actualizado exitosamente");

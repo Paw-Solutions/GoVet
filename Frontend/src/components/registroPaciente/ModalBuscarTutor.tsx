@@ -23,6 +23,7 @@ import {
 import { close, checkmark, person, eye } from "ionicons/icons";
 import { TutorData } from "../../api/tutores";
 import { obtenerTutoresPaginados } from "../../api/tutores";
+import { useAuth } from "../../hooks/useAuth";
 import ModalInfoTutor from "../verTutores/infoTutor";
 import "../../styles/modalBuscarTutor.css";
 // Componente: Búsqueda de tutores
@@ -64,6 +65,7 @@ const ModalBuscarTutor: React.FC<ModalBuscarTutorProps> = ({
   onTutorSelected,
   tutorSeleccionado,
 }) => {
+  const {idToken} = useAuth();
   // Estados exactamente iguales a verTutores
   const [tutores, setTutores] = useState<TutorData[]>([]);
   const [loading, setLoading] = useState(false);
@@ -94,7 +96,8 @@ const ModalBuscarTutor: React.FC<ModalBuscarTutorProps> = ({
         const data: PaginatedResponse = await obtenerTutoresPaginados(
           page,
           50,
-          search
+          search,
+          idToken
         );
 
         if (resetList) {

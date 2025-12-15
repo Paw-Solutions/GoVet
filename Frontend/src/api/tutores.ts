@@ -1,5 +1,6 @@
 // src/api/tutoresApi.ts
 // Componente: Gestor de tutores - Frontend
+import { fetchWithAuth } from "./http";
 const API_URL = import.meta.env.VITE_API_URL || "/api"; // usa tu variable de entorno
 
 export interface TutorCreate {
@@ -49,16 +50,21 @@ export interface PaginatedResponse {
 }
 
 // Ruta para crear un nuevo tutor
-export async function crearTutor(formData: TutorData) {
+export async function crearTutor(
+  formData: TutorData,
+  idToken?: string | null) {
   try {
     console.log("Enviando datos al servidor:", formData);
-    const response = await fetch(`${API_URL}/tutores/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    const response = await fetchWithAuth(
+      `${API_URL}/tutores/`, 
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
       },
-      body: JSON.stringify(formData),
-    });
+      idToken);
 
     if (!response.ok) {
       throw new Error(`Error en la petición: ${response.status}`);
@@ -74,15 +80,20 @@ export async function crearTutor(formData: TutorData) {
 }
 
 // Ruta para obtener todos los tutores
-export async function obtenerTutores() {
+export async function obtenerTutores(
+    idToken?: string | null
+) {
   try {
     console.log("Obteniendo tutores del servidor...");
-    const response = await fetch(`${API_URL}/tutores/`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
+    const response = await fetchWithAuth(
+      `${API_URL}/tutores/`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
       },
-    });
+      idToken
+    );
 
     if (!response.ok) {
       throw new Error(`Error en la petición: ${response.status}`);
@@ -101,7 +112,8 @@ export async function obtenerTutores() {
 export async function obtenerTutoresPaginados(
   page: number = 1,
   limit: number = 50,
-  search?: string
+  search?: string,
+  idToken?: string | null
 ): Promise<PaginatedResponse> {
   try {
     const params = new URLSearchParams({
@@ -114,12 +126,16 @@ export async function obtenerTutoresPaginados(
     }
 
     console.log(`Obteniendo tutores página ${page}...`);
-    const response = await fetch(`${API_URL}/tutores/paginated/?${params}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
+    const response = await fetchWithAuth(
+      `${API_URL}/tutores/paginated/?${params}`, 
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
       },
-    });
+      idToken
+    );
 
     if (!response.ok) {
       throw new Error(`Error en la petición: ${response.status}`);
@@ -137,17 +153,21 @@ export async function obtenerTutoresPaginados(
 {
   /* Obtener tutor por RUT */
 }
-export async function obtenerTutorPorRut(rut: string): Promise<TutorData> {
+export async function obtenerTutorPorRut(
+  rut: string,
+  idToken?: string | null
+): Promise<TutorData> {
   try {
     console.log(`Obteniendo tutor con RUT ${rut}...`);
-    const response = await fetch(
+    const response = await fetchWithAuth(
       `${API_URL}/tutores/${encodeURIComponent(rut)}`,
       {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
-      }
+      },
+      idToken
     );
 
     if (!response.ok) {
@@ -174,17 +194,19 @@ export async function obtenerTutorPorRut(rut: string): Promise<TutorData> {
 }
 export async function actualizarTutor(
   rutActual: string,
-  payload: TutorCreate
+  payload: TutorCreate,
+  idToken?: string | null
 ): Promise<TutorData> {
   const API_URL = import.meta.env.VITE_API_URL || "/api";
   try {
-    const response = await fetch(
+    const response = await fetchWithAuth(
       `${API_URL}/tutores/${encodeURIComponent(rutActual)}`,
       {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
-      }
+      },
+      idToken
     );
     if (!response.ok) {
       const errorText = await response.text().catch(() => "");

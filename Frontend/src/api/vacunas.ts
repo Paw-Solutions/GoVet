@@ -1,4 +1,9 @@
 // API para gestión de vacunas pendientes
+
+// *** ACTUALMENTE NO SE ESTA USANDO ***
+
+import { fetchWithAuth } from "./http";
+
 // TODO: Implementar endpoints en el backend cuando se cree el modelo de Vacuna
 const API_URL = import.meta.env.VITE_API_URL || "/api";
 
@@ -25,10 +30,15 @@ export interface VacunaPendienteResponse {
  * @returns Promise con las vacunas pendientes
  */
 export const obtenerVacunasPendientesPorPaciente = async (
-  id_paciente: number
+  id_paciente: number,
+  idToken?: string | null
 ): Promise<VacunaPendienteResponse> => {
-  const response = await fetch(
-    `${API_URL}/vacunas/paciente/${id_paciente}/pendientes`
+  const response = await fetchWithAuth(
+    `${API_URL}/vacunas/paciente/${id_paciente}/pendientes`,
+    {
+      method: "GET"
+    },
+    idToken
   );
 
   if (!response.ok) {
@@ -44,9 +54,16 @@ export const obtenerVacunasPendientesPorPaciente = async (
  * @returns Promise con todas las vacunas
  */
 export const obtenerVacunasPorPaciente = async (
-  id_paciente: number
+  id_paciente: number,
+  idToken?: string | null
 ): Promise<VacunaPendienteResponse> => {
-  const response = await fetch(`${API_URL}/vacunas/paciente/${id_paciente}`);
+  const response = await fetchWithAuth(
+    `${API_URL}/vacunas/paciente/${id_paciente}`,
+    {
+      method: "GET"
+    },
+    idToken
+  );
 
   if (!response.ok) {
     throw new Error("Error al obtener vacunas del paciente");
@@ -65,13 +82,18 @@ export const obtenerVacunasPorPaciente = async (
 export const marcarVacunaAplicada = async (
   id_vacuna: number,
   fecha_aplicada: string,
-  lote?: string
+  lote?: string,
+  idToken?: string | null
 ): Promise<Vacuna> => {
-  const response = await fetch(`${API_URL}/vacunas/${id_vacuna}/aplicar`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ fecha_aplicada, lote }),
-  });
+  const response = await fetchWithAuth(
+    `${API_URL}/vacunas/${id_vacuna}/aplicar`, 
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ fecha_aplicada, lote }),
+    },
+    idToken
+  );
 
   if (!response.ok) {
     throw new Error("Error al marcar vacuna como aplicada");

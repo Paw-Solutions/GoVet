@@ -26,6 +26,7 @@ import { PacienteData } from "../../api/pacientes";
 import { obtenerPacientesPaginados } from "../../api/pacientes";
 import ModalInfoPaciente from "../verPacientes/infoPaciente";
 import "../../styles/modalEscogerPaciente.css";
+import { useAuth } from "../../hooks/useAuth";
 
 interface Paciente {
   id: number;
@@ -70,6 +71,7 @@ const ModalEscogerPaciente: React.FC<ModalEscogerPacienteProps> = ({
   motivoConsulta = "",
   onMotivoChange,
 }) => {
+  const {idToken} = useAuth();
   // Estados exactamente iguales a verPacientes
   const [pacientes, setPacientes] = useState<PacienteData[]>([]);
   const [loading, setLoading] = useState(false);
@@ -103,7 +105,8 @@ const ModalEscogerPaciente: React.FC<ModalEscogerPacienteProps> = ({
         const data: PaginatedResponse = await obtenerPacientesPaginados(
           page,
           50,
-          search
+          search,
+          idToken
         );
 
         if (resetList) {

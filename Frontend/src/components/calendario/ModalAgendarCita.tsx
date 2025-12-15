@@ -127,7 +127,7 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
       const cargarDatosIniciales = async () => {
         setCargandoPacientes(true);
         try {
-          const pacientes = await obtenerPacientesPorTutor(tutorInicial.rut);
+          const pacientes = await obtenerPacientesPorTutor(tutorInicial.rut, idToken);
           setPacientesDisponibles(pacientes);
 
           // Si también hay pacienteInicial, pre-seleccionarlo y saltar al paso 3
@@ -172,7 +172,7 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
 
     setBuscandoTutores(true);
     try {
-      const response = await obtenerTutoresPaginados(1, 20, textoBusqueda);
+      const response = await obtenerTutoresPaginados(1, 20, textoBusqueda, idToken);
       setTutoresEncontrados(response.tutores);
     } catch (error) {
       console.error("Error buscando tutores:", error);
@@ -215,7 +215,7 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
   const cargarPacientesDeTutor = async (rutTutor: string) => {
     setCargandoPacientes(true);
     try {
-      const pacientes = await obtenerPacientesPorTutor(rutTutor);
+      const pacientes = await obtenerPacientesPorTutor(rutTutor, idToken);
       setPacientesDisponibles(pacientes);
 
       if (pacientes.length === 0) {
@@ -605,7 +605,8 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
                   asunto: "Confirmación de cita - GoVet",
                   cuerpo: cuerpoEmail,
                 },
-                fechaEnvioIso
+                fechaEnvioIso,
+                idToken
               );
 
               notificacionesEmailExitosas++;

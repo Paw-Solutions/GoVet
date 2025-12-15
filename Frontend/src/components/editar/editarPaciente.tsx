@@ -28,6 +28,7 @@ import { obtenerEspecies, obtenerRazas } from "../../api/especies";
 import { SelectorEspecie } from "../registroPaciente/SelectorEspecie";
 import { SelectorRaza } from "../registroPaciente/SelectorRaza";
 import ModalBuscarTutor from "../registroPaciente/ModalBuscarTutor";
+import { useAuth } from "../../hooks/useAuth";
 
 interface Tutor {
   rut: string;
@@ -51,6 +52,7 @@ const ModalEditarPaciente: React.FC<ModalEditarPacienteProps> = ({
   onDismiss,
   paciente,
 }) => {
+  const {idToken} = useAuth();
   // Estados básicos del formulario
   const [nombre, setNombre] = useState("");
   const [color, setColor] = useState("");
@@ -267,13 +269,13 @@ const ModalEditarPaciente: React.FC<ModalEditarPacienteProps> = ({
         esterilizado,
       };
 
-      await actualizarPaciente(paciente.id_paciente, payload);
+      await actualizarPaciente(paciente.id_paciente, payload, idToken);
 
       // 2) Actualizar tutor si cambió el RUT
       const rutActual = paciente.tutor?.rut || "";
       const rutNuevo = tutorSeleccionado.rut.trim();
       if (rutNuevo && rutNuevo !== rutActual) {
-        await actualizarTutorDePaciente(paciente.id_paciente, rutNuevo);
+        await actualizarTutorDePaciente(paciente.id_paciente, rutNuevo, idToken);
       }
 
       // 3) Mostrar mensaje de éxito

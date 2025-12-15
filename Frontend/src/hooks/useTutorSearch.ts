@@ -1,7 +1,9 @@
 import { useState, useCallback, useEffect } from "react";
 import { TutorData, obtenerTutoresPaginados } from "../api/tutores";
+import { useAuth } from "./useAuth"; 
 
 export const useTutorSearch = () => {
+  const {idToken} = useAuth();
   const [tutores, setTutores] = useState<TutorData[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -19,7 +21,7 @@ export const useTutorSearch = () => {
 
       try {
         const page = resetList ? 1 : currentPage + 1;
-        const data = await obtenerTutoresPaginados(page, 50, search);
+        const data = await obtenerTutoresPaginados(page, 50, search, idToken);
 
         setTutores((prev) =>
           resetList ? data.tutores : [...prev, ...data.tutores]

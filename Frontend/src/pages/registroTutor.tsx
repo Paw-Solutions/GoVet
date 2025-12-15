@@ -33,6 +33,7 @@ import { SelectorComuna } from "../components/registroTutor/SelectorComuna";
 import { crearTutor } from "../api/tutores";
 import { obtenerRegiones } from "../api/regiones";
 import { formatRegionName, formatComunaName } from "../utils/formatters";
+import { useAuth } from "../hooks/useAuth";
 // Componente: Interfaz para gestionar dueños
 
 // FUNCIÓN DE NORMALIZACIÓN PARA BÚSQUEDA ROBUSTA
@@ -50,6 +51,7 @@ interface RegistroTutorProps {
 }
 
 const RegistroTutor: React.FC<RegistroTutorProps> = ({ onClose }) => {
+  const {idToken} = useAuth();
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [toastColor, setToastColor] = useState<
@@ -266,7 +268,7 @@ const RegistroTutor: React.FC<RegistroTutorProps> = ({ onClose }) => {
         comuna: selectedComuna ? selectedComuna.name : "",
       };
 
-      const respuesta = await crearTutor(dataToSubmit);
+      const respuesta = await crearTutor(dataToSubmit, idToken);
       console.log("Tutor creado:", respuesta);
       setToastMessage("Tutor registrado exitosamente");
       setToastColor("success");

@@ -31,6 +31,7 @@ import {
 import { TutorData } from "../../api/tutores";
 import { obtenerPacientesPorTutor, PacienteData } from "../../api/pacientes";
 import ModalAgendarCita from "../calendario/ModalAgendarCita";
+import { useAuth } from "../../hooks/useAuth";
 // Componente: Visualizador del detalle de un tutor
 interface ModalInfoTutorProps {
   isOpen: boolean;
@@ -47,6 +48,7 @@ const ModalInfoTutor: React.FC<ModalInfoTutorProps> = ({
   onEdit,
   onViewPaciente,
 }) => {
+  const {idToken} = useAuth();
   const [pacientes, setPacientes] = useState<PacienteData[]>([]);
   const [loadingPacientes, setLoadingPacientes] = useState(false);
   const [showAgendarModal, setShowAgendarModal] = useState(false);
@@ -55,7 +57,7 @@ const ModalInfoTutor: React.FC<ModalInfoTutorProps> = ({
   useEffect(() => {
     if (isOpen && tutor?.rut) {
       setLoadingPacientes(true);
-      obtenerPacientesPorTutor(tutor.rut)
+      obtenerPacientesPorTutor(tutor.rut, idToken)
         .then((data) => {
           setPacientes(data);
           console.log(`📋 Pacientes del tutor ${tutor.rut}:`, data);

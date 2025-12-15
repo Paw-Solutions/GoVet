@@ -21,6 +21,7 @@ import {
   checkmarkCircleOutline,
 } from "ionicons/icons";
 import { ConsultaTratamiento, obtenerTratamientosPorPaciente } from "../../api/tratamientos";
+import { useAuth } from "../../hooks/useAuth";
 // Componente: Visualizador de próximas vacunas
 interface PendientesPacienteProps {
   idPaciente: number;
@@ -31,6 +32,7 @@ const PendientesPaciente: React.FC<PendientesPacienteProps> = ({
   idPaciente,
   onVerDetalleVacuna,
 }) => {
+  const {idToken} = useAuth();
   const [vacunas, setVacunas] = useState<ConsultaTratamiento[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -45,7 +47,8 @@ const PendientesPaciente: React.FC<PendientesPacienteProps> = ({
 
     try {
       const vacunasResponse = await obtenerTratamientosPorPaciente(
-        idPaciente
+        idPaciente,
+        idToken
       );
       setVacunas(vacunasResponse);
     } catch (err) {
