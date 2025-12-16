@@ -48,10 +48,14 @@ const normalizarTexto = (texto: string) => {
 
 interface RegistroTutorProps {
   onClose?: () => void;
+  onTutorRegistered?: (tutor: any) => void;
 }
 
-const RegistroTutor: React.FC<RegistroTutorProps> = ({ onClose }) => {
-  const {idToken} = useAuth();
+const RegistroTutor: React.FC<RegistroTutorProps> = ({
+  onClose,
+  onTutorRegistered,
+}) => {
+  const { idToken } = useAuth();
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [toastColor, setToastColor] = useState<
@@ -273,6 +277,23 @@ const RegistroTutor: React.FC<RegistroTutorProps> = ({ onClose }) => {
       setToastMessage("Tutor registrado exitosamente");
       setToastColor("success");
 
+      // Si hay callback, invocar con los datos del tutor creado
+      if (onTutorRegistered && respuesta) {
+        const tutorData = {
+          rut: respuesta.rut,
+          nombre: respuesta.nombre,
+          apellido: `${respuesta.apellido_paterno}${
+            respuesta.apellido_materno ? " " + respuesta.apellido_materno : ""
+          }`,
+          telefono: respuesta.telefono?.toString() || "",
+          email: respuesta.email || "",
+          direccion: respuesta.direccion || "",
+          comuna: respuesta.comuna || "",
+          region: respuesta.region || "",
+        };
+        onTutorRegistered(tutorData);
+      }
+
       // Limpiar formulario
       setFormData({
         nombre: "",
@@ -300,6 +321,11 @@ const RegistroTutor: React.FC<RegistroTutorProps> = ({ onClose }) => {
 
       resetRut();
       resetTelefono();
+
+      // Cerrar el modal si fue abierto desde registro de paciente
+      if (onClose && onTutorRegistered) {
+        onClose();
+      }
     } catch (error) {
       console.error("Fallo al crear tutor:", error);
       setToastMessage("Error de conexión");

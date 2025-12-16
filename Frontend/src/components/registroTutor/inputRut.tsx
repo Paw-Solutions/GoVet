@@ -87,11 +87,20 @@ const InputRut = forwardRef<InputRutHandle, InputRutProps>(
 
     const handleBlur = () => {
       let cleanRut = myRut.replace(/[^0-9Kk]/g, "");
+
+      // Solo aplicar auto-formato si el RUT tiene 8 caracteres completos (7 dígitos + 1 DV)
+      // Esto significa que el usuario ya ingresó el dígito verificador
       if (cleanRut.length === 8) {
-        cleanRut = "0" + cleanRut;
-        const formattedRut = maskitoTransform(cleanRut, rutMaskOptions);
-        setMyRut(formattedRut);
-        onRutChange(formattedRut);
+        const body = cleanRut.slice(0, -1); // primeros 7 caracteres (cuerpo)
+        const dv = cleanRut.slice(-1); // último carácter (dígito verificador)
+
+        // Solo agregar el 0 si el cuerpo son todos dígitos (no contiene K)
+        if (/^\d+$/.test(body)) {
+          cleanRut = "0" + body + dv;
+          const formattedRut = maskitoTransform(cleanRut, rutMaskOptions);
+          setMyRut(formattedRut);
+          onRutChange(formattedRut);
+        }
       }
     };
 

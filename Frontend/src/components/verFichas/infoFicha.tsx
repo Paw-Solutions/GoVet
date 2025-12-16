@@ -230,7 +230,7 @@ const ModalInfoFicha: React.FC<ModalInfoFichaProps> = ({
                     color: "var(--ion-color-primary)",
                   }}
                 >
-                  Constantes Vitales
+                  Frecuencia y Constantes Vitales
                 </h2>
               </IonLabel>
             </IonItem>

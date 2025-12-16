@@ -210,6 +210,14 @@ export const useRegistroPaciente = () => {
     setShowToast(true);
   };
 
+  const handleTutorRegistrado = (tutor: any) => {
+    console.log("✅ Tutor registrado y seleccionado:", tutor);
+    setFormData((prev) => ({
+      ...prev,
+      rut_tutor: tutor.rut,
+    }));
+  };
+
   return {
     formData,
     setFormData,
@@ -234,5 +242,6 @@ export const useRegistroPaciente = () => {
     selectRaza,
     registraPaciente,
     clearEspecie,
+    handleTutorRegistrado,
   };
 };

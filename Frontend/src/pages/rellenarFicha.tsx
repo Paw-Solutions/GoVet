@@ -1020,7 +1020,7 @@ const RellenarFicha: React.FC = () => {
               <IonCol size="6" sizeMd="4" sizeLg="3">
                 <ModuleCard
                   icon={pulseOutline}
-                  title="Constantes Vitales"
+                  title="Frecuencia y Constantes Vitales"
                   status={getModuleStatus("constantes")}
                   onClick={() => openModule("constantes")}
                 />
@@ -1079,7 +1079,7 @@ const RellenarFicha: React.FC = () => {
         >
           <IonHeader>
             <IonToolbar>
-              <IonTitle>Constantes Vitales</IonTitle>
+              <IonTitle>Frecuencia y Constantes Vitales</IonTitle>
               <IonButtons slot="end">
                 <IonButton onClick={() => setActiveModule(null)}>
                   <IonIcon icon={closeOutline} />

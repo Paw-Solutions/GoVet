@@ -74,6 +74,7 @@ const RegistroPaciente: React.FC = () => {
     selectRaza,
     registraPaciente,
     clearEspecie,
+    handleTutorRegistrado,
   } = useRegistroPaciente();
 
   // Filtros
@@ -104,6 +105,15 @@ const RegistroPaciente: React.FC = () => {
       ...prev,
       rut_tutor: tutor.rut,
     }));
+  };
+
+  const handleNuevoTutorRegistrado = (tutor: any) => {
+    // Seleccionar el tutor recién registrado
+    setTutorSeleccionado(tutor);
+    // Llamar al handler del hook para actualizar formData
+    handleTutorRegistrado(tutor);
+    // Cerrar el modal
+    setShowModalRegistroTutor(false);
   };
 
   const handleRegistrarPaciente = async () => {
@@ -410,7 +420,10 @@ const RegistroPaciente: React.FC = () => {
           isOpen={showModalRegistroTutor}
           onDidDismiss={() => setShowModalRegistroTutor(false)}
         >
-          <RegistroTutor onClose={() => setShowModalRegistroTutor(false)} />
+          <RegistroTutor
+            onClose={() => setShowModalRegistroTutor(false)}
+            onTutorRegistered={handleNuevoTutorRegistrado}
+          />
         </IonModal>
 
         <IonToast
