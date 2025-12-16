@@ -12,6 +12,100 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// --- FUNCIÓN DE VARIACIONES (Anti-Spam) ---
+const generarMensaje = (nombre, fecha, hora, paciente) => {
+  const plantillas = [
+    // Versión 1: Clásica (muy similar a la tuya)
+    () => `*🐾 Confirmación de Cita - GoVet*
+
+Hola *${nombre}*,
+
+Tu cita ha sido agendada exitosamente con los siguientes detalles:
+
+━━━━━━━━━━━━━━━━━━━
+📅 *Fecha:* ${fecha}
+🕐 *Horario:* ${hora}
+🐶 *Paciente:* ${paciente}
+━━━━━━━━━━━━━━━━━━━
+
+Si necesitas cancelar o reprogramar, por favor contáctanos con anticipación.
+
+_Este es un mensaje automático._`,
+
+    // Versión 2: Variación "Agenda Médica" (Emojis distintos, sinónimos)
+    () => `*✅ Agenda Médica - GoVet*
+
+Estimado/a *${nombre}*,
+
+Hemos reservado tu hora de atención domiciliaria correctamente:
+
+━━━━━━━━━━━━━━━━━━━
+📆 *Día:* ${fecha}
+⏰ *Bloque:* ${hora}
+🐱 *Mascota:* ${paciente}
+━━━━━━━━━━━━━━━━━━━
+
+Cualquier inconveniente con este horario, avísanos a la brevedad.
+
+_Mensaje generado automáticamente._`,
+
+    // Versión 3: Variación "Visita Programada" (Saludo diferente, redacción directa)
+    () => `*🚑 Visita Programada - GoVet*
+
+Saludos *${nombre}* 👋,
+
+Ya está todo listo para la visita veterinaria. Aquí los datos:
+
+━━━━━━━━━━━━━━━━━━━
+🗓️ *Cuándo:* ${fecha}
+🕓 *Hora:* ${hora}
+🐾 *Para:* ${paciente}
+━━━━━━━━━━━━━━━━━━━
+
+Si no puedes recibirnos, por favor infórmanos para reagendar.
+
+_Notificación automática de sistema._`,
+
+    // Versión 4: Variación "Reserva Exitosa" (Enfoque en éxito)
+    () => `*🌟 Reserva Exitosa - GoVet*
+
+¡Hola *${nombre}*!
+
+Confirmamos la visita para tu regalón/a con la siguiente información:
+
+━━━━━━━━━━━━━━━━━━━
+📅 *Fecha Cita:* ${fecha}
+🕐 *Hora Cita:* ${hora}
+🐕 *Paciente:* ${paciente}
+━━━━━━━━━━━━━━━━━━━
+
+Recuerda avisarnos con tiempo si necesitas cambiar la fecha.
+
+_Recordatorio automático._`,
+
+    // Versión 5: Variación "Detalle de Atención" (Más formal)
+    () => `*📋 Detalle de Atención - GoVet*
+
+Hola *${nombre}*,
+
+Se ha generado una orden de visita a domicilio:
+
+━━━━━━━━━━━━━━━━━━━
+📆 *Fecha:* ${fecha}
+⌚ *Horario:* ${hora}
+🐾 *Atención a:* ${paciente}
+━━━━━━━━━━━━━━━━━━━
+
+Para modificaciones o cancelaciones, escríbenos por este medio.
+
+_Envío automático por GoVet._`
+  ];
+
+  // Selección aleatoria
+  const indice = Math.floor(Math.random() * plantillas.length);
+  return plantillas[indice]();
+};
+
 // ---- QR ----
 // Para enviar el qr a la parte principal
 app.get("/qr", async (req, res) => {
@@ -54,21 +148,7 @@ app.get("/notificar", async (req, res) => {
 
   if (!numero) return res.status(400).json({ error: "Falta número" });
 
-  const mensaje = `*🐾 Confirmación de Cita - GoVet*
-
-Hola *${nombre}*,
-
-Tu cita ha sido agendada exitosamente con los siguientes detalles:
-
-━━━━━━━━━━━━━━━━━━━
-📅 *Fecha:* ${fecha}
-🕐 *Horario:* ${hora}
-🐾 *Paciente(s):* ${paciente}
-━━━━━━━━━━━━━━━━━━━
-
-Si necesitas cancelar o reprogramar, por favor contáctanos con anticipación.
-
-_Este es un mensaje automático._`;
+  const mensaje = generarMensaje(nombre, fecha, hora, paciente);
 
   const sock = getSocket();
   if (!sock) return res.status(500).json({ error: "No conectado a WhatsApp" });
