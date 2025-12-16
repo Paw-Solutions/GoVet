@@ -16,7 +16,7 @@ RUN npm install
 COPY server.js whatsapp.js ./
 
 # Puerto interno de la app (no se publicará hacia fuera en docker-compose)
-EXPOSE 3000
+EXPOSE 6007
 
 # Comando de arranque
 CMD ["npm", "start"]

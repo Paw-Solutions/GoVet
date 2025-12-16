@@ -12,7 +12,11 @@ RUN npm install
 # Copiar todo el código fuente
 COPY . .
 
-COPY .env.production .env.production
+ARG VITE_GOOGLE_CLIENT_ID
+ENV VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID
+
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
 
 # Construir la aplicación para producción
 # Esto genera archivos estáticos en /app/dist

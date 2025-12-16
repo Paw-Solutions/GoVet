@@ -48,7 +48,7 @@ app.get("/status", (req, res) => {
 // - fecha: fecha de la consulta
 // - hora: hora de la consulta
 // ------- Ejemplo de Ejecucion ---------
-// http://localhost:3000/notificar?numero=${numero}&nombre=${nombre}&paciente=${paciente}&fecha=${fecha}
+// http://localhost:6007/notificar?numero=${numero}&nombre=${nombre}&paciente=${paciente}&fecha=${fecha}
 app.get("/notificar", async (req, res) => {
   const { numero, nombre, paciente, fecha, hora } = req.query;
 
@@ -130,7 +130,7 @@ app.post("/iniciar", async (req, res) => {
 // Para ver si esta funcionando
 app.get("/", (req, res) => res.send("Backend WhatsApp activo"));
 
-app.listen(3000, () => {
-  console.log("Backend corriendo en puerto 3000");
+app.listen(6007, () => {
+  console.log("Backend corriendo en puerto 6007");
   iniciarWhatsapp();
 });
