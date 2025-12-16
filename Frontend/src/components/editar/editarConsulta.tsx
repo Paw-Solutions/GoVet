@@ -23,6 +23,7 @@ import {
   IonCardContent,
   IonText,
   IonFooter,
+  IonRange,
 } from "@ionic/react";
 import {
   closeOutline,
@@ -71,7 +72,8 @@ const ModalEditarConsulta: React.FC<ModalEditarConsultaProps> = ({
   const [peso, setPeso] = useState<number>(0);
   const [temperatura, setTemperatura] = useState<number>(0);
   const [frecuenciaCardiaca, setFrecuenciaCardiaca] = useState<number>(0);
-  const [frecuenciaRespiratoria, setFrecuenciaRespiratoria] = useState<number>(0);
+  const [frecuenciaRespiratoria, setFrecuenciaRespiratoria] =
+    useState<number>(0);
   const [tllc, setTllc] = useState<number>(0);
   const [dht, setDht] = useState<number>(0);
 
@@ -133,7 +135,10 @@ const ModalEditarConsulta: React.FC<ModalEditarConsultaProps> = ({
       case "constantes":
         const hasAllConstantes = peso > 0 && temperatura > 0;
         const hasSomeConstantes =
-          peso > 0 || temperatura > 0 || frecuenciaCardiaca > 0 || frecuenciaRespiratoria > 0;
+          peso > 0 ||
+          temperatura > 0 ||
+          frecuenciaCardiaca > 0 ||
+          frecuenciaRespiratoria > 0;
         if (hasAllConstantes) return "complete";
         if (hasSomeConstantes) return "incomplete";
         if (isTouched) return "visited";
@@ -142,7 +147,11 @@ const ModalEditarConsulta: React.FC<ModalEditarConsultaProps> = ({
       case "examen_fisico":
         const hasAllFisico = mucosas && condicionCorporal;
         const hasSomeFisico =
-          mucosas || condicionCorporal || estadoPelaje || estadoPiel || nodulosLinfaticos;
+          mucosas ||
+          condicionCorporal ||
+          estadoPelaje ||
+          estadoPiel ||
+          nodulosLinfaticos;
         if (hasAllFisico) return "complete";
         if (hasSomeFisico) return "incomplete";
         if (isTouched) return "visited";
@@ -193,7 +202,11 @@ const ModalEditarConsulta: React.FC<ModalEditarConsultaProps> = ({
         auscultacion_cardiaca_toraxica: auscultacionCardiaca,
       };
 
-      await actualizarConsulta(consulta.id_consulta, consultaActualizada, idToken);
+      await actualizarConsulta(
+        consulta.id_consulta,
+        consultaActualizada,
+        idToken
+      );
 
       setToastMessage("Consulta actualizada exitosamente");
       setToastColor("success");
@@ -223,7 +236,11 @@ const ModalEditarConsulta: React.FC<ModalEditarConsultaProps> = ({
 
   return (
     <>
-      <IonModal isOpen={isOpen} onDidDismiss={onDismiss} className="fullscreen-modal">
+      <IonModal
+        isOpen={isOpen}
+        onDidDismiss={onDismiss}
+        className="fullscreen-modal"
+      >
         <IonHeader translucent={true}>
           <IonToolbar>
             <IonTitle>Editar Consulta</IonTitle>
@@ -249,18 +266,34 @@ const ModalEditarConsulta: React.FC<ModalEditarConsultaProps> = ({
                 <IonRow>
                   <IonCol size="12" sizeMd="4">
                     <IonText color="medium">
-                      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px",
+                          marginBottom: "4px",
+                        }}
+                      >
                         <IonIcon icon={pawOutline} />
                         <strong>Paciente</strong>
                       </div>
                     </IonText>
                     <IonText>
-                      <p style={{ margin: 0 }}>{consulta.paciente?.nombre || "N/A"}</p>
+                      <p style={{ margin: 0 }}>
+                        {consulta.paciente?.nombre || "N/A"}
+                      </p>
                     </IonText>
                   </IonCol>
                   <IonCol size="12" sizeMd="4">
                     <IonText color="medium">
-                      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px",
+                          marginBottom: "4px",
+                        }}
+                      >
                         <IonIcon icon={calendarOutline} />
                         <strong>Fecha</strong>
                       </div>
@@ -268,7 +301,9 @@ const ModalEditarConsulta: React.FC<ModalEditarConsultaProps> = ({
                     <IonText>
                       <p style={{ margin: 0 }}>
                         {consulta.fecha_consulta
-                          ? new Date(consulta.fecha_consulta).toLocaleDateString()
+                          ? new Date(
+                              consulta.fecha_consulta
+                            ).toLocaleDateString()
                           : "N/A"}
                       </p>
                     </IonText>
@@ -352,7 +387,9 @@ const ModalEditarConsulta: React.FC<ModalEditarConsultaProps> = ({
                     type="number"
                     step="0.1"
                     value={peso}
-                    onIonChange={(e) => setPeso(parseFloat(e.detail.value || "0"))}
+                    onIonChange={(e) =>
+                      setPeso(parseFloat(e.detail.value || "0"))
+                    }
                   />
                 </IonItem>
                 <IonItem>
@@ -363,7 +400,9 @@ const ModalEditarConsulta: React.FC<ModalEditarConsultaProps> = ({
                     type="number"
                     step="0.1"
                     value={temperatura}
-                    onIonChange={(e) => setTemperatura(parseFloat(e.detail.value || "0"))}
+                    onIonChange={(e) =>
+                      setTemperatura(parseFloat(e.detail.value || "0"))
+                    }
                   />
                 </IonItem>
                 <IonItem>
@@ -373,7 +412,9 @@ const ModalEditarConsulta: React.FC<ModalEditarConsultaProps> = ({
                     fill="outline"
                     type="number"
                     value={frecuenciaCardiaca}
-                    onIonChange={(e) => setFrecuenciaCardiaca(parseFloat(e.detail.value || "0"))}
+                    onIonChange={(e) =>
+                      setFrecuenciaCardiaca(parseFloat(e.detail.value || "0"))
+                    }
                   />
                 </IonItem>
                 <IonItem>
@@ -384,7 +425,9 @@ const ModalEditarConsulta: React.FC<ModalEditarConsultaProps> = ({
                     type="number"
                     value={frecuenciaRespiratoria}
                     onIonChange={(e) =>
-                      setFrecuenciaRespiratoria(parseFloat(e.detail.value || "0"))
+                      setFrecuenciaRespiratoria(
+                        parseFloat(e.detail.value || "0")
+                      )
                     }
                   />
                 </IonItem>
@@ -396,7 +439,9 @@ const ModalEditarConsulta: React.FC<ModalEditarConsultaProps> = ({
                     type="number"
                     step="0.1"
                     value={tllc}
-                    onIonChange={(e) => setTllc(parseFloat(e.detail.value || "0"))}
+                    onIonChange={(e) =>
+                      setTllc(parseFloat(e.detail.value || "0"))
+                    }
                   />
                 </IonItem>
                 <IonItem>
@@ -406,7 +451,9 @@ const ModalEditarConsulta: React.FC<ModalEditarConsultaProps> = ({
                     fill="outline"
                     type="number"
                     value={dht}
-                    onIonChange={(e) => setDht(parseFloat(e.detail.value || "0"))}
+                    onIonChange={(e) =>
+                      setDht(parseFloat(e.detail.value || "0"))
+                    }
                   />
                 </IonItem>
               </IonList>
@@ -451,9 +498,15 @@ const ModalEditarConsulta: React.FC<ModalEditarConsultaProps> = ({
                       Rosadas y brillantes
                     </IonSelectOption>
                     <IonSelectOption value="Pálidas">Pálidas</IonSelectOption>
-                    <IonSelectOption value="Cianóticas">Cianóticas</IonSelectOption>
-                    <IonSelectOption value="Ictéricas">Ictéricas</IonSelectOption>
-                    <IonSelectOption value="Congestivas">Congestivas</IonSelectOption>
+                    <IonSelectOption value="Cianóticas">
+                      Cianóticas
+                    </IonSelectOption>
+                    <IonSelectOption value="Ictéricas">
+                      Ictéricas
+                    </IonSelectOption>
+                    <IonSelectOption value="Congestivas">
+                      Congestivas
+                    </IonSelectOption>
                   </IonSelect>
                 </IonItem>
                 <IonItem>
@@ -465,44 +518,48 @@ const ModalEditarConsulta: React.FC<ModalEditarConsultaProps> = ({
                     value={condicionCorporal}
                     onIonChange={(e) => setCondicionCorporal(e.detail.value)}
                   >
-                    <IonSelectOption value="Muy delgado">Muy delgado</IonSelectOption>
+                    <IonSelectOption value="Muy delgado">
+                      Muy delgado
+                    </IonSelectOption>
                     <IonSelectOption value="Delgado">Delgado</IonSelectOption>
                     <IonSelectOption value="Normal">Normal</IonSelectOption>
-                    <IonSelectOption value="Sobrepeso">Sobrepeso</IonSelectOption>
+                    <IonSelectOption value="Sobrepeso">
+                      Sobrepeso
+                    </IonSelectOption>
                     <IonSelectOption value="Obeso">Obeso</IonSelectOption>
                   </IonSelect>
                 </IonItem>
                 <IonItem>
-                  <IonSelect
-                    label="Estado del Pelaje"
-                    labelPlacement="stacked"
-                    fill="outline"
-                    interface="action-sheet"
-                    value={estadoPelaje}
-                    onIonChange={(e) => setEstadoPelaje(e.detail.value)}
+                  <IonLabel position="stacked">
+                    Estado del Pelaje:{" "}
+                    {parseFloat(estadoPelaje || "3").toFixed(1)}
+                  </IonLabel>
+                  <IonRange
+                    min={1}
+                    max={5}
+                    step={0.5}
+                    value={parseFloat(estadoPelaje || "3")}
+                    pin={true}
+                    pinFormatter={(value: number) => value.toFixed(1)}
+                    ticks={true}
+                    snaps={true}
+                    onIonChange={(e) => {
+                      setEstadoPelaje((e.detail.value as number).toString());
+                    }}
                   >
-                    <IonSelectOption value="Muy bueno">Muy bueno</IonSelectOption>
-                    <IonSelectOption value="Bueno">Bueno</IonSelectOption>
-                    <IonSelectOption value="Regular">Regular</IonSelectOption>
-                    <IonSelectOption value="Malo">Malo</IonSelectOption>
-                    <IonSelectOption value="Muy malo">Muy malo</IonSelectOption>
-                  </IonSelect>
+                    <IonLabel slot="start">1</IonLabel>
+                    <IonLabel slot="end">5</IonLabel>
+                  </IonRange>
                 </IonItem>
                 <IonItem>
-                  <IonSelect
+                  <IonInput
                     label="Estado de la Piel"
                     labelPlacement="stacked"
                     fill="outline"
-                    interface="action-sheet"
+                    placeholder="Describa el estado de la piel"
                     value={estadoPiel}
-                    onIonChange={(e) => setEstadoPiel(e.detail.value)}
-                  >
-                    <IonSelectOption value="Muy bueno">Muy bueno</IonSelectOption>
-                    <IonSelectOption value="Bueno">Bueno</IonSelectOption>
-                    <IonSelectOption value="Regular">Regular</IonSelectOption>
-                    <IonSelectOption value="Malo">Malo</IonSelectOption>
-                    <IonSelectOption value="Muy malo">Muy malo</IonSelectOption>
-                  </IonSelect>
+                    onIonChange={(e) => setEstadoPiel(e.detail.value || "")}
+                  />
                 </IonItem>
                 <IonItem>
                   <IonTextarea
@@ -512,7 +569,9 @@ const ModalEditarConsulta: React.FC<ModalEditarConsultaProps> = ({
                     placeholder="Describa el estado de los nódulos linfáticos"
                     rows={3}
                     value={nodulosLinfaticos}
-                    onIonChange={(e) => setNodulosLinfaticos(e.detail.value || "")}
+                    onIonChange={(e) =>
+                      setNodulosLinfaticos(e.detail.value || "")
+                    }
                   />
                 </IonItem>
                 <IonItem>
@@ -523,7 +582,9 @@ const ModalEditarConsulta: React.FC<ModalEditarConsultaProps> = ({
                     placeholder="Describa la auscultación cardíaca"
                     rows={3}
                     value={auscultacionCardiaca}
-                    onIonChange={(e) => setAuscultacionCardiaca(e.detail.value || "")}
+                    onIonChange={(e) =>
+                      setAuscultacionCardiaca(e.detail.value || "")
+                    }
                   />
                 </IonItem>
               </IonList>
@@ -647,7 +708,9 @@ const ModalEditarConsulta: React.FC<ModalEditarConsultaProps> = ({
                     placeholder="Indicaciones para el tutor"
                     rows={6}
                     value={indicacionesGenerales}
-                    onIonChange={(e) => setIndicacionesGenerales(e.detail.value || "")}
+                    onIonChange={(e) =>
+                      setIndicacionesGenerales(e.detail.value || "")
+                    }
                   />
                 </IonItem>
               </IonList>

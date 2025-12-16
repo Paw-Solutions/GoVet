@@ -29,6 +29,7 @@ import {
   IonToggle,
   IonModal,
   IonAlert,
+  IonRange,
 } from "@ionic/react";
 import {
   chevronBackOutline,
@@ -185,11 +186,11 @@ const RellenarFicha: React.FC = () => {
     nodulos_linfaticos: "",
     mucosas: "Rosadas y brillantes",
     peso: 0,
-    estado_pelaje: "Muy bueno",
+    estado_pelaje: "3",
     condicion_corporal: "",
     id_consulta: 0,
     motivo_consulta: "", // ← Agregar para compatibilidad con backend
-    estado_piel: "Muy bueno",
+    estado_piel: "",
     temperatura: 0,
     frecuencia_cardiaca: 0,
     frecuencia_respiratoria: 0,
@@ -822,7 +823,7 @@ const RellenarFicha: React.FC = () => {
       nodulos_linfaticos: "",
       mucosas: "",
       peso: 0,
-      estado_pelaje: "",
+      estado_pelaje: "3",
       condicion_corporal: "",
       id_consulta: 0,
       motivo_consulta: "",
@@ -1219,38 +1220,40 @@ const RellenarFicha: React.FC = () => {
                 </IonSelect>
               </IonItem>
               <IonItem>
-                <IonSelect
-                  label="Estado del Pelaje"
-                  labelPlacement="stacked"
-                  fill="outline"
-                  interface="action-sheet"
-                  name="estado_pelaje"
-                  value={formData.estado_pelaje}
-                  onIonChange={handleInputChange}
+                <IonLabel position="stacked">
+                  Estado del Pelaje:{" "}
+                  {parseFloat(formData.estado_pelaje || "3").toFixed(1)}
+                </IonLabel>
+                <IonRange
+                  min={1}
+                  max={5}
+                  step={0.5}
+                  value={parseFloat(formData.estado_pelaje || "3")}
+                  pin={true}
+                  pinFormatter={(value: number) => value.toFixed(1)}
+                  ticks={true}
+                  snaps={true}
+                  onIonChange={(e) => {
+                    setFormData((prev) => ({
+                      ...prev,
+                      estado_pelaje: (e.detail.value as number).toString(),
+                    }));
+                  }}
                 >
-                  <IonSelectOption value="Muy bueno">Muy bueno</IonSelectOption>
-                  <IonSelectOption value="Bueno">Bueno</IonSelectOption>
-                  <IonSelectOption value="Regular">Regular</IonSelectOption>
-                  <IonSelectOption value="Malo">Malo</IonSelectOption>
-                  <IonSelectOption value="Muy malo">Muy malo</IonSelectOption>
-                </IonSelect>
+                  <IonLabel slot="start">1</IonLabel>
+                  <IonLabel slot="end">5</IonLabel>
+                </IonRange>
               </IonItem>
               <IonItem>
-                <IonSelect
+                <IonInput
                   label="Estado de la Piel"
                   labelPlacement="stacked"
                   fill="outline"
-                  interface="action-sheet"
+                  placeholder="Describa el estado de la piel"
                   name="estado_piel"
                   value={formData.estado_piel}
                   onIonChange={handleInputChange}
-                >
-                  <IonSelectOption value="Muy bueno">Muy bueno</IonSelectOption>
-                  <IonSelectOption value="Bueno">Bueno</IonSelectOption>
-                  <IonSelectOption value="Regular">Regular</IonSelectOption>
-                  <IonSelectOption value="Malo">Malo</IonSelectOption>
-                  <IonSelectOption value="Muy malo">Muy malo</IonSelectOption>
-                </IonSelect>
+                />
               </IonItem>
               <IonItem>
                 <IonTextarea
@@ -1378,9 +1381,6 @@ const RellenarFicha: React.FC = () => {
                       </IonSelectOption>
                       <IonSelectOption value="Triple Felina">
                         Triple Felina
-                      </IonSelectOption>
-                      <IonSelectOption value="Quíntuple Canina">
-                        Quíntuple Canina
                       </IonSelectOption>
                       <IonSelectOption value="Séxtuple Canina">
                         Séxtuple Canina
@@ -1577,6 +1577,17 @@ const RellenarFicha: React.FC = () => {
               recetas={recetaMedicaData}
               setRecetas={setRecetaMedicaData}
             />
+
+            <IonButton
+              expand="block"
+              color="primary"
+              href="https://sso.sag.gob.cl:8443/auth/realms/SAG/protocol/openid-connect/auth?client_id=antimicrobianos&redirect_uri=https%3A%2F%2Fantimicrobianos.sag.gob.cl%2F%23%2Fmv%2Fprescripciones&state=f2fdcbe0-4778-4924-89a8-e221d95e857c&response_mode=fragment&response_type=code&scope=openid&nonce=4c4e8780-0c2b-4e76-8eb1-125039234f96"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ marginTop: "16px", marginBottom: "16px" }}
+            >
+              Ir a SAG
+            </IonButton>
 
             <IonList style={{ marginTop: "24px" }}>
               <IonItem>

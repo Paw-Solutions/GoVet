@@ -142,7 +142,7 @@ interface ConsultasActions {
 }
 
 export const useSegmentedData = (initialSegment: string = "tutores") => {
-  // idToken 
+  // idToken
   const { idToken } = useAuth();
 
   // Estados para tutores
@@ -697,7 +697,7 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
   const handleShare = useCallback(async (consulta: ConsultaData) => {
     try {
       console.log("Obteniendo PDF para compartir...");
-      
+
       // Llamar al endpoint que ya existe en el backend
       const blob = await descargarPdfConsulta(consulta.id_consulta, idToken);
 
@@ -705,25 +705,32 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
       if (!blob || blob.size === 0) {
         throw new Error("El PDF descargado está vacío");
       }
-      
-      console.log("Blob descargado, tamaño:", blob.size, "bytes", "tipo:", blob.type);
+
+      console.log(
+        "Blob descargado, tamaño:",
+        blob.size,
+        "bytes",
+        "tipo:",
+        blob.type
+      );
 
       // Nombre del archivo
       const fecha = consulta.fecha_consulta
         ? new Date(consulta.fecha_consulta).toISOString().split("T")[0]
         : new Date().toISOString().split("T")[0];
       const nombrePaciente = consulta.paciente?.nombre || "paciente";
-      
+
       const nombreSeguro = nombrePaciente
-          .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Quita tildes
-          .replace(/[^a-zA-Z0-9]/g, "_"); // Reemplaza no alfanuméricos por _
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "") // Quita tildes
+        .replace(/[^a-zA-Z0-9]/g, "_"); // Reemplaza no alfanuméricos por _
 
       const fileName = `consulta_${nombreSeguro}_${fecha}.pdf`;
 
-      const file = new File([blob], fileName, { 
-              type: "application/pdf",
-              lastModified: Date.now()
-            });
+      const file = new File([blob], fileName, {
+        type: "application/pdf",
+        lastModified: Date.now(),
+      });
 
       // Verificar si el navegador soporta compartir archivos
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -735,26 +742,28 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
         });
         console.log("PDF compartido exitosamente");
       } else {
-        alert("Tu navegador no soporta compartir archivos. Intenta descargar el PDF en su lugar.");
+        alert(
+          "Tu navegador no soporta compartir archivos. Intenta descargar el PDF en su lugar."
+        );
       }
     } catch (err: any) {
       // No mostrar error si el usuario simplemente canceló el share
-      if (err.name === 'AbortError') {
+      if (err.name === "AbortError") {
         console.log("El usuario canceló el compartir");
         return;
       }
-      
+
       // Para cualquier otro error, mostrar en consola pero no alertar al usuario
       // ya que el share pudo haber sido exitoso
       console.error("Error al compartir:", err);
-      
+
       // Solo mostrar alert si es un error crítico (no de permisos o red)
-      if (err.name !== 'NotAllowedError' && err.name !== 'TypeError') {
+      if (err.name !== "NotAllowedError" && err.name !== "TypeError") {
         alert(`Error al compartir el PDF: ${err.message || err}`);
       }
     }
-  }, [])
-  
+  }, []);
+
   const exportConsulta = useCallback(async (consulta: ConsultaData) => {
     try {
       console.log("Descargando PDF de consulta:", consulta.id_consulta);
