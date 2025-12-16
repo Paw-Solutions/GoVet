@@ -27,6 +27,7 @@ interface PacienteItemProps {
   onEdit: () => void;
   disabled?: boolean;
   showTutor?: boolean;
+  editButtonText?: string;
 }
 
 const PacienteItem: React.FC<PacienteItemProps> = ({
@@ -35,6 +36,7 @@ const PacienteItem: React.FC<PacienteItemProps> = ({
   onEdit,
   disabled = false,
   showTutor = true,
+  editButtonText,
 }) => {
   // Función para obtener el color del badge según el sexo
   const getSexColor = (sexo?: string) => {
@@ -189,8 +191,13 @@ const PacienteItem: React.FC<PacienteItemProps> = ({
             onEdit();
           }}
           disabled={disabled}
+          title={editButtonText}
         >
-          <IonIcon icon={pencilOutline} slot="icon-only" size="small" />
+          {editButtonText ? (
+            <span style={{ fontSize: "0.85rem" }}>{editButtonText}</span>
+          ) : (
+            <IonIcon icon={pencilOutline} slot="icon-only" size="small" />
+          )}
         </IonButton>
       </IonButtons>
     </IonItem>

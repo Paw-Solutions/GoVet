@@ -22,6 +22,7 @@ import {
   settingsOutline,
   close,
   addCircleOutline,
+  documentTextOutline,
 } from "ionicons/icons";
 import { useLocation, useHistory } from "react-router-dom";
 import "../styles/BottomTabs.css";
@@ -138,6 +139,15 @@ const BottomTabs: React.FC = () => {
           >
             <IonIcon icon={clipboardOutline} slot="start" />
             <span>Generar Ficha</span>
+          </IonButton>
+          <IonButton
+            fill="solid"
+            expand="block"
+            onClick={() => handleNavigate("/certificados")}
+            className="opcion-menu"
+          >
+            <IonIcon icon={documentTextOutline} slot="start" />
+            <span>Generar Certificado</span>
           </IonButton>
           <IonButton
             fill="solid"

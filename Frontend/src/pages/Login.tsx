@@ -31,15 +31,21 @@ const Login: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      await renderGoogleButton("gsi-login-container", (token) => {
-        // Persistir el token en el contexto
-        loginWithToken(token);
-        // Redirigir al home después del login exitoso
-        history.push("/");
+      await renderGoogleButton("gsi-login-container", async (token) => {
+        // Validar y persistir el token en el contexto
+        const result = await loginWithToken(token);
+
+        if (result.success) {
+          // Redirigir al home después del login exitoso
+          history.push("/");
+        } else {
+          // Mostrar error de validación
+          setError(result.error || "Error al validar las credenciales");
+          setLoading(false);
+        }
       });
     } catch (e: any) {
       setError(e?.message || "Error al iniciar sesión con Google");
-    } finally {
       setLoading(false);
     }
   };
@@ -99,22 +105,33 @@ const Login: React.FC = () => {
 
               {/* Mensaje de error */}
               {error && (
-                <IonText color="danger">
-                  <p className="login-error">{error}</p>
-                </IonText>
+                <div className="login-error-container">
+                  <IonText color="danger">
+                    <p className="login-error">
+                      <strong>Acceso denegado</strong>
+                    </p>
+                    <p className="login-error-detail">{error}</p>
+                    {error.includes("no está autorizado") && (
+                      <p className="login-error-hint">
+                        Por favor, contacta al administrador del sistema para
+                        obtener acceso.
+                      </p>
+                    )}
+                  </IonText>
+                </div>
               )}
             </IonCardContent>
           </IonCard>
 
           {/* Footer informativo */}
-          {/*<div className="login-footer">
+          <div className="login-footer">
             <IonText color="medium">
               <p className="login-footer-text">
-                Al iniciar sesión, aceptas nuestros términos de servicio y
-                política de privacidad
+                ⚠️ Acceso restringido: Solo usuarios autorizados pueden acceder
+                al sistema
               </p>
             </IonText>
-          </div>*/}
+          </div>
         </div>
       </IonContent>
     </IonPage>

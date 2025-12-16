@@ -47,6 +47,7 @@ interface ModalEscogerPacienteProps {
   pacienteSeleccionado?: PacienteData | null; // <-- Cambia aquí
   motivoConsulta?: string;
   onMotivoChange?: (motivo: string) => void;
+  hideMotivo?: boolean; // Ocultar campo de motivo de consulta
 }
 
 interface PaginatedResponse {
@@ -70,8 +71,9 @@ const ModalEscogerPaciente: React.FC<ModalEscogerPacienteProps> = ({
   pacienteSeleccionado,
   motivoConsulta = "",
   onMotivoChange,
+  hideMotivo = false,
 }) => {
-  const {idToken} = useAuth();
+  const { idToken } = useAuth();
   // Estados exactamente iguales a verPacientes
   const [pacientes, setPacientes] = useState<PacienteData[]>([]);
   const [loading, setLoading] = useState(false);
@@ -195,7 +197,8 @@ const ModalEscogerPaciente: React.FC<ModalEscogerPacienteProps> = ({
   };
 
   const handleConfirmarSeleccion = () => {
-    if (pacienteSeleccionadoTemp && motivoTemp.trim()) {
+    const motivoValido = hideMotivo || motivoTemp.trim();
+    if (pacienteSeleccionadoTemp && motivoValido) {
       if (onPacienteSelected && typeof onPacienteSelected === "function") {
         onPacienteSelected(pacienteSeleccionadoTemp); // <-- Retorna el objeto completo
       }
@@ -308,17 +311,19 @@ const ModalEscogerPaciente: React.FC<ModalEscogerPacienteProps> = ({
             </IonItem>
 
             {/* Campo de motivo de consulta */}
-            <IonItem lines="none" style={{ marginTop: "12px" }}>
-              <IonTextarea
-                label="Motivo de la Consulta"
-                labelPlacement="stacked"
-                fill="outline"
-                placeholder="Describa el motivo de la consulta"
-                rows={4}
-                value={motivoTemp}
-                onIonChange={(e) => setMotivoTemp(e.detail.value || "")}
-              />
-            </IonItem>
+            {!hideMotivo && (
+              <IonItem lines="none" style={{ marginTop: "12px" }}>
+                <IonTextarea
+                  label="Motivo de la Consulta"
+                  labelPlacement="stacked"
+                  fill="outline"
+                  placeholder="Describa el motivo de la consulta"
+                  rows={4}
+                  value={motivoTemp}
+                  onIonChange={(e) => setMotivoTemp(e.detail.value || "")}
+                />
+              </IonItem>
+            )}
           </div>
         )}
 
@@ -463,7 +468,9 @@ const ModalEscogerPaciente: React.FC<ModalEscogerPacienteProps> = ({
             <IonButton
               fill="solid"
               onClick={handleConfirmarSeleccion}
-              disabled={!pacienteSeleccionadoTemp || !motivoTemp.trim()}
+              disabled={
+                !pacienteSeleccionadoTemp || (!hideMotivo && !motivoTemp.trim())
+              }
             >
               Confirmar Selección
             </IonButton>

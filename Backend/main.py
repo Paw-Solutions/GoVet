@@ -1469,6 +1469,114 @@ def descargar_pdf_consulta(id_consulta: int, db: Session = Depends(get_db), curr
         }
     )
 
+# Generar certificado de transporte
+@app.get("/pacientes/{id_paciente}/certificado-transporte")
+def descargar_certificado_transporte(id_paciente: int, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
+    from services.pdf_service import generar_certificado_transporte
+    pdf = generar_certificado_transporte(db, id_paciente)
+    return Response(
+        content=pdf,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'attachment; filename="certificado_transporte_{id_paciente}.pdf"'
+        }
+    )
+
+# Generar consentimiento informado
+class ConsentimientoRequest(BaseModel):
+    procedimiento: Optional[str] = None
+    indicaciones: Optional[str] = None
+    objetivos: Optional[str] = None
+    peso: Optional[float] = None
+    autorizaciones_adicionales: Optional[List[str]] = None
+    testigo_requerido: Optional[bool] = False
+
+@app.post("/pacientes/{id_paciente}/consentimiento-informado")
+def descargar_consentimiento_informado(
+    id_paciente: int,
+    request: ConsentimientoRequest,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+):
+    from services.pdf_service import generar_consentimiento_informado
+    pdf = generar_consentimiento_informado(
+        db=db,
+        id_paciente=id_paciente,
+        procedimiento=request.procedimiento,
+        indicaciones=request.indicaciones,
+        objetivos=request.objetivos,
+        peso=request.peso,
+        autorizaciones_adicionales=request.autorizaciones_adicionales,
+        testigo_requerido=request.testigo_requerido
+    )
+    return Response(
+        content=pdf,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'attachment; filename="consentimiento_informado_{id_paciente}.pdf"'
+        }
+    )
+
+# Generar orden de exámenes
+class OrdenExamenesRequest(BaseModel):
+    id_consulta: Optional[int] = None
+    examenes: Optional[List[dict]] = None
+    observaciones: Optional[str] = None
+
+@app.post("/pacientes/{id_paciente}/orden-examenes")
+def descargar_orden_examenes(
+    id_paciente: int,
+    request: OrdenExamenesRequest,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+):
+    from services.pdf_service import generar_orden_examenes
+    pdf = generar_orden_examenes(
+        db=db,
+        id_paciente=id_paciente,
+        id_consulta=request.id_consulta,
+        examenes=request.examenes,
+        observaciones=request.observaciones
+    )
+    return Response(
+        content=pdf,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'attachment; filename="orden_examenes_{id_paciente}.pdf"'
+        }
+    )
+
+# Generar receta médica
+class RecetaMedicaRequest(BaseModel):
+    id_consulta: Optional[int] = None
+    recetas: Optional[List[dict]] = None
+    observaciones: Optional[str] = None
+    fecha_receta: Optional[str] = None
+
+@app.post("/pacientes/{id_paciente}/receta-medica")
+def descargar_receta_medica(
+    id_paciente: int,
+    request: RecetaMedicaRequest,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+):
+    from services.pdf_service import generar_receta_medica
+    pdf = generar_receta_medica(
+        db=db,
+        id_paciente=id_paciente,
+        id_consulta=request.id_consulta,
+        recetas=request.recetas,
+        observaciones=request.observaciones,
+        fecha_receta=request.fecha_receta
+    )
+    return Response(
+        content=pdf,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'attachment; filename="receta_medica_{id_paciente}.pdf"'
+        }
+    )
+
 # async def envia(email: EmailSchema) -> JSONResponse:
 #     html = f"""<p>{email.cuerpo}</p>"""
 

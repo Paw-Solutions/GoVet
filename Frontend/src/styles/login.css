@@ -138,14 +138,35 @@
    MENSAJES
    ========================================== */
 
-.login-error {
-  text-align: center;
-  font-size: var(--font-size-sm);
+.login-error-container {
   margin-top: var(--spacing-md);
-  padding: var(--spacing-sm);
+  padding: var(--spacing-md);
   background: rgba(var(--ion-color-danger-rgb), 0.1);
   border-radius: var(--radius-md);
+  border-left: 4px solid var(--ion-color-danger);
   animation: shake 0.5s ease-out;
+}
+
+.login-error {
+  text-align: center;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  margin: 0 0 var(--spacing-xs) 0;
+}
+
+.login-error-detail {
+  text-align: center;
+  font-size: var(--font-size-sm);
+  margin: var(--spacing-xs) 0;
+  line-height: var(--line-height-relaxed);
+}
+
+.login-error-hint {
+  text-align: center;
+  font-size: var(--font-size-xs);
+  margin: var(--spacing-sm) 0 0 0;
+  font-style: italic;
+  opacity: 0.9;
 }
 
 /* ==========================================

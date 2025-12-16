@@ -124,6 +124,172 @@ def generar_certificado_transporte(db: Session, id_paciente: int) -> bytes:
     return pdf_bytes
 
 
+# Funcion para generar consentimiento informado
+def generar_consentimiento_informado(
+    db: Session, 
+    id_paciente: int,
+    procedimiento: str = None,
+    indicaciones: str = None,
+    objetivos: str = None,
+    peso: float = None,
+    autorizaciones_adicionales: list = None,
+    testigo_requerido: bool = False
+) -> bytes:
+    # Buscar paciente con sus relaciones
+    paciente = db.query(models.Paciente).options(
+        joinedload(models.Paciente.raza).joinedload(models.Raza.especie),
+        joinedload(models.Paciente.tutores).joinedload(models.TutorPaciente.tutor)
+    ).filter(models.Paciente.id_paciente == id_paciente).first()
+    
+    if not paciente:
+        raise HTTPException(status_code=404, detail="Paciente no encontrado")
+    
+    # Obtener tutor (el primero asociado)
+    if not paciente.tutores or len(paciente.tutores) == 0:
+        raise HTTPException(status_code=404, detail="El paciente no tiene tutor asociado")
+    
+    tutor = paciente.tutores[0].tutor
+    
+    # Información del médico (hardcoded por ahora, se puede parametrizar)
+    medico = {
+        "nombre": "Dra. Daniela Alejandra Otárola Arancibia",
+        "rut": "16.372.666-1",
+        "titulo": "Médica Veterinaria"
+    }
+    
+    # Renderizar template
+    template = env.get_template("consentimiento_informado_pdf.html")
+    html = template.render(
+        paciente=paciente,
+        tutor=tutor,
+        medico=medico,
+        procedimiento=procedimiento,
+        indicaciones=indicaciones,
+        objetivos=objetivos,
+        peso=peso,
+        autorizaciones_adicionales=autorizaciones_adicionales or [],
+        testigo_requerido=testigo_requerido,
+        edad=_edad(paciente.fecha_nacimiento) if paciente.fecha_nacimiento else "—",
+        sexo=_format_sexo(paciente.sexo) if paciente.sexo else "—",
+        fecha_generacion=datetime.now().strftime("%d-%m-%Y %H:%M")
+    )
+    
+    pdf_bytes = HTML(string=html).write_pdf()
+    return pdf_bytes
+
+
+# Funcion para generar orden de exámenes
+def generar_orden_examenes(
+    db: Session,
+    id_paciente: int,
+    id_consulta: int = None,
+    examenes: list = None,
+    observaciones: str = None
+) -> bytes:
+    # Buscar paciente con sus relaciones
+    paciente = db.query(models.Paciente).options(
+        joinedload(models.Paciente.raza).joinedload(models.Raza.especie),
+        joinedload(models.Paciente.tutores).joinedload(models.TutorPaciente.tutor)
+    ).filter(models.Paciente.id_paciente == id_paciente).first()
+    
+    if not paciente:
+        raise HTTPException(status_code=404, detail="Paciente no encontrado")
+    
+    # Obtener tutor (el primero asociado)
+    if not paciente.tutores or len(paciente.tutores) == 0:
+        raise HTTPException(status_code=404, detail="El paciente no tiene tutor asociado")
+    
+    tutor = paciente.tutores[0].tutor
+    
+    # Consulta opcional
+    consulta = None
+    if id_consulta:
+        consulta = db.query(models.Consulta).filter(
+            models.Consulta.id_consulta == id_consulta
+        ).first()
+    
+    # Información del médico
+    medico = {
+        "nombre": "Dra. Daniela Alejandra Otárola Arancibia",
+        "rut": "16.372.666-1",
+        "titulo": "Médica Veterinaria"
+    }
+    
+    # Renderizar template
+    template = env.get_template("orden_de_examenes_pdf.html")
+    html = template.render(
+        paciente=paciente,
+        tutor=tutor,
+        consulta=consulta,
+        medico=medico,
+        examenes=examenes or [],
+        observaciones=observaciones,
+        edad=_edad(paciente.fecha_nacimiento) if paciente.fecha_nacimiento else "—",
+        sexo=_format_sexo(paciente.sexo) if paciente.sexo else "—",
+        fecha_generacion=datetime.now().strftime("%d-%m-%Y %H:%M")
+    )
+    
+    pdf_bytes = HTML(string=html).write_pdf()
+    return pdf_bytes
+
+
+# Funcion para generar receta médica
+def generar_receta_medica(
+    db: Session,
+    id_paciente: int,
+    id_consulta: int = None,
+    recetas: list = None,
+    observaciones: str = None,
+    fecha_receta: str = None
+) -> bytes:
+    # Buscar paciente con sus relaciones
+    paciente = db.query(models.Paciente).options(
+        joinedload(models.Paciente.raza).joinedload(models.Raza.especie),
+        joinedload(models.Paciente.tutores).joinedload(models.TutorPaciente.tutor)
+    ).filter(models.Paciente.id_paciente == id_paciente).first()
+    
+    if not paciente:
+        raise HTTPException(status_code=404, detail="Paciente no encontrado")
+    
+    # Obtener tutor (el primero asociado)
+    if not paciente.tutores or len(paciente.tutores) == 0:
+        raise HTTPException(status_code=404, detail="El paciente no tiene tutor asociado")
+    
+    tutor = paciente.tutores[0].tutor
+    
+    # Consulta opcional
+    consulta = None
+    if id_consulta:
+        consulta = db.query(models.Consulta).filter(
+            models.Consulta.id_consulta == id_consulta
+        ).first()
+    
+    # Información del médico
+    medico = {
+        "nombre": "Dra. Daniela Alejandra Otárola Arancibia",
+        "rut": "16.372.666-1",
+        "titulo": "Médica Veterinaria"
+    }
+    
+    # Renderizar template
+    template = env.get_template("receta_pdf.html")
+    html = template.render(
+        paciente=paciente,
+        tutor=tutor,
+        consulta=consulta,
+        medico=medico,
+        recetas=recetas or [],
+        observaciones=observaciones,
+        fecha_receta=fecha_receta,
+        edad=_edad(paciente.fecha_nacimiento) if paciente.fecha_nacimiento else "—",
+        sexo=_format_sexo(paciente.sexo) if paciente.sexo else "—",
+        fecha_generacion=datetime.now().strftime("%d-%m-%Y %H:%M")
+    )
+    
+    pdf_bytes = HTML(string=html).write_pdf()
+    return pdf_bytes
+
+
 # ==================== FUNCIONES AUXILIARES PARA TESTING ====================
 
 def generar_pdf_consulta_desde_datos(datos: dict) -> bytes:
