@@ -12,7 +12,7 @@ from fastapi import HTTPException, status, Depends
 from auth import get_current_user
 
 # URL base del microservicio; configurable por env.
-WHATSAPP_MS_BASE_URL = os.getenv("WHATSAPP_MS_BASE_URL", "http://whatsapp-ms:3000")
+WHATSAPP_MS_BASE_URL = os.getenv("WHATSAPP_MS_BASE_URL", "http://whatsapp-ms:6007")
 
 # Timeouts razonables: 3s connect, 5s total
 DEFAULT_TIMEOUT = httpx.Timeout(timeout=5.0, connect=3.0)
