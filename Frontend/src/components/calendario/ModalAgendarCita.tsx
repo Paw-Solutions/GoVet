@@ -127,7 +127,10 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
       const cargarDatosIniciales = async () => {
         setCargandoPacientes(true);
         try {
-          const pacientes = await obtenerPacientesPorTutor(tutorInicial.rut, idToken);
+          const pacientes = await obtenerPacientesPorTutor(
+            tutorInicial.rut,
+            idToken
+          );
           setPacientesDisponibles(pacientes);
 
           // Si también hay pacienteInicial, pre-seleccionarlo y saltar al paso 3
@@ -172,7 +175,12 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
 
     setBuscandoTutores(true);
     try {
-      const response = await obtenerTutoresPaginados(1, 20, textoBusqueda, idToken);
+      const response = await obtenerTutoresPaginados(
+        1,
+        20,
+        textoBusqueda,
+        idToken
+      );
       setTutoresEncontrados(response.tutores);
     } catch (error) {
       console.error("Error buscando tutores:", error);
@@ -488,11 +496,18 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
       const fechaInicio = new Date(fechaHora);
       const fechaTermino = new Date(fechaHoraTermino);
 
-      // Obtener nombres de los pacientes seleccionados
-      const nombresPacientes = pacientesDisponibles
-        .filter((p) => pacientesSeleccionados.includes(p.id_paciente))
+      // Obtener nombres e IDs de los pacientes seleccionados
+      const pacientesPrincipales = pacientesDisponibles.filter((p) =>
+        pacientesSeleccionados.includes(p.id_paciente)
+      );
+      const nombresPacientes = pacientesPrincipales
         .map((p) => p.nombre)
         .join(", ");
+
+      // Guardar IDs en formato oculto para uso interno (separados por comas)
+      const idsPacientes = pacientesPrincipales
+        .map((p) => p.id_paciente)
+        .join(",");
 
       // Construir el evento para Google Calendar
       const nuevoEvento: CalendarEventCreate = {
@@ -502,7 +517,7 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
           tutorSeleccionado!.nombre
         } ${tutorSeleccionado!.apellido_paterno}${
           notas ? "\n\nNotas: " + notas : ""
-        }`,
+        }\n\n<!-- IDS:${idsPacientes} -->`,
         start: fechaInicio.toISOString(),
         end: fechaTermino.toISOString(),
         attendees: undefined, //tutorSeleccionado?.email
@@ -669,11 +684,12 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
 
                   await sendWhatsAppNotification(
                     {
-                    numero: numeroFormateado,
-                    nombre: nombreCompleto,
-                    paciente: nombresPacientes,
-                    fecha: fechaFormateada,
-                    hora: `${horaInicioFormateada} - ${horaTerminoFormateada}`,},
+                      numero: numeroFormateado,
+                      nombre: nombreCompleto,
+                      paciente: nombresPacientes,
+                      fecha: fechaFormateada,
+                      hora: `${horaInicioFormateada} - ${horaTerminoFormateada}`,
+                    },
                     idToken
                   );
 
