@@ -117,6 +117,7 @@ interface ConsultasState {
   searchTimeout: NodeJS.Timeout | null;
   selectedConsulta: ConsultaData | null;
   showConsultaInfo: boolean;
+  showConsultaEdit: boolean;
   sortOrder: "desc" | "asc";
 }
 
@@ -131,9 +132,11 @@ interface ConsultasActions {
   refresh: (event?: CustomEvent) => Promise<void>;
   viewConsulta: (consulta: ConsultaData) => void;
   editConsulta: (consulta: ConsultaData) => void;
+  editConsultaFromInfo: () => void;
   exportConsulta: (consulta: ConsultaData) => void;
   handleShare: (consulta: ConsultaData) => Promise<void>;
   closeConsultaInfo: () => void;
+  closeConsultaEdit: () => void;
   retry: () => void;
   handleSortOrderChange: (newOrder: "desc" | "asc") => void;
 }
@@ -181,6 +184,7 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
     searchTimeout: null,
     selectedConsulta: null,
     showConsultaInfo: false,
+    showConsultaEdit: false,
     sortOrder: "desc",
   });
 
@@ -660,10 +664,34 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
     },
     [loadConsultasData, consultasState.busqueda]
   );
-
   const editConsulta = useCallback((consulta: ConsultaData) => {
-    console.log("Editar consulta:", consulta);
-    // Aqui va la logica d edicion k aun no se implementa ups
+    setConsultasState((prev) => ({
+      ...prev,
+      selectedConsulta: consulta,
+      showConsultaInfo: false,
+      showConsultaEdit: true,
+    }));
+  }, []);
+
+  const editConsultaFromInfo = useCallback(() => {
+    setConsultasState((prev) => ({
+      ...prev,
+      showConsultaInfo: false,
+      showConsultaEdit: true,
+    }));
+  }, []);
+
+  const closeConsultaEdit = useCallback(() => {
+    setConsultasState((prev) => ({
+      ...prev,
+      showConsultaEdit: false,
+    }));
+    setTimeout(() => {
+      setConsultasState((prev) => ({
+        ...prev,
+        selectedConsulta: null,
+      }));
+    }, 150);
   }, []);
 
   const handleShare = useCallback(async (consulta: ConsultaData) => {
@@ -838,9 +866,11 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
     refresh: refreshConsultas,
     viewConsulta,
     editConsulta,
+    editConsultaFromInfo,
     exportConsulta,
     handleShare,
     closeConsultaInfo,
+    closeConsultaEdit,
     retry: retryConsultas,
     handleSortOrderChange,
   };
@@ -880,6 +910,7 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
       hasMoreData: consultasState.hasMoreData,
       selectedConsulta: consultasState.selectedConsulta,
       showConsultaInfo: consultasState.showConsultaInfo,
+      showConsultaEdit: consultasState.showConsultaEdit,
       sortOrder: consultasState.sortOrder,
       // Acciones
       ...consultasActions,

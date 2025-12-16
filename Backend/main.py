@@ -969,6 +969,37 @@ def crear_consulta(consulta: ConsultaCreate, db: Session = Depends(get_db), curr
     db.refresh(db_consulta)
     return db_consulta
 
+# Ruta PUT para actualizar una consulta existente
+@app.put("/consultas/{id_consulta}", response_model=ConsultaResponse)
+def actualizar_consulta(
+    id_consulta: int, 
+    consulta: ConsultaCreate, 
+    db: Session = Depends(get_db), 
+    current_user: dict = Depends(get_current_user)
+):
+    # Buscar la consulta existente
+    db_consulta = db.query(models.Consulta).filter(
+        models.Consulta.id_consulta == id_consulta
+    ).first()
+    
+    if not db_consulta:
+        raise HTTPException(status_code=404, detail="Consulta no encontrada")
+    
+    # Actualizar los campos de la consulta
+    for key, value in consulta.dict(exclude_unset=True).items():
+        setattr(db_consulta, key, value)
+    
+    db.commit()
+    db.refresh(db_consulta)
+    
+    # Cargar relaciones para la respuesta
+    db_consulta = db.query(models.Consulta)\
+        .options(selectinload(models.Consulta.recetas))\
+        .options(selectinload(models.Consulta.tratamientos).selectinload(models.ConsultaTratamiento.tratamiento))\
+        .filter(models.Consulta.id_consulta == id_consulta).first()
+    
+    return ConsultaResponse.from_orm_with_tratamientos(db_consulta)
+
 # Ruta GET para obtener una consulta por su ID
 @app.get("/consultas/{id_consulta}", response_model=ConsultaResponse)
 def obtener_consulta_por_id(id_consulta: int, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):

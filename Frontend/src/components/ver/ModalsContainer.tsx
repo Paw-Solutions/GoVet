@@ -7,6 +7,7 @@ import ModalInfoPaciente from "../verPacientes/infoPaciente";
 import ModalInfoFicha from "../verFichas/infoFicha";
 import ModalEditarPaciente from "../editar/editarPaciente";
 import ModalEditarTutor from "../editar/editarTutor";
+import ModalEditarConsulta from "../editar/editarConsulta";
 
 interface ModalsContainerProps {
   // Props para modal de tutores
@@ -25,6 +26,7 @@ interface ModalsContainerProps {
   showConsultaInfo: boolean;
   selectedConsulta: ConsultaData | null;
   onCloseConsultaInfo: () => void;
+  onEditConsultaFromInfo?: () => void; // Nueva prop para editar desde info
 
   // Props para modal edicion tutores
   showTutorEdit?: boolean;
@@ -33,6 +35,10 @@ interface ModalsContainerProps {
   // Props para modal edicion pacientes
   showPacienteEdit?: boolean;
   onClosePacienteEdit?: () => void;
+
+  // Props para modal edicion consultas
+  showConsultaEdit?: boolean;
+  onCloseConsultaEdit?: () => void;
 
   // Navegación entre modales
   onViewTutorFromPaciente?: (tutorData: TutorData) => void;
@@ -57,6 +63,7 @@ const ModalsContainer: React.FC<ModalsContainerProps> = ({
   showConsultaInfo,
   selectedConsulta,
   onCloseConsultaInfo,
+  onEditConsultaFromInfo,
 
   // Editar tutores
   showTutorEdit,
@@ -65,6 +72,10 @@ const ModalsContainer: React.FC<ModalsContainerProps> = ({
   // Editar pacientes
   showPacienteEdit,
   onClosePacienteEdit,
+
+  // Editar consultas
+  showConsultaEdit,
+  onCloseConsultaEdit,
 
   // Navegación entre modales
   onViewTutorFromPaciente,
@@ -97,6 +108,7 @@ const ModalsContainer: React.FC<ModalsContainerProps> = ({
         isOpen={showConsultaInfo}
         onDismiss={onCloseConsultaInfo}
         consulta={selectedConsulta}
+        onEdit={onEditConsultaFromInfo}
       />
 
       {/* Modal de edicion de tutor*/}
@@ -111,6 +123,13 @@ const ModalsContainer: React.FC<ModalsContainerProps> = ({
         isOpen={!!showPacienteEdit}
         onDismiss={onClosePacienteEdit ?? (() => {})}
         paciente={selectedPaciente}
+      />
+
+      {/* Modal de edicion de consulta*/}
+      <ModalEditarConsulta
+        isOpen={!!showConsultaEdit}
+        onDismiss={onCloseConsultaEdit ?? (() => {})}
+        consulta={selectedConsulta}
       />
     </>
   );

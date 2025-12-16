@@ -39,6 +39,16 @@ const Ver: React.FC = () => {
     };
   }, [tutores]);
 
+  useEffect(() => {
+    const handler = () => {
+      consultas.refresh();
+    };
+    window.addEventListener("consultas:updated", handler as EventListener);
+    return () => {
+      window.removeEventListener("consultas:updated", handler as EventListener);
+    };
+  }, [consultas]);
+
   return (
     <IonPage>
       <PageHeader
@@ -144,12 +154,16 @@ const Ver: React.FC = () => {
         showConsultaInfo={consultas.showConsultaInfo}
         selectedConsulta={consultas.selectedConsulta}
         onCloseConsultaInfo={consultas.closeConsultaInfo}
+        onEditConsultaFromInfo={consultas.editConsultaFromInfo}
         // Editar tutores
         showTutorEdit={tutores.showTutorEdit}
         onCloseTutorEdit={tutores.closeTutorEdit}
         // Editar pacientes
         showPacienteEdit={pacientes.showPacienteEdit}
         onClosePacienteEdit={pacientes.closePacienteEdit}
+        // Editar consultas
+        showConsultaEdit={consultas.showConsultaEdit}
+        onCloseConsultaEdit={consultas.closeConsultaEdit}
         // Navegación entre modales
         onViewTutorFromPaciente={pacientes.viewTutorFromPaciente}
         onViewConsultaFromPaciente={pacientes.viewConsultaFromPaciente}

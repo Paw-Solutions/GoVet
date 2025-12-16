@@ -141,12 +141,12 @@ const API_URL = import.meta.env.VITE_API_URL || "/api";
 // Ruta para crear una nueva consulta/ficha
 export async function crearConsulta(
   formData: ConsultaData,
-  idToken?: string | null 
+  idToken?: string | null
 ) {
   try {
     console.log("Enviando datos al servidor:", formData);
     const response = await fetchWithAuth(
-      `${API_URL}/consultas/`, 
+      `${API_URL}/consultas/`,
       {
         method: "POST",
         headers: {
@@ -170,13 +170,45 @@ export async function crearConsulta(
   }
 }
 
+// Ruta para actualizar una consulta/ficha existente
+export async function actualizarConsulta(
+  id_consulta: number,
+  formData: ConsultaData,
+  idToken?: string | null
+) {
+  try {
+    console.log("Actualizando consulta:", id_consulta, formData);
+    const response = await fetchWithAuth(
+      `${API_URL}/consultas/${id_consulta}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      },
+      idToken
+    );
+
+    if (!response.ok) {
+      throw new Error(`Error en la petición: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("Consulta actualizada:", data);
+    return data;
+  } catch (error) {
+    console.error("Error actualizando consulta:", error);
+    throw error;
+  }
+}
 
 export async function obtenerConsultasPaginadas(
   page: number = 1,
   limit: number = 50,
   search?: string,
   sortOrder: "desc" | "asc" = "desc",
-  idToken?: string | null 
+  idToken?: string | null
 ): Promise<PaginatedResponse> {
   try {
     const params = new URLSearchParams({
@@ -190,7 +222,7 @@ export async function obtenerConsultasPaginadas(
     }
 
     console.log(`Obteniendo consultas página ${page}...`);
-    const response = await fetchWithAuth( 
+    const response = await fetchWithAuth(
       `${API_URL}/consultas/paginated/?${params}`,
       {
         method: "GET",
@@ -198,7 +230,7 @@ export async function obtenerConsultasPaginadas(
           "Content-Type": "application/json",
         },
       },
-      idToken 
+      idToken
     );
 
     if (!response.ok) {
@@ -224,7 +256,6 @@ export async function obtenerConsultaPorId(
   idToken?: string | null
 ): Promise<ConsultaData> {
   try {
-
     const response = await fetchWithAuth(
       `${API_URL}/consulta/${id_consulta}`,
       {

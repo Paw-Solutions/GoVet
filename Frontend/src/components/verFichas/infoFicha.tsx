@@ -57,12 +57,14 @@ interface ModalInfoFichaProps {
   isOpen: boolean;
   onDismiss: () => void;
   consulta: ConsultaData | null;
+  onEdit?: () => void;
 }
 
 const ModalInfoFicha: React.FC<ModalInfoFichaProps> = ({
   isOpen,
   onDismiss,
   consulta,
+  onEdit,
 }) => {
   // Función segura para cerrar el modal
   const handleDismiss = () => {
@@ -176,6 +178,11 @@ const ModalInfoFicha: React.FC<ModalInfoFichaProps> = ({
         <IonToolbar>
           <IonTitle>Ficha Clínica</IonTitle>
           <IonButtons slot="end">
+            {onEdit && (
+              <IonButton fill="clear" onClick={onEdit}>
+                <IonIcon icon={colorWandOutline} />
+              </IonButton>
+            )}
             <IonButton fill="clear" onClick={handleDismiss}>
               <IonIcon icon={closeOutline} />
             </IonButton>
