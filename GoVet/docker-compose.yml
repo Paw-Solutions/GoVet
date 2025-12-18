@@ -1,0 +1,53 @@
+services:
+  db:
+    image: postgres:15
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "5007:5432"
+    expose:
+      - "6007"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./Dbase/generador_schema.sql:/docker-entrypoint-initdb.d/generador_schema.sql
+
+  whatsapp-ms:
+    build:
+      context: ./Whatsapp-ms
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    volumes:
+      - whatsapp_auth:/app/auth_info
+
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "4007:4007"
+    volumes:
+      - ./Backend:/app
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile.dev
+    env_file:
+      - .env
+    ports:
+      - "3007:3007"
+    volumes:
+      - ./Frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+      
+
+volumes:
+  db_data:
+  whatsapp_auth:

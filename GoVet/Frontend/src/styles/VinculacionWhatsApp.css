@@ -1,0 +1,297 @@
+/* VinculacionWhatsApp.css - Estilos específicos para el componente de vinculación WhatsApp */
+
+/* Contenedor principal de la card */
+.whatsapp-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Header de la card */
+.whatsapp-card-header-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.whatsapp-icon {
+  font-size: 32px;
+}
+
+/* Estado: Loading */
+.whatsapp-loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  gap: 16px;
+}
+
+.whatsapp-loading-container ion-spinner {
+  --color: var(--ion-color-primary);
+  width: 48px;
+  height: 48px;
+}
+
+.whatsapp-loading-container p {
+  margin: 0;
+  font-size: 14px;
+}
+
+/* Estado: Error */
+.whatsapp-error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 20px;
+  gap: 16px;
+  text-align: center;
+}
+
+.whatsapp-error-container ion-icon {
+  font-size: 64px;
+}
+
+.whatsapp-error-container h3 {
+  margin: 8px 0;
+  font-weight: 600;
+}
+
+.whatsapp-error-container p {
+  margin: 4px 0;
+  font-size: 14px;
+}
+
+/* Estado: Connected */
+.whatsapp-status-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 20px;
+  gap: 16px;
+  text-align: center;
+}
+
+.whatsapp-status-container ion-icon {
+  font-size: 64px;
+}
+
+.whatsapp-status-container ion-badge {
+  font-size: 14px;
+  padding: 8px 16px;
+}
+
+.whatsapp-status-container h3 {
+  margin: 8px 0;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.whatsapp-status-container p {
+  margin: 4px 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ion-color-medium);
+}
+
+/* Grupo de botones en estado conectado */
+.whatsapp-button-group {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+/* Botones de acción con iconos más pequeños */
+.whatsapp-action-button ion-icon {
+  font-size: 18px;
+  margin-right: 4px;
+}
+
+/* Estado: Disconnected (QR) */
+.whatsapp-qr-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  gap: 20px;
+  text-align: center;
+}
+
+.whatsapp-qr-container ion-badge {
+  font-size: 14px;
+  padding: 8px 16px;
+}
+
+.whatsapp-qr-container h3 {
+  margin: 8px 0 4px;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+/* Instrucciones del QR */
+.whatsapp-qr-instructions {
+  font-size: 14px;
+  line-height: 1.8;
+  text-align: left;
+  margin: 8px 0;
+  padding: 12px 16px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid var(--ion-color-primary);
+  width: 100%;
+  max-width: 360px;
+}
+
+.whatsapp-qr-instructions strong {
+  color: var(--ion-color-primary);
+  font-weight: 600;
+}
+
+/* Contenedor del código QR */
+.whatsapp-qr-code-wrapper {
+  background-color: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 12px 0;
+  transition: box-shadow 0.3s ease;
+}
+
+.whatsapp-qr-code-wrapper:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.whatsapp-qr-code-wrapper img {
+  display: block;
+  border-radius: 4px;
+}
+
+/* Hint del QR */
+.whatsapp-qr-hint {
+  font-size: 13px;
+  color: var(--ion-color-medium);
+  margin: 0;
+  font-style: italic;
+}
+
+/* Warning de expiración del QR */
+.whatsapp-qr-warning {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background-color: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 8px;
+  margin: 12px 0;
+  max-width: 360px;
+}
+
+.whatsapp-qr-warning ion-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.whatsapp-qr-warning p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: left;
+}
+
+/* Animación de fade-in para cambios de estado */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.whatsapp-loading-container,
+.whatsapp-error-container,
+.whatsapp-status-container,
+.whatsapp-qr-container {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Estilos para el IonAlert personalizado de desvinculación */
+.whatsapp-unlink-alert {
+  --backdrop-opacity: 0.6;
+}
+
+.whatsapp-unlink-alert .alert-wrapper {
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.whatsapp-unlink-alert .alert-head {
+  padding: 20px 20px 12px;
+}
+
+.whatsapp-unlink-alert .alert-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--ion-color-warning);
+}
+
+.whatsapp-unlink-alert .alert-sub-title {
+  font-size: 14px;
+  color: var(--ion-color-medium);
+  margin-top: 4px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+  .whatsapp-qr-code-wrapper {
+    padding: 16px;
+  }
+
+  .whatsapp-qr-code-wrapper img {
+    width: 240px !important;
+    height: 240px !important;
+  }
+
+  .whatsapp-qr-instructions {
+    font-size: 13px;
+    padding: 10px 14px;
+  }
+
+  .whatsapp-status-container h3,
+  .whatsapp-qr-container h3 {
+    font-size: 16px;
+  }
+
+  .whatsapp-status-container p,
+  .whatsapp-qr-container p {
+    font-size: 13px;
+  }
+}
+
+/* Modo oscuro */
+@media (prefers-color-scheme: dark) {
+  .whatsapp-qr-instructions {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-left-color: var(--ion-color-primary);
+  }
+
+  .whatsapp-qr-code-wrapper {
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  .whatsapp-qr-code-wrapper:hover {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+  }
+}

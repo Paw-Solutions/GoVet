@@ -1,0 +1,175 @@
+services:
+  # ==========================================
+  # BASE DE DATOS (Genérico para PG o MySQL)
+  # ==========================================
+  database:
+    image: postgres:15
+    container_name: grupo7_GoVet_db
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      # Mapeo de variables genéricas a específicas de motor
+      # Postgres
+      POSTGRES_USER: pawsolutions
+      POSTGRES_PASSWORD: garrita
+      POSTGRES_DB: govet
+    volumes:
+      - db_data:/var/lib/postgresql/data # Para Postgres
+      # Script de inicio opcional (si existe en la carpeta)
+      - ./Dbase/generador_schema.sql:/docker-entrypoint-initdb.d/generador_schema.sql
+    networks:
+      - red_taller_software
+    # Límites de recursos para evitar saturar el Host
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1G
+    # Configuración de Logs (Rotación automática)
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        tag: "{{.Name}}"
+    # Etiquetas para monitoreo (Loki/Grafana)
+    labels:
+      - "org.uach.group=grupo7"
+      - "org.uach.project=GoVet"
+      - "org.uach.service=database"
+      - "logging=promtail" 
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pawsolutions -d govet"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+
+  # ==========================================
+  # BACKEND
+  # ==========================================
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: ./Dockerfile
+    container_name: grupo7_GoVet_backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    expose:
+      - 4007
+    depends_on:
+      database:
+        condition: service_healthy
+    networks:
+      - red_taller_software
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 700M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        tag: "{{.Name}}"
+    labels:
+      - "org.uach.group=grupo7"
+      - "org.uach.project=GoVet"
+      - "org.uach.service=backend"
+      - "logging=promtail"
+
+  # ==========================================
+  # FRONTEND
+  # ==========================================
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: ./Dockerfile.prod
+      args:
+        VITE_GOOGLE_CLIENT_ID: ${VITE_GOOGLE_CLIENT_ID}
+        VITE_API_URL: ${VITE_API_URL}
+    container_name: grupo7_GoVet_frontend
+    restart: unless-stopped
+    env_file:
+      - .env
+    expose:
+      - 3007
+    depends_on:
+      - backend
+    networks:
+      - red_taller_software
+    deploy:
+      resources:
+        limits:
+          cpus: "0.30"
+          memory: 400M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        tag: "{{.Name}}"
+    labels:
+      - "org.uach.group=grupo7"
+      - "org.uach.project=GoVet"
+      - "org.uach.service=frontend"
+      - "logging=promtail"
+      
+
+  # ==========================================
+  # WHATSAPP MICRO-SERVICE
+  # ==========================================
+  whatsapp-ms:
+    build:
+      context: ./Whatsapp-ms
+      dockerfile: Dockerfile
+    container_name: grupo7_GoVet_whatsapp_ms
+    restart: unless-stopped
+    volumes:
+      - whatsapp_auth:/app/auth_info
+    networks:
+      - red_taller_software
+    depends_on:
+      - backend
+    deploy:
+      resources:
+        limits:
+          cpus: "0.30"
+          memory: 400M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        tag: "{{.Name}}"
+    labels:
+      - "org.uach.group=grupo7"
+      - "org.uach.project=GoVet"
+      - "org.uach.service=whatsapp-ms"
+      - "logging=promtail"
+
+  # ==========================================
+  # SERVICIOS OPCIONALES (Redis, Celery, etc)
+  # Descomentar si el grupo lo requiere
+  # ==========================================
+  # redis:
+  #   image: redis:alpine
+  #   container_name: ${GROUP}_${PROJECT}_redis
+  #   networks:
+  #     - red_taller_software
+  #   labels:
+  #     - "org.uach.group=${GROUP}"
+  #     - "org.uach.service=redis"
+
+volumes:
+  db_data:
+    name: grupo7_GoVet_db_data
+  whatsapp_auth:
+    name: grupo7_GoVet_whatsapp_auth
+
+networks:
+  red_taller_software:
+    external: true

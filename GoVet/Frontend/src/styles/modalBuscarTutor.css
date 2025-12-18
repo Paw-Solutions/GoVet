@@ -1,0 +1,205 @@
+/* Contenedor principal del modal */
+.modal-buscar-tutor {
+  --ion-background-color: var(--color-light);
+}
+
+/* Barra de búsqueda sticky */
+.modal-search-container {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: var(--ion-background-color);
+  padding: var(--spacing-md);
+  border-bottom: 1px solid var(--border-color-light);
+}
+
+.modal-search-container ion-searchbar {
+  --background: var(--background-color);
+  --border-radius: var(--radius-lg);
+  --box-shadow: var(--shadow-sm);
+}
+
+/* Tutor seleccionado fijo */
+.modal-selected-tutor {
+  position: fixed;
+  top: 9rem; /* Altura del header + barra de búsqueda */
+  left: 0;
+  right: 0;
+  z-index: 9;
+  background-color: var(--ion-background-color);
+  padding: 0 var(--spacing-md) var(--spacing-md) var(--spacing-md);
+  border-bottom: 1px solid var(--border-color-light);
+  box-shadow: var(--shadow-sm);
+}
+
+.modal-selected-tutor h3 {
+  margin: 0 0 var(--spacing-sm) 0;
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-md);
+  color: var(--color-primary);
+}
+
+.modal-selected-item {
+  --background: linear-gradient(
+    145deg,
+    rgba(220, 138, 221, 0.08),
+    rgba(220, 138, 221, 0.12)
+  );
+  --border-radius: var(--radius-lg);
+  --min-height: 3.75rem;
+  border: 2px solid var(--color-primary);
+  margin: 0;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Agregar padding-top al contenido cuando hay tutor seleccionado */
+.modal-tutores-list.with-selected-tutor {
+  padding-top: 7.5rem; /* Espacio para el tutor seleccionado fijo */
+}
+
+/* Estados de carga, error y vacío */
+.modal-loading-state,
+.modal-error-state,
+.modal-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--spacing-2xl) var(--spacing-md);
+}
+
+.modal-loading-state ion-spinner {
+  margin-bottom: var(--spacing-md);
+}
+
+.modal-error-state p {
+  margin-bottom: var(--spacing-lg);
+}
+
+.modal-empty-state h3 {
+  color: var(--text-color);
+  margin-bottom: var(--spacing-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Contador de resultados */
+.modal-results-counter {
+  text-align: center;
+  padding: var(--spacing-md);
+  background: transparent;
+}
+
+.modal-results-counter p {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--text-color-secondary);
+}
+
+/* Lista de tutores - NO interferir con el scroll */
+.modal-tutores-list {
+  background: transparent;
+  padding: 0;
+}
+
+/* Items de tutor */
+.modal-tutor-item {
+  --background: var(--background-color);
+  --border-radius: var(--radius-lg);
+  --box-shadow: var(--shadow-sm);
+  --padding-start: var(--spacing-md);
+  --padding-end: var(--spacing-md);
+  margin: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--border-color-light);
+  transition: transform var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.modal-tutor-item:hover {
+  transform: translateY(-2px);
+  --box-shadow: var(--shadow-md);
+}
+
+.modal-tutor-item.selected {
+  --background: linear-gradient(
+    145deg,
+    rgba(220, 138, 221, 0.08),
+    rgba(220, 138, 221, 0.12)
+  );
+  border: 2px solid var(--color-primary);
+  --box-shadow: var(--shadow-md);
+}
+
+/* Etiquetas en los items */
+.modal-tutor-item ion-label h2 {
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-color);
+  margin-bottom: var(--spacing-xs);
+  font-size: var(--font-size-md);
+}
+
+.modal-tutor-item ion-label p {
+  color: var(--text-color-secondary);
+  font-size: var(--font-size-sm);
+  margin: var(--spacing-xs) 0;
+}
+
+.modal-tutor-item.selected ion-label h2 {
+  color: var(--color-primary);
+}
+
+/* Botones en los items */
+.modal-tutor-item ion-button[fill="clear"] {
+  --color: var(--text-color-secondary);
+  --border-radius: var(--radius-full);
+  width: 2.5rem;
+  height: 2.5rem;
+  transition: all var(--transition-fast);
+}
+
+.modal-tutor-item ion-button[fill="clear"]:hover {
+  --color: var(--color-primary);
+  transform: scale(1.1);
+}
+
+/* Footer del modal */
+.modal-footer ion-button[fill="solid"] {
+  --border-radius: var(--radius-button);
+  --padding-start: var(--spacing-xl);
+  --padding-end: var(--spacing-xl);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Header del modal */
+.modal-header ion-toolbar {
+  --background: var(--color-primary);
+  --color: var(--color-primary-contrast);
+}
+
+.modal-header ion-title {
+  font-weight: var(--font-weight-semibold);
+}
+
+.modal-header ion-button {
+  --color: var(--color-primary-contrast);
+}
+
+/* Responsividad */
+@media (max-width: 768px) {
+  .modal-search-container {
+    padding: var(--spacing-sm);
+  }
+
+  .modal-selected-tutor {
+    padding: 0 var(--spacing-sm) var(--spacing-sm) var(--spacing-sm);
+    top: 8.625rem;
+  }
+
+  .modal-tutor-item {
+    margin: var(--spacing-xs) var(--spacing-sm);
+  }
+
+  .modal-tutores-list.with-selected-tutor {
+    padding-top: 6.875rem;
+  }
+}

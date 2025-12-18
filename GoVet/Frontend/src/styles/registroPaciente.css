@@ -1,0 +1,200 @@
+.popup-modal .modal-wrapper {
+  width: 21.875rem;
+  max-width: 90vw;
+  height: auto;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 1rem;
+  padding: 1.5rem;
+}
+
+/* Evita que los labels flotantes se corten visualmente cuando están activos */
+ion-input .label-text-wrapper,
+ion-input .native-wrapper {
+  overflow: visible !important;
+}
+
+/* Configuración visual y espaciado de los inputs */
+ion-input {
+  --padding-top: 1.2rem; /* Espacio superior para que el label flotante no se superponga */
+  --highlight-color-focused: #87216c !important; /* Color morado del borde cuando el input está enfocado */
+  --placeholder-color: #c8a9da !important; /* Color lila claro para el texto placeholder */
+}
+
+/* Altura mínima y visibilidad de los contenedores de input */
+ion-item {
+  --min-height: 3.5rem; /* Altura mínima consistente para todos los inputs */
+  overflow: visible !important; /* Permite que las listas de sugerencias se muestren sobre otros elementos */
+}
+
+/* Estilo del botón principal de registro */
+.custom-button {
+  width: 19rem; /* Ancho fijo que coincide con el ancho de los inputs */
+  margin: 0 auto; /* Centrado horizontal automático */
+  display: block; /* Necesario para que el margin auto funcione */
+  --background: #c757c0 !important; /* Color de fondo morado personalizado */
+}
+
+/* Estilo de la barra superior de navegación */
+ion-header ion-toolbar {
+  --background: #ddcfe4; /* Color lila suave que coincide con la barra lateral */
+  --color: #333; /* Color del texto oscuro para contraste */
+}
+
+/* Configuración del título en el header */
+ion-header ion-title {
+  --color: #333; /* Color del texto del título */
+  font-weight: 600; /* Peso de fuente semi-bold para destacar */
+}
+
+/* Estilo del botón de menú hamburguesa */
+ion-header ion-menu-button {
+  --color: #333; /* Color del ícono del menú */
+}
+
+/* Layout horizontal para radio buttons de sexo (Macho/Hembra) */
+.radio-group-spaced {
+  display: flex !important; /* Layout horizontal en lugar de vertical */
+  flex-direction: row !important; /* Dirección horizontal explícita */
+  gap: 0.01rem !important; /* Espacio mínimo entre elementos */
+  align-items: center !important; /* Alineación vertical centrada */
+  justify-content: flex-start !important; /* Alineación horizontal al inicio */
+  padding: 0.125rem 0 !important; /* Padding vertical mínimo */
+}
+
+/* Espaciado entre cada radio button */
+.radio-group-spaced ion-radio {
+  margin-right: 0.5rem !important; /* Separación de 0.5rem entre radio buttons */
+}
+
+/* Contenedor para inputs con funcionalidad de búsqueda */
+.searchbar-container {
+  position: relative; /* Necesario para posicionar la lista de sugerencias */
+}
+
+/* Lista desplegable de sugerencias para especies y razas */
+.filter-list {
+  position: absolute; /* Posicionamiento absoluto respecto al contenedor */
+  top: 100%; /* Se posiciona justo debajo del input */
+  left: 0; /* Alineado al borde izquierdo del input */
+  right: 0; /* Se extiende hasta el borde derecho del input */
+  z-index: 1000; /* Aparece sobre otros elementos */
+  background: white; /* Fondo blanco para contrastar */
+  border: 0.0625rem solid #ddd; /* Borde gris claro de 1px */
+  border-radius: 0.25rem; /* Bordes redondeados sutiles */
+  max-height: 10rem; /* Altura máxima para máximo 4 elementos */
+  overflow-y: auto; /* Scroll vertical si es necesario */
+  box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.1); /* Sombra sutil */
+  margin: 0; /* Sin margen externo */
+}
+
+/* Estilo de cada elemento en la lista de sugerencias */
+.filter-list ion-item {
+  --border-width: 0 0 0.0625rem 0; /* Borde inferior de 1px */
+  --border-color: #eee; /* Color del borde muy claro */
+  --padding-start: 1rem; /* Padding izquierdo de 16px */
+  --padding-end: 1rem; /* Padding derecho de 16px */
+  min-height: 2.5rem; /* Altura mínima de cada elemento */
+  font-size: 0.875rem; /* Tamaño de fuente ligeramente menor */
+}
+
+/* Efecto hover para elementos de la lista */
+.filter-list ion-item:hover {
+  --background: #f5f5f5; /* Fondo gris claro al pasar el mouse */
+  cursor: pointer; /* Cursor de mano para indicar clickeable */
+}
+
+/* Quitar borde del último elemento */
+.filter-list ion-item:last-child {
+  --border-width: 0; /* Sin borde inferior en el último elemento */
+}
+
+/* Espaciado del texto dentro de cada sugerencia */
+.filter-list ion-label {
+  margin: 0.5rem 0; /* Margen vertical de 8px */
+}
+
+/* Sección de asignar tutor */
+.tutor-section {
+  margin: 1rem 0;
+  padding: 1rem 0;
+  border-top: 0.0625rem solid #ccc;
+}
+
+.tutor-header {
+  text-align: center;
+}
+
+.tutor-title {
+  font-size: 1.25rem;
+  font-weight: bold;
+  padding-bottom: 0.3125rem;
+  margin: 0;
+}
+
+.tutor-register-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.tutor-register-link {
+  color: #87216c;
+  text-decoration: underline;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.tutor-register-link:hover {
+  color: #5f1849;
+}
+
+/* Separador visual */
+.section-separator {
+  border: none;
+  border-top: 0.0625rem solid #ccc;
+  margin: 1rem 0;
+  opacity: 0.6;
+}
+
+/* Spinner de carga inicial */
+.initial-loading {
+  text-align: center;
+  padding: 2rem;
+}
+
+.initial-loading p {
+  margin-top: 1rem;
+  color: #666;
+  font-size: 0.875rem;
+}
+
+/* Container para mejor organización */
+.form-section {
+  padding: 0 1rem;
+}
+
+.button-section {
+  padding: 1rem;
+  background: var(--ion-color-light);
+  margin-top: 1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .tutor-title {
+    font-size: 1.125rem;
+  }
+
+  .tutor-register-container {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .form-section {
+    padding: 0 0.5rem;
+  }
+}

@@ -1,0 +1,202 @@
+/* Ajustes.css - Estilos para la página de Ajustes y conexión WhatsApp */
+
+.ajustes-content {
+  --background: #f5f5f5;
+}
+
+.ajustes-container {
+  padding: 16px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Session Card */
+.session-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 16px;
+}
+
+.session-card ion-button {
+  margin-top: 8px;
+}
+
+/* WhatsApp Card */
+.whatsapp-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card-header-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.whatsapp-icon {
+  font-size: 32px;
+}
+
+/* Loading Container */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  gap: 16px;
+}
+
+.loading-container ion-spinner {
+  --color: var(--ion-color-primary);
+  width: 48px;
+  height: 48px;
+}
+
+/* Error Container */
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 20px;
+  gap: 16px;
+  text-align: center;
+}
+
+.error-container ion-icon {
+  font-size: 64px;
+}
+
+.error-container h3 {
+  margin: 8px 0;
+  font-weight: 600;
+}
+
+.error-container p {
+  margin: 4px 0;
+  font-size: 14px;
+}
+
+/* Status Container (Conectado) */
+.status-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 20px;
+  gap: 16px;
+  text-align: center;
+}
+
+.status-container ion-icon {
+  font-size: 64px;
+}
+
+.status-container ion-badge {
+  font-size: 14px;
+  padding: 8px 16px;
+}
+
+.status-container h3 {
+  margin: 8px 0;
+  font-weight: 600;
+}
+
+.status-container p {
+  margin: 4px 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* QR Container */
+.qr-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  gap: 20px;
+  text-align: center;
+}
+
+.qr-container ion-badge {
+  font-size: 14px;
+  padding: 8px 16px;
+}
+
+.qr-container h3 {
+  margin: 8px 0 4px;
+  font-weight: 600;
+}
+
+.qr-instructions {
+  font-size: 14px;
+  line-height: 1.8;
+  text-align: left;
+  margin: 8px 0;
+  padding: 12px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid var(--ion-color-primary);
+}
+
+/* QR Code Wrapper */
+.qr-code-wrapper {
+  background-color: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 12px 0;
+}
+
+.qr-code-wrapper svg {
+  display: block;
+}
+
+.qr-hint {
+  font-size: 13px;
+  color: var(--ion-color-medium);
+  margin: 0;
+  font-style: italic;
+}
+
+/* Info Card */
+.info-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 16px;
+}
+
+.info-card ion-card-content p {
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+
+.info-card ion-card-content p:last-child {
+  margin-bottom: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+  .ajustes-container {
+    padding: 12px;
+  }
+
+  .qr-code-wrapper {
+    padding: 16px;
+  }
+
+  .qr-code-wrapper svg {
+    width: 240px !important;
+    height: 240px !important;
+  }
+
+  .qr-instructions {
+    font-size: 13px;
+  }
+}

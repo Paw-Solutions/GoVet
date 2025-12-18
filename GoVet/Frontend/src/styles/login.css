@@ -1,0 +1,300 @@
+/* ============================================
+   LOGIN PAGE STYLES
+   ============================================ */
+
+.login-content {
+  --background: linear-gradient(
+    135deg,
+    var(--background-color) 0%,
+    var(--background-color-secondary) 100%
+  );
+}
+
+.login-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  padding: var(--spacing-xl);
+  gap: var(--spacing-xl);
+}
+
+/* ==========================================
+   MARCA Y LOGO
+   ========================================== */
+
+.login-brand {
+  text-align: center;
+  margin-bottom: var(--spacing-md);
+  animation: fadeInDown 0.6s ease-out;
+}
+
+.login-logo-icon {
+  font-size: 80px;
+  color: var(--color-primary);
+  margin-bottom: var(--spacing-md);
+  filter: drop-shadow(0 4px 12px rgba(var(--ion-color-primary-rgb), 0.3));
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.login-title {
+  font-size: 2.5rem;
+  font-weight: var(--font-weight-bold);
+  color: var(--text-color);
+  margin: 0;
+  margin-bottom: var(--spacing-xs);
+  letter-spacing: -0.5px;
+}
+
+.login-subtitle {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-color-secondary);
+  margin: 0;
+}
+
+/* ==========================================
+   CARD DE LOGIN
+   ========================================== */
+
+.login-card {
+  width: 100%;
+  max-width: 440px;
+  margin: 0;
+  animation: fadeInUp 0.6s ease-out 0.2s both;
+}
+
+.login-card ion-card-header {
+  text-align: center;
+  padding-bottom: var(--spacing-sm);
+}
+
+.login-card ion-card-title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-color);
+}
+
+.login-card ion-card-content {
+  padding: var(--spacing-lg);
+}
+
+.login-description {
+  text-align: center;
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-relaxed);
+  margin-bottom: var(--spacing-xl);
+  color: var(--text-color-secondary);
+}
+
+/* ==========================================
+   BOTONES
+   ========================================== */
+
+.login-button-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-lg);
+}
+
+.google-login-button {
+  --background: #ffffff;
+  --color: #3c4043;
+  --border-radius: var(--radius-lg);
+  --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --padding-start: var(--spacing-lg);
+  --padding-end: var(--spacing-lg);
+  height: 48px;
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-base);
+  text-transform: none;
+  letter-spacing: 0.25px;
+  transition: all var(--transition-fast);
+}
+
+.google-login-button:hover {
+  --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+.google-login-button:active {
+  transform: translateY(0);
+}
+
+.google-login-button ion-icon {
+  font-size: 24px;
+  margin-right: var(--spacing-sm);
+}
+
+.gsi-container {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--spacing-sm);
+}
+
+/* ==========================================
+   MENSAJES
+   ========================================== */
+
+.login-error-container {
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: rgba(var(--ion-color-danger-rgb), 0.1);
+  border-radius: var(--radius-md);
+  border-left: 4px solid var(--ion-color-danger);
+  animation: shake 0.5s ease-out;
+}
+
+.login-error {
+  text-align: center;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  margin: 0 0 var(--spacing-xs) 0;
+}
+
+.login-error-detail {
+  text-align: center;
+  font-size: var(--font-size-sm);
+  margin: var(--spacing-xs) 0;
+  line-height: var(--line-height-relaxed);
+}
+
+.login-error-hint {
+  text-align: center;
+  font-size: var(--font-size-xs);
+  margin: var(--spacing-sm) 0 0 0;
+  font-style: italic;
+  opacity: 0.9;
+}
+
+/* ==========================================
+   FOOTER
+   ========================================== */
+
+.login-footer {
+  text-align: center;
+  max-width: 400px;
+  animation: fadeIn 0.6s ease-out 0.4s both;
+}
+
+.login-footer-text {
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-relaxed);
+  color: var(--text-color-tertiary);
+  margin: 0;
+}
+
+/* ==========================================
+   ANIMACIONES
+   ========================================== */
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-5px);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(5px);
+  }
+}
+
+/* ==========================================
+   RESPONSIVE
+   ========================================== */
+
+@media (max-width: 576px) {
+  .login-container {
+    padding: var(--spacing-lg);
+    gap: var(--spacing-lg);
+  }
+
+  .login-logo-icon {
+    font-size: 64px;
+  }
+
+  .login-title {
+    font-size: 2rem;
+  }
+
+  .login-card {
+    max-width: 100%;
+  }
+
+  .login-card ion-card-content {
+    padding: var(--spacing-md);
+  }
+}
+
+@media (min-width: 768px) {
+  .login-container {
+    padding: var(--spacing-2xl);
+  }
+
+  .login-card {
+    max-width: 480px;
+  }
+}
+
+/* ==========================================
+   MODO OSCURO (si se implementa)
+   ========================================== */
+
+@media (prefers-color-scheme: dark) {
+  .google-login-button {
+    --background: #ffffff;
+    --color: #3c4043;
+  }
+}

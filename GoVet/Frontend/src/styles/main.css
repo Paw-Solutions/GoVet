@@ -1,0 +1,15 @@
+/* Estilos para íconos en botones */
+
+.button-icon {
+  font-size: 1.5rem; /* Tamaño del ícono */
+  color: #ffffff; /* Color del ícono */
+  margin-right: 0.5rem; /* Espacio entre el ícono y el texto */
+}
+
+.custom-button {
+  width: 19rem;
+  margin: 0 auto;
+  display: block;
+
+  --background: #c757c0 !important;
+}

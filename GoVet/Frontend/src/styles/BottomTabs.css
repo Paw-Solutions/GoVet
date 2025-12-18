@@ -1,0 +1,140 @@
+.bottom-tabs {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0;
+  height: 56px;
+  border-top: 1px solid var(--ion-color-light-shade);
+  background: var(--ion-background-color, #fff);
+  position: relative;
+}
+
+.tab-button {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 4px 0;
+  min-width: 0;
+  color: var(--ion-color-medium);
+}
+
+.tab-button ion-icon {
+  font-size: 24px;
+  margin-bottom: 2px;
+}
+
+.tab-button ion-label {
+  font-size: 10px;
+  font-weight: 500;
+  margin: 0;
+}
+
+.tab-button.tab-selected {
+  color: var(--ion-color-primary);
+}
+
+.tab-button-add {
+  color: var(--ion-color-primary) !important;
+  font-weight: 600;
+}
+
+.tab-button-add ion-icon {
+  font-size: 28px;
+}
+
+.add-popover::part(backdrop) {
+  background: #000000 !important;
+  opacity: 0.2 !important;
+  backdrop-filter: none;
+}
+
+.add-popover::part(content) {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  --background: transparent !important;
+}
+
+.add-popover .popover-content {
+  padding: 0.75rem;
+  min-width: 15rem;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.add-popover .opcion-menu {
+  --color: #ffffff;
+  --background: #c757c0;
+  margin: 1.5em 0;
+  text-align: left;
+  justify-content: flex-start;
+  --border-radius: 2rem;
+  --box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.1);
+  --padding-start: 1rem;
+  --padding-end: 1rem;
+  --padding-top: 0.75rem;
+  --padding-bottom: 0.75rem;
+  height: auto;
+  min-height: 3rem;
+  font-weight: 500;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  color: #fff !important;
+}
+
+.add-popover .opcion-menu span {
+  flex: 1;
+  text-align: left;
+  margin-left: 0;
+  color: #fff !important;
+}
+
+.add-popover .opcion-menu:hover {
+  --background: #f8f9fa;
+  --box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.15);
+  transform: translateY(-0.0625rem);
+  transition: all 0.2s ease;
+  color: var(--ion-color-dark, #000) !important;
+}
+
+.add-popover .opcion-menu ion-icon {
+  margin-right: 0.75rem;
+  font-size: 1.3rem;
+  color: #ffffff;
+}
+
+.add-popover .opcion-menu .button-inner {
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.add-popover .opcion-menu-cancel {
+  margin: 0.5rem 0 0;
+}
+
+/* Responsive para pantallas pequeñas */
+@media (max-width: 375px) {
+  .tab-button ion-icon {
+    font-size: 22px;
+  }
+
+  .tab-button ion-label {
+    font-size: 9px;
+  }
+}
+
+/* Para pantallas muy pequeñas, ocultamos las etiquetas */
+@media (max-width: 320px) {
+  .tab-button ion-label {
+    display: none;
+  }
+
+  .tab-button ion-icon {
+    font-size: 24px;
+    margin-bottom: 0;
+  }
+}

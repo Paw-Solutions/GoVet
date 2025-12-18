@@ -1,0 +1,460 @@
+/* ============================================
+   PÁGINA VER - ESTILOS UNIFICADOS
+   ============================================ */
+
+.info-container {
+  padding: var(--spacing-md);
+  max-width: 75rem;
+  margin: 0 auto;
+  background: transparent;
+  min-height: 100vh;
+}
+
+/* ============================================
+   BARRA DE BÚSQUEDA
+   ============================================ */
+
+.search-container {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: var(--ion-background-color);
+  padding: var(--spacing-md);
+  border-bottom: 1px solid var(--border-color-light);
+  box-shadow: var(--shadow-sm);
+}
+
+.searchbar {
+  --background: var(--background-color);
+  --border-radius: var(--radius-lg);
+  --box-shadow: var(--shadow-md);
+  --color: var(--text-color);
+  --placeholder-color: var(--text-color-tertiary);
+  --icon-color: var(--color-primary);
+  --clear-button-color: var(--text-color-secondary);
+  margin: 0;
+  padding: 0;
+}
+
+/* ============================================
+   CONTADOR DE RESULTADOS
+   ============================================ */
+
+.results-counter {
+  text-align: center;
+  padding: var(--spacing-md);
+  background: transparent;
+  border-radius: var(--radius-md);
+  margin: var(--spacing-sm) var(--spacing-md);
+}
+
+.results-counter p {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--text-color-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+/* ============================================
+   ITEMS UNIFICADOS - TUTORES, PACIENTES, FICHAS
+   ============================================ */
+
+/* Lista general */
+.tutores-list,
+.info-list {
+  background: transparent;
+  padding: 0;
+}
+
+/* Estilos base unificados para todos los items */
+.tutor-item,
+.info-card {
+  --background: var(--background-color);
+  --border-radius: var(--radius-lg);
+  --box-shadow: var(--shadow-md);
+  --padding-start: var(--spacing-md);
+  --padding-end: var(--spacing-md);
+  --padding-top: var(--spacing-md);
+  --padding-bottom: var(--spacing-md);
+  --min-height: 88px;
+  margin: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--border-color-light);
+  border-radius: var(--radius-lg) !important;
+  transition: transform var(--transition-fast),
+    box-shadow var(--transition-fast);
+  overflow: visible;
+  cursor: pointer;
+}
+
+.tutor-item:hover,
+.info-card:hover {
+  transform: translateY(-3px);
+  --box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-lg);
+}
+
+.tutor-item:active,
+.info-card:active {
+  transform: translateY(-1px);
+}
+
+.tutor-item.selected,
+.info-card.selected {
+  --background: linear-gradient(
+    145deg,
+    rgba(220, 138, 221, 0.08),
+    rgba(220, 138, 221, 0.12)
+  );
+  border: 2px solid var(--color-primary);
+  --box-shadow: var(--shadow-lg);
+}
+
+/* Iconos de inicio con margen */
+.tutor-item .item-icon,
+.info-card .item-icon {
+  margin-right: var(--spacing-lg);
+  font-size: 1.75rem;
+  width: 1.75rem;
+  height: 1.75rem;
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.tutor-item ion-icon[slot="start"],
+.info-card ion-icon[slot="start"] {
+  margin-right: var(--spacing-lg);
+  font-size: 1.75rem;
+  color: var(--color-primary);
+}
+
+.tutor-item ion-avatar,
+.info-card ion-avatar {
+  margin-right: var(--spacing-lg);
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(var(--ion-color-primary-rgb), 0.1);
+  border-radius: var(--radius-full);
+}
+
+.tutor-item ion-avatar ion-icon,
+.info-card ion-avatar ion-icon {
+  font-size: 1.5rem;
+  color: var(--color-primary);
+  margin: 0;
+}
+
+/* Labels */
+.tutor-item ion-label,
+.info-card ion-label {
+  padding: var(--spacing-xs) 0;
+}
+
+.tutor-item ion-label h2,
+.info-card ion-label h2 {
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-color);
+  margin-bottom: var(--spacing-xs);
+  font-size: var(--font-size-md);
+}
+
+.tutor-item ion-label p,
+.info-card ion-label p {
+  color: var(--text-color-secondary);
+  font-size: var(--font-size-sm);
+  margin: var(--spacing-xs) 0;
+}
+
+.tutor-item.selected ion-label h2,
+.info-card.selected ion-label h2 {
+  color: var(--color-primary);
+}
+
+/* Botones de acción */
+.tutor-item ion-buttons,
+.info-card ion-buttons {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.tutor-item ion-button[fill="clear"],
+.info-card ion-button[fill="clear"] {
+  --color: var(--text-color-secondary);
+  --color-hover: var(--color-primary);
+  --border-radius: var(--radius-full);
+  --padding-start: var(--spacing-sm);
+  --padding-end: var(--spacing-sm);
+  width: 2.5rem;
+  height: 2.5rem;
+  transition: all var(--transition-fast);
+}
+
+.tutor-item ion-button[fill="clear"]:hover,
+.info-card ion-button[fill="clear"]:hover {
+  --background: rgba(var(--ion-color-primary-rgb), 0.1);
+  --color: var(--color-primary);
+  transform: scale(1.1);
+}
+
+/* ============================================
+   ENCABEZADOS Y DETALLES COMPARTIDOS
+   ============================================ */
+
+.info-card-header {
+  background: linear-gradient(
+    145deg,
+    rgba(220, 138, 221, 0.08),
+    rgba(220, 138, 221, 0.12)
+  );
+  color: var(--color-primary);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  padding: var(--spacing-md);
+  border-bottom: 2px solid var(--color-primary);
+}
+
+h2.tutor-nombre {
+  padding-bottom: var(--spacing-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-color);
+}
+
+h2.paciente-nombre {
+  padding-bottom: var(--spacing-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-color);
+}
+
+span {
+  color: var(--text-color-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.info-icon {
+  margin-right: var(--spacing-sm);
+  font-size: 1.5rem;
+  color: var(--color-primary);
+}
+
+ion-icon.pacientes-icon {
+  vertical-align: middle;
+  font-size: var(--font-size-md);
+  position: relative;
+  top: -2px;
+}
+
+.info-card-content {
+  padding: var(--spacing-md);
+  background: transparent;
+}
+
+.info-item {
+  align-items: center;
+  margin-bottom: var(--spacing-xs);
+  padding: var(--spacing-xs) 0;
+  color: var(--text-color-secondary);
+}
+
+.info-item:last-child {
+  margin-bottom: 0;
+}
+
+.info-item strong {
+  margin-right: var(--spacing-sm);
+  color: var(--text-color-secondary);
+  min-width: 4.5rem;
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+}
+
+.info-item span {
+  color: var(--text-color);
+  font-size: var(--font-size-sm);
+}
+
+/* ============================================
+   ESTADOS - LOADING, ERROR, VACÍO
+   ============================================ */
+
+.loading-container,
+.error-container,
+.no-results {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--spacing-2xl) var(--spacing-md);
+}
+
+.loading-container ion-spinner {
+  margin-bottom: var(--spacing-md);
+  transform: scale(1.2);
+}
+
+.loading-container p {
+  color: var(--text-color-secondary);
+  font-size: var(--font-size-md);
+  margin: 0;
+}
+
+.error-container p {
+  margin-bottom: var(--spacing-lg);
+  font-size: var(--font-size-md);
+  color: var(--text-color-secondary);
+}
+
+.retry-button {
+  --border-radius: var(--radius-button);
+  --padding-start: var(--spacing-xl);
+  --padding-end: var(--spacing-xl);
+  --box-shadow: var(--shadow-md);
+}
+
+.no-results {
+  background: transparent;
+  border-radius: var(--radius-lg);
+  margin: var(--spacing-md);
+  padding: var(--spacing-xl) var(--spacing-md);
+  border: 1px solid var(--border-color-light);
+  box-shadow: none;
+}
+
+.no-results h3 {
+  color: var(--text-color);
+  margin-bottom: var(--spacing-sm);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+}
+
+.no-results p {
+  color: var(--text-color-secondary);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-relaxed);
+  margin: 0;
+}
+
+/* ============================================
+   ANIMACIONES
+   ============================================ */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.info-card,
+.tutor-item {
+  animation: fadeInUp 0.3s ease-out;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+  .search-container {
+    padding: var(--spacing-sm);
+  }
+
+  .tutor-item {
+    margin: var(--spacing-xs) var(--spacing-sm);
+    --padding-start: var(--spacing-sm);
+    --padding-end: var(--spacing-sm);
+  }
+
+  .info-card {
+    margin: var(--spacing-xs) var(--spacing-sm);
+  }
+}
+
+@media (min-width: 48rem) {
+  .info-container {
+    padding: var(--spacing-lg);
+  }
+
+  .info-item {
+    font-size: var(--font-size-md);
+  }
+}
+
+@media (min-width: 64rem) {
+  .info-container {
+    padding: var(--spacing-xl);
+  }
+
+  .info-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(25rem, 1fr));
+    gap: var(--spacing-lg);
+    padding: 0;
+  }
+
+  .info-card {
+    margin: 0;
+    height: fit-content;
+  }
+
+  .tutores-list {
+    display: block;
+  }
+}
+
+@media (min-width: 80rem) {
+  .info-list {
+    grid-template-columns: repeat(auto-fit, minmax(28rem, 1fr));
+    gap: var(--spacing-xl);
+  }
+}
+
+/* ============================================
+   OPTIMIZACIONES TÁCTILES
+   ============================================ */
+
+@media (hover: none) and (pointer: coarse) {
+  .info-card:hover,
+  .tutor-item:hover {
+    transform: none;
+  }
+
+  .info-card:active,
+  .tutor-item:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+  }
+}
+
+/* ============================================
+   SCROLL SUAVE
+   ============================================ */
+
+.info-container {
+  --overflow: hidden;
+}
+
+.info-container::part(scroll) {
+  scroll-behavior: smooth;
+}
+
+/* ============================================
+   DROPDOWN DE ORDENAMIENTO
+   ============================================ */
+
+.sort-dropdown-container {
+  margin: var(--spacing-sm) var(--spacing-md);
+  --background: var(--color-light);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.sort-select {
+  max-width: 100%;
+}

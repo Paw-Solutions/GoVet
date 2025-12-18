@@ -1,0 +1,102 @@
+/* ============================================
+   INSTALL PROMPT - Prompt de instalación PWA
+   ============================================ */
+
+.install-prompt-card {
+  position: fixed;
+  bottom: calc(var(--height-tab-bar) + var(--spacing-md));
+  left: var(--spacing-md);
+  right: var(--spacing-md);
+  margin: 0;
+  z-index: var(--z-index-toast);
+  box-shadow: var(--shadow-xl);
+  animation: slideUp var(--transition-base);
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.install-prompt-content {
+  padding: var(--spacing-sm);
+}
+
+.install-prompt-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-md);
+}
+
+.install-prompt-icon {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(
+    135deg,
+    var(--color-primary),
+    var(--color-secondary)
+  );
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.install-prompt-icon ion-icon {
+  font-size: 28px;
+}
+
+.install-prompt-close {
+  --color: var(--text-color-secondary);
+  margin: 0;
+  --padding-start: 0;
+  --padding-end: 0;
+}
+
+.install-prompt-text {
+  margin-bottom: var(--spacing-md);
+}
+
+.install-prompt-text h3 {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-color);
+  margin-bottom: var(--spacing-xs);
+}
+
+.install-prompt-text p {
+  font-size: var(--font-size-sm);
+  color: var(--text-color-secondary);
+  line-height: var(--line-height-normal);
+  margin: 0;
+}
+
+.install-prompt-button {
+  --background: var(--color-primary);
+  --background-hover: var(--color-primary-shade);
+  --color: var(--color-primary-contrast);
+  --border-radius: var(--radius-button);
+  font-weight: var(--font-weight-semibold);
+  margin-top: var(--spacing-sm);
+}
+
+/* Adaptación para desktop */
+@media (min-width: 768px) {
+  .install-prompt-card {
+    bottom: var(--spacing-lg);
+    right: var(--spacing-lg);
+    left: auto;
+    max-width: 400px;
+  }
+}

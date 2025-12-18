@@ -1,0 +1,21 @@
+.modal-search-container {
+  position: sticky;
+  top: 15;
+  z-index: 10;
+  background-color: var(--ion-background-color);
+  padding: 1rem;
+  border-bottom: 1px solid var(--ion-color-light-shade);
+}
+
+.modal-search-container ion-searchbar {
+  --background: var(--background-color);
+  --border-radius: var(--radius-lg);
+  --box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .modal-search-container {
+    padding: 0.75rem;
+  }
+}

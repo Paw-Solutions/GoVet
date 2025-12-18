@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Orden de exámenes - {{ paciente.nombre }}</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 2cm 1.5cm;
+      @bottom-center {
+        content: "Página " counter(page);
+        font-family: Helvetica, Arial, sans-serif;
+        font-size: 9px;
+        color: #888;
+      }
+    }
+    body {
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 12px;
+      color: #222;
+      line-height: 1.6;
+    }
+
+    .document-title {
+      text-align: center;
+      margin-bottom: 18px;
+      padding-bottom: 10px;
+      border-bottom: 3px double #2c3e50;
+    }
+    .document-title h1 {
+      font-size: 18px;
+      color: #1a252f;
+      margin: 0;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .document-title .meta {
+      font-size: 11px;
+      color: #555;
+      margin-top: 8px;
+    }
+
+    h2 {
+      font-size: 13px;
+      color: #1a252f;
+      margin-top: 20px;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 2px solid #34495e;
+      padding-bottom: 6px;
+    }
+
+    .info-table {
+      width: 100%;
+      border: 1px solid #bdc3c7;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    .info-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid #ecf0f1;
+      font-size: 12px;
+    }
+    .info-table tr:last-child td {
+      border-bottom: none;
+    }
+    .info-table .label-cell {
+      background-color: #ecf0f1;
+      font-weight: 600;
+      color: #2c3e50;
+      width: 35%;
+      font-size: 11px;
+      text-transform: uppercase;
+    }
+    .info-table .value-cell {
+      background-color: #fff;
+      color: #222;
+      font-size: 12px;
+    }
+
+    .table-rounded {
+      border-radius: 8px;
+      border: 1px solid #bdc3c7;
+      overflow: hidden;
+      margin-top: 10px;
+      margin-bottom: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      border-spacing: 0;
+    }
+    th {
+      background-color: #34495e;
+      color: #ffffff;
+      font-weight: 600;
+      padding: 10px 12px;
+      text-align: left;
+      font-size: 11px;
+      text-transform: uppercase;
+    }
+    td {
+      border-bottom: 1px solid #ecf0f1;
+      padding: 10px 12px;
+      font-size: 12px;
+      color: #2c3e50;
+    }
+    tr:nth-child(even) {
+      background-color: #f9fafb;
+    }
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .observaciones {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 6px;
+      background: #f8f9fa;
+      border: 1px solid #e6e9eb;
+      font-size: 12px;
+      color: #222;
+    }
+
+    .signature-section {
+      margin-top: 36px;
+      page-break-inside: avoid;
+    }
+    .signature-box {
+      width: 60%;
+      margin: 0 auto;
+      text-align: center;
+      padding-top: 50px;
+      border-top: 2px solid #2c3e50;
+    }
+    .signature-box .name {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1a252f;
+      margin-bottom: 4px;
+    }
+    .signature-box .title {
+      font-size: 11px;
+      color: #555;
+      margin-bottom: 2px;
+    }
+    .signature-box .rut {
+      font-size: 11px;
+      color: #555;
+    }
+
+    .footer {
+      margin-top: 30px;
+      text-align: center;
+      font-size: 9px;
+      color: #999;
+      border-top: 1px solid #eee;
+      padding-top: 10px;
+    }
+
+    .layout-two-col {
+      width: 100%;
+      display: flex;
+      gap: 20px;
+    }
+    .layout-two-col > div { width: 50%; }
+  </style>
+</head>
+<body>
+
+  <div class="document-title">
+    <h1>Orden de exámenes</h1>
+    <div class="meta">Emitida: {{ fecha_generacion }} &nbsp; · &nbsp; Consulta: {{ consulta.id_consulta if consulta else '—' }}</div>
+  </div>
+
+  <h2>1. Identificación</h2>
+  <table class="info-table">
+    <tr>
+      <td class="label-cell">Paciente</td>
+      <td class="value-cell">{{ paciente.nombre }}</td>
+    </tr>
+    <tr>
+      <td class="label-cell">Especie / Raza</td>
+      <td class="value-cell">{{ paciente.raza.especie.nombre_comun if paciente.raza and paciente.raza.especie else '—' }} / {{ paciente.raza.nombre if paciente.raza else '—' }}</td>
+    </tr>
+    <tr>
+      <td class="label-cell">Tutor</td>
+      <td class="value-cell">{{ tutor.nombre }} {{ tutor.apellido_paterno or '' }} {{ tutor.apellido_materno or '' }}</td>
+    </tr>
+    <tr>
+      <td class="label-cell">RUT</td>
+      <td class="value-cell">{{ tutor.rut }}</td>
+    </tr>
+    <tr>
+      <td class="label-cell">Fecha</td>
+      <td class="value-cell">{{ fecha_receta or fecha_generacion }}</td>
+    </tr>
+    <tr>
+      <td class="label-cell">N° microchip</td>
+      <td class="value-cell">{{ paciente.codigo_chip or '—' }}</td>
+    </tr>
+  </table>
+
+  <h2>2. Exámenes solicitados</h2>
+
+  {% if recetas %}
+  <div class="table-rounded">
+    <table>
+      <thead>
+        <tr>
+          <th>Medicamento</th>
+          <th>Dosis</th>
+          <th>Frecuencia</th>
+          <th>Duración</th>
+          <th>N° Serie</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in recetas %}
+        <tr>
+          <td>{{ r.medicamento }}</td>
+          <td>{{ r.dosis or '—' }}</td>
+          <td>
+            {% if r.frecuencia %}
+              {{ r.frecuencia }} {{ "veces/día" if r.frecuencia|int > 1 else "vez/día" }}
+            {% else %}
+              — 
+            {% endif %}
+          </td>
+          <td>
+            {% if r.duracion %}
+              {{ r.duracion }} {{ "día(s)" }}
+            {% else %}
+              — 
+            {% endif %}
+          </td>
+          <td>{{ r.numero_de_serie or '—' }}</td>
+        </tr>
+        <tr>
+          <td colspan="5" style="font-size:11px; color:#444;">
+            <strong>Instrucciones:</strong> {{ r.instrucciones or r.observaciones or '—' }}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="legal-box" style="text-align:center;">
+    <p>No hay medicamentos registrados en esta receta.</p>
+  </div>
+  {% endif %}
+
+  {% if observaciones %}
+  <h2>3. Observaciones</h2>
+  <div class="observaciones">
+    {{ observaciones }}
+  </div>
+  {% endif %}
+
+  <div class="signature-section">
+    <div class="signature-box">
+      <div class="name">{{ medico.nombre or "Dra. Daniela Alejandra Otárola Arancibia" }}</div>
+      <div class="title">{{ medico.titulo or "Médica Veterinaria" }}</div>
+      <div class="rut">RUT: {{ medico.rut or '—' }}</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    Documento generado el {{ fecha_generacion }} · GoVet Software
+  </div>
+
+</body>
+</html>

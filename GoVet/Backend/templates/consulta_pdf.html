@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Resumen de Atención #{{ consulta.id_consulta }}</title>
+    <style>
+      @page {
+        size: A4;
+        margin: 1.5cm;
+        @bottom-center {
+          content: "Página " counter(page);
+          font-family: Helvetica, Arial, sans-serif;
+          font-size: 10px;
+          color: #888;
+        }
+      }
+      body {
+        font-family: Helvetica, Arial, sans-serif;
+        font-size: 13px;
+        color: #333;
+        line-height: 1.5;
+      }
+      h1 {
+        font-size: 22px;
+        color: #4a2d7a;
+        margin: 0;
+        font-weight: 700;
+      }
+      h2 {
+        font-size: 15px;
+        color: #4a2d7a;
+        margin-top: 25px;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid #e0e0e0;
+        padding-bottom: 5px;
+      }
+
+      /* Clases Utilitarias */
+      .box {
+        background-color: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 12px;
+        padding: 15px;
+        margin-bottom: 15px;
+      }
+      .label {
+        color: #9c65b4e6;
+        font-size: 11px;
+        text-transform: uppercase;
+        font-weight: bold;
+        display: block;
+        margin-bottom: 2px;
+      }
+      .data-row {
+        margin-bottom: 8px;
+      }
+      .value {
+        font-size: 14px;
+        font-weight: 500;
+        color: #000;
+      }
+
+      /* Tablas Redondeadas */
+      .table-rounded {
+        border-radius: 12px;
+        border: 1px solid #ddd;
+        overflow: hidden;
+        margin-top: 10px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        border-spacing: 0;
+      }
+      th {
+        background-color: #4a2d7a;
+        color: #ffffff;
+        font-weight: 600;
+        padding: 10px;
+        text-align: left;
+        font-size: 12px;
+      }
+      td {
+        border-bottom: 1px solid #eee;
+        padding: 10px;
+        font-size: 12px;
+        color: #444;
+      }
+      tr:nth-child(even) {
+        background-color: #fcfcfc;
+      }
+      tr:last-child td {
+        border-bottom: none;
+      }
+
+      /* Header */
+      .header {
+        margin-bottom: 25px;
+        border-bottom: 2px solid #4a2d7a;
+        padding-bottom: 15px;
+      }
+      .header-table {
+        width: 100%;
+        border: none;
+      }
+      .header-table td {
+        border: none;
+        padding: 0;
+        vertical-align: top;
+      }
+      .vet-title {
+        font-size: 18px;
+        color: #4a2d7a;
+        font-weight: 700;
+        margin-bottom: 5px;
+      }
+      .vet-subtitle {
+        font-size: 12px;
+        color: #666;
+        margin-bottom: 3px;
+      }
+      .folio-box {
+        text-align: right;
+      }
+      .folio-number {
+        font-size: 24px;
+        font-weight: 700;
+        color: #4a2d7a;
+      }
+      .folio-date {
+        font-size: 12px;
+        color: #666;
+        margin-top: 5px;
+      }
+
+      /* Consulta Info */
+      .consulta-box {
+        background-color: #f0f0f8;
+        border: 1px solid #d0d0e0;
+        border-radius: 12px;
+        padding: 15px;
+        margin-bottom: 20px;
+      }
+      .consulta-row {
+        margin-bottom: 8px;
+      }
+      .consulta-label {
+        font-weight: 600;
+        color: #4a2d7a;
+      }
+
+      /* Alertas y Footer */
+      .alert-box {
+        background-color: #fff8e1;
+        border: 1px solid #ffe0b2;
+        border-left: 5px solid #ffb74d;
+        color: #5d4037;
+        padding: 15px;
+        border-radius: 8px;
+        font-size: 13px;
+        margin-top: 20px;
+      }
+      .alert-title {
+        font-weight: 700;
+        color: #e65100;
+        margin-bottom: 8px;
+        font-size: 14px;
+      }
+      .footer {
+        margin-top: 40px;
+        text-align: center;
+        font-size: 10px;
+        color: #999;
+        border-top: 1px solid #eee;
+        padding-top: 20px;
+      }
+
+      /* Layout tabla invisible */
+      .layout-table {
+        width: 100%;
+        border: none;
+      }
+      .layout-table td {
+        border: none;
+        padding: 0 10px 0 0;
+        vertical-align: top;
+        width: 50%;
+      }
+      .layout-table td:last-child {
+        padding-right: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Header con información de la veterinaria -->
+    <div class="header">
+      <table class="header-table">
+        <tr>
+          <td>
+            <div class="vet-title">
+              Dra. Daniela Alejandra Otárola Arancibia
+            </div>
+            <div class="vet-subtitle"><strong>Médico Veterinario</strong></div>
+            <div class="vet-subtitle">RUT: 16.372.666-1</div>
+            <div class="vet-subtitle">
+              Dirección: Los Cururos 1785, Valdivia, Región de Los Ríos
+            </div>
+            <div class="vet-subtitle">Teléfono: +56 9 61255122</div>
+          </td>
+          <td class="folio-box">
+            <div class="folio-number">Folio #{{ consulta.id_consulta }}</div>
+            <div class="folio-date">{{ fecha_consulta }}</div>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Información de la consulta -->
+    <div class="consulta-box">
+      <div class="consulta-row">
+        <span class="consulta-label">Motivo de consulta:</span> {{
+        consulta.motivo or consulta.motivo_consulta or '—' }}
+      </div>
+      <div class="consulta-row">
+        <span class="consulta-label">Diagnóstico:</span> {{ consulta.diagnostico
+        or '—' }}
+      </div>
+    </div>
+
+    <!-- Información del Paciente y Tutor en 2 cuadros lado a lado -->
+    <h2>Información del Paciente y Tutor</h2>
+    <table class="layout-table">
+      <tr>
+        <td>
+          <!-- Cuadro del Paciente -->
+          <div class="box">
+            <table style="width: 100%; border-collapse: collapse">
+              <tr>
+                <td
+                  style="
+                    width: 50%;
+                    border: none;
+                    padding: 5px;
+                    vertical-align: top;
+                  "
+                >
+                  <div class="data-row">
+                    <span class="label">Paciente</span>
+                    <span class="value">{{ paciente.nombre }}</span>
+                  </div>
+                  <div class="data-row">
+                    <span class="label">Especie</span>
+                    <span class="value"
+                      >{{ paciente.raza.especie.nombre_comun or '—' }}</span
+                    >
+                  </div>
+                  <div class="data-row">
+                    <span class="label">Raza</span>
+                    <span class="value">{{ paciente.raza.nombre or '—' }}</span>
+                  </div>
+                </td>
+                <td
+                  style="
+                    width: 50%;
+                    border: none;
+                    padding: 5px;
+                    vertical-align: top;
+                  "
+                >
+                  <div class="data-row">
+                    <span class="label">Sexo</span>
+                    <span class="value">{{ sexo }}</span>
+                  </div>
+                  <div class="data-row">
+                    <span class="label">Edad</span>
+                    <span class="value">{{ edad }}</span>
+                  </div>
+                  <div class="data-row">
+                    <span class="label">Código Chip</span>
+                    <span class="value">{{ paciente.codigo_chip or '—' }}</span>
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </div>
+        </td>
+        <td>
+          <!-- Cuadro del Tutor -->
+          <div class="box">
+            <table style="width: 100%; border-collapse: collapse">
+              <tr>
+                <td
+                  style="
+                    width: 50%;
+                    border: none;
+                    padding: 5px;
+                    vertical-align: top;
+                  "
+                >
+                  <div class="data-row">
+                    <span class="label">Tutor</span>
+                    <span class="value"
+                      >{{ tutor.nombre }} {{ tutor.apellido_paterno or '' }} {{
+                      tutor.apellido_materno or '' }}</span
+                    >
+                  </div>
+                  <div class="data-row">
+                    <span class="label">RUT</span>
+                    <span class="value">{{ tutor.rut }}</span>
+                  </div>
+                  <div class="data-row">
+                    <span class="label">Email</span>
+                    <span class="value">{{ tutor.email or '—' }}</span>
+                  </div>
+                </td>
+                <td
+                  style="
+                    width: 50%;
+                    border: none;
+                    padding: 5px;
+                    vertical-align: top;
+                  "
+                >
+                  <div class="data-row">
+                    <span class="label">Teléfono</span>
+                    <span class="value"
+                      >{{ tutor.telefono or tutor.celular or '—' }}</span
+                    >
+                  </div>
+                  <div class="data-row">
+                    <span class="label">Dirección</span>
+                    <span class="value">{{ tutor.direccion or '—' }}</span>
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </div>
+        </td>
+      </tr>
+    </table>
+
+    <!-- Parámetros Clínicos -->
+    <h2>Parámetros Clínicos</h2>
+    <div class="table-rounded">
+      <table>
+        <thead>
+          <tr>
+            <th>Peso</th>
+            <th>Temperatura</th>
+            <th>FC</th>
+            <th>FR</th>
+            <th>Condición Corporal</th>
+            <th>Mucosas</th>
+            <th>DHT</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              {{ consulta.peso or '—' }}{% if consulta.peso %} kg{% endif %}
+            </td>
+            <td>
+              {{ consulta.temperatura or '—' }}{% if consulta.temperatura %}
+              °C{% endif %}
+            </td>
+            <td>
+              {{ consulta.frecuencia_cardiaca or '—' }}{% if
+              consulta.frecuencia_cardiaca %} lpm{% endif %}
+            </td>
+            <td>
+              {{ consulta.frecuencia_respiratoria or '—' }}{% if
+              consulta.frecuencia_respiratoria %} rpm{% endif %}
+            </td>
+            <td>{{ consulta.condicion_corporal or '—' }}</td>
+            <td>{{ consulta.mucosas or '—' }}</td>
+            <td>
+              {{ consulta.dht or '—' }}{% if consulta.dht %} seg{% endif %}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Examen Físico -->
+    {% if consulta.estado_pelaje or consulta.estado_piel or
+    consulta.nodulos_linfaticos or consulta.auscultacion_cardiaca_toraxica or
+    consulta.examen_clinico %}
+    <div class="table-rounded">
+      <table>
+        <thead>
+          <tr>
+            <th>Estado Pelaje</th>
+            <th>Estado Piel</th>
+            <th>Nódulos Linfáticos</th>
+            <th>Auscultación</th>
+            <th>Examen Clínico</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>{{ consulta.estado_pelaje or '—' }}</td>
+            <td>{{ consulta.estado_piel or '—' }}</td>
+            <td>{{ consulta.nodulos_linfaticos or '—' }}</td>
+            <td>{{ consulta.auscultacion_cardiaca_toraxica or '—' }}</td>
+            <td>{{ consulta.examen_clinico or '—' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+
+    <!-- Recetas Médicas -->
+    {% if consulta.recetas %}
+    <h2>Medicamentos Recetados</h2>
+    <div class="table-rounded">
+      <table>
+        <thead>
+          <tr>
+            <th>Medicamento</th>
+            <th>Dosis</th>
+            <th>Frecuencia</th>
+            <th>Duración</th>
+            <th>N° Serie</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for receta in consulta.recetas %}
+          <tr>
+            <td>{{ receta.medicamento }}</td>
+            <td>{{ receta.dosis }}</td>
+            <td>Cada {{ receta.frecuencia }}h</td>
+            <td>{{ receta.duracion }} días</td>
+            <td>{{ receta.numero_serie or '—' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+
+    <!-- Tratamientos aplicados -->
+    {% if consulta.tratamientos %}
+    <h2>Procedimientos Realizados (Vacunas/Antiparasitarios)</h2>
+    <div class="table-rounded">
+      <table>
+        <thead>
+          <tr>
+            <th>Tratamiento</th>
+            <th>Tipo</th>
+            <th>Dosis</th>
+            <th>Marca</th>
+            <th>Próxima Dosis</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in consulta.tratamientos %}
+          <tr>
+            <td>{{ item.tratamiento.nombre }}</td>
+            <td>{{ item.tratamiento.tipo_tratamiento or '—' }}</td>
+            <td>{{ item.dosis or '—' }}</td>
+            <td>{{ item.marca or '—' }}</td>
+            <td>
+              {{ item.proxima_dosis.strftime('%d/%m/%Y') if item.proxima_dosis
+              else '—' }}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+
+    <!-- Indicaciones para el hogar -->
+    {% if consulta.indicaciones_generales %}
+    <div class="alert-box">
+      <div class="alert-title">Indicaciones para el Hogar</div>
+      <div>{{ consulta.indicaciones_generales }}</div>
+    </div>
+    {% endif %}
+
+    <!-- Observaciones -->
+    {% if consulta.observaciones %}
+    <h2>Observaciones Adicionales</h2>
+    <div class="box">{{ consulta.observaciones }}</div>
+    {% endif %}
+
+    <!-- Footer -->
+    <div class="footer">
+      Atención realizada por Dra. Daniela Otárola Arancibia · GoVet Software
+    </div>
+  </body>
+</html>
