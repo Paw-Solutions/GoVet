@@ -54,7 +54,7 @@ const ModalSeleccionarConsulta: React.FC<ModalSeleccionarConsultaProps> = ({
     setLoading(true);
     setError(null);
     try {
-      console.log("Cargando consultas para paciente ID:", idPaciente);
+      //console.log("Cargando consultas para paciente ID:", idPaciente);
 
       const response = await fetchWithAuth(
         `${API_URL}/consultas/paciente/id/${idPaciente}`,
@@ -67,14 +67,14 @@ const ModalSeleccionarConsulta: React.FC<ModalSeleccionarConsultaProps> = ({
         sessionToken
       );
 
-      console.log("Response status:", response.status);
+      //console.log("Response status:", response.status);
 
       if (!response.ok) {
         throw new Error("Error al cargar consultas");
       }
 
       const data = await response.json();
-      console.log("Consultas recibidas:", data);
+      //console.log("Consultas recibidas:", data);
 
       // Ordenar consultas por fecha (más recientes primero)
       const consultasOrdenadas = data.sort(

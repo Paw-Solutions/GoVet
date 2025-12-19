@@ -427,7 +427,7 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
   }, []);
 
   const editPaciente = useCallback((paciente: PacienteData) => {
-    console.log("Editar paciente:", paciente);
+    //console.log("Editar paciente:", paciente);
     setPacientesState((prev) => ({
       ...prev,
       selectedPaciente: paciente,
@@ -564,7 +564,7 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
           loading: false,
           sortOrder: order,
         }));
-        console.log("Datos obtenidos: ", data.consultas);
+        //console.log("Datos obtenidos: ", data.consultas);
       } catch (error) {
         setConsultasState((prev) => ({
           ...prev,
@@ -696,7 +696,7 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
 
   const handleShare = useCallback(async (consulta: ConsultaData) => {
     try {
-      console.log("Obteniendo PDF para compartir...");
+      //console.log("Obteniendo PDF para compartir...");
 
       // Llamar al endpoint que ya existe en el backend
       const blob = await descargarPdfConsulta(consulta.id_consulta, sessionToken);
@@ -706,13 +706,13 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
         throw new Error("El PDF descargado está vacío");
       }
 
-      console.log(
+      /*console.log(
         "Blob descargado, tamaño:",
         blob.size,
         "bytes",
         "tipo:",
         blob.type
-      );
+      );*/
 
       // Nombre del archivo
       const fecha = consulta.fecha_consulta
@@ -734,13 +734,13 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
 
       // Verificar si el navegador soporta compartir archivos
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        console.log("Iniciando share...");
+        //console.log("Iniciando share...");
         await navigator.share({
           title: "Resumen consulta Veterinaria - GoVet",
           text: "Te comparto el resumen de la consulta veterinaria.",
           files: [file],
         });
-        console.log("PDF compartido exitosamente");
+        //console.log("PDF compartido exitosamente");
       } else {
         alert(
           "Tu navegador no soporta compartir archivos. Intenta descargar el PDF en su lugar."
@@ -749,7 +749,7 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
     } catch (err: any) {
       // No mostrar error si el usuario simplemente canceló el share
       if (err.name === "AbortError") {
-        console.log("El usuario canceló el compartir");
+        //console.log("El usuario canceló el compartir");
         return;
       }
 
@@ -766,7 +766,7 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
 
   const exportConsulta = useCallback(async (consulta: ConsultaData) => {
     try {
-      console.log("Descargando PDF de consulta:", consulta.id_consulta);
+      //console.log("Descargando PDF de consulta:", consulta.id_consulta);
 
       // Llamar al endpoint que ya existe en el backend
       const blob = await descargarPdfConsulta(consulta.id_consulta, sessionToken);
@@ -793,7 +793,7 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
 
-      console.log("PDF descargado exitosamente");
+      //console.log("PDF descargado exitosamente");
     } catch (error) {
       console.error("Error exportando consulta:", error);
       alert("Error al descargar el PDF. Por favor, intente nuevamente.");

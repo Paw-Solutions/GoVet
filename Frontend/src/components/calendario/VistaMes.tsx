@@ -48,9 +48,9 @@ const VistaMes: React.FC<VistaMesProps> = ({
     try {
       const year = fecha.getFullYear();
       const month = fecha.getMonth() + 1; // getMonth() devuelve 0-11
-      console.log("Cargando eventos del mes:", year, month);
+      //console.log("Cargando eventos del mes:", year, month);
       const response = await getEventsMonth(year, month, sessionToken);
-      console.log("Eventos recibidos:", response);
+      //console.log("Eventos recibidos:", response);
       setEventos(response || []);
     } catch (error) {
       console.error("Error al cargar eventos:", error);

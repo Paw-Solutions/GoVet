@@ -34,12 +34,12 @@ export const SelectorRegion: React.FC<SelectorRegionProps> = ({
 
   // Debug: mostrar estado del componente
   useEffect(() => {
-    console.log("📋 SelectorRegion estado:", {
+    /*console.log("📋 SelectorRegion estado:", {
       showRegionList,
       filteredRegionesCount: filteredRegiones.length,
       loadingRegiones,
       regionQuery,
-    });
+    });*/
   }, [showRegionList, filteredRegiones, loadingRegiones, regionQuery]);
 
   // Cerrar dropdown al hacer click fuera

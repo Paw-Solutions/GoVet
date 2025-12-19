@@ -65,14 +65,14 @@ const VistaSemana: React.FC<VistaSemanaProps> = ({
     try {
       const startDate = inicioSemana.toISOString().split("T")[0];
       const endDate = finSemana.toISOString().split("T")[0];
-      console.log("Cargando eventos de la semana:", startDate, "a", endDate);
+      //console.log("Cargando eventos de la semana:", startDate, "a", endDate);
       const data = await getEventsWeek(startDate, endDate, sessionToken);
-      console.log("Eventos de la semana recibidos:", data);
+      //console.log("Eventos de la semana recibidos:", data);
 
       // Filtrar eventos que tengan la estructura correcta antes de ordenar
       const eventosValidos = data.filter((evento) => evento?.start?.dateTime);
 
-      console.log("Eventos válidos:", eventosValidos);
+      //console.log("Eventos válidos:", eventosValidos);
 
       setEventos(
         eventosValidos.sort((a, b) =>

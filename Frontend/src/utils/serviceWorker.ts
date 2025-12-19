@@ -9,38 +9,38 @@
 export async function registerServiceWorker(): Promise<ServiceWorkerRegistration | null> {
   // Verificar soporte
   if (!("serviceWorker" in navigator)) {
-    console.log("Service Worker no soportado en este navegador");
+    //console.log("Service Worker no soportado en este navegador");
     return null;
   }
 
   try {
-    console.log("[SW Registration] Registrando Service Worker...");
+    //console.log("[SW Registration] Registrando Service Worker...");
 
     const registration = await navigator.serviceWorker.register(
       "/service-worker.js",
       { scope: "/" }
     );
 
-    console.log(
+    /*console.log(
       "[SW Registration] Service Worker registrado:",
       registration.scope
-    );
+    );*/
 
     // Manejar actualizaciones
     registration.addEventListener("updatefound", () => {
       const newWorker = registration.installing;
-      console.log("[SW Registration] Nueva versión encontrada");
+      //console.log("[SW Registration] Nueva versión encontrada");
 
       if (newWorker) {
         newWorker.addEventListener("statechange", () => {
-          console.log("[SW Registration] Estado:", newWorker.state);
+          //console.log("[SW Registration] Estado:", newWorker.state);
 
           if (
             newWorker.state === "installed" &&
             navigator.serviceWorker.controller
           ) {
             // Hay una nueva versión disponible
-            console.log("[SW Registration] Nueva versión lista");
+            //console.log("[SW Registration] Nueva versión lista");
             notifyUpdate();
           }
         });
@@ -66,7 +66,7 @@ export async function unregisterServiceWorker(): Promise<boolean> {
     const registration = await navigator.serviceWorker.getRegistration();
     if (registration) {
       const success = await registration.unregister();
-      console.log("[SW Registration] Service Worker desregistrado:", success);
+      //console.log("[SW Registration] Service Worker desregistrado:", success);
       return success;
     }
     return false;
@@ -88,7 +88,7 @@ export async function checkForUpdates(): Promise<void> {
     const registration = await navigator.serviceWorker.getRegistration();
     if (registration) {
       await registration.update();
-      console.log("[SW Registration] Verificación de actualización completada");
+      //console.log("[SW Registration] Verificación de actualización completada");
     }
   } catch (error) {
     console.error("[SW Registration] Error al verificar actualización:", error);
@@ -118,7 +118,7 @@ function notifyUpdate(): void {
 
   window.dispatchEvent(event);
 
-  console.log("[SW Registration] Evento de actualización disparado");
+  //console.log("[SW Registration] Evento de actualización disparado");
 }
 
 /**
@@ -126,7 +126,7 @@ function notifyUpdate(): void {
  */
 export function setupConnectionListener(): void {
   window.addEventListener("online", () => {
-    console.log("[Connection] Conexión restaurada");
+    //console.log("[Connection] Conexión restaurada");
     const event = new CustomEvent("connection-changed", {
       detail: { online: true },
     });
@@ -134,7 +134,7 @@ export function setupConnectionListener(): void {
   });
 
   window.addEventListener("offline", () => {
-    console.log("[Connection] Conexión perdida");
+    //console.log("[Connection] Conexión perdida");
     const event = new CustomEvent("connection-changed", {
       detail: { online: false },
     });
@@ -168,7 +168,7 @@ export async function clearAllCaches(): Promise<void> {
   if ("caches" in window) {
     const cacheNames = await caches.keys();
     await Promise.all(cacheNames.map((cacheName) => caches.delete(cacheName)));
-    console.log("[SW Registration] Todas las caches eliminadas");
+    //console.log("[SW Registration] Todas las caches eliminadas");
   }
 }
 

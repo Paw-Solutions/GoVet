@@ -524,7 +524,7 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
         //? [{ email: tutorSeleccionado.email }]
         //: undefined,
       };
-      console.log(nuevoEvento);
+      //console.log(nuevoEvento);
       await createEvent(nuevoEvento, sessionToken);
 
       present({
@@ -610,9 +610,9 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
               );
               const fechaEnvioIso = fechaEnvioDate.toISOString();
 
-              console.log(
+              /*console.log(
                 `Programando notificación EMAIL (${tipoNotificacion}) para ${tutorSeleccionado.email} en ${fechaEnvioIso}`
-              );
+              );*/
 
               await enviarNotificacion(
                 {
@@ -634,9 +634,9 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
             }
           }
         } else {
-          console.log(
+          /*console.log(
             "El tutor no tiene un email válido; se omite el envío de notificación por correo."
-          );
+          );*/
         }
 
         // Enviar notificaciones por WHATSAPP
@@ -678,9 +678,9 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
               try {
                 // Para WhatsApp, solo enviamos si es "ahora" ya que la API actual no soporta programación
                 if (tipoNotificacion === "ahora") {
-                  console.log(
+                  /*console.log(
                     `Enviando notificación WhatsApp para ${numeroFormateado}`
-                  );
+                  );*/
 
                   await sendWhatsAppNotification(
                     {
@@ -704,14 +704,14 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
               }
             }
           } else {
-            console.log(
+            /*console.log(
               `El número ${numeroWhatsApp} no tiene un formato válido para WhatsApp (debe ser +569XXXXXXXX). Se omite el envío.`
-            );
+            );*/
           }
         } else {
-          console.log(
+          /*console.log(
             "El tutor no tiene teléfono/celular registrado; se omite el envío de notificación por WhatsApp."
-          );
+          );*/
         }
 
         // Mostrar mensaje según resultados
@@ -757,9 +757,9 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
           });
         }
       } else {
-        console.log(
+        /*console.log(
           "No se seleccionaron notificaciones o se eligió 'No notificar'"
-        );
+        );*/
       }
 
       onCitaCreada();

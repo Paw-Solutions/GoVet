@@ -52,10 +52,10 @@ export async function enviarNotificacion(
     // si el backend retorna JSON, lo devolvemos; si no, devolvemos null
     try {
       const data = await res.json();
-      console.log("Respuesta del backend (notificación):", data);
+      //console.log("Respuesta del backend (notificación):", data);
       return data;
     } catch {
-      console.log("Notificación enviada correctamente (sin body JSON). status:", res.status);
+      //console.log("Notificación enviada correctamente (sin body JSON). status:", res.status);
       return null;
     }
   } catch (error) {

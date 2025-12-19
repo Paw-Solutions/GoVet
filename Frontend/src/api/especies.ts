@@ -4,7 +4,7 @@ const API_URL = import.meta.env.VITE_API_URL || '/api'; // usa tu variable de en
 
 export async function obtenerEspecies() {
   try {
-    console.log("Obteniendo especies...");
+    //console.log("Obteniendo especies...");
     const response = await fetch(`${API_URL}/especies/`, {
       method: "GET",
       headers: {
@@ -17,7 +17,7 @@ export async function obtenerEspecies() {
     }
 
     const data = await response.json();
-    console.log("Especies obtenidas:", data);
+    //console.log("Especies obtenidas:", data);
     return data;
   } catch (error) {
     console.error("Error obteniendo especies:", error);
@@ -27,7 +27,7 @@ export async function obtenerEspecies() {
 
 export async function obtenerRazas(especieId: string) {
   try {
-    console.log(`Obteniendo razas para la especie ID: ${especieId}...`);
+    //console.log(`Obteniendo razas para la especie ID: ${especieId}...`);
     const response = await fetch(`${API_URL}/razas/especie/${especieId}`, {
       method: "GET",
       headers: {
@@ -40,7 +40,7 @@ export async function obtenerRazas(especieId: string) {
     }
 
     const data = await response.json();
-    console.log(`Razas obtenidas para la especie ID ${especieId}:`, data);
+    //console.log(`Razas obtenidas para la especie ID ${especieId}:`, data);
     return data;
   } catch (error) {
     console.error("Error obteniendo razas:", error);

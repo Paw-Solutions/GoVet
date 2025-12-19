@@ -43,7 +43,7 @@ export async function getEventsDay(
   if (!response.ok) {
     throw new Error(`Error al obtener eventos del día ${response.status}`);
   }
-  console.log("Get day events response:", response);
+  //console.log("Get day events response:", response);
 
   const data = await response.json();
   return data.events;
@@ -67,7 +67,7 @@ export async function getEventsWeek(
   if (!response.ok) {
     throw new Error(`Error al obtener eventos de la semana ${response.status}`);
   }
-  console.log("Get week events response:", response);
+  //console.log("Get week events response:", response);
   const data = await response.json();
   return data.events;
 }
@@ -86,7 +86,7 @@ export async function getEventsMonth(
     },
     idToken
   );
-  console.log("Get month events response:", response);
+  //console.log("Get month events response:", response);
   if (!response.ok) {
     throw new Error(`Error al obtener eventos del mes ${response.status}`);
   }
@@ -107,7 +107,7 @@ export async function deleteEvent(
     },
   idToken
   );
-  console.log("Delete response:", response);
+  //console.log("Delete response:", response);
 
   if (!response.ok) {
     throw new Error(`Error al eliminar evento ${response.status}`);

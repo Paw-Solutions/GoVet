@@ -53,7 +53,7 @@ export async function crearPaciente(
   formData: PacienteCreate,
   idToken?: string | null) {
   try {
-    console.log("Enviando datos del paciente al servidor:", formData);
+    //console.log("Enviando datos del paciente al servidor:", formData);
     const response = await fetchWithAuth(
       `${API_URL}/pacientes/`,
       {
@@ -75,7 +75,7 @@ export async function crearPaciente(
     }
 
     const data = await response.json();
-    console.log("Paciente creado exitosamente:", data);
+    //console.log("Paciente creado exitosamente:", data);
     return data;
   } catch (error) {
     console.error("Error creando paciente:", error);
@@ -91,7 +91,7 @@ export async function asociarTutorAPaciente(
   idToken?: string | null
 ) {
   try {
-    console.log(`Asociando tutor ${rutTutor} al paciente ${idPaciente}`);
+    //console.log(`Asociando tutor ${rutTutor} al paciente ${idPaciente}`);
     const response = await fetchWithAuth(
       `${API_URL}/tutores/${rutTutor}/pacientes/${idPaciente}?fecha=${fecha}`,
       {
@@ -112,7 +112,7 @@ export async function asociarTutorAPaciente(
     }
 
     const data = await response.json();
-    console.log("Tutor asociado exitosamente:", data);
+    //console.log("Tutor asociado exitosamente:", data);
     return data;
   } catch (error) {
     console.error("Error asociando tutor al paciente:", error);
@@ -124,7 +124,7 @@ export async function obtenerPacientes(
   idToken?: string | null
 ) {
   try {
-    console.log("Obteniendo pacientes...");
+    //console.log("Obteniendo pacientes...");
     const response = await fetchWithAuth(
       `${API_URL}/pacientes/`, 
       {
@@ -141,7 +141,7 @@ export async function obtenerPacientes(
     }
 
     const data = await response.json();
-    console.log("Pacientes obtenidos:", data);
+    //console.log("Pacientes obtenidos:", data);
     return data;
   } catch (error) {
     console.error("Error obteniendo pacientes:", error);
@@ -165,7 +165,7 @@ export async function obtenerPacientesPaginados(
       params.append("search", search);
     }
 
-    console.log(`Obteniendo pacientes página ${page}...`);
+    //console.log(`Obteniendo pacientes página ${page}...`);
     const response = await fetchWithAuth(
       `${API_URL}/pacientes/paginated/?${params}`,
       {
@@ -182,7 +182,7 @@ export async function obtenerPacientesPaginados(
     }
 
     const data = await response.json();
-    console.log("Pacientes paginados obtenidos:", data);
+    //console.log("Pacientes paginados obtenidos:", data);
     return data;
   } catch (error) {
     console.error("Error obteniendo pacientes paginados:", error);
@@ -196,7 +196,7 @@ export async function obtenerPacientesPorTutor(
   idToken?: string | null
 ): Promise<PacienteData[]> {
   try {
-    console.log(`Obteniendo pacientes del tutor ${rutTutor}...`);
+    //console.log(`Obteniendo pacientes del tutor ${rutTutor}...`);
     const response = await fetchWithAuth(
       `${API_URL}/pacientes/tutor/${encodeURIComponent(rutTutor)}`,
       {
@@ -217,7 +217,7 @@ export async function obtenerPacientesPorTutor(
     }
 
     const data = await response.json();
-    console.log("Pacientes del tutor obtenidos:", data);
+    //console.log("Pacientes del tutor obtenidos:", data);
     return data;
   } catch (error) {
     console.error("Error obteniendo pacientes del tutor:", error);
@@ -231,7 +231,7 @@ export async function obtenerPacientePorId(
   idToken?: string | null
 ): Promise<PacienteData> {
   try {
-    console.log(`Obteniendo paciente con ID ${idPaciente}...`);
+    //console.log(`Obteniendo paciente con ID ${idPaciente}...`);
     const response = await fetchWithAuth(
       `${API_URL}/pacientes/${idPaciente}`, 
       {
@@ -248,7 +248,7 @@ export async function obtenerPacientePorId(
     }
 
     const data = await response.json();
-    console.log("Paciente obtenido:", data);
+    //console.log("Paciente obtenido:", data);
     return data;
   } catch (error) {
     console.error("Error obteniendo paciente:", error);

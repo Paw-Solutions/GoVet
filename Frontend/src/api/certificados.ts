@@ -48,15 +48,15 @@ export async function descargarCertificadoTransporte(
   idPaciente: number,
   idToken?: string | null
 ): Promise<Blob> {
-  console.log(
+  /*console.log(
     `[API] Descargando certificado de transporte para paciente ${idPaciente}`
-  );
-  console.log(
-    `[API] idToken recibido:`,
+  );*/
+  (
+    //`[API] idToken recibido:`,
     idToken ? `${idToken.substring(0, 20)}...` : "NULL"
   );
   const url = `${API_URL}/pacientes/${idPaciente}/certificado-transporte`;
-  console.log(`[API] URL: ${url}`);
+  //console.log(`[API] URL: ${url}`);
 
   const response = await fetchWithAuth(
     url,
@@ -69,8 +69,8 @@ export async function descargarCertificadoTransporte(
     idToken
   );
 
-  console.log(`[API] Response status: ${response.status}`);
-  console.log(`[API] Response headers:`, response.headers);
+  //console.log(`[API] Response status: ${response.status}`);
+  //console.log(`[API] Response headers:`, response.headers);
 
   if (!response.ok) {
     const errorText = await response.text();
@@ -81,7 +81,7 @@ export async function descargarCertificadoTransporte(
   }
 
   const blob = await response.blob();
-  console.log(`[API] Blob size: ${blob.size} bytes, type: ${blob.type}`);
+  //console.log(`[API] Blob size: ${blob.size} bytes, type: ${blob.type}`);
   return blob;
 }
 

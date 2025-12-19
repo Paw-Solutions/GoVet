@@ -78,7 +78,7 @@ const BotonAnadir: React.FC<BotonAnadirProps> = ({
     }
     // Si no hay callback pero hay ruta, navegar automáticamente
     else if (opcion.ruta) {
-      console.log("Navegando a:", opcion.ruta);
+      //console.log("Navegando a:", opcion.ruta);
       history.push(opcion.ruta);
     }
 

@@ -4,7 +4,7 @@ const API_URL = import.meta.env.VITE_API_URL || "/api"; // usa tu variable de en
 
 export async function obtenerRegiones() {
   try {
-    console.log("Obteniendo regiones desde el backend...");
+    //console.log("Obteniendo regiones desde el backend...");
     const response = await fetch(`${API_URL}/regiones/`, {
       method: "GET",
       headers: {
@@ -17,7 +17,7 @@ export async function obtenerRegiones() {
     }
 
     const data = await response.json();
-    console.log("Regiones obtenidas desde backend:", data);
+    //console.log("Regiones obtenidas desde backend:", data);
     return data;
   } catch (error) {
     console.error("Error obteniendo regiones:", error);

@@ -54,7 +54,7 @@ export async function crearTutor(
   formData: TutorData,
   idToken?: string | null) {
   try {
-    console.log("Enviando datos al servidor:", formData);
+    //console.log("Enviando datos al servidor:", formData);
     const response = await fetchWithAuth(
       `${API_URL}/tutores/`, 
       {
@@ -71,7 +71,7 @@ export async function crearTutor(
     }
 
     const data = await response.json();
-    console.log("Respuesta del servidor:", data);
+    //console.log("Respuesta del servidor:", data);
     return data;
   } catch (error) {
     console.error("Error creando tutor:", error);
@@ -84,7 +84,7 @@ export async function obtenerTutores(
     idToken?: string | null
 ) {
   try {
-    console.log("Obteniendo tutores del servidor...");
+    //console.log("Obteniendo tutores del servidor...");
     const response = await fetchWithAuth(
       `${API_URL}/tutores/`, {
         method: "GET",
@@ -100,7 +100,7 @@ export async function obtenerTutores(
     }
 
     const data = await response.json();
-    console.log("Tutores obtenidos:", data);
+    //console.log("Tutores obtenidos:", data);
     return data;
   } catch (error) {
     console.error("Error obteniendo tutores:", error);
@@ -125,7 +125,7 @@ export async function obtenerTutoresPaginados(
       params.append("search", search);
     }
 
-    console.log(`Obteniendo tutores página ${page}...`);
+    //console.log(`Obteniendo tutores página ${page}...`);
     const response = await fetchWithAuth(
       `${API_URL}/tutores/paginated/?${params}`, 
       {
@@ -142,7 +142,7 @@ export async function obtenerTutoresPaginados(
     }
 
     const data = await response.json();
-    console.log("Tutores paginados obtenidos:", data);
+    //console.log("Tutores paginados obtenidos:", data);
     return data;
   } catch (error) {
     console.error("Error obteniendo tutores paginados:", error);
@@ -158,7 +158,7 @@ export async function obtenerTutorPorRut(
   idToken?: string | null
 ): Promise<TutorData> {
   try {
-    console.log(`Obteniendo tutor con RUT ${rut}...`);
+    //console.log(`Obteniendo tutor con RUT ${rut}...`);
     const response = await fetchWithAuth(
       `${API_URL}/tutores/${encodeURIComponent(rut)}`,
       {
@@ -181,7 +181,7 @@ export async function obtenerTutorPorRut(
     }
 
     const data = await response.json();
-    console.log("Tutor obtenido:", data);
+    //console.log("Tutor obtenido:", data);
     return data as TutorData;
   } catch (error) {
     console.error("Error obteniendo tutor:", error);

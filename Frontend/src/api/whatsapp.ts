@@ -53,7 +53,7 @@ export async function getWhatsAppQR(
   idToken?: string | null
 ): Promise<WhatsAppQRResponse> {
   try {
-    console.log("Obteniendo código QR de WhatsApp...");
+    //console.log("Obteniendo código QR de WhatsApp...");
 
     const response = await fetchWithAuth(
       `${API_URL}/whatsapp/qr`, 
@@ -72,7 +72,7 @@ export async function getWhatsAppQR(
     }
 
     const data: WhatsAppQRResponse = await response.json();
-    console.log("QR obtenido:", data.qr ? "Disponible" : "No disponible");
+    //console.log("QR obtenido:", data.qr ? "Disponible" : "No disponible");
     return data;
   } catch (error) {
     console.error("Error obteniendo código QR de WhatsApp:", error);
@@ -88,7 +88,7 @@ export async function getWhatsAppStatus(
   idToken?: string | null
 ): Promise<WhatsAppStatus> {
   try {
-    console.log("Verificando estado de WhatsApp...");
+    //console.log("Verificando estado de WhatsApp...");
     const response = await fetchWithAuth(
       `${API_URL}/whatsapp/status`, 
       {
@@ -105,10 +105,10 @@ export async function getWhatsAppStatus(
     }
 
     const data: WhatsAppStatus = await response.json();
-    console.log(
+    /*console.log(
       "Estado de WhatsApp:",
       data.conectado ? "Conectado" : "Desconectado"
-    );
+    );*/
     return data;
   } catch (error) {
     console.error("Error verificando estado de WhatsApp:", error);
@@ -125,7 +125,7 @@ export async function cerrarSesionWhatsApp(
   idToken?: string | null
 ): Promise<WhatsAppActionResponse> {
   try {
-    console.log("Cerrando sesión de WhatsApp...");
+    //console.log("Cerrando sesión de WhatsApp...");
     const response = await fetchWithAuth(
       `${API_URL}/whatsapp/cerrar-sesion`, 
       {
@@ -143,7 +143,7 @@ export async function cerrarSesionWhatsApp(
     }
 
     const data: WhatsAppActionResponse = await response.json();
-    console.log("Sesión cerrada:", data.mensaje);
+    //console.log("Sesión cerrada:", data.mensaje);
     return data;
   } catch (error) {
     console.error("Error cerrando sesión de WhatsApp:", error);
@@ -160,7 +160,7 @@ export async function desvincularWhatsApp(
   idToken?: string | null
 ): Promise<WhatsAppActionResponse> {
   try {
-    console.log("Desvinculando dispositivo de WhatsApp...");
+    //console.log("Desvinculando dispositivo de WhatsApp...");
     const response = await fetchWithAuth(
       `${API_URL}/whatsapp/desvincular`,
       {
@@ -178,7 +178,7 @@ export async function desvincularWhatsApp(
     }
 
     const data: WhatsAppActionResponse = await response.json();
-    console.log("Dispositivo desvinculado:", data.mensaje);
+    //console.log("Dispositivo desvinculado:", data.mensaje);
     return data;
   } catch (error) {
     console.error("Error desvinculando dispositivo de WhatsApp:", error);
@@ -195,7 +195,7 @@ export async function iniciarSesionWhatsApp(
   idToken?: string | null
 ): Promise<WhatsAppActionResponse> {
   try {
-    console.log("Iniciando sesión de WhatsApp...");
+    //console.log("Iniciando sesión de WhatsApp...");
     const response = await fetchWithAuth(
       `${API_URL}/whatsapp/iniciar`, 
       {
@@ -213,7 +213,7 @@ export async function iniciarSesionWhatsApp(
     }
 
     const data: WhatsAppActionResponse = await response.json();
-    console.log("Sesión iniciada:", data.mensaje);
+    //console.log("Sesión iniciada:", data.mensaje);
     return data;
   } catch (error) {
     console.error("Error iniciando sesión de WhatsApp:", error);
@@ -236,7 +236,7 @@ export async function sendWhatsAppNotification(
   idToken?: string | null
 ) {
   try {
-    console.log("Enviando notificación de WhatsApp...");
+    //console.log("Enviando notificación de WhatsApp...");
 
     const queryParams = new URLSearchParams({
       numero: params.numero,
@@ -268,7 +268,7 @@ export async function sendWhatsAppNotification(
     }
 
     const data = await response.json();
-    console.log("Notificación enviada:", data);
+    //console.log("Notificación enviada:", data);
     return data;
   } catch (error) {
     console.error("Error enviando notificación de WhatsApp:", error);

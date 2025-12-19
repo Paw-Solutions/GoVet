@@ -131,7 +131,7 @@ const VinculacionWhatsApp: React.FC = () => {
    * Implementa backoff exponencial en caso de fallos
    */
   const startPolling = () => {
-    console.log("[WhatsApp-Debug] Iniciando polling...");
+    //console.log("[WhatsApp-Debug] Iniciando polling...");
 
     // Siempre detener polling anterior primero
     stopPolling();
@@ -159,7 +159,7 @@ const VinculacionWhatsApp: React.FC = () => {
 
         // Si está conectado ahora
         if (statusData.conectado) {
-          console.log("WhatsApp connected successfully");
+          //console.log("WhatsApp connected successfully");
           setState("connected");
           setQrCode(null);
           setQrTimestamp(null);
@@ -210,7 +210,7 @@ const VinculacionWhatsApp: React.FC = () => {
    * pero NO reinicia automáticamente. Debemos llamar a /iniciar para generar nuevo QR.
    */
   const handleDesvincular = async () => {
-    console.log("Starting WhatsApp unlinking process");
+    //console.log("Starting WhatsApp unlinking process");
 
     try {
       // Paso 1: Mostrar loading y detener polling
@@ -227,7 +227,7 @@ const VinculacionWhatsApp: React.FC = () => {
       }
 
       // Paso 3: Desvinculación exitosa
-      console.log("WhatsApp unlinked successfully");
+      //console.log("WhatsApp unlinked successfully");
 
       setQrCode(null);
       setQrTimestamp(null);
@@ -248,7 +248,7 @@ const VinculacionWhatsApp: React.FC = () => {
       if (!isMountedRef.current) return;
 
       // Paso 5: POLLING hasta confirmar desconexión real (máx 10 intentos)
-      console.log("Polling for disconnection confirmation...");
+      //console.log("Polling for disconnection confirmation...");
       let isReallyDisconnected = false;
       let attempts = 0;
       const maxAttempts = 10;
@@ -260,7 +260,7 @@ const VinculacionWhatsApp: React.FC = () => {
 
         if (!checkStatus.conectado) {
           isReallyDisconnected = true;
-          console.log("Disconnection confirmed");
+          //console.log("Disconnection confirmed");
         } else {
           await new Promise((resolve) => setTimeout(resolve, 2000));
         }
@@ -278,7 +278,7 @@ const VinculacionWhatsApp: React.FC = () => {
       }
 
       // Paso 6: POLLING hasta que aparezca el QR (máx 15 intentos = 30s)
-      console.log("Polling for new QR code...");
+      //console.log("Polling for new QR code...");
       let qrGenerated = false;
       let qrAttempts = 0;
       const maxQRAttempts = 15;
@@ -290,7 +290,7 @@ const VinculacionWhatsApp: React.FC = () => {
           const qrData = await getWhatsAppQR(sessionToken);
 
           if (qrData.qr) {
-            console.log(`QR code generated after ${qrAttempts} attempts`);
+            //console.log(`QR code generated after ${qrAttempts} attempts`);
             setQrCode(qrData.qr);
             setQrTimestamp(Date.now());
             setState("disconnected");
@@ -317,7 +317,7 @@ const VinculacionWhatsApp: React.FC = () => {
       }
 
       // Paso 7: Iniciar polling para detectar cuando escaneen el QR
-      console.log("Starting status polling");
+      //console.log("Starting status polling");
       startPolling();
     } catch (err) {
       console.error("Error during unlinking:", err);
@@ -350,7 +350,7 @@ const VinculacionWhatsApp: React.FC = () => {
    * Maneja el refresco manual
    */
   const handleRefresh = async () => {
-    console.log("[WhatsApp-Debug] Refresco manual solicitado");
+    //console.log("[WhatsApp-Debug] Refresco manual solicitado");
     setFailureCount(0); // Reset contador de fallos
     await loadWhatsAppData();
   };
@@ -359,7 +359,7 @@ const VinculacionWhatsApp: React.FC = () => {
    * Efecto para carga inicial y configuración de polling
    */
   useEffect(() => {
-    console.log("[WhatsApp-Debug] Componente montado");
+    //console.log("[WhatsApp-Debug] Componente montado");
     isMountedRef.current = true;
 
     loadWhatsAppData();
@@ -367,7 +367,7 @@ const VinculacionWhatsApp: React.FC = () => {
 
     // Cleanup al desmontar
     return () => {
-      console.log("[WhatsApp-Debug] Componente desmontado - limpiando...");
+      //console.log("[WhatsApp-Debug] Componente desmontado - limpiando...");
       isMountedRef.current = false;
       stopPolling();
 
@@ -383,7 +383,7 @@ const VinculacionWhatsApp: React.FC = () => {
    * Simplificado para evitar race conditions
    */
   useEffect(() => {
-    console.log("[WhatsApp-Debug] Cambio de estado:", state);
+    //console.log("[WhatsApp-Debug] Cambio de estado:", state);
 
     // Si está conectado o en error, detener polling
     if (state === "connected" || state === "error") {
@@ -392,9 +392,9 @@ const VinculacionWhatsApp: React.FC = () => {
     // Si está desconectado, asegurar que polling esté activo
     else if (state === "disconnected") {
       if (!pollingIntervalRef.current) {
-        console.log(
+        /*console.log(
           "[WhatsApp-Debug] Estado desconectado sin polling, iniciando..."
-        );
+        );*/
         startPolling();
       }
     }

@@ -48,11 +48,11 @@ export const useRegistroPaciente = () => {
   const [toastMessage, setToastMessage] = useState("");
 
   const handleCargarRazas = useCallback(async (nombreEspecie: string) => {
-    console.log("🔄 Cargando razas para:", nombreEspecie);
+    //console.log("🔄 Cargando razas para:", nombreEspecie);
     setLoadingRazas(true);
     try {
       const razas = await obtenerRazas(nombreEspecie);
-      console.log("✅ Razas cargadas:", razas ? razas.length : 0, "razas");
+      //console.log("✅ Razas cargadas:", razas ? razas.length : 0, "razas");
       setRazasData(razas || []);
     } catch (error) {
       console.error("❌ Error cargando razas:", error);
@@ -65,11 +65,11 @@ export const useRegistroPaciente = () => {
   }, []);
 
   const handleCargarEspecies = useCallback(async () => {
-    console.log("🔄 Iniciando carga de especies...");
+    //console.log("🔄 Iniciando carga de especies...");
     setLoadingEspecies(true);
     try {
       const especies = await obtenerEspecies();
-      console.log("✅ Especies cargadas:", especies.length, "especies");
+      //console.log("✅ Especies cargadas:", especies.length, "especies");
       setEspeciesData(especies);
     } catch (error) {
       console.error("❌ Error cargando especies:", error);
@@ -142,7 +142,7 @@ export const useRegistroPaciente = () => {
 
   const registraPaciente = async () => {
     try {
-      console.log("📋 FormData completo antes de enviar:", formData);
+      //console.log("📋 FormData completo antes de enviar:", formData);
 
       if (
         !formData.nombre ||
@@ -170,20 +170,20 @@ export const useRegistroPaciente = () => {
         esterilizado: formData.esterilizado,
       };
 
-      console.log("📤 Datos del paciente que se enviarán:", pacienteData);
+      //console.log("📤 Datos del paciente que se enviarán:", pacienteData);
 
       const pacienteCreado = await crearPaciente(pacienteData, sessionToken);
-      console.log("✅ Paciente creado exitosamente:", pacienteCreado);
+      //console.log("✅ Paciente creado exitosamente:", pacienteCreado);
 
       // PASO 2: Asociar el tutor al paciente
-      console.log("🔗 Asociando tutor al paciente...");
+      //console.log("🔗 Asociando tutor al paciente...");
       await asociarTutorAPaciente(
         formData.rut_tutor,
         pacienteCreado.id_paciente,
         new Date().toISOString().split("T")[0],
         sessionToken
       );
-      console.log("✅ Tutor asociado exitosamente");
+      //console.log("✅ Tutor asociado exitosamente");
 
       setToastMessage("Paciente registrado y asociado al tutor exitosamente");
 
@@ -211,7 +211,7 @@ export const useRegistroPaciente = () => {
   };
 
   const handleTutorRegistrado = (tutor: any) => {
-    console.log("✅ Tutor registrado y seleccionado:", tutor);
+    //console.log("✅ Tutor registrado y seleccionado:", tutor);
     setFormData((prev) => ({
       ...prev,
       rut_tutor: tutor.rut,

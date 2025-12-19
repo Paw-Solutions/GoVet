@@ -99,8 +99,8 @@ const RegistroTutor: React.FC<RegistroTutorProps> = ({
       try {
         setLoadingRegiones(true);
         const data = await obtenerRegiones();
-        console.log("✅ Regiones cargadas:", data);
-        console.log("📊 Cantidad de regiones:", data?.length);
+        //console.log("✅ Regiones cargadas:", data);
+        //console.log("📊 Cantidad de regiones:", data?.length);
         setRegiones(data);
       } catch (error) {
         console.error("❌ Error cargando regiones:", error);
@@ -136,13 +136,13 @@ const RegistroTutor: React.FC<RegistroTutorProps> = ({
       );
     });
 
-    console.log(
+    /*console.log(
       "🔍 Regiones filtradas:",
       filtered.length,
       "de",
       regiones.length
-    );
-    console.log("🔍 Búsqueda actual:", regionQuery);
+    );*/
+    //console.log("🔍 Búsqueda actual:", regionQuery);
     return filtered;
   }, [regiones, regionQuery]);
 
@@ -273,7 +273,7 @@ const RegistroTutor: React.FC<RegistroTutorProps> = ({
       };
 
       const respuesta = await crearTutor(dataToSubmit, sessionToken);
-      console.log("Tutor creado:", respuesta);
+      //console.log("Tutor creado:", respuesta);
       setToastMessage("Tutor registrado exitosamente");
       setToastColor("success");
 

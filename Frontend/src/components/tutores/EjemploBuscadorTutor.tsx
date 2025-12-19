@@ -27,12 +27,12 @@ const EjemploBuscadorTutor: React.FC = () => {
 
   const handleSelectTutor = (tutor: TutorData) => {
     setTutorSeleccionado(tutor);
-    console.log("Tutor seleccionado:", tutor);
+    //console.log("Tutor seleccionado:", tutor);
   };
 
   const handleConfirm = () => {
     if (tutorSeleccionado) {
-      console.log("Tutor confirmado:", tutorSeleccionado);
+      //console.log("Tutor confirmado:", tutorSeleccionado);
       setShowModal(false);
       // Aquí va tu lógica después de confirmar
     }

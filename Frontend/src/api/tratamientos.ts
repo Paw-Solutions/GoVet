@@ -19,7 +19,7 @@ export async function obtenerTratamientosProximos(
   idToken?: string | null
 ) {
   try {
-    console.log("Obteniendo tratamientos...");
+    //console.log("Obteniendo tratamientos...");
     const response = await fetchWithAuth(
       `${API_URL}/consultas/tratamientos/vacunas/nombre/`, 
       {
@@ -36,7 +36,7 @@ export async function obtenerTratamientosProximos(
     }
     const data = await response.json();
     
-    console.log("Tratamientos obtenidos:", data);
+    //console.log("Tratamientos obtenidos:", data);
     return data;
   } catch (error) {
     console.error("Error obteniendo tratamientos:", error);
@@ -49,7 +49,7 @@ export async function obtenerTratamientosPorPaciente(
   idToken?: string | null
 ): Promise<ConsultaTratamiento[]> {
   try {
-    console.log(`Obteniendo tratamientos para el paciente ID: ${idPaciente}...`);
+    //console.log(`Obteniendo tratamientos para el paciente ID: ${idPaciente}...`);
     const response = await fetchWithAuth(
       `${API_URL}/consultas/tratamientos/vacunas/paciente/${idPaciente}/proximas/`, 
       {
@@ -65,7 +65,7 @@ export async function obtenerTratamientosPorPaciente(
       throw new Error(`Error al obtener tratamientos para el paciente: ${response.status}`);
     }
     const data = await response.json();
-    console.log(`Tratamientos obtenidos para el paciente ID: ${idPaciente}:`, data);
+    //console.log(`Tratamientos obtenidos para el paciente ID: ${idPaciente}:`, data);
     return data;
   } catch (error) {
     console.error(`Error obteniendo tratamientos para el paciente ID: ${idPaciente}:`, error);

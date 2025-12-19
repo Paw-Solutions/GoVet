@@ -100,7 +100,7 @@ const ModalInfoPaciente: React.FC<ModalInfoPacienteProps> = ({
 
   // Función para abrir el historial de consultas
   const handleViewHistorial = () => {
-    console.log("🔍 Abriendo historial de consultas para paciente:", paciente);
+    //console.log("🔍 Abriendo historial de consultas para paciente:", paciente);
     setShowHistorial(true);
   };
 
@@ -336,7 +336,7 @@ const ModalInfoPaciente: React.FC<ModalInfoPacienteProps> = ({
             idPaciente={paciente.id_paciente}
             onVerDetalleVacuna={(vacuna) => {
               // TODO: Implementar modal de detalle de vacuna
-              console.log("Ver detalle de vacuna:", vacuna);
+              //console.log("Ver detalle de vacuna:", vacuna);
             }}
           />
         )}

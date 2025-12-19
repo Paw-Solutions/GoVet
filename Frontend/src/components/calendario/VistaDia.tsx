@@ -43,10 +43,10 @@ const VistaDia: React.FC<VistaDiaProps> = ({ fecha, onCambiarFecha }) => {
     setLoading(true);
     try {
       const fechaISO = new Date(fecha).toISOString();
-      console.log(fechaISO);
+      //console.log(fechaISO);
       const eventosDelDia = await getEventsDay(fechaISO, sessionToken);
       setEventos(eventosDelDia);
-      console.log("Eventos del día obtenidos:", eventosDelDia);
+      //console.log("Eventos del día obtenidos:", eventosDelDia);
     } catch (error) {
       console.error("Error al obtener eventos del día:", error);
     } finally {

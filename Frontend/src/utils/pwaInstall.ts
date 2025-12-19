@@ -31,14 +31,14 @@ export function usePWAInstall(): PWAInstallState {
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
-      console.log("[PWA Install] Prompt disponible");
+      //console.log("[PWA Install] Prompt disponible");
     };
 
     // Detectar cuando se instala
     const handleAppInstalled = () => {
       setIsInstalled(true);
       setDeferredPrompt(null);
-      console.log("[PWA Install] App instalada");
+      //console.log("[PWA Install] App instalada");
     };
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
@@ -63,7 +63,7 @@ export function usePWAInstall(): PWAInstallState {
       await deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
 
-      console.log(`[PWA Install] User choice: ${outcome}`);
+      //console.log(`[PWA Install] User choice: ${outcome}`);
 
       if (outcome === "accepted") {
         setDeferredPrompt(null);

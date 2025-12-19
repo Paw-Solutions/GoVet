@@ -60,7 +60,7 @@ const ModalInfoTutor: React.FC<ModalInfoTutorProps> = ({
       obtenerPacientesPorTutor(tutor.rut, sessionToken)
         .then((data) => {
           setPacientes(data);
-          console.log(`📋 Pacientes del tutor ${tutor.rut}:`, data);
+          //console.log(`📋 Pacientes del tutor ${tutor.rut}:`, data);
         })
         .catch((error) => {
           console.error("Error cargando pacientes del tutor:", error);

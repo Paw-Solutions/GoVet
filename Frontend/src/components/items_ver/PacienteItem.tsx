@@ -52,7 +52,7 @@ const PacienteItem: React.FC<PacienteItemProps> = ({
 
   // Función para obtener el ícono del sexo
   const getSexIcon = (sexo?: string) => {
-    console.log("Sexo del paciente:", sexo);
+    //console.log("Sexo del paciente:", sexo);
     switch (sexo?.toLowerCase()) {
       case "m":
         return maleOutline;

@@ -172,10 +172,10 @@ const Certificados: React.FC = () => {
       return;
     }
 
-    console.log("=== INICIO GENERACIÓN DE CERTIFICADO ===");
-    console.log("Paciente:", selectedPaciente);
-    console.log("Certificado seleccionado:", certificadoSeleccionado);
-    console.log("Datos del certificado:", certificadoDatos);
+    //console.log("=== INICIO GENERACIÓN DE CERTIFICADO ===");
+    //console.log("Paciente:", selectedPaciente);
+    //console.log("Certificado seleccionado:", certificadoSeleccionado);
+    //console.log("Datos del certificado:", certificadoDatos);
 
     setIsLoading(true);
     try {
@@ -184,7 +184,7 @@ const Certificados: React.FC = () => {
 
       switch (certificadoSeleccionado) {
         case "transporte":
-          console.log("Descargando certificado de transporte...");
+          //console.log("Descargando certificado de transporte...");
           blob = await descargarCertificadoTransporte(
             selectedPaciente.id_paciente,
             sessionToken
@@ -193,11 +193,11 @@ const Certificados: React.FC = () => {
           break;
 
         case "consentimiento":
-          console.log("Datos de consentimiento:", certificadoDatos);
+          //console.log("Datos de consentimiento:", certificadoDatos);
           if (!certificadoDatos) {
             throw new Error("Faltan datos para consentimiento");
           }
-          console.log("Descargando consentimiento informado...");
+          //console.log("Descargando consentimiento informado...");
           blob = await descargarConsentimientoInformado(
             selectedPaciente.id_paciente,
             certificadoDatos,
@@ -207,11 +207,11 @@ const Certificados: React.FC = () => {
           break;
 
         case "examenes":
-          console.log("Datos de exámenes:", certificadoDatos);
+          //console.log("Datos de exámenes:", certificadoDatos);
           if (!certificadoDatos) {
             throw new Error("Faltan datos para exámenes");
           }
-          console.log("Descargando orden de exámenes...");
+          //console.log("Descargando orden de exámenes...");
           blob = await descargarOrdenExamenes(
             selectedPaciente.id_paciente,
             certificadoDatos,
@@ -221,11 +221,11 @@ const Certificados: React.FC = () => {
           break;
 
         case "receta":
-          console.log("Datos de receta:", certificadoDatos);
+          //console.log("Datos de receta:", certificadoDatos);
           if (!certificadoDatos) {
             throw new Error("Faltan datos para receta");
           }
-          console.log("Descargando receta médica...");
+          //console.log("Descargando receta médica...");
           blob = await descargarRecetaMedica(
             selectedPaciente.id_paciente,
             certificadoDatos,
@@ -235,11 +235,11 @@ const Certificados: React.FC = () => {
           break;
 
         case "consulta":
-          console.log("Datos de consulta:", certificadoDatos);
+          //console.log("Datos de consulta:", certificadoDatos);
           if (!certificadoDatos?.id_consulta) {
             throw new Error("Faltan datos para consulta");
           }
-          console.log("Descargando resumen de consulta...");
+          //console.log("Descargando resumen de consulta...");
           blob = await descargarResumenConsulta(
             certificadoDatos.id_consulta,
             sessionToken
@@ -252,7 +252,7 @@ const Certificados: React.FC = () => {
       }
 
       // Descargar
-      console.log("Iniciando descarga...");
+      //console.log("Iniciando descarga...");
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -261,12 +261,12 @@ const Certificados: React.FC = () => {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      console.log("✅ Descarga completada");
+      //console.log("✅ Descarga completada");
 
       // Compartir usando API nativa
-      console.log("Iniciando compartir...");
+      //console.log("Iniciando compartir...");
       await descargarYCompartirPDF(blob, nombreArchivo);
-      console.log("✅ Compartir completado");
+      //console.log("✅ Compartir completado");
 
       setToastMessage("Certificado generado y compartido exitosamente");
       setToastColor("success");

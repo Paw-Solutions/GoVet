@@ -107,20 +107,20 @@ const ModalDetalleCita: React.FC<ModalDetalleCitaProps> = ({
   };
 
   const handleIrARellenarFicha = async () => {
-    console.log("🔍 Iniciando handleIrARellenarFicha");
+    //console.log("🔍 Iniciando handleIrARellenarFicha");
     setCargandoPaciente(true);
     try {
       const descripcion = evento.description || "";
-      console.log("📝 Descripción del evento:", descripcion);
+      //console.log("📝 Descripción del evento:", descripcion);
 
       // Extraer IDs ocultos en formato <!-- IDS:1,2,3 -->
       const matchIds = descripcion.match(/<!--\s*IDS:([0-9,]+)\s*-->/);
-      console.log("🔢 Match IDs ocultos:", matchIds);
+      //console.log("🔢 Match IDs ocultos:", matchIds);
 
       if (matchIds) {
         const idsString = matchIds[1];
         const ids = idsString.split(",").map((id) => parseInt(id.trim()));
-        console.log("✅ IDs encontrados:", ids);
+        //console.log("✅ IDs encontrados:", ids);
 
         // Extraer nombres de pacientes de la descripción para buscar
         const matchNombres = descripcion.match(/Pacientes?:\s*([^\n]+)/);
@@ -128,10 +128,10 @@ const ModalDetalleCita: React.FC<ModalDetalleCitaProps> = ({
         const nombresPacientes = nombresPacientesStr
           .split(",")
           .map((n) => n.trim());
-        console.log("📛 Nombres extraídos:", nombresPacientes);
+        //console.log("📛 Nombres extraídos:", nombresPacientes);
 
         // Buscar cada paciente por nombre
-        console.log("🔍 Buscando pacientes por nombres...");
+        //console.log("🔍 Buscando pacientes por nombres...");
         const pacientesEncontrados: PacienteData[] = [];
 
         for (const nombre of nombresPacientes) {
@@ -154,7 +154,7 @@ const ModalDetalleCita: React.FC<ModalDetalleCitaProps> = ({
           }
         }
 
-        console.log("🐾 Pacientes encontrados:", pacientesEncontrados);
+        //console.log("🐾 Pacientes encontrados:", pacientesEncontrados);
 
         if (pacientesEncontrados.length === 0) {
           present({
@@ -168,7 +168,7 @@ const ModalDetalleCita: React.FC<ModalDetalleCitaProps> = ({
 
         if (pacientesEncontrados.length === 1) {
           // Un solo paciente, ir directo
-          console.log("✅ Un solo paciente, navegando directo");
+          //console.log("✅ Un solo paciente, navegando directo");
           sessionStorage.setItem(
             "pacienteParaFicha",
             JSON.stringify(pacientesEncontrados[0])
@@ -179,16 +179,16 @@ const ModalDetalleCita: React.FC<ModalDetalleCitaProps> = ({
         }
 
         // Múltiples pacientes, mostrar modal de selección
-        console.log("👥 Múltiples pacientes, mostrando selector");
+        //console.log("👥 Múltiples pacientes, mostrando selector");
         setPacientesDisponibles(pacientesEncontrados);
         setShowModalSeleccionPaciente(true);
         return;
       }
 
       // Fallback: buscar por nombre (para eventos antiguos sin IDs ocultos)
-      console.log("🔄 Fallback: buscando por nombre...");
+      //console.log("🔄 Fallback: buscando por nombre...");
       const matchPaciente = descripcion.match(/Pacientes?:\s*([^\n,]+)/);
-      console.log("📛 Match nombre:", matchPaciente);
+      //console.log("📛 Match nombre:", matchPaciente);
 
       if (!matchPaciente) {
         present({
@@ -201,7 +201,7 @@ const ModalDetalleCita: React.FC<ModalDetalleCitaProps> = ({
       }
 
       const nombrePaciente = matchPaciente[1].trim();
-      console.log("🔍 Buscando por nombre:", nombrePaciente);
+      //console.log("🔍 Buscando por nombre:", nombrePaciente);
 
       const response = await obtenerPacientesPaginados(
         1,
@@ -209,11 +209,11 @@ const ModalDetalleCita: React.FC<ModalDetalleCitaProps> = ({
         nombrePaciente,
         sessionToken
       );
-      console.log("📦 Respuesta búsqueda por nombre:", response);
+      //console.log("📦 Respuesta búsqueda por nombre:", response);
 
       if (response.pacientes && response.pacientes.length > 0) {
         const paciente = response.pacientes[0];
-        console.log("✅ Paciente encontrado por nombre:", paciente);
+        //console.log("✅ Paciente encontrado por nombre:", paciente);
         sessionStorage.setItem("pacienteParaFicha", JSON.stringify(paciente));
         onClose();
         history.push("/rellenar-ficha");
@@ -238,13 +238,13 @@ const ModalDetalleCita: React.FC<ModalDetalleCitaProps> = ({
         cssClass: "toast-error",
       });
     } finally {
-      console.log("🏁 Finalizando handleIrARellenarFicha");
+      //console.log("🏁 Finalizando handleIrARellenarFicha");
       setCargandoPaciente(false);
     }
   };
 
   const handleSeleccionarPaciente = (paciente: PacienteData) => {
-    console.log("✅ Paciente seleccionado:", paciente);
+    //console.log("✅ Paciente seleccionado:", paciente);
     sessionStorage.setItem("pacienteParaFicha", JSON.stringify(paciente));
     setShowModalSeleccionPaciente(false);
     onClose();

@@ -144,7 +144,7 @@ export async function crearConsulta(
   idToken?: string | null
 ) {
   try {
-    console.log("Enviando datos al servidor:", formData);
+    //console.log("Enviando datos al servidor:", formData);
     const response = await fetchWithAuth(
       `${API_URL}/consultas/`,
       {
@@ -162,7 +162,7 @@ export async function crearConsulta(
     }
 
     const data = await response.json();
-    console.log("Respuesta del servidor:", data);
+    //console.log("Respuesta del servidor:", data);
     return data;
   } catch (error) {
     console.error("Error creando consulta:", error);
@@ -177,7 +177,7 @@ export async function actualizarConsulta(
   idToken?: string | null
 ) {
   try {
-    console.log("Actualizando consulta:", id_consulta, formData);
+    //console.log("Actualizando consulta:", id_consulta, formData);
     const response = await fetchWithAuth(
       `${API_URL}/consultas/${id_consulta}`,
       {
@@ -195,7 +195,7 @@ export async function actualizarConsulta(
     }
 
     const data = await response.json();
-    console.log("Consulta actualizada:", data);
+    //console.log("Consulta actualizada:", data);
     return data;
   } catch (error) {
     console.error("Error actualizando consulta:", error);
@@ -221,7 +221,7 @@ export async function obtenerConsultasPaginadas(
       params.append("search", search);
     }
 
-    console.log(`Obteniendo consultas página ${page}...`);
+    //console.log(`Obteniendo consultas página ${page}...`);
     const response = await fetchWithAuth(
       `${API_URL}/consultas/paginated/?${params}`,
       {
@@ -238,7 +238,7 @@ export async function obtenerConsultasPaginadas(
     }
 
     const data = await response.json();
-    console.log("Consultas paginadas obtenidas:", data);
+    //console.log("Consultas paginadas obtenidas:", data);
     return data;
   } catch (error) {
     console.error("Error obteniendo consultas paginadas:", error);

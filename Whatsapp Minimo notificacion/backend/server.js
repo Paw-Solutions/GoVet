@@ -55,6 +55,6 @@ app.get("/notificar", async (req, res) => {
 app.get("/", (req, res) => res.send("Backend WhatsApp activo"));
 
 app.listen(3000, () => {
-  console.log("Backend corriendo en puerto 3000");
+  //console.log("Backend corriendo en puerto 3000");
   iniciarWhatsapp();
 });

@@ -297,8 +297,8 @@ const RellenarFicha: React.FC = () => {
         vacunas_inoculadas: [...(prev.vacunas_inoculadas || []), vacuna],
       };
     });
-    console.log("Vacuna agregada:", vacunasData);
-    console.log("Formulario actualizado:", formData);
+    //console.log("Vacuna agregada:", vacunasData);
+    //console.log("Formulario actualizado:", formData);
     setVacunasData({
       nombre_vacuna: "",
       fecha_vacunacion: new Date().toISOString().split("T")[0],
@@ -642,67 +642,67 @@ const RellenarFicha: React.FC = () => {
             : undefined,
       };
 
-      console.log("=== INICIO LOG GUARDADO FICHA ===");
-      console.log(
+      //console.log("=== INICIO LOG GUARDADO FICHA ===");
+      /*console.log(
         "📋 Datos completos a enviar:",
         JSON.stringify(dataToSend, null, 2)
-      );
-      console.log("\n🐾 Paciente:", {
+      );*/
+      /*console.log("\n🐾 Paciente:", {
         id: dataToSend.id_paciente,
         nombre: dataToSend.paciente?.nombre,
         especie: dataToSend.paciente?.especie,
         raza: dataToSend.paciente?.raza,
-      });
-      console.log("\n👤 Tutor:", {
+      });*/
+      /*console.log("\n👤 Tutor:", {
         rut: dataToSend.rut,
         nombre: dataToSend.tutor?.nombre,
-      });
-      console.log("\n🩺 Constantes Vitales:", {
+      });*/
+      /*console.log("\n🩺 Constantes Vitales:", {
         peso: dataToSend.peso,
         temperatura: dataToSend.temperatura,
         fc: dataToSend.frecuencia_cardiaca,
         fr: dataToSend.frecuencia_respiratoria,
         tllc: dataToSend.tllc,
-      });
-      console.log("\n🔬 Examen Físico:", {
+      });*/
+      /*console.log("\n🔬 Examen Físico:", {
         mucosas: dataToSend.mucosas,
         condicion_corporal: dataToSend.condicion_corporal,
         estado_pelaje: dataToSend.estado_pelaje,
         estado_piel: dataToSend.estado_piel,
         nodulos_linfaticos: dataToSend.nodulos_linfaticos?.substring(0, 50),
-      });
-      console.log("\n📝 Diagnóstico:", {
+      });*/
+      /*console.log("\n📝 Diagnóstico:", {
         motivo: dataToSend.motivo,
         examen_clinico: dataToSend.examen_clinico?.substring(0, 50),
         diagnostico: dataToSend.diagnostico?.substring(0, 50),
         observaciones: dataToSend.observaciones?.substring(0, 50),
-      });
-      console.log(
+      });*/
+      /*console.log(
         "\n💉 Vacunas:",
         dataToSend.vacunas_inoculadas?.length || 0,
         "registradas"
-      );
-      if (dataToSend.vacunas_inoculadas) {
+      );*/
+      /*if (dataToSend.vacunas_inoculadas) {
         dataToSend.vacunas_inoculadas.forEach((v, i) =>
           console.log(`  ${i + 1}. ${v.nombre_vacuna} - ${v.fecha_vacunacion}`)
         );
-      }
-      console.log("\n🐛 Desparasitación:");
-      console.log(
+      }*/
+      //console.log("\n🐛 Desparasitación:");
+      /*console.log(
         "  Interna:",
         dataToSend.desparasitacion_interna?.nombre_desparasitante ||
           "No registrada"
-      );
-      console.log(
+      );*/
+      /*console.log(
         "  Externa:",
         dataToSend.desparasitacion_externa?.nombre_desparasitante ||
           "No registrada"
-      );
-      console.log(
+      );*/
+      /*console.log(
         "\n💊 Recetas Médicas:",
         dataToSend.receta_medica?.length || 0,
         "registradas"
-      );
+      );*/
       if (dataToSend.receta_medica) {
         dataToSend.receta_medica.forEach((r, i) =>
           console.log(
@@ -712,15 +712,15 @@ const RellenarFicha: React.FC = () => {
           )
         );
       }
-      console.log(
+      /*console.log(
         "\n📅 Indicaciones:",
         dataToSend.indicaciones_generales?.substring(0, 50) ||
           "Sin indicaciones"
-      );
-      console.log("=== FIN LOG GUARDADO FICHA ===\n");
+      );*/
+      //console.log("=== FIN LOG GUARDADO FICHA ===\n");
 
       const response = await crearConsulta(dataToSend, sessionToken);
-      console.log("✅ Respuesta del servidor:", response);
+      //console.log("✅ Respuesta del servidor:", response);
 
       // Verificar si hay vacunas con próxima dosis para agendar
       const tieneVacunasParaAgendar =
