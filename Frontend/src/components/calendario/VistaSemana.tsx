@@ -33,7 +33,7 @@ const VistaSemana: React.FC<VistaSemanaProps> = ({
   onCambiarFecha,
   onSeleccionarDia,
 }) => {
-  const {idToken} = useAuth();
+  const {sessionToken} = useAuth();
   const [loading, setLoading] = useState(true);
   const [eventoSeleccionado, setEventoSeleccionado] =
     useState<CalendarEvent | null>(null);
@@ -66,7 +66,7 @@ const VistaSemana: React.FC<VistaSemanaProps> = ({
       const startDate = inicioSemana.toISOString().split("T")[0];
       const endDate = finSemana.toISOString().split("T")[0];
       console.log("Cargando eventos de la semana:", startDate, "a", endDate);
-      const data = await getEventsWeek(startDate, endDate, idToken);
+      const data = await getEventsWeek(startDate, endDate, sessionToken);
       console.log("Eventos de la semana recibidos:", data);
 
       // Filtrar eventos que tengan la estructura correcta antes de ordenar

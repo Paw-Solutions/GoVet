@@ -34,7 +34,7 @@ const VistaMes: React.FC<VistaMesProps> = ({
   onCambiarFecha,
   onSeleccionarDia,
 }) => {
-  const {idToken} = useAuth();
+  const {sessionToken} = useAuth();
   const [eventos, setEventos] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [calendarioColapsado, setCalendarioColapsado] = useState(false);
@@ -49,7 +49,7 @@ const VistaMes: React.FC<VistaMesProps> = ({
       const year = fecha.getFullYear();
       const month = fecha.getMonth() + 1; // getMonth() devuelve 0-11
       console.log("Cargando eventos del mes:", year, month);
-      const response = await getEventsMonth(year, month, idToken);
+      const response = await getEventsMonth(year, month, sessionToken);
       console.log("Eventos recibidos:", response);
       setEventos(response || []);
     } catch (error) {

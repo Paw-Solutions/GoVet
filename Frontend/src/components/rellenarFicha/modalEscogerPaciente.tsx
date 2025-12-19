@@ -73,7 +73,7 @@ const ModalEscogerPaciente: React.FC<ModalEscogerPacienteProps> = ({
   onMotivoChange,
   hideMotivo = false,
 }) => {
-  const { idToken } = useAuth();
+  const { sessionToken } = useAuth();
   // Estados exactamente iguales a verPacientes
   const [pacientes, setPacientes] = useState<PacienteData[]>([]);
   const [loading, setLoading] = useState(false);
@@ -108,7 +108,7 @@ const ModalEscogerPaciente: React.FC<ModalEscogerPacienteProps> = ({
           page,
           50,
           search,
-          idToken
+          sessionToken
         );
 
         if (resetList) {

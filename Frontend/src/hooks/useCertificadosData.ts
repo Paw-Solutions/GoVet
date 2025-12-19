@@ -64,7 +64,7 @@ interface CertificadosActions {
 }
 
 export const useCertificadosData = (tipoCertificado: string) => {
-  const { idToken } = useAuth();
+  const { sessionToken } = useAuth();
   const [presentToast] = useIonToast();
 
   const [state, setState] = useState<CertificadosState>({
@@ -88,7 +88,7 @@ export const useCertificadosData = (tipoCertificado: string) => {
       try {
         const page = resetList ? 1 : state.currentPage + 1;
         const data: PaginatedResponsePacientes =
-          await obtenerPacientesPaginados(page, 50, search, idToken);
+          await obtenerPacientesPaginados(page, 50, search, sessionToken);
 
         setState((prev) => ({
           ...prev,
@@ -106,7 +106,7 @@ export const useCertificadosData = (tipoCertificado: string) => {
         }));
       }
     },
-    [state.currentPage, idToken]
+    [state.currentPage, sessionToken]
   );
 
   // ========== BÚSQUEDA ==========
@@ -192,7 +192,7 @@ export const useCertificadosData = (tipoCertificado: string) => {
 
         const blob = await descargarCertificadoTransporte(
           paciente.id_paciente,
-          idToken
+          sessionToken
         );
 
         await descargarYCompartirPDF(
@@ -216,7 +216,7 @@ export const useCertificadosData = (tipoCertificado: string) => {
         setState((prev) => ({ ...prev, loading: false }));
       }
     },
-    [idToken, presentToast]
+    [sessionToken, presentToast]
   );
 
   const generarConsentimientoInformado = useCallback(
@@ -227,7 +227,7 @@ export const useCertificadosData = (tipoCertificado: string) => {
         const blob = await descargarConsentimientoInformado(
           paciente.id_paciente,
           data,
-          idToken
+          sessionToken
         );
 
         await descargarYCompartirPDF(
@@ -251,7 +251,7 @@ export const useCertificadosData = (tipoCertificado: string) => {
         setState((prev) => ({ ...prev, loading: false }));
       }
     },
-    [idToken, presentToast]
+    [sessionToken, presentToast]
   );
 
   const generarOrdenExamenes = useCallback(
@@ -262,7 +262,7 @@ export const useCertificadosData = (tipoCertificado: string) => {
         const blob = await descargarOrdenExamenes(
           paciente.id_paciente,
           data,
-          idToken
+          sessionToken
         );
 
         await descargarYCompartirPDF(
@@ -286,7 +286,7 @@ export const useCertificadosData = (tipoCertificado: string) => {
         setState((prev) => ({ ...prev, loading: false }));
       }
     },
-    [idToken, presentToast]
+    [sessionToken, presentToast]
   );
 
   const generarRecetaMedica = useCallback(
@@ -297,7 +297,7 @@ export const useCertificadosData = (tipoCertificado: string) => {
         const blob = await descargarRecetaMedica(
           paciente.id_paciente,
           data,
-          idToken
+          sessionToken
         );
 
         await descargarYCompartirPDF(
@@ -321,7 +321,7 @@ export const useCertificadosData = (tipoCertificado: string) => {
         setState((prev) => ({ ...prev, loading: false }));
       }
     },
-    [idToken, presentToast]
+    [sessionToken, presentToast]
   );
 
   // ========== CARGAR DATOS INICIAL ==========

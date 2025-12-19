@@ -55,7 +55,7 @@ const RegistroTutor: React.FC<RegistroTutorProps> = ({
   onClose,
   onTutorRegistered,
 }) => {
-  const { idToken } = useAuth();
+  const { sessionToken } = useAuth();
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [toastColor, setToastColor] = useState<
@@ -272,7 +272,7 @@ const RegistroTutor: React.FC<RegistroTutorProps> = ({
         comuna: selectedComuna ? selectedComuna.name : "",
       };
 
-      const respuesta = await crearTutor(dataToSubmit, idToken);
+      const respuesta = await crearTutor(dataToSubmit, sessionToken);
       console.log("Tutor creado:", respuesta);
       setToastMessage("Tutor registrado exitosamente");
       setToastColor("success");

@@ -50,7 +50,7 @@ const Home: React.FC = () => {
   const history = useHistory();
   const API_URL = import.meta.env.VITE_API_URL || "/api";
 
-  const { isAuthenticated, login, loginWithToken, logout, idToken } = useAuth(); // ← añadido
+  const { isAuthenticated, login, loginWithToken, logout, sessionToken } = useAuth(); // ← añadido
   const [consultasPrueba, setConsultasPrueba] = useState<any>(null); // ← añadido
   const [errorPrueba, setErrorPrueba] = useState<string | null>(null); // ← añadido
 
@@ -74,7 +74,7 @@ const Home: React.FC = () => {
       const hoy = new Date();
       const fechaHoy = hoy.toISOString().split("T")[0];
 
-      const eventos = await getEventsDay(fechaHoy, idToken);
+      const eventos = await getEventsDay(fechaHoy, sessionToken);
 
       // Ordenar por hora de inicio
       const eventosOrdenados = eventos.sort(
@@ -163,7 +163,7 @@ const Home: React.FC = () => {
           10,
           undefined,
           "desc",
-          idToken
+          sessionToken
         );
         setConsultasPrueba(data);
       } catch (e: any) {
@@ -171,7 +171,7 @@ const Home: React.FC = () => {
       }
     };
     cargarConsultasProtegidas();
-  }, [isAuthenticated, idToken]);
+  }, [isAuthenticated, sessionToken]);
 
   return (
     <IonPage>

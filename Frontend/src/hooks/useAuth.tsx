@@ -9,7 +9,7 @@ import { getIdToken } from "../utils/googleAuth";
 import { validateToken, extractEmailFromToken } from "../utils/jwtUtils";
 
 type AuthContextValue = {
-  idToken: string | null;
+  sessionToken: string | null; // Cambia de idToken a sessionToken
   isAuthenticated: boolean;
   isLoading: boolean;
   userEmail: string | null;
@@ -22,12 +22,12 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-const TOKEN_STORAGE_KEY = "govet_auth_token";
+const TOKEN_STORAGE_KEY = "govet_session_token"; // Renómbralo para evitar confusiones futuras
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [idToken, setIdToken] = useState<string | null>(null);
+  const [sessionToken, setSessionToken] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -35,82 +35,94 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     const storedToken = localStorage.getItem(TOKEN_STORAGE_KEY);
     if (storedToken) {
-      // Validar token antes de aceptarlo
-      const validation = validateToken(storedToken);
-      if (validation.valid) {
-        setIdToken(storedToken);
-        setUserEmail(validation.email || null);
-      } else {
-        // Token inválido o no autorizado, limpiar
-        console.warn("Token almacenado inválido:", validation.error);
-        localStorage.removeItem(TOKEN_STORAGE_KEY);
+      // Opción básica: podrías validar el expiration si quieres, aquí solo lo cargamos
+      setSessionToken(storedToken);
+      try {
+        const payload = JSON.parse(atob(storedToken.split(".")[1]));
+        setUserEmail(payload.email || null);
+      } catch {
+        setUserEmail(null);
       }
     }
     setIsLoading(false);
   }, []);
 
+  // Nuevo login: pide idToken, pide sessionToken al backend y lo guarda
   const login = async (): Promise<{ success: boolean; error?: string }> => {
     try {
-      const token = await getIdToken();
+      const idToken = await getIdToken();
 
-      // Validar token
-      const validation = validateToken(token);
-      if (!validation.valid) {
-        return {
-          success: false,
-          error: validation.error,
-        };
+      // Llama al backend /login
+      const resp = await fetch(`${import.meta.env.VITE_API_URL || "/api"}/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken }),
+      });
+
+      if (!resp.ok) {
+        const errorData = await resp.json();
+        return { success: false, error: errorData.detail || "Login falló" };
       }
 
-      setIdToken(token);
-      setUserEmail(validation.email || null);
-      localStorage.setItem(TOKEN_STORAGE_KEY, token);
+      const data = await resp.json();
+      setSessionToken(data.sessionToken);
+      setUserEmail(data.email || null);
+      localStorage.setItem(TOKEN_STORAGE_KEY, data.sessionToken);
 
       return { success: true };
     } catch (error: any) {
       return {
         success: false,
-        error: error?.message || "Error al iniciar sesión",
+        error: error?.message || "Error en login",
       };
     }
   };
 
+  // Permite login programático (por ejemplo, con un idToken GSI)
   const loginWithToken = async (
-    token: string
+    idToken: string
   ): Promise<{ success: boolean; error?: string }> => {
-    // Validar token
-    const validation = validateToken(token);
-    if (!validation.valid) {
-      return {
-        success: false,
-        error: validation.error,
-      };
+    // Llama al backend /login
+    try {
+      const resp = await fetch(`${import.meta.env.VITE_API_URL || "/api"}/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken }),
+      });
+
+      if (!resp.ok) {
+        const errorData = await resp.json();
+        return { success: false, error: errorData.detail || "Login falló" };
+      }
+
+      const data = await resp.json();
+      setSessionToken(data.sessionToken);
+      setUserEmail(data.email || null);
+      localStorage.setItem(TOKEN_STORAGE_KEY, data.sessionToken);
+
+      return { success: true };
+    } catch (error: any) {
+      return { success: false, error: error?.message || "Login falló" };
     }
-
-    setIdToken(token);
-    setUserEmail(validation.email || null);
-    localStorage.setItem(TOKEN_STORAGE_KEY, token);
-
-    return { success: true };
   };
 
   const logout = () => {
-    setIdToken(null);
+    setSessionToken(null);
     setUserEmail(null);
     localStorage.removeItem(TOKEN_STORAGE_KEY);
   };
 
   const value = useMemo(
     () => ({
-      idToken,
-      isAuthenticated: !!idToken,
+      sessionToken,
+      isAuthenticated: !!sessionToken,
       isLoading,
       userEmail,
       login,
       loginWithToken,
       logout,
     }),
-    [idToken, isLoading, userEmail]
+    [sessionToken, isLoading, userEmail]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

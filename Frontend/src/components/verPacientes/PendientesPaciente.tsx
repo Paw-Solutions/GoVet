@@ -32,7 +32,7 @@ const PendientesPaciente: React.FC<PendientesPacienteProps> = ({
   idPaciente,
   onVerDetalleVacuna,
 }) => {
-  const {idToken} = useAuth();
+  const {sessionToken} = useAuth();
   const [vacunas, setVacunas] = useState<ConsultaTratamiento[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -48,7 +48,7 @@ const PendientesPaciente: React.FC<PendientesPacienteProps> = ({
     try {
       const vacunasResponse = await obtenerTratamientosPorPaciente(
         idPaciente,
-        idToken
+        sessionToken
       );
       setVacunas(vacunasResponse);
     } catch (err) {

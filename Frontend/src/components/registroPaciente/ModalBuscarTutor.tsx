@@ -65,7 +65,7 @@ const ModalBuscarTutor: React.FC<ModalBuscarTutorProps> = ({
   onTutorSelected,
   tutorSeleccionado,
 }) => {
-  const {idToken} = useAuth();
+  const {sessionToken} = useAuth();
   // Estados exactamente iguales a verTutores
   const [tutores, setTutores] = useState<TutorData[]>([]);
   const [loading, setLoading] = useState(false);
@@ -97,7 +97,7 @@ const ModalBuscarTutor: React.FC<ModalBuscarTutorProps> = ({
           page,
           50,
           search,
-          idToken
+          sessionToken
         );
 
         if (resetList) {

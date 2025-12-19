@@ -63,7 +63,7 @@ const ModalAgendarTratamiento: React.FC<ModalAgendarTratamientoProps> = ({
   onAgendarDespues,
   onCancelar,
 }) => {
-  const { idToken } = useAuth();
+  const { sessionToken } = useAuth();
   const [present] = useIonToast();
   const [selectedTime, setSelectedTime] = useState("09:00");
   const [selectedNotification, setSelectedNotification] =
@@ -129,7 +129,7 @@ const ModalAgendarTratamiento: React.FC<ModalAgendarTratamientoProps> = ({
       };
 
       // Crear el evento en el calendario
-      await createEvent(eventData, idToken);
+      await createEvent(eventData, sessionToken);
 
       // Enviar notificación si corresponde
       if (selectedNotification !== "noNotificar" && isValidEmail(tutor.email)) {
@@ -154,7 +154,7 @@ const ModalAgendarTratamiento: React.FC<ModalAgendarTratamientoProps> = ({
               cuerpo: emailBody,
             },
             fechaNotificacion.toISOString(),
-            idToken
+            sessionToken
           );
         } catch (notifError) {
           console.error("Error al enviar notificación:", notifError);

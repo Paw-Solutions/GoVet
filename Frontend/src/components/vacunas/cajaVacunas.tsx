@@ -26,7 +26,7 @@ interface CajaVacunasProps {
 }
 
 const CajaVacunas: React.FC<CajaVacunasProps> = ({ limite = 5 }) => {
-  const {idToken} = useAuth();
+  const {sessionToken} = useAuth();
   const [tratamientos, setTratamientos] = useState<ConsultaTratamiento[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -67,7 +67,7 @@ const CajaVacunas: React.FC<CajaVacunasProps> = ({ limite = 5 }) => {
     try {
       setLoading(true);
       setError("");
-      const data = await obtenerTratamientosProximos(idToken);
+      const data = await obtenerTratamientosProximos(sessionToken);
       
       // Filtrar y ordenar tratamientos próximos
       const tratamientosProximos = filtrarTratamientosProximos(data);

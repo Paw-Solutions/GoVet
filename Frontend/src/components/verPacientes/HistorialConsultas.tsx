@@ -39,7 +39,7 @@ const HistorialConsultas: React.FC<HistorialConsultasProps> = ({
   paciente,
   onViewConsulta,
 }) => {
-  const {idToken} = useAuth();
+  const {sessionToken} = useAuth();
   const [consultas, setConsultas] = useState<ConsultaData[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -78,7 +78,7 @@ const HistorialConsultas: React.FC<HistorialConsultasProps> = ({
             "Content-Type": "application/json",
           },
         },
-        idToken
+        sessionToken
       );
 
       console.log("📡 Response status:", response.status);

@@ -68,7 +68,7 @@ interface CertificadoSeleccionado {
 }
 
 const Certificados: React.FC = () => {
-  const { idToken } = useAuth();
+  const { sessionToken } = useAuth();
   // Estados del flujo
   const [paso, setPaso] = useState<1 | 2 | 3>(1); // 1: Selección paciente, 2: Dashboard certificados, 3: Resumen/Generación
   const [selectedPaciente, setSelectedPaciente] = useState<PacienteData | null>(
@@ -187,7 +187,7 @@ const Certificados: React.FC = () => {
           console.log("Descargando certificado de transporte...");
           blob = await descargarCertificadoTransporte(
             selectedPaciente.id_paciente,
-            idToken
+            sessionToken
           );
           nombreArchivo = `Certificado_Transporte_${selectedPaciente.nombre}.pdf`;
           break;
@@ -201,7 +201,7 @@ const Certificados: React.FC = () => {
           blob = await descargarConsentimientoInformado(
             selectedPaciente.id_paciente,
             certificadoDatos,
-            idToken
+            sessionToken
           );
           nombreArchivo = `Consentimiento_Informado_${selectedPaciente.nombre}.pdf`;
           break;
@@ -215,7 +215,7 @@ const Certificados: React.FC = () => {
           blob = await descargarOrdenExamenes(
             selectedPaciente.id_paciente,
             certificadoDatos,
-            idToken
+            sessionToken
           );
           nombreArchivo = `Orden_Examenes_${selectedPaciente.nombre}.pdf`;
           break;
@@ -229,7 +229,7 @@ const Certificados: React.FC = () => {
           blob = await descargarRecetaMedica(
             selectedPaciente.id_paciente,
             certificadoDatos,
-            idToken
+            sessionToken
           );
           nombreArchivo = `Receta_Medica_${selectedPaciente.nombre}.pdf`;
           break;
@@ -242,7 +242,7 @@ const Certificados: React.FC = () => {
           console.log("Descargando resumen de consulta...");
           blob = await descargarResumenConsulta(
             certificadoDatos.id_consulta,
-            idToken
+            sessionToken
           );
           nombreArchivo = `Resumen_Consulta_${selectedPaciente.nombre}.pdf`;
           break;

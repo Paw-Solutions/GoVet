@@ -44,7 +44,7 @@ const ModalDetalleCita: React.FC<ModalDetalleCitaProps> = ({
   evento,
   onEventoActualizado,
 }) => {
-  const { idToken } = useAuth();
+  const { sessionToken } = useAuth();
   const [present] = useIonToast();
   const history = useHistory();
   const [mostrarAlertaEliminar, setMostrarAlertaEliminar] = useState(false);
@@ -84,7 +84,7 @@ const ModalDetalleCita: React.FC<ModalDetalleCitaProps> = ({
     if (!evento || !evento.id) return;
 
     try {
-      await deleteEvent(evento.id, idToken);
+      await deleteEvent(evento.id, sessionToken);
 
       present({
         message: "Evento eliminado exitosamente",
@@ -140,7 +140,7 @@ const ModalDetalleCita: React.FC<ModalDetalleCitaProps> = ({
               1,
               10,
               nombre,
-              idToken
+              sessionToken
             );
             if (response.pacientes && response.pacientes.length > 0) {
               // Buscar el paciente que coincida con el ID esperado o tomar el primero
@@ -207,7 +207,7 @@ const ModalDetalleCita: React.FC<ModalDetalleCitaProps> = ({
         1,
         10,
         nombrePaciente,
-        idToken
+        sessionToken
       );
       console.log("📦 Respuesta búsqueda por nombre:", response);
 

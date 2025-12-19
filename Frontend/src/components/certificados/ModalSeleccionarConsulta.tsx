@@ -34,7 +34,7 @@ const ModalSeleccionarConsulta: React.FC<ModalSeleccionarConsultaProps> = ({
   onConsultaSeleccionada,
   idPaciente,
 }) => {
-  const { idToken } = useAuth();
+  const { sessionToken } = useAuth();
   const [consultas, setConsultas] = useState<ConsultaData[]>([]);
   const [consultaSeleccionada, setConsultaSeleccionada] = useState<
     number | null
@@ -64,7 +64,7 @@ const ModalSeleccionarConsulta: React.FC<ModalSeleccionarConsultaProps> = ({
             "Content-Type": "application/json",
           },
         },
-        idToken
+        sessionToken
       );
 
       console.log("Response status:", response.status);

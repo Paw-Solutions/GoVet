@@ -52,7 +52,7 @@ const ModalEditarPaciente: React.FC<ModalEditarPacienteProps> = ({
   onDismiss,
   paciente,
 }) => {
-  const {idToken} = useAuth();
+  const {sessionToken} = useAuth();
   // Estados básicos del formulario
   const [nombre, setNombre] = useState("");
   const [color, setColor] = useState("");
@@ -269,13 +269,13 @@ const ModalEditarPaciente: React.FC<ModalEditarPacienteProps> = ({
         esterilizado,
       };
 
-      await actualizarPaciente(paciente.id_paciente, payload, idToken);
+      await actualizarPaciente(paciente.id_paciente, payload, sessionToken);
 
       // 2) Actualizar tutor si cambió el RUT
       const rutActual = paciente.tutor?.rut || "";
       const rutNuevo = tutorSeleccionado.rut.trim();
       if (rutNuevo && rutNuevo !== rutActual) {
-        await actualizarTutorDePaciente(paciente.id_paciente, rutNuevo, idToken);
+        await actualizarTutorDePaciente(paciente.id_paciente, rutNuevo, sessionToken);
       }
 
       // 3) Mostrar mensaje de éxito

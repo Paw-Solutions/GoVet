@@ -1,14 +1,14 @@
 /**
- * Helper HTTP para adjuntar Authorization: Bearer <ID_TOKEN>
+ * Helper HTTP para adjuntar Authorization: Bearer <SESSION_TOKEN>
  */
 export async function fetchWithAuth(
   input: RequestInfo | URL,
   init: RequestInit = {},
-  idToken?: string | null
+  sessionToken?: string | null  // <-- ahora espera el token propio
 ) {
   const headers = new Headers(init.headers || {});
-  if (idToken) {
-    headers.set("Authorization", `Bearer ${idToken}`);
+  if (sessionToken) {
+    headers.set("Authorization", `Bearer ${sessionToken}`);
   }
   return fetch(input, { ...init, headers });
 }

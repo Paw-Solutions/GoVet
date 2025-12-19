@@ -27,7 +27,7 @@ interface VistaDiaProps {
 }
 
 const VistaDia: React.FC<VistaDiaProps> = ({ fecha, onCambiarFecha }) => {
-  const { idToken } = useAuth();
+  const { sessionToken } = useAuth();
   const [eventos, setEventos] = useState<CalendarEvent[]>([]);
   const [eventoSeleccionado, setEventoSeleccionado] =
     useState<CalendarEvent | null>(null);
@@ -37,14 +37,14 @@ const VistaDia: React.FC<VistaDiaProps> = ({ fecha, onCambiarFecha }) => {
 
   useEffect(() => {
     fetchEvents();
-  }, [fecha, idToken]);
+  }, [fecha, sessionToken]);
 
   const fetchEvents = async () => {
     setLoading(true);
     try {
       const fechaISO = new Date(fecha).toISOString();
       console.log(fechaISO);
-      const eventosDelDia = await getEventsDay(fechaISO, idToken);
+      const eventosDelDia = await getEventsDay(fechaISO, sessionToken);
       setEventos(eventosDelDia);
       console.log("Eventos del día obtenidos:", eventosDelDia);
     } catch (error) {

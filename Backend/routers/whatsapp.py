@@ -26,6 +26,7 @@ from services.whatsapp_client import (
 
 
 from auth import get_current_user
+from session_auth import get_current_session_user
 
 router = APIRouter(
     prefix="/whatsapp",
@@ -33,7 +34,7 @@ router = APIRouter(
 )
 
 
-@router.get("/qr", dependencies=[Depends(get_current_user)])
+@router.get("/qr", dependencies=[Depends(get_current_session_user)])
 async def whatsapp_qr():
     """
     Devuelve el último QR disponible para emparejar la sesión de WhatsApp.
@@ -42,7 +43,7 @@ async def whatsapp_qr():
     return await get_qr()
 
 
-@router.get("/status", dependencies=[Depends(get_current_user)])
+@router.get("/status", dependencies=[Depends(get_current_session_user)])
 async def whatsapp_status():
     """
     Indica si el microservicio está conectado a WhatsApp.
@@ -51,7 +52,7 @@ async def whatsapp_status():
     return await get_status()
 
 
-@router.get("/notificar", dependencies=[Depends(get_current_user)])
+@router.get("/notificar", dependencies=[Depends(get_current_session_user)])
 async def whatsapp_notificar(
     numero: str = Query(..., description="Número MSISDN con prefijo país, ej: 569XXXXXXXX"),
     nombre: str = Query(..., description="Nombre del tutor"),
@@ -76,7 +77,7 @@ async def whatsapp_notificar(
 # --- Nuevas acciones de control de sesión ---
 
 
-@router.post("/cerrar-sesion", dependencies=[Depends(get_current_user)])
+@router.post("/cerrar-sesion", dependencies=[Depends(get_current_session_user)])
 async def whatsapp_cerrar_sesion():
     """
     Cierra la sesión actual (desconecta el socket) sin borrar credenciales.
@@ -85,7 +86,7 @@ async def whatsapp_cerrar_sesion():
     return await cerrar_sesion()
 
 
-@router.post("/desvincular", dependencies=[Depends(get_current_user)])
+@router.post("/desvincular", dependencies=[Depends(get_current_session_user)])
 async def whatsapp_desvincular():
     """
     Desvincula el dispositivo: realiza logout y borra credenciales locales.
@@ -94,7 +95,7 @@ async def whatsapp_desvincular():
     return await desvincular()
 
 
-@router.post("/iniciar", dependencies=[Depends(get_current_user)])
+@router.post("/iniciar", dependencies=[Depends(get_current_session_user)])
 async def whatsapp_iniciar():
     """
     Inicia/reconecta la sesión con el microservicio (según estado).

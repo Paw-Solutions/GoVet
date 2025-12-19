@@ -10,6 +10,7 @@ from typing import Any, Dict, Optional
 import httpx
 from fastapi import HTTPException, status, Depends
 from auth import get_current_user
+from session_auth import get_current_session_user
 
 # URL base del microservicio; configurable por env.
 WHATSAPP_MS_BASE_URL = os.getenv("WHATSAPP_MS_BASE_URL", "http://whatsapp-ms:6007")
@@ -19,7 +20,7 @@ DEFAULT_TIMEOUT = httpx.Timeout(timeout=5.0, connect=3.0)
 
 
 async def get_qr(
-    current_user: dict = Depends(get_current_user)
+    current_user: dict = Depends(get_current_session_user)
 ) -> Dict[str, Any]:
     """
     GET /qr -> { "qr": string|null }
@@ -37,7 +38,7 @@ async def get_qr(
 
 
 async def get_status(
-    current_user: dict = Depends(get_current_user)
+    current_user: dict = Depends(get_current_session_user)
 ) -> Dict[str, Any]:
     """
     GET /status -> { "conectado": bool }
@@ -56,7 +57,7 @@ async def get_status(
 
 async def notificar(
     numero: str, nombre: str, paciente: str, fecha: str, hora: Optional[str],
-    current_user: dict = Depends(get_current_user)
+    current_user: dict = Depends(get_current_session_user)
 ) -> Dict[str, Any]:
     """
     GET /notificar con query params; reenvía la solicitud de notificación.
@@ -86,7 +87,7 @@ async def notificar(
 
 
 async def cerrar_sesion(
-    current_user: dict = Depends(get_current_user)
+    current_user: dict = Depends(get_current_session_user)
 ) -> Dict[str, Any]:
     """
     POST /cerrar-sesion -> desconecta el socket sin borrar credenciales.
@@ -105,7 +106,7 @@ async def cerrar_sesion(
 
 
 async def desvincular(
-    current_user: dict = Depends(get_current_user)
+    current_user: dict = Depends(get_current_session_user)
 ) -> Dict[str, Any]:
     """
     POST /desvincular -> logout + borra credenciales locales.
@@ -124,7 +125,7 @@ async def desvincular(
 
 
 async def iniciar(
-    current_user: dict = Depends(get_current_user)
+    current_user: dict = Depends(get_current_session_user)
 ) -> Dict[str, Any]:
     """
     POST /iniciar -> inicia/reconecta la sesión en el microservicio.

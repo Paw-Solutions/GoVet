@@ -20,7 +20,7 @@ export interface FormData {
 }
 
 export const useRegistroPaciente = () => {
-  const { idToken } = useAuth();
+  const { sessionToken } = useAuth();
   const [formData, setFormData] = useState<FormData>({
     nombre: "",
     especie: null,
@@ -172,7 +172,7 @@ export const useRegistroPaciente = () => {
 
       console.log("📤 Datos del paciente que se enviarán:", pacienteData);
 
-      const pacienteCreado = await crearPaciente(pacienteData, idToken);
+      const pacienteCreado = await crearPaciente(pacienteData, sessionToken);
       console.log("✅ Paciente creado exitosamente:", pacienteCreado);
 
       // PASO 2: Asociar el tutor al paciente
@@ -181,7 +181,7 @@ export const useRegistroPaciente = () => {
         formData.rut_tutor,
         pacienteCreado.id_paciente,
         new Date().toISOString().split("T")[0],
-        idToken
+        sessionToken
       );
       console.log("✅ Tutor asociado exitosamente");
 

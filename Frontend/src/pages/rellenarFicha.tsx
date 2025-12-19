@@ -108,7 +108,7 @@ const mapRecetaToRecetaMedicaData = (recetas: Receta[]): RecetaMedicaData[] => {
 
 // Componente: Dashboard con 6 módulos para gestionar consultas
 const RellenarFicha: React.FC = () => {
-  const { idToken } = useAuth();
+  const { sessionToken } = useAuth();
   const [showModalPacientes, setShowModalPacientes] = useState(false);
   const [activeModule, setActiveModule] = useState<string | null>(null);
   const [touchedModules, setTouchedModules] = useState<Set<string>>(new Set());
@@ -719,7 +719,7 @@ const RellenarFicha: React.FC = () => {
       );
       console.log("=== FIN LOG GUARDADO FICHA ===\n");
 
-      const response = await crearConsulta(dataToSend, idToken);
+      const response = await crearConsulta(dataToSend, sessionToken);
       console.log("✅ Respuesta del servidor:", response);
 
       // Verificar si hay vacunas con próxima dosis para agendar

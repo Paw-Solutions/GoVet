@@ -48,7 +48,7 @@ const ModalInfoTutor: React.FC<ModalInfoTutorProps> = ({
   onEdit,
   onViewPaciente,
 }) => {
-  const {idToken} = useAuth();
+  const {sessionToken} = useAuth();
   const [pacientes, setPacientes] = useState<PacienteData[]>([]);
   const [loadingPacientes, setLoadingPacientes] = useState(false);
   const [showAgendarModal, setShowAgendarModal] = useState(false);
@@ -57,7 +57,7 @@ const ModalInfoTutor: React.FC<ModalInfoTutorProps> = ({
   useEffect(() => {
     if (isOpen && tutor?.rut) {
       setLoadingPacientes(true);
-      obtenerPacientesPorTutor(tutor.rut, idToken)
+      obtenerPacientesPorTutor(tutor.rut, sessionToken)
         .then((data) => {
           setPacientes(data);
           console.log(`📋 Pacientes del tutor ${tutor.rut}:`, data);

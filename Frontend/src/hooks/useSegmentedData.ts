@@ -142,8 +142,8 @@ interface ConsultasActions {
 }
 
 export const useSegmentedData = (initialSegment: string = "tutores") => {
-  // idToken
-  const { idToken } = useAuth();
+  // sessionToken
+  const { sessionToken } = useAuth();
 
   // Estados para tutores
   const [tutoresState, setTutoresState] = useState<TutoresState>({
@@ -200,7 +200,7 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
           page,
           50,
           search,
-          idToken
+          sessionToken
         );
 
         setTutoresState((prev) => ({
@@ -332,7 +332,7 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
       try {
         const page = resetList ? 1 : pacientesState.currentPage + 1;
         const data: PaginatedResponsePacientes =
-          await obtenerPacientesPaginados(page, 50, search, idToken);
+          await obtenerPacientesPaginados(page, 50, search, sessionToken);
 
         setPacientesState((prev) => ({
           ...prev,
@@ -469,7 +469,7 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
     setTimeout(async () => {
       try {
         // Fetch complete tutor data from API using RUT
-        const tutorCompleto = await obtenerTutorPorRut(tutorData.rut, idToken);
+        const tutorCompleto = await obtenerTutorPorRut(tutorData.rut, sessionToken);
         setTutoresState((prev) => ({
           ...prev,
           selectedTutor: tutorCompleto,
@@ -518,7 +518,7 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
       try {
         const pacienteCompleto = await obtenerPacientePorId(
           pacienteData.id_paciente,
-          idToken
+          sessionToken
         );
         setPacientesState((prev) => ({
           ...prev,
@@ -554,7 +554,7 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
         const page = resetList ? 1 : consultasState.currentPage + 1;
         const order = sortOrder || consultasState.sortOrder;
         const data: PaginatedResponseConsultas =
-          await obtenerConsultasPaginadas(page, 50, search, order, idToken);
+          await obtenerConsultasPaginadas(page, 50, search, order, sessionToken);
 
         setConsultasState((prev) => ({
           ...prev,
@@ -699,7 +699,7 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
       console.log("Obteniendo PDF para compartir...");
 
       // Llamar al endpoint que ya existe en el backend
-      const blob = await descargarPdfConsulta(consulta.id_consulta, idToken);
+      const blob = await descargarPdfConsulta(consulta.id_consulta, sessionToken);
 
       // Verificar que el blob tenga contenido
       if (!blob || blob.size === 0) {
@@ -769,7 +769,7 @@ export const useSegmentedData = (initialSegment: string = "tutores") => {
       console.log("Descargando PDF de consulta:", consulta.id_consulta);
 
       // Llamar al endpoint que ya existe en el backend
-      const blob = await descargarPdfConsulta(consulta.id_consulta, idToken);
+      const blob = await descargarPdfConsulta(consulta.id_consulta, sessionToken);
 
       // Crear URL temporal para el blob
       const url = window.URL.createObjectURL(blob);

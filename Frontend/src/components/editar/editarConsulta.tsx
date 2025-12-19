@@ -53,7 +53,7 @@ const ModalEditarConsulta: React.FC<ModalEditarConsultaProps> = ({
   onDismiss,
   consulta,
 }) => {
-  const { idToken } = useAuth();
+  const { sessionToken } = useAuth();
 
   // Estado del módulo activo
   const [activeModule, setActiveModule] = useState<string | null>(null);
@@ -205,7 +205,7 @@ const ModalEditarConsulta: React.FC<ModalEditarConsultaProps> = ({
       await actualizarConsulta(
         consulta.id_consulta,
         consultaActualizada,
-        idToken
+        sessionToken
       );
 
       setToastMessage("Consulta actualizada exitosamente");

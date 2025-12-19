@@ -49,7 +49,7 @@ const ModalEditarTutor: React.FC<ModalEditarTutorProps> = ({
   onDismiss,
   tutor,
 }) => {
-  const {idToken} = useAuth();
+  const {sessionToken} = useAuth();
   // Estados básicos del formulario
   const [nombre, setNombre] = useState("");
   const [apellidoPaterno, setApellidoPaterno] = useState("");
@@ -461,7 +461,7 @@ const ModalEditarTutor: React.FC<ModalEditarTutorProps> = ({
         observacion: observacion.trim() || undefined,
       };
 
-      await actualizarTutor(rutActual, payload, idToken);
+      await actualizarTutor(rutActual, payload, sessionToken);
 
       // Mostrar mensaje de éxito
       setToastMessage("Tutor actualizado exitosamente");

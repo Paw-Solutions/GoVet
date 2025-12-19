@@ -59,7 +59,7 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
   tutorInicial,
   pacienteInicial,
 }) => {
-  const { idToken } = useAuth();
+  const { sessionToken } = useAuth();
   const [present] = useIonToast();
   const [paso, setPaso] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -129,7 +129,7 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
         try {
           const pacientes = await obtenerPacientesPorTutor(
             tutorInicial.rut,
-            idToken
+            sessionToken
           );
           setPacientesDisponibles(pacientes);
 
@@ -179,7 +179,7 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
         1,
         20,
         textoBusqueda,
-        idToken
+        sessionToken
       );
       setTutoresEncontrados(response.tutores);
     } catch (error) {
@@ -223,7 +223,7 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
   const cargarPacientesDeTutor = async (rutTutor: string) => {
     setCargandoPacientes(true);
     try {
-      const pacientes = await obtenerPacientesPorTutor(rutTutor, idToken);
+      const pacientes = await obtenerPacientesPorTutor(rutTutor, sessionToken);
       setPacientesDisponibles(pacientes);
 
       if (pacientes.length === 0) {
@@ -525,7 +525,7 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
         //: undefined,
       };
       console.log(nuevoEvento);
-      await createEvent(nuevoEvento, idToken);
+      await createEvent(nuevoEvento, sessionToken);
 
       present({
         message: "Cita agendada exitosamente",
@@ -621,7 +621,7 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
                   cuerpo: cuerpoEmail,
                 },
                 fechaEnvioIso,
-                idToken
+                sessionToken
               );
 
               notificacionesEmailExitosas++;
@@ -690,7 +690,7 @@ const ModalAgendarCita: React.FC<ModalAgendarCitaProps> = ({
                       fecha: fechaFormateada,
                       hora: `${horaInicioFormateada} - ${horaTerminoFormateada}`,
                     },
-                    idToken
+                    sessionToken
                   );
 
                   notificacionesWhatsAppExitosas++;
