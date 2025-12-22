@@ -21,7 +21,6 @@ export interface ConsentimientoDatos {
   procedimiento: string;
   indicaciones: string;
   objetivos: string;
-  peso: number;
   autorizaciones_adicionales: string[];
   testigo_requerido: boolean;
 }
@@ -40,7 +39,6 @@ const ModalDatosConsentimiento: React.FC<ModalDatosConsentimientoProps> = ({
   const [procedimiento, setProcedimiento] = useState("");
   const [indicaciones, setIndicaciones] = useState("");
   const [objetivos, setObjetivos] = useState("");
-  const [peso, setPeso] = useState<number | undefined>(undefined);
   const [testigoRequerido, setTestigoRequerido] = useState(false);
   const [autorizaciones, setAutorizaciones] = useState({
     anestesia: false,
@@ -50,7 +48,7 @@ const ModalDatosConsentimiento: React.FC<ModalDatosConsentimientoProps> = ({
   });
 
   const handleConfirmar = () => {
-    if (!procedimiento || !indicaciones || !objetivos || !peso) {
+    if (!procedimiento || !indicaciones || !objetivos ) {
       alert("Por favor completa todos los campos obligatorios");
       return;
     }
@@ -66,7 +64,6 @@ const ModalDatosConsentimiento: React.FC<ModalDatosConsentimientoProps> = ({
       procedimiento,
       indicaciones,
       objetivos,
-      peso: peso || 0,
       autorizaciones_adicionales: autorizacionesSeleccionadas,
       testigo_requerido: testigoRequerido,
     };
@@ -79,7 +76,6 @@ const ModalDatosConsentimiento: React.FC<ModalDatosConsentimientoProps> = ({
     setProcedimiento("");
     setIndicaciones("");
     setObjetivos("");
-    setPeso(undefined);
     setTestigoRequerido(false);
     setAutorizaciones({
       anestesia: false,
@@ -130,16 +126,6 @@ const ModalDatosConsentimiento: React.FC<ModalDatosConsentimientoProps> = ({
               onIonInput={(e) => setObjetivos(e.detail.value || "")}
               placeholder="Objetivos del procedimiento"
               rows={3}
-            />
-          </IonItem>
-
-          <IonItem>
-            <IonLabel position="stacked">Peso (kg) *</IonLabel>
-            <IonInput
-              type="number"
-              value={peso}
-              onIonInput={(e) => setPeso(parseFloat(e.detail.value || "0"))}
-              placeholder="Peso del paciente"
             />
           </IonItem>
 

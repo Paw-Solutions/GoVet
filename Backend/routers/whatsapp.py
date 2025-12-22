@@ -1,3 +1,5 @@
+# Módulo: Gestor de Whatsapp
+
 """
 Router público del backend para exponer:
 - GET /whatsapp/qr

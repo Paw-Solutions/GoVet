@@ -45,9 +45,6 @@ interface ModalEscogerPacienteProps {
   onDidDismiss?: () => void;
   onPacienteSelected?: (paciente: PacienteData) => void; // <-- Cambia aquí
   pacienteSeleccionado?: PacienteData | null; // <-- Cambia aquí
-  motivoConsulta?: string;
-  onMotivoChange?: (motivo: string) => void;
-  hideMotivo?: boolean; // Ocultar campo de motivo de consulta
 }
 
 interface PaginatedResponse {
@@ -69,9 +66,6 @@ const ModalEscogerPaciente: React.FC<ModalEscogerPacienteProps> = ({
   onDidDismiss,
   onPacienteSelected,
   pacienteSeleccionado,
-  motivoConsulta = "",
-  onMotivoChange,
-  hideMotivo = false,
 }) => {
   const { sessionToken } = useAuth();
   // Estados exactamente iguales a verPacientes
@@ -88,7 +82,6 @@ const ModalEscogerPaciente: React.FC<ModalEscogerPacienteProps> = ({
   // Estados específicos del modal
   const [pacienteSeleccionadoTemp, setPacienteSeleccionadoTemp] =
     useState<PacienteData | null>(pacienteSeleccionado || null);
-  const [motivoTemp, setMotivoTemp] = useState<string>(motivoConsulta);
 
   // Estados para el modal de información del paciente
   const [showPacienteInfo, setShowPacienteInfo] = useState(false);
@@ -189,7 +182,6 @@ const ModalEscogerPaciente: React.FC<ModalEscogerPacienteProps> = ({
 
   const handleCancelar = () => {
     setPacienteSeleccionadoTemp(pacienteSeleccionado || null);
-    setMotivoTemp(motivoConsulta);
     setBusqueda("");
     if (onDidDismiss && typeof onDidDismiss === "function") {
       onDidDismiss();
@@ -197,13 +189,9 @@ const ModalEscogerPaciente: React.FC<ModalEscogerPacienteProps> = ({
   };
 
   const handleConfirmarSeleccion = () => {
-    const motivoValido = hideMotivo || motivoTemp.trim();
-    if (pacienteSeleccionadoTemp && motivoValido) {
+    if (pacienteSeleccionadoTemp) {
       if (onPacienteSelected && typeof onPacienteSelected === "function") {
         onPacienteSelected(pacienteSeleccionadoTemp); // <-- Retorna el objeto completo
-      }
-      if (onMotivoChange && typeof onMotivoChange === "function") {
-        onMotivoChange(motivoTemp.trim());
       }
       if (onDidDismiss && typeof onDidDismiss === "function") {
         onDidDismiss();
@@ -213,7 +201,6 @@ const ModalEscogerPaciente: React.FC<ModalEscogerPacienteProps> = ({
 
   const handleCerrarModal = () => {
     setPacienteSeleccionadoTemp(pacienteSeleccionado || null);
-    setMotivoTemp(motivoConsulta);
     setBusqueda("");
 
     if (onDidDismiss && typeof onDidDismiss === "function") {
@@ -233,10 +220,9 @@ const ModalEscogerPaciente: React.FC<ModalEscogerPacienteProps> = ({
     if (isOpen) {
       handleGetPacientes();
       setPacienteSeleccionadoTemp(pacienteSeleccionado || null);
-      setMotivoTemp(motivoConsulta);
       setBusqueda("");
     }
-  }, [isOpen, pacienteSeleccionado, motivoConsulta]);
+  }, [isOpen, pacienteSeleccionado]);
 
   // Limpiar timeouts
   useEffect(() => {
@@ -283,49 +269,7 @@ const ModalEscogerPaciente: React.FC<ModalEscogerPacienteProps> = ({
           />
         </div>
 
-        {/* Mostrar paciente seleccionado temporalmente - STICKY */}
-        {pacienteSeleccionadoTemp && (
-          <div className="modal-selected-paciente">
-            <IonText color="primary">
-              <h3>Paciente seleccionado:</h3>
-            </IonText>
-            <IonItem className="modal-selected-item" lines="none">
-              <IonIcon icon={paw} slot="start" color="primary" />
-              <IonLabel>
-                <h2>{pacienteSeleccionadoTemp.nombre}</h2>
-                <p>Especie: {pacienteSeleccionadoTemp.especie}</p>
-                <p>
-                  Tutor:{" "}
-                  {pacienteSeleccionadoTemp.tutor
-                    ? pacienteSeleccionadoTemp.tutor.nombre ||
-                      pacienteSeleccionadoTemp.tutor.rut
-                    : "N/A"}
-                </p>
-              </IonLabel>
-              <IonIcon
-                icon={checkmark}
-                color="success"
-                size="large"
-                slot="end"
-              />
-            </IonItem>
 
-            {/* Campo de motivo de consulta */}
-            {!hideMotivo && (
-              <IonItem lines="none" style={{ marginTop: "12px" }}>
-                <IonTextarea
-                  label="Motivo de la Consulta"
-                  labelPlacement="stacked"
-                  fill="outline"
-                  placeholder="Describa el motivo de la consulta"
-                  rows={4}
-                  value={motivoTemp}
-                  onIonChange={(e) => setMotivoTemp(e.detail.value || "")}
-                />
-              </IonItem>
-            )}
-          </div>
-        )}
 
         {/* Estado de carga inicial */}
         {loading && pacientes.length === 0 && (
@@ -377,11 +321,7 @@ const ModalEscogerPaciente: React.FC<ModalEscogerPacienteProps> = ({
             </div>
 
             {/* Lista simple de pacientes */}
-            <IonList
-              className={`modal-pacientes-list ${
-                pacienteSeleccionadoTemp ? "with-selected-paciente" : ""
-              }`}
-            >
+            <IonList>
               {pacientes.map((paciente, index) => {
                 const isSelected =
                   pacienteSeleccionadoTemp?.id_paciente ===
@@ -469,7 +409,7 @@ const ModalEscogerPaciente: React.FC<ModalEscogerPacienteProps> = ({
               fill="solid"
               onClick={handleConfirmarSeleccion}
               disabled={
-                !pacienteSeleccionadoTemp || (!hideMotivo && !motivoTemp.trim())
+                !pacienteSeleccionadoTemp
               }
             >
               Confirmar Selección

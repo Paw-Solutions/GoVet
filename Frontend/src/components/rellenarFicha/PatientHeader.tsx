@@ -20,13 +20,11 @@ import { PacienteData } from "../../api/pacientes";
 
 interface PatientHeaderProps {
   paciente: PacienteData;
-  motivo?: string;
   onChangePaciente?: () => void;
 }
 
 const PatientHeader: React.FC<PatientHeaderProps> = ({
   paciente,
-  motivo,
   onChangePaciente,
 }) => {
   const calcularEdad = (fechaNacimiento: string) => {
@@ -129,27 +127,6 @@ const PatientHeader: React.FC<PatientHeaderProps> = ({
               </div>
             </IonCol>
           </IonRow>
-          {motivo && (
-            <IonRow style={{ marginTop: "12px" }}>
-              <IonCol size="12">
-                <div
-                  style={{
-                    padding: "12px",
-                    backgroundColor: "var(--ion-color-light)",
-                    borderRadius: "8px",
-                    borderLeft: "3px solid var(--ion-color-primary)",
-                  }}
-                >
-                  <IonText color="medium">
-                    <strong>Motivo de Consulta:</strong>
-                  </IonText>
-                  <IonText style={{ display: "block", marginTop: "4px" }}>
-                    {motivo}
-                  </IonText>
-                </div>
-              </IonCol>
-            </IonRow>
-          )}
         </IonGrid>
       </IonCardContent>
     </IonCard>

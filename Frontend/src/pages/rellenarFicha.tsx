@@ -980,6 +980,20 @@ const RellenarFicha: React.FC = () => {
           </IonToolbar>
         </IonHeader>
 
+
+        {/* Campo de motivo de consulta */}
+          <IonItem lines="none" style={{ marginTop: "12px" }}>
+            <IonTextarea
+              label="Motivo de la Consulta"
+              labelPlacement="stacked"
+              fill="outline"
+              placeholder="Describa el motivo de la consulta"
+              rows={4}
+              value={formData.motivo}
+              onIonChange={(e) => setFormData({ ...formData, motivo: e.detail.value || "" })}
+            />
+          </IonItem>
+
         {/* Banner de Paciente */}
         {!selectedPaciente ? (
           <IonCard>
@@ -1009,7 +1023,6 @@ const RellenarFicha: React.FC = () => {
         ) : (
           <PatientHeader
             paciente={selectedPaciente}
-            motivo={formData.motivo}
             onChangePaciente={() => setShowModalPacientes(true)}
           />
         )}
