@@ -59,6 +59,8 @@ services:
       - .env
     expose:
       - 4007
+    ports:
+      - "4007:4007"
     depends_on:
       database:
         condition: service_healthy
@@ -97,6 +99,8 @@ services:
       - .env
     expose:
       - 3007
+    ports:
+      - "3007:3007"
     depends_on:
       - backend
     networks:

@@ -16,6 +16,7 @@ cur = conn.cursor()
 
 # Insertar pacientes
 for _, row in df.iterrows():
+    codigo_mascota = row ['CÓDIGO MASCOTA']
     nombre = row['NOMBRE']
     color = row['COLOR']
     sexo = row['SEXO_SIGLA']
@@ -30,10 +31,10 @@ for _, row in df.iterrows():
 
     if pd.notna(nombre):
         cur.execute("""
-            INSERT INTO govet.paciente (id_paciente, nombre, color, sexo, esterilizado, fecha_nacimiento, id_raza, codigo_chip)
-            VALUES (DEFAULT, %s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO govet.paciente (id_paciente, nombre, color, sexo, esterilizado, fecha_nacimiento, id_raza, codigo_chip, activo)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, true)
             ON CONFLICT DO NOTHING;
-        """, (nombre, color, sexo, esterilizado, fecha_nacimiento, id_raza, codigo_chip))
+        """, (codigo_mascota, nombre, color, sexo, esterilizado, fecha_nacimiento, id_raza, codigo_chip))
 
 
 conn.commit()

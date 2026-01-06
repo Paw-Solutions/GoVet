@@ -53,3 +53,7 @@ local_testing/
 !Backend/rellenar_bd/script_limpia_rellena_test.py
 
 Whatsapp\ Minimo\ notificacion/backend/node_modules/
+
+# Caddy binaries / archives
+caddy*.tar.gz
+caddy
