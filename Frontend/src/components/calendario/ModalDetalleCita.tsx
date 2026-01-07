@@ -251,6 +251,19 @@ const ModalDetalleCita: React.FC<ModalDetalleCitaProps> = ({
     history.push("/rellenar-ficha");
   };
 
+    // Función para abrir ubicación en Google Maps
+  const handleLocation = (direccion: string) => {
+    try {
+      const encodedAddress = encodeURIComponent(direccion);
+      window.open(
+        `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`,
+        "_blank"
+      );
+    } catch (error) {
+      console.error("Error opening maps:", error);
+    }
+  };
+
   const { fecha, horaInicio, horaFin } = formatearFechaHora();
 
   return (
@@ -331,11 +344,26 @@ const ModalDetalleCita: React.FC<ModalDetalleCitaProps> = ({
               </h3>
               <div style={{ padding: "0.5rem 0" }}>
                 <div
-                  style={{ display: "flex", alignItems: "center", gap: "8px" }}
+                  style={{display: "flex", alignItems: "center", gap: "8px" }}
                 >
-                  <IonIcon icon={locationOutline} className="pacientes-icon" />
-                  <span>{evento.location}</span>
+                  <IonIcon icon={locationOutline} />
+
+                  <IonLabel>
+                    <p>{evento.location}</p>
+                  </IonLabel>
+
+                  <IonButton
+                    style={{ marginLeft: "auto" }}
+                    fill="clear"
+                    size="small"
+                    color="secondary"
+                    onClick={() => handleLocation(evento.location!)}
+                  >
+                    <IonIcon icon={locationOutline} slot="start" />
+                    Ver en Maps
+                  </IonButton>
                 </div>
+                
               </div>
             </div>
           )}
