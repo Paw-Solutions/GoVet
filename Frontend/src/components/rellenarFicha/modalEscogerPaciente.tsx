@@ -45,6 +45,9 @@ interface ModalEscogerPacienteProps {
   onDidDismiss?: () => void;
   onPacienteSelected?: (paciente: PacienteData) => void; // <-- Cambia aquí
   pacienteSeleccionado?: PacienteData | null; // <-- Cambia aquí
+  hideMotivo?: boolean;
+  motivoConsulta?: string;
+  onMotivoChange?: (motivo: string) => void;
 }
 
 interface PaginatedResponse {
